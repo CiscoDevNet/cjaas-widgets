@@ -1,0 +1,11 @@
+{
+  "name": "cjaas-widgets",
+  "license": "MIT",
+  "repository": "https://github.com/CiscoDevNet/cjaas-widgets",
+  "version": "1.0.0",
+  "author": {
+    "name": "Yana Harris",
+    "email": "yanaha@cisco.com"
+  },
+  "license": "MIT"
+}
