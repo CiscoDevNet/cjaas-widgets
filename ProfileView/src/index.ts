@@ -8,16 +8,15 @@
 
 // This file imports all of the webcomponents from "components" folder
 
-import { html, LitElement, customElement, css, property } from "lit-element";
+import {  customElement } from "lit-element";
 import "./components/ActivityStream/ActivityItem";
 import { CJSActivityStream } from "./components/ActivityStream/ActivityStream";
 import "./components/View/View";
-import "@momentum-ui/web-components";
 
 /**
  * Please give your widget a unique name. We recommend using prefix to identify the author and help avoid naming conflict. e.g. "2ring-timer-widget"
  */
-@customElement("cjaas-activity-widget")
+@customElement("cjaas-profile-view-widget")
 export default class CjaasActivityWidget extends CJSActivityStream {
   async connectedCallback() {
     super.connectedCallback();
