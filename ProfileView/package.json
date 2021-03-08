@@ -1,12 +1,14 @@
 {
-  "name": "cjaas-widgets",
-  "license": "MIT",
-  "repository": "https://github.com/CiscoDevNet/cjaas-widgets",
+  "name": "CJaaS-Profile-View-Widget",
   "version": "1.0.0",
   "author": {
-    "name": "Yana Harris",
-    "email": "yanaha@cisco.com"
+    "name": "Kevin Hyde",
+    "email": "kehyde@cisco.com"
   },
+  "license": "MIT",
+  "repository": "https://github.com/CiscoDevNet/cjaas-widgets",
+  "main": "./dist/index.js",
+  "types": "./dist/types/index.d.ts",
   "scripts": {
     "start": "npm run dev",
     "dev": "npm run check && webpack-dev-server --config ./webpack.config.dev.server.ts",
