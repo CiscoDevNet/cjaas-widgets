@@ -82,19 +82,19 @@ export class Sandbox extends LitElement {
       </div>
       <md-theme ?darkTheme=${this.darkTheme}>
         <div class="container">
-        <h2>Profile</h2>
-        <div
-          style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
-          class="widget-container"
-        >
-          <cjs-view
-            id="view"
-            customer="560021-Venki"
-            .template=${sampleTemplate}
-            .authToken=${"st=demoassure&so=sandbox&ss=stream&sp=w&se=2021-04-06T07:38:17Z&sk=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztQ4xKyn5APjdSY="}
-          ></cjs-view>
+          <h2>Profile</h2>
+          <div
+            style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
+            class="widget-container"
+          >
+            <cjaas-profile-view-widget
+              id="view"
+              customer="560021-Venki"
+              .template=${sampleTemplate}
+              .authToken=${"st=demoassure&so=sandbox&ss=stream&sp=w&se=2021-04-06T07:38:17Z&sk=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztQ4xKyn5APjdSY="}
+            ></cjaas-profile-view-widget>
+          </div>
         </div>
-      </div>
       </md-theme>
     `;
   }

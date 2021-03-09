@@ -1,5 +1,5 @@
 {
-  "name": "CJaaS-Profile-View-Widget",
+  "name": "@cjaas/profile-view-widget",
   "version": "1.0.0",
   "author": {
     "name": "Kevin Hyde",
@@ -31,6 +31,7 @@
   "devDependencies": {
     "@babel/core": "^7.9.0",
     "@babel/preset-env": "^7.9.0",
+    "@cjaas/common-components": "1.0.0",
     "@momentum-ui/core": "^19.9.12",
     "@momentum-ui/icons": "^7.54.0",
     "@momentum-ui/utils": "^6.2.7",
