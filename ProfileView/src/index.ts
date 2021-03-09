@@ -140,10 +140,10 @@ export default class CjaasProfileWidget extends LitElement {
   getFormattedProfile() {
     return html`
       <div class="profile-bound default-template">
-        <profile-view
+        <cjaas-profile
           .profile=${this.profile}
           .presetTags=${this.presetTags}
-        ></profile-view>
+        ></cjaas-profile>
         <section class="customer-journey" title="Customer Journey">
           <div class="header inner-header">
             <h4>Customer Journey</h4>
@@ -187,11 +187,11 @@ export default class CjaasProfileWidget extends LitElement {
             <span>All</span>
           </md-tab>
           <md-tab-panel slot="panel">
-            <cjs-timeline
+            <cjaas-timeline
               .streamId=${this.authToken}
               .filter=${`person eq '${this.customer}'`}
               type="journey-and-stream"
-            ></cjs-timeline>
+            ></cjaas-timeline>
           </md-tab-panel>
         `
       : html`
@@ -212,7 +212,9 @@ export default class CjaasProfileWidget extends LitElement {
               </md-tab>
               <md-tab-panel slot="panel">
                 <!-- use verbose journey events with timeline comp -->
-                <cjs-timeline .tapeEvents="${x.journeyEvents}"></cjs-timeline>
+                <cjaas-timeline
+                  .tapeEvents="${x.journeyEvents}"
+                ></cjaas-timeline>
               </md-tab-panel>
             `;
           })}

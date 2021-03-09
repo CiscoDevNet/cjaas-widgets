@@ -145,8 +145,7 @@ const commonDist = merge(common, {
     index: "./src/index.ts",
 
     // widgets component bundled together
-    widgets: "./src/widgets.ts",
-
+    widgets: "./src/widgets.ts"
   },
   output: {
     path: pDist,
