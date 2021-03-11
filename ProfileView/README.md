@@ -2,6 +2,22 @@
 
 This widget uses CJaaS Common Components to output a combined customer profile view that includes Profile information an ACtivity Timeline side by side.
 
+
+## Profile Widget Properties
+
+The CJaaS Profile Widget accepts specific properties to interact with the CJaaS API
+* customer: string  -  an identifier of the customer, i.e. ""
+* template: any | JSON | Object -  for user-provided data-shape template.
+* auth-token: string  -  an unique Auth token to enable the CJaaS tape stream.
+* base-url: string  -  defaults to "https://trycjaas.exp.bz" at present, can be modified for changing APIs
+
+```html
+<cjaas-profile-view-widget
+   customer="560000-John"
+   .template=${sampleTemplateObject}
+   authToken="st=demoassure&............=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztQ4xKyn5APjdSY="
+></cjaas-profile-view-widget>
+```
 ## Setup
 
 Install dependencies:
