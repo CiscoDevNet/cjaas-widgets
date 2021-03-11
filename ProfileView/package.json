@@ -23,11 +23,22 @@
   },
   "resolutions": {
     "jest": "^26.4.2",
-    "jest-config": "^26.4.2"
+    "jest-config": "^26.4.2",
+    "lit-element": "2.3.1",
+    "lit-html": "1.2.1"
+  },
+  "peerDependencies": {
+    "@momentum-ui/core": "^19.9.12",
+    "@momentum-ui/icons": "^7.54.0",
+    "@momentum-ui/utils": "^6.2.7",
+    "@momentum-ui/web-components": "^2.1.2",
+    "lit-element": "2.3.1",
+    "lit-html": "1.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
     "@babel/preset-env": "^7.9.0",
+    "@cjaas/common-components": "^1.0.0-dev.4",
     "@momentum-ui/core": "^19.9.12",
     "@momentum-ui/icons": "^7.54.0",
     "@momentum-ui/utils": "^6.2.7",
@@ -61,8 +72,8 @@
     "identity-obj-proxy": "^3.0.0",
     "jest": "26.4.2",
     "jest-config": "26.4.2",
-    "lit-element": "^2.3.1",
-    "lit-html": "^1.2.1",
+    "lit-element": "2.3.1",
+    "lit-html": "1.2.1",
     "lit-scss-loader": "^1.0.0",
     "lodash": "^4.17.20",
     "luxon": "^1.25.0",
@@ -79,8 +90,10 @@
     "ts-node": "^8.6.2",
     "typescript": "^3.8.3",
     "webpack": "^4.42.0",
+    "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.10.3",
-    "webpack-merge": "^4.2.2"
+    "webpack-merge": "^4.2.2",
+    "webpack-node-externals": "^1.7.2"
   },
   "husky": {
     "hooks": {
