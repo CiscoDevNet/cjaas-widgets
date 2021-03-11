@@ -1,0 +1,9 @@
+{
+  "license": "MIT",
+  "repository": "https://github.com/CiscoDevNet/cjaas-widgets",
+  "version": "1.0.0",
+  "author": {
+    "name": "Kevin Hyde",
+    "email": "kehyde@cisco.com"
+  }
+}
