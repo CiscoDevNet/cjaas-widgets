@@ -8,14 +8,14 @@ This widget uses CJaaS Common Components to output a combined customer profile v
 The CJaaS Profile Widget accepts specific properties to interact with the CJaaS API
 * _customer: string_ -  an identifier of the customer, i.e. "560000-John"
 * _template: any | JSON | Object_  -  for user-provided data-shape template.
-* _auth-token: string_ -  an unique Auth token to enable the CJaaS tape stream.
+* _auth-token: string_ -  an unique Auth token to enable the CJaaS tape stream. You can get a token here: https://forms.office.com/Pages/ResponsePage.aspx?id=Yq_hWgWVl0CmmsFVPveEDqqpouLp2otDkH7uBREgKh5URVhNWkY2M0lOTE83M05FTzg2TERLMVdTWS4u
 * _base-url: string_ -  defaults to "https://trycjaas.exp.bz" at present, can be modified for changing APIs
 
 ```html
 <cjaas-profile-view-widget
    customer="560000-John"
    .template=${sampleTemplateObject}
-   authToken="st=demoassure&............=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztQ4xKyn5APjdSY="
+   authToken=" . . . . . . . "
 ></cjaas-profile-view-widget>
 ```
 ## Setup

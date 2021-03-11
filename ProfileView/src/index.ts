@@ -15,15 +15,9 @@ import {
   customElement,
   LitElement
 } from "lit-element";
-// import "./components/ActivityStream/ActivityItem";
-// import "./components/View/View";
 import "@cjaas/common-components";
 import { Profile } from "./types/cjaas";
 import styles from "./assets/styles/View.scss";
-
-/**
- * Please give your widget a unique name. We recommend using prefix to identify the author and help avoid naming conflict. e.g. "2ring-timer-widget"
- */
 @customElement("cjaas-profile-view-widget")
 export default class CjaasProfileWidget extends LitElement {
   @property() customer: string | undefined;
@@ -42,7 +36,6 @@ export default class CjaasProfileWidget extends LitElement {
 
   updated(changedProperties: any) {
     changedProperties.forEach((oldValue: string, name: string) => {
-      console.log(oldValue);
       if (
         (name === "template" || name === "customer") &&
         this.customer &&
@@ -68,7 +61,6 @@ export default class CjaasProfileWidget extends LitElement {
     });
 
     const body = JSON.stringify(template);
-
     return fetch(url, {
       headers: {
         "Content-type": "application/json",
@@ -169,10 +161,7 @@ export default class CjaasProfileWidget extends LitElement {
             title="Reload Profile"
             @click=${() => this.getProfile()}
           >
-            <img
-              height="20px"
-              src="https://cjaas.cisco.com/web-components/icons/refresh_24.svg"
-            />
+            <md-icon name="icon-refresh_24" size="20"></md-icon>
           </md-button>
         `;
   }
@@ -204,7 +193,6 @@ export default class CjaasProfileWidget extends LitElement {
         <md-tabs>
           ${activityTab}
           ${tabs.map((x: any) => {
-            console.log(x);
             return html`
               <md-tab slot="tab">
                 <span>${x.query.DisplayName}</span
