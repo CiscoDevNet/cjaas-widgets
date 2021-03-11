@@ -6,10 +6,10 @@ This widget uses CJaaS Common Components to output a combined customer profile v
 ## Profile Widget Properties
 
 The CJaaS Profile Widget accepts specific properties to interact with the CJaaS API
-* customer: string  -  an identifier of the customer, i.e. ""
-* template: any | JSON | Object -  for user-provided data-shape template.
-* auth-token: string  -  an unique Auth token to enable the CJaaS tape stream.
-* base-url: string  -  defaults to "https://trycjaas.exp.bz" at present, can be modified for changing APIs
+* _customer: string_ -  an identifier of the customer, i.e. ""
+* _template: any | JSON | Object_  -  for user-provided data-shape template.
+* _auth-token: string_ -  an unique Auth token to enable the CJaaS tape stream.
+* _base-url: string_ -  defaults to "https://trycjaas.exp.bz" at present, can be modified for changing APIs
 
 ```html
 <cjaas-profile-view-widget
