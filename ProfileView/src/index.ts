@@ -18,6 +18,7 @@ import {
 import "@cjaas/common-components";
 import { Profile } from "./types/cjaas";
 import styles from "./assets/styles/View.scss";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 @customElement("cjaas-profile-view-widget")
 export default class CjaasProfileWidget extends LitElement {
   @property() customer: string | undefined;
@@ -60,16 +61,18 @@ export default class CjaasProfileWidget extends LitElement {
       return x;
     });
 
-    const body = JSON.stringify(template);
-    return fetch(url, {
+    const data = JSON.stringify(template);
+    const options: AxiosRequestConfig = {
+      url,
+      method: "POST",
       headers: {
         "Content-type": "application/json",
         Authorization: "SharedAccessSignature " + this.authToken
       },
-      method: "POST",
-      body
-    })
-      .then((x: Response) => x.json())
+      data
+    }
+    return axios(url, options)
+      .then((x: AxiosResponse) => x.data)
       .then((x: Profile) => {
         this.profile = this.template.Attributes.map((y: any, i: number) => {
           // if attribute is of tab type
