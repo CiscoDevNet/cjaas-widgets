@@ -12,24 +12,13 @@ import {
   html,
   internalProperty,
   property,
-  customElement,
   LitElement
 } from "lit-element";
-import "@cjaas/common-components";
 import { Profile } from "./types/cjaas";
+import {customElementWithCheck} from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import "@momentum-ui/web-components/dist/comp/md-badge";
-import "@momentum-ui/web-components/dist/comp/md-button";
-import "@momentum-ui/web-components/dist/comp/md-icon";
-import "@momentum-ui/web-components/dist/comp/md-spinner";
-import "@momentum-ui/web-components/dist/comp/md-tab";
-import "@momentum-ui/web-components/dist/comp/md-tabs";
-import "@momentum-ui/web-components/dist/comp/md-tab-panel";
-
-import "../dist/index";
-
-@customElement("cjaas-profile-view-widget")
+@customElementWithCheck("cjaas-profile-view-widget")
 export default class CjaasProfileWidget extends LitElement {
   @property() customer: string | undefined;
   @property() template: any | null | undefined = null;
@@ -233,7 +222,6 @@ export default class CjaasProfileWidget extends LitElement {
   render() {
     return html`
       <div class="outer-container">
-        <md-badge color="blue">TEST</md-badge>
         ${this.profile
           ? this.getFormattedProfile()
           : html`
@@ -251,5 +239,11 @@ export default class CjaasProfileWidget extends LitElement {
             `}
       </div>
     `;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "cjaas-profile-view-widget": CjaasProfileWidget;
   }
 }
