@@ -1,12 +1,18 @@
-import { LitElement, html, customElement, property, PropertyValues } from 'lit-element'
-import { sampleEvent, sampleTemplate } from "./sandbox.mock.ts";
+import {
+  LitElement,
+  html,
+  customElement,
+  property,
+  PropertyValues,
+} from "lit-element";
+import { sampleEvent, sampleTemplate } from "./sandbox.mock";
 import "@momentum-ui/web-components";
 import "@cjaas/common-components";
-import "../ProfileView/dist/index";
+import "../../ProfileView/dist/index";
 
-@customElement('main-view')
-class KitchenSink extends LitElement {
-  @property({ type: Number }) count = 0
+@customElement("cjaas-widgets-kitchen-sink")
+export class KitchenSink extends LitElement {
+  @property({ type: Number }) count = 0;
   @property({ type: Boolean }) darkTheme = false;
   @property({ type: Boolean }) lumos = false;
 
@@ -39,32 +45,45 @@ class KitchenSink extends LitElement {
     return html`
       <div class="toggle-container">
         <label class="switch">
-          <input type="checkbox" id="theme-switch" class="theme-switch" data-aspect="darkTheme" @click=${this.toggleSetting}
-            ?checked=${this.darkTheme} />
+          <input
+            type="checkbox"
+            id="theme-switch"
+            class="theme-switch"
+            data-aspect="darkTheme"
+            @click=${this.toggleSetting}
+            ?checked=${this.darkTheme}
+          />
           Dark Mode
         </label>
         <label class="switch">
-          <input type="checkbox" class="lumos-switch" data-aspect="lumos" @click=${this.toggleSetting}
-            ?checked=${this.lumos} />
+          <input
+            type="checkbox"
+            class="lumos-switch"
+            data-aspect="lumos"
+            @click=${this.toggleSetting}
+            ?checked=${this.lumos}
+          />
           Lumos Theme
         </label>
       </div>
     `;
   }
 
-
   clickHandler() {
-    this.count++
+    this.count++;
   }
 
   render() {
     return html`
-    <md-theme ?lumos=${this.lumos} ?darkTheme=${this.darkTheme}>
-      ${this.themeToggle()}
-      <cjaas-profile-view-widget id="view" customer="560021-Venki" .template=${sampleTemplate}
-        .authToken=${"st=demoassure&so=sandbox&ss=stream&sp=w&se=2021-04-06T07:38:17Z&sk=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztQ4xKyn5APjdSY="}
-          ></cjaas-profile-view-widget>
-        </md-theme>
-    `
+      <md-theme ?lumos=${this.lumos} ?darkTheme=${this.darkTheme}>
+        ${this.themeToggle()}
+        <cjaas-profile-view-widget
+          id="view"
+          customer="560021-Venki"
+          .template=${sampleTemplate}
+          .authToken=${"st=demoassure&so=sandbox&ss=stream&sp=w&se=2021-04-06T07:38:17Z&sk=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztQ4xKyn5APjdSY="}
+        ></cjaas-profile-view-widget>
+      </md-theme>
+    `;
   }
 }
