@@ -12,14 +12,13 @@ import {
   html,
   internalProperty,
   property,
-  customElement,
   LitElement
 } from "lit-element";
-import "@cjaas/common-components";
 import { Profile } from "./types/cjaas";
+import {customElementWithCheck} from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-@customElement("cjaas-profile-view-widget")
+@customElementWithCheck("cjaas-profile-view-widget")
 export default class CjaasProfileWidget extends LitElement {
   @property() customer: string | undefined;
   @property() template: any | null | undefined = null;
@@ -240,5 +239,11 @@ export default class CjaasProfileWidget extends LitElement {
             `}
       </div>
     `;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "cjaas-profile-view-widget": CjaasProfileWidget;
   }
 }

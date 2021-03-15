@@ -6,6 +6,7 @@
  *
  */
 import "@momentum-ui/web-components";
+import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
 import "..";
 import styles from "./sandbox.scss";
