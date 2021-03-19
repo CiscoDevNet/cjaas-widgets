@@ -112,7 +112,7 @@ export default class CjaasProfileWidget extends LitElement {
     const PRESET_TAGS = ["name", "email"];
 
     PRESET_TAGS.forEach((x: string) => {
-      let matches = this.profile.filter((y: any) => y.query.tag === x);
+      let matches = this.profile!.filter((y: any) => y.query.tag === x);
       if (x === "name") {
         matches = matches.sort((a: any) => {
           if (a.query.Metadata === "firstName") {
