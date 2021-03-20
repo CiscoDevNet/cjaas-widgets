@@ -8,14 +8,9 @@
 
 // This file imports all of the webcomponents from "components" folder
 
-import {
-  html,
-  internalProperty,
-  property,
-  LitElement
-} from "lit-element";
+import { html, internalProperty, property, LitElement } from "lit-element";
 import { Profile } from "./types/cjaas";
-import {customElementWithCheck} from "./mixins/CustomElementCheck";
+import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 @customElementWithCheck("cjaas-profile-view-widget")
@@ -69,7 +64,7 @@ export default class CjaasProfileWidget extends LitElement {
         Authorization: "SharedAccessSignature " + this.authToken
       },
       data
-    }
+    };
     return axios(url, options)
       .then((x: AxiosResponse) => x.data)
       .then((x: Profile) => {
@@ -203,7 +198,7 @@ export default class CjaasProfileWidget extends LitElement {
               <md-tab-panel slot="panel">
                 <!-- use verbose journey events with timeline comp -->
                 <cjaas-timeline
-                  .tapeEvents="${x.journeyEvents}"
+                  .timelineEvents="${x.journeyEvents}"
                 ></cjaas-timeline>
               </md-tab-panel>
             `;
