@@ -90,7 +90,6 @@ export class Sandbox extends LitElement {
           >
             <cjaas-timeline-widget
               id="timeline-widget"
-              .timelineEvents=${mockedtimelineEvents}
               type="journey-and-stream"
               stream-id="st=demostore&so=sandbox&ss=datasink&sp=w&se=2021-04-23T18:25:43.511Z&sk=sandbox&sig=TEUtd3qKp6pYjoTM7GEHDZeKRfnIWr90MQoW6r2xsB0="
               pagination="$top=15"

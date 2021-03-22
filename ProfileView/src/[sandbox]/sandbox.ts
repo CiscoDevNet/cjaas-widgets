@@ -83,7 +83,7 @@ export class Sandbox extends LitElement {
       </div>
       <md-theme ?darkTheme=${this.darkTheme}>
         <div class="container">
-          <h2>Profile</h2>
+          <h2 class="sandbox-header">Profile</h2>
           <div
             style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
             class="widget-container"
@@ -93,6 +93,9 @@ export class Sandbox extends LitElement {
               customer="560021-Venki"
               .template=${sampleTemplate}
               .authToken=${"st=demoassure&so=sandbox&ss=stream&sp=w&se=2021-04-06T07:38:17Z&sk=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztQ4xKyn5APjdSY="}
+              type="journey-and-stream"
+              stream-id="st=demostore&so=sandbox&ss=datasink&sp=w&se=2021-04-23T18:25:43.511Z&sk=sandbox&sig=TEUtd3qKp6pYjoTM7GEHDZeKRfnIWr90MQoW6r2xsB0="
+              pagination="$top=15"
             ></cjaas-profile-view-widget>
           </div>
         </div>

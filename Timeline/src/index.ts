@@ -12,8 +12,8 @@ import {
   html,
   internalProperty,
   property,
-  PropertyValues,
   LitElement,
+  PropertyValues,
 } from "lit-element";
 import { nothing } from "lit-html";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
@@ -49,38 +49,23 @@ export default class CjaasTimelineWidget extends LitElement {
     | "livestream"
     | "journey-and-stream" = "livestream";
 
-  @internalProperty() expandDetails = false;
   @internalProperty() eventSource: EventSource | null = null;
   @internalProperty() showSpinner = false;
   @internalProperty() errorMessage = "";
-  
-  connectedCallback() {
-    super.connectedCallback();
-    this.subscribeToStream();
-  }
 
-  updated(changedProperties: any) {
-    let flag = false;
-    changedProperties.forEach((oldValue: string, name: string) => {
-      console.log("Oldvalue", oldValue);
-      if (name === "streamId" && this.streamId) {
-        flag = true;
-      } else if (
-        name === "filter" &&
-        this.filter !== oldValue &&
-        this.streamId
-      ) {
-        flag = true;
-      }
-    });
+  updated(changedProperties: PropertyValues) {
+    super.updated(changedProperties);
 
-    if (flag) {
+    if (
+      this.streamId &&
+      (changedProperties.has("streamId") || changedProperties.has("filter"))
+    ) {
       this.timelineEvents = [];
       this.requestUpdate();
       this.subscribeToStream();
     }
   }
-  
+
   // defaults to top 10 for journey
   getAPIQueryParams(forJourney = false) {
     let url = this.streamId;
@@ -128,7 +113,8 @@ export default class CjaasTimelineWidget extends LitElement {
         x?.map((y: ServerSentEvent) =>
           this.getTimelineEventFromMessage(y)
         ).map((z: TimelineEvent) => this.enqueueEvent(z));
-      }).then(() => {
+      })
+      .then(() => {
         this.showSpinner = false;
       })
       .catch((err) => {
@@ -138,20 +124,15 @@ export default class CjaasTimelineWidget extends LitElement {
   }
 
   subscribeToStream() {
-    console.log('[log] subscribe 1');
     if (this.eventSource) {
       this.eventSource.close();
     }
 
     if (this.type === "journey" || this.type === "journey-and-stream") {
-      console.log('[log] subscribe 2');
-
       this.getJourney();
     }
 
     if (this.type !== "journey") {
-      console.log('[log] subscribe 3');
-
       this.eventSource = new EventSource(
         `${this.baseURL}/real-time?${this.getAPIQueryParams()}`
       );
@@ -166,8 +147,6 @@ export default class CjaasTimelineWidget extends LitElement {
 
         if (data) {
           this.enqueueEvent(this.getTimelineEventFromMessage(data));
-          console.log('[log] stream data enqueue', data);
-
           this.showSpinner = false;
         }
       };
@@ -179,17 +158,14 @@ export default class CjaasTimelineWidget extends LitElement {
   }
 
   public enqueueEvent(event: TimelineEvent) {
-    // console.log('[log] enqueueEvent', event);
     while (
       this.timelineEvents.length >= this.limit &&
       this.type === "livestream"
     ) {
       this.dequeuePastOneEvent();
-      this.requestUpdate();
     }
 
     const dataLength = this.timelineEvents.length;
-    console.log('enqueueEvent init', this.timelineEvents);
 
     // events may not be chronologically sorted by default
     if (dataLength === 0) {
@@ -223,7 +199,6 @@ export default class CjaasTimelineWidget extends LitElement {
   }
 
   renderTimeline() {
-    console.log('[log][timelineWidget] renderTimeline', this.timelineEvents);
     return html`
       <cjaas-timeline
         .timelineEvents=${this.timelineEvents}
@@ -247,8 +222,10 @@ export default class CjaasTimelineWidget extends LitElement {
                     `
                   : html`
                       <div class="spinner-container">
-                      <h3>No Timeline available</h3>
-                      <p class="error-message">${this.errorMessage || nothing}</p>
+                        <h3>No Timeline available</h3>
+                        <p class="error-message">
+                          ${this.errorMessage || nothing}
+                        </p>
                       </div>
                     `}
               </div>
