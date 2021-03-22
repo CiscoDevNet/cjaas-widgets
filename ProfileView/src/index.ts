@@ -18,6 +18,8 @@ import { Profile } from "./types/cjaas";
 import {customElementWithCheck} from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+
+
 @customElementWithCheck("cjaas-profile-view-widget")
 export default class CjaasProfileWidget extends LitElement {
   @property() customer: string | undefined;
