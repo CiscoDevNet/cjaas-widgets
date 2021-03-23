@@ -10,7 +10,6 @@ import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
 import styles from "./sandbox.scss";
 import ".."
-import { mockedtimelineEvents } from "./sandbox.mock";
 
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
@@ -91,8 +90,7 @@ export class Sandbox extends LitElement {
             <cjaas-timeline-widget
               id="timeline-widget"
               type="journey-and-stream"
-              stream-id="st=demostore&so=sandbox&ss=datasink&sp=w&se=2021-04-23T18:25:43.511Z&sk=sandbox&sig=TEUtd3qKp6pYjoTM7GEHDZeKRfnIWr90MQoW6r2xsB0="
-              pagination="$top=15"
+              auth-token="st=demostore&so=sandbox&ss=datasink&sp=w&se=2021-04-23T18:25:43.511Z&sk=sandbox&sig=TEUtd3qKp6pYjoTM7GEHDZeKRfnIWr90MQoW6r2xsB0="
               limit="15"
             ></cjaas-timeline-widget>
           </div>

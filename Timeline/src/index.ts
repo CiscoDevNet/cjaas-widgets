@@ -20,7 +20,7 @@ import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
 import { DateTime } from "luxon";
 
-export type TimelineEvent = {
+export type TimelineItem = {
   title: string;
   text?: string;
   person?: string;
@@ -38,11 +38,11 @@ export interface ServerSentEvent {
 
 @customElementWithCheck("cjaas-timeline-widget")
 export default class CjaasTimelineWidget extends LitElement {
-  @property({ type: Array }) timelineEvents: TimelineEvent[] = [];
+  @property({ type: Array }) timelineItems: TimelineItem[] = [];
   @property({ type: String }) baseURL = "https://trycjaas.exp.bz";
   @property() filter: string | undefined;
-  @property({ attribute: "stream-id" }) streamId: string | null = null;
-  @property({ reflect: true }) pagination: string | null = null;
+  @property({ attribute: "auth-token" }) authToken: string | null = null;
+  @property({ reflect: true }) pagination: string = "$top=15";
   @property({ type: Number }) limit = 5;
   @property({ reflect: true }) type:
     | "journey"
@@ -57,10 +57,10 @@ export default class CjaasTimelineWidget extends LitElement {
     super.updated(changedProperties);
 
     if (
-      this.streamId &&
-      (changedProperties.has("streamId") || changedProperties.has("filter"))
+      this.authToken &&
+      (changedProperties.has("authToken") || changedProperties.has("filter"))
     ) {
-      this.timelineEvents = [];
+      this.timelineItems = [];
       this.requestUpdate();
       this.subscribeToStream();
     }
@@ -68,7 +68,7 @@ export default class CjaasTimelineWidget extends LitElement {
 
   // defaults to top 10 for journey
   getAPIQueryParams(forJourney = false) {
-    let url = this.streamId;
+    let url = this.authToken;
     if (this.filter) {
       url += `&$filter=${this.filter}`;
     }
@@ -81,21 +81,21 @@ export default class CjaasTimelineWidget extends LitElement {
     return url;
   }
 
-  getTimelineEventFromMessage(message: any) {
-    const event: any = {};
+  getTimelineItemFromMessage(message: any) {
+    const item: any = {};
 
-    event.title = message.type;
-    event.timestamp = DateTime.fromISO(message.time);
-    event.id = message.id;
+    item.title = message.type;
+    item.timestamp = DateTime.fromISO(message.time);
+    item.id = message.id;
     if (message.person && message.person.indexOf("anon") === -1) {
-      event.person = message.person;
+      item.person = message.person;
     }
 
     if (message.data) {
-      event.data = message.data;
+      item.data = message.data;
     }
 
-    return event;
+    return item;
   }
 
   getJourney() {
@@ -111,8 +111,8 @@ export default class CjaasTimelineWidget extends LitElement {
       .then((x: Response) => x.json())
       .then((x: Array<ServerSentEvent>) => {
         x?.map((y: ServerSentEvent) =>
-          this.getTimelineEventFromMessage(y)
-        ).map((z: TimelineEvent) => this.enqueueEvent(z));
+          this.getTimelineItemFromMessage(y)
+        ).map((z: TimelineItem) => this.enqueueItem(z));
       })
       .then(() => {
         this.showSpinner = false;
@@ -146,7 +146,7 @@ export default class CjaasTimelineWidget extends LitElement {
         }
 
         if (data) {
-          this.enqueueEvent(this.getTimelineEventFromMessage(data));
+          this.enqueueItem(this.getTimelineItemFromMessage(data));
           this.showSpinner = false;
         }
       };
@@ -157,41 +157,41 @@ export default class CjaasTimelineWidget extends LitElement {
     }
   }
 
-  public enqueueEvent(event: TimelineEvent) {
+  public enqueueItem(item: TimelineItem) {
     while (
-      this.timelineEvents.length >= this.limit &&
+      this.timelineItems.length >= this.limit &&
       this.type === "livestream"
     ) {
-      this.dequeuePastOneEvent();
+      this.dequeuePastOneItem();
     }
 
-    const dataLength = this.timelineEvents.length;
+    const dataLength = this.timelineItems.length;
 
     // events may not be chronologically sorted by default
     if (dataLength === 0) {
-      this.timelineEvents = [event];
-    } else if (this.timelineEvents[0].timestamp < event.timestamp) {
-      this.timelineEvents = [event, ...this.timelineEvents];
+      this.timelineItems = [item];
+    } else if (this.timelineItems[0].timestamp < item.timestamp) {
+      this.timelineItems = [item, ...this.timelineItems];
     } else if (
-      this.timelineEvents[dataLength - 1].timestamp > event.timestamp
+      this.timelineItems[dataLength - 1].timestamp > item.timestamp
     ) {
-      this.timelineEvents = [...this.timelineEvents, event];
+      this.timelineItems = [...this.timelineItems, item];
     } else {
       let currentIndex = 0;
-      let currentItem = this.timelineEvents[currentIndex];
+      let currentItem = this.timelineItems[currentIndex];
       while (
-        currentItem.timestamp > event.timestamp &&
-        currentIndex < this.timelineEvents.length
+        currentItem.timestamp > item.timestamp &&
+        currentIndex < this.timelineItems.length
       ) {
         currentIndex = currentIndex + 1;
-        currentItem = this.timelineEvents[currentIndex];
+        currentItem = this.timelineItems[currentIndex];
       }
-      this.timelineEvents.splice(currentIndex, 0, event);
+      this.timelineItems.splice(currentIndex, 0, item);
     }
   }
 
-  dequeuePastOneEvent() {
-    this.timelineEvents.shift();
+  dequeuePastOneItem() {
+    this.timelineItems.shift();
   }
 
   static get styles() {
@@ -201,8 +201,10 @@ export default class CjaasTimelineWidget extends LitElement {
   renderTimeline() {
     return html`
       <cjaas-timeline
-        .timelineEvents=${this.timelineEvents}
+        id="cjaas-timeline-component"
+        .timelineItems=${this.timelineItems}
         limit=${this.limit}
+        type=${this.type}
       ></cjaas-timeline>
     `;
   }
@@ -210,7 +212,7 @@ export default class CjaasTimelineWidget extends LitElement {
   render() {
     return html`
       <div class="outer-container">
-        ${this.timelineEvents?.length
+        ${this.timelineItems?.length
           ? this.renderTimeline()
           : html`
               <div class="empty-state">

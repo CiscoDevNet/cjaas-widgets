@@ -92,10 +92,8 @@ export class Sandbox extends LitElement {
               id="view"
               customer="560021-Venki"
               .template=${sampleTemplate}
-              .authToken=${"st=demoassure&so=sandbox&ss=stream&sp=w&se=2021-04-06T07:38:17Z&sk=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztQ4xKyn5APjdSY="}
-              type="journey-and-stream"
-              stream-id="st=demostore&so=sandbox&ss=datasink&sp=w&se=2021-04-23T18:25:43.511Z&sk=sandbox&sig=TEUtd3qKp6pYjoTM7GEHDZeKRfnIWr90MQoW6r2xsB0="
-              pagination="$top=15"
+              auth-token="st=demoassure&so=sandbox&ss=stream&sp=w&se=2021-04-06T07:38:17Z&sk=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztQ4xKyn5APjdSY="
+              timelineType="journey-and-stream"
             ></cjaas-profile-view-widget>
           </div>
         </div>

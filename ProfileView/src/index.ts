@@ -26,7 +26,7 @@ export interface ServerSentEvent {
   data: string;
 }
 
-export type TimelineEvent = {
+export type TimelineItem = {
   title: string;
   text?: string;
   person?: string;
@@ -51,12 +51,11 @@ export default class CjaasProfileWidget extends LitElement {
     "https://trycjaas.exp.bz";
 
   // timeline properties
-  @property({ type: Array }) timelineEvents: TimelineEvent[] = [];
+  @property({ type: Array }) timelineItems: TimelineItem[] = [];
   @property() filter: string | undefined;
-  @property({ attribute: "stream-id" }) streamId: string | null = null;
-  @property({ reflect: true }) pagination: string | null = null;
+  @property({ reflect: true }) pagination: string = "$top=15";
   @property({ type: Number }) limit = 5;
-  @property({ reflect: true }) type:
+  @property({ reflect: true }) timelineType:
     | "journey"
     | "livestream"
     | "journey-and-stream" = "livestream";
@@ -81,10 +80,10 @@ export default class CjaasProfileWidget extends LitElement {
     }
 
     if (
-      this.streamId &&
-      (changedProperties.has("streamId") || changedProperties.has("filter"))
+      this.authToken &&
+      (changedProperties.has("authToken") || changedProperties.has("filter"))
     ) {
-      this.timelineEvents = [];
+      this.timelineItems = [];
       this.requestUpdate();
       this.subscribeToStream();
     }
@@ -178,7 +177,7 @@ export default class CjaasProfileWidget extends LitElement {
   // Timeline Logic
   // defaults to top 10 for journey
   getTimelineAPIQueryParams(forJourney = false) {
-    let url = this.streamId;
+    let url = this.authToken;
     if (this.filter) {
       url += `&$filter=${this.filter}`;
     }
@@ -191,21 +190,21 @@ export default class CjaasProfileWidget extends LitElement {
     return url;
   }
 
-  getTimelineEventFromMessage(message: any) {
-    const event: any = {};
+  getTimelineItemFromMessage(message: any) {
+    const item: any = {};
 
-    event.title = message.type;
-    event.timestamp = DateTime.fromISO(message.time);
-    event.id = message.id;
+    item.title = message.type;
+    item.timestamp = DateTime.fromISO(message.time);
+    item.id = message.id;
     if (message.person && message.person.indexOf("anon") === -1) {
-      event.person = message.person;
+      item.person = message.person;
     }
 
     if (message.data) {
-      event.data = message.data;
+      item.data = message.data;
     }
 
-    return event;
+    return item;
   }
 
   getJourney() {
@@ -221,8 +220,8 @@ export default class CjaasProfileWidget extends LitElement {
       .then((x: Response) => x.json())
       .then((x: Array<ServerSentEvent>) => {
         x?.map((y: ServerSentEvent) =>
-          this.getTimelineEventFromMessage(y)
-        ).map((z: TimelineEvent) => this.enqueueEvent(z));
+          this.getTimelineItemFromMessage(y)
+        ).map((z: TimelineItem) => this.enqueueItem(z));
       })
       .then(() => {
         this.showTimelineSpinner = false;
@@ -238,11 +237,11 @@ export default class CjaasProfileWidget extends LitElement {
       this.eventSource.close();
     }
 
-    if (this.type === "journey" || this.type === "journey-and-stream") {
+    if (this.timelineType === "journey" || this.timelineType === "journey-and-stream") {
       this.getJourney();
     }
 
-    if (this.type !== "journey") {
+    if (this.timelineType !== "journey") {
       this.eventSource = new EventSource(
         `${this.baseURL}/real-time?${this.getTimelineAPIQueryParams()}`
       );
@@ -256,7 +255,7 @@ export default class CjaasProfileWidget extends LitElement {
         }
 
         if (data) {
-          this.enqueueEvent(this.getTimelineEventFromMessage(data));
+          this.enqueueItem(this.getTimelineItemFromMessage(data));
         }
       };
 
@@ -266,50 +265,52 @@ export default class CjaasProfileWidget extends LitElement {
     }
   }
 
-  public enqueueEvent(event: TimelineEvent) {
+  public enqueueItem(item: TimelineItem) {
     while (
-      this.timelineEvents.length >= this.limit &&
-      this.type === "livestream"
+      this.timelineItems.length >= this.limit &&
+      this.timelineType === "livestream"
     ) {
-      this.dequeuePastOneEvent();
+      this.dequeuePastOneItem();
     }
 
-    const dataLength = this.timelineEvents.length;
+    const dataLength = this.timelineItems.length;
 
     // events may not be chronologically sorted by default
     if (dataLength === 0) {
-      this.timelineEvents = [event];
-    } else if (this.timelineEvents[0].timestamp < event.timestamp) {
-      this.timelineEvents = [event, ...this.timelineEvents];
+      this.timelineItems = [item];
+    } else if (this.timelineItems[0].timestamp < item.timestamp) {
+      this.timelineItems = [item, ...this.timelineItems];
     } else if (
-      this.timelineEvents[dataLength - 1].timestamp > event.timestamp
+      this.timelineItems[dataLength - 1].timestamp > item.timestamp
     ) {
-      this.timelineEvents = [...this.timelineEvents, event];
+      this.timelineItems = [...this.timelineItems, item];
     } else {
       let currentIndex = 0;
-      let currentItem = this.timelineEvents[currentIndex];
+      let currentItem = this.timelineItems[currentIndex];
       while (
-        currentItem.timestamp > event.timestamp &&
-        currentIndex < this.timelineEvents.length
+        currentItem.timestamp > item.timestamp &&
+        currentIndex < this.timelineItems.length
       ) {
         currentIndex = currentIndex + 1;
-        currentItem = this.timelineEvents[currentIndex];
+        currentItem = this.timelineItems[currentIndex];
       }
-      this.timelineEvents.splice(currentIndex, 0, event);
+      this.timelineItems.splice(currentIndex, 0, item);
       this.showTimelineSpinner = false;
     }
   }
 
-  dequeuePastOneEvent() {
-    this.timelineEvents.shift();
+  dequeuePastOneItem() {
+    this.timelineItems.shift();
   }
 
-  renderTimeline(theTimelineEvents: TimelineEvent[]) {
-    if (theTimelineEvents?.length) {
+  renderTimeline(theTimelineItems: TimelineItem[]) {
+    if (theTimelineItems?.length) {
       return html`
         <cjaas-timeline
-          .timelineEvents=${theTimelineEvents}
+          id="cjaas-timeline-component"
+          .timelineItems=${theTimelineItems}
           limit=${this.limit}
+          type=${this.timelineType}
         ></cjaas-timeline>
       `;
     } else {
@@ -381,7 +382,7 @@ export default class CjaasProfileWidget extends LitElement {
             <span>All</span>
           </md-tab>
           <md-tab-panel slot="panel">
-            ${this.renderTimeline(this.timelineEvents)}
+            ${this.renderTimeline(this.timelineItems)}
           </md-tab-panel>
         `
       : html`

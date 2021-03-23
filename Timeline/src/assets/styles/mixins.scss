@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
- 
+
 @mixin test-mixin($path) {
   background-image: url($path);
   font-weight: bold;
@@ -14,17 +14,17 @@
 @mixin table {
   table {
     display: block;
-  
+
     tr {
       display: flex;
       flex-direction: row;
       margin-top: 8px;
-  
+
       .title {
         width: 7rem;
         color: var(--md-secondary-text-color, #545454);
       }
-  
+
       .value {
         flex: 1;
         color: var(--md-primary-text-color, #121212);

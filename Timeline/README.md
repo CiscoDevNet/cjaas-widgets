@@ -12,8 +12,11 @@ The CJaaS Timeline Widget accepts specific properties to interact with the CJaaS
 * _base-url: string_ -  defaults to "https://trycjaas.exp.bz" at present, can be modified for changing APIs
 
 ```html
-<cjaas-timeline-widget
-></cjaas-timeline-widget>
+   <cjaas-timeline-widget
+      type="journey-and-stream"
+      auth-token="<your-auth-token>"
+      limit="15"
+   ></cjaas-timeline-widget>
 ```
 ## Setup
 

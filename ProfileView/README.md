@@ -13,11 +13,13 @@ The CJaaS Profile Widget accepts specific properties to interact with the CJaaS 
 
 ```html
 <cjaas-profile-view-widget
-   customer="560000-John"
+   customer="560021-Venki"
    .template=${sampleTemplateObject}
-   authToken=" . . . . . . . "
+   auth-token="your-auth-token"
+   timelineType="journey-and-stream"
 ></cjaas-profile-view-widget>
 ```
+
 ## Setup
 
 Install dependencies:
