@@ -102,7 +102,7 @@ export default class CjaasTimelineWidget extends LitElement {
     this.showSpinner = true;
 
     // gets historic journey
-    fetch(`${this.baseURL}/journey?${this.getAPIQueryParams(true)}`, {
+    fetch(`${this.baseURL}/v1/journey/events?${this.getAPIQueryParams(true)}`, {
       headers: {
         "content-type": "application/json; charset=UTF-8",
       },

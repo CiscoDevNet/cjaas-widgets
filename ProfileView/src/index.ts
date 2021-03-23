@@ -90,7 +90,7 @@ export default class CjaasProfileWidget extends LitElement {
   }
 
   getProfile() {
-    const url = `${this.baseURL}/profileview?personid=${this.customer}`;
+    const url = `${this.baseURL}/v1/journey/profileview?personid=${this.customer}`;
     this.showSpinner = true;
     this.requestUpdate();
 
@@ -211,7 +211,7 @@ export default class CjaasProfileWidget extends LitElement {
     this.showTimelineSpinner = true;
 
     // gets historic journey
-    fetch(`${this.baseURL}/journey?${this.getTimelineAPIQueryParams(true)}`, {
+    fetch(`${this.baseURL}/v1/journey/events?${this.getTimelineAPIQueryParams(true)}`, {
       headers: {
         "content-type": "application/json; charset=UTF-8",
       },
