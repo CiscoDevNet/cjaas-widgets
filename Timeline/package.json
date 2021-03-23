@@ -1,9 +1,9 @@
 {
-  "name": "@cjaas/profile-view-widget",
-  "version": "1.1.0",
+  "name": "@cjaas/timeline-widget",
+  "version": "1.0.0",
   "author": {
-    "name": "Kevin Hyde",
-    "email": "kehyde@cisco.com"
+    "name": "Elena Giere",
+    "email": "egiere@cisco.com"
   },
   "license": "MIT",
   "repository": "https://github.com/CiscoDevNet/cjaas-widgets",

@@ -8,9 +8,8 @@
 import "@momentum-ui/web-components";
 import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
-import "..";
 import styles from "./sandbox.scss";
-import { sampleTemplate } from "./sandbox.mock";
+import ".."
 
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
@@ -83,18 +82,17 @@ export class Sandbox extends LitElement {
       </div>
       <md-theme ?darkTheme=${this.darkTheme}>
         <div class="container">
-          <h2 class="sandbox-header">Profile</h2>
+          <h2 class="sandbox-header">Timeline</h2>
           <div
             style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
             class="widget-container"
           >
-            <cjaas-profile-view-widget
-              id="view"
-              customer="560021-Venki"
-              .template=${sampleTemplate}
-              auth-token="st=demoassure&so=sandbox&ss=stream&sp=w&se=2021-04-06T07:38:17Z&sk=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztQ4xKyn5APjdSY="
-              timelineType="journey-and-stream"
-            ></cjaas-profile-view-widget>
+            <cjaas-timeline-widget
+              id="timeline-widget"
+              type="journey-and-stream"
+              auth-token="st=demostore&so=sandbox&ss=datasink&sp=w&se=2021-04-23T18:25:43.511Z&sk=sandbox&sig=TEUtd3qKp6pYjoTM7GEHDZeKRfnIWr90MQoW6r2xsB0="
+              limit="15"
+            ></cjaas-timeline-widget>
           </div>
         </div>
       </md-theme>

@@ -1,25 +1,23 @@
-# CJaaS Profile View Widdget
+# CJaaS Timeline Widget
 
-This widget uses CJaaS Common Components to output a combined customer profile view that includes Profile information an ACtivity Timeline side by side.
+This widget uses CJaaS Common Components to output a combined customer Timeline that includes Timeline information.
 
 
-## Profile Widget Properties
+## Timeline Widget Properties
 
-The CJaaS Profile Widget accepts specific properties to interact with the CJaaS API
+The CJaaS Timeline Widget accepts specific properties to interact with the CJaaS API
 * _customer: string_ -  an identifier of the customer, i.e. "560000-John"
 * _template: any | JSON | Object_  -  for user-provided data-shape template.
 * _auth-token: string_ -  an unique Auth token to enable the CJaaS tape stream. You can get a token here: https://forms.office.com/Pages/ResponsePage.aspx?id=Yq_hWgWVl0CmmsFVPveEDqqpouLp2otDkH7uBREgKh5URVhNWkY2M0lOTE83M05FTzg2TERLMVdTWS4u
 * _base-url: string_ -  defaults to "https://trycjaas.exp.bz" at present, can be modified for changing APIs
 
 ```html
-<cjaas-profile-view-widget
-   customer="560021-Venki"
-   .template=${sampleTemplateObject}
-   auth-token="your-auth-token"
-   timelineType="journey-and-stream"
-></cjaas-profile-view-widget>
+   <cjaas-timeline-widget
+      type="journey-and-stream"
+      auth-token="<your-auth-token>"
+      limit="15"
+   ></cjaas-timeline-widget>
 ```
-
 ## Setup
 
 Install dependencies:
@@ -51,7 +49,7 @@ yarn dist
 ```
 
 This will create a `dist` folder in the root directory of your widget with generated files.
-`index.js` file that contains your entire set of widgets. `widget.js` contains the Activity and Profile widgets that can be plugged into dashboards like Webex CC Agent Dashboard. Additionally, it generates the fonts, icons and its styles necessary for the components to use momentum icons & fonts. Your host web page needs to import these resources. These files can be renamed and uploaded to a preferred location on a CDN (e.g. an S3 bucket on AWS. Please keep in mind that this file has to be publicly available over the internet to be accessible to Agent or Supervisor Desktop).
+`index.js` file that contains your entire set of widgets. `widget.js` contains the Timeline widget that can be plugged into dashboards like Webex CC Agent Dashboard. Additionally, it generates the fonts, icons and its styles necessary for the components to use momentum icons & fonts. Your host web page needs to import these resources. These files can be renamed and uploaded to a preferred location on a CDN (e.g. an S3 bucket on AWS. Please keep in mind that this file has to be publicly available over the internet to be accessible to Agent or Supervisor Desktop).
 
 ```
 <script src="PATH TO YOUR WIDGET/INDEX.JS"></script>

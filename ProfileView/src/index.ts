@@ -12,12 +12,32 @@ import {
   html,
   internalProperty,
   property,
-  LitElement
+  LitElement,
+  PropertyValues,
 } from "lit-element";
 import { Profile } from "./types/cjaas";
-import {customElementWithCheck} from "./mixins/CustomElementCheck";
+import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import { DateTime } from "luxon";
+import { nothing } from "lit-html";
+
+export interface ServerSentEvent {
+  data: string;
+}
+
+export type TimelineItem = {
+  title: string;
+  text?: string;
+  person?: string;
+  subText?: string;
+  data?: any;
+  footer?: string;
+  timestamp?: any;
+  showMore?: boolean;
+  id: string;
+};
+
 @customElementWithCheck("cjaas-profile-view-widget")
 export default class CjaasProfileWidget extends LitElement {
   @property() customer: string | undefined;
@@ -30,20 +50,43 @@ export default class CjaasProfileWidget extends LitElement {
   @property({ type: String, attribute: "base-url" }) baseURL =
     "https://trycjaas.exp.bz";
 
+  // timeline properties
+  @property({ type: Array }) timelineItems: TimelineItem[] = [];
+  @property() filter: string | undefined;
+  @property({ reflect: true }) pagination: string = "$top=15";
+  @property({ type: Number }) limit = 5;
+  @property({ reflect: true }) timelineType:
+    | "journey"
+    | "livestream"
+    | "journey-and-stream" = "livestream";
+
+  @internalProperty() eventSource: EventSource | null = null;
+  @internalProperty() showTimelineSpinner = false;
+  @internalProperty() errorMessage = "";
+
   @internalProperty() profile: any;
   @internalProperty() presetTags: any = {};
   @internalProperty() showSpinner = false;
 
-  updated(changedProperties: any) {
-    changedProperties.forEach((oldValue: string, name: string) => {
-      if (
-        (name === "template" || name === "customer") &&
-        this.customer &&
-        this.template
-      ) {
-        this.getProfile();
-      }
-    });
+  updated(changedProperties: PropertyValues) {
+    super.updated(changedProperties);
+
+    if (
+      this.customer &&
+      this.template &&
+      (changedProperties.has("template") || changedProperties.has("customer"))
+    ) {
+      this.getProfile();
+    }
+
+    if (
+      this.authToken &&
+      (changedProperties.has("authToken") || changedProperties.has("filter"))
+    ) {
+      this.timelineItems = [];
+      this.requestUpdate();
+      this.subscribeToStream();
+    }
   }
 
   getProfile() {
@@ -66,10 +109,10 @@ export default class CjaasProfileWidget extends LitElement {
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.authToken
+        Authorization: "SharedAccessSignature " + this.authToken,
       },
-      data
-    }
+      data,
+    };
     return axios(url, options)
       .then((x: AxiosResponse) => x.data)
       .then((x: Profile) => {
@@ -90,7 +133,7 @@ export default class CjaasProfileWidget extends LitElement {
           return {
             query: y,
             result: x.attributeView[i].result.split(","),
-            journeyEvents
+            journeyEvents,
           };
         });
 
@@ -129,6 +172,167 @@ export default class CjaasProfileWidget extends LitElement {
         this.presetTags[x] = matches.map((y: any) => y.result);
       }
     });
+  }
+
+  // Timeline Logic
+  // defaults to top 10 for journey
+  getTimelineAPIQueryParams(forJourney = false) {
+    let url = this.authToken;
+    if (this.filter) {
+      url += `&$filter=${this.filter}`;
+    }
+
+    if (this.pagination) {
+      url += `&${this.pagination}`;
+    } else if (!this.pagination && forJourney) {
+      url += "&$top=10";
+    }
+    return url;
+  }
+
+  getTimelineItemFromMessage(message: any) {
+    const item: any = {};
+
+    item.title = message.type;
+    item.timestamp = DateTime.fromISO(message.time);
+    item.id = message.id;
+    if (message.person && message.person.indexOf("anon") === -1) {
+      item.person = message.person;
+    }
+
+    if (message.data) {
+      item.data = message.data;
+    }
+
+    return item;
+  }
+
+  getJourney() {
+    this.showTimelineSpinner = true;
+
+    // gets historic journey
+    fetch(`${this.baseURL}/journey?${this.getTimelineAPIQueryParams(true)}`, {
+      headers: {
+        "content-type": "application/json; charset=UTF-8",
+      },
+      method: "GET",
+    })
+      .then((x: Response) => x.json())
+      .then((x: Array<ServerSentEvent>) => {
+        x?.map((y: ServerSentEvent) =>
+          this.getTimelineItemFromMessage(y)
+        ).map((z: TimelineItem) => this.enqueueItem(z));
+      })
+      .then(() => {
+        this.showTimelineSpinner = false;
+      })
+      .catch((err) => {
+        this.showTimelineSpinner = false;
+        this.errorMessage = `Failure to fetch Journey ${err}`;
+      });
+  }
+
+  subscribeToStream() {
+    if (this.eventSource) {
+      this.eventSource.close();
+    }
+
+    if (this.timelineType === "journey" || this.timelineType === "journey-and-stream") {
+      this.getJourney();
+    }
+
+    if (this.timelineType !== "journey") {
+      this.eventSource = new EventSource(
+        `${this.baseURL}/real-time?${this.getTimelineAPIQueryParams()}`
+      );
+
+      this.eventSource.onmessage = (event: ServerSentEvent) => {
+        let data;
+        try {
+          data = JSON.parse(event.data);
+        } catch (err) {
+          // received just the timestamp
+        }
+
+        if (data) {
+          this.enqueueItem(this.getTimelineItemFromMessage(data));
+        }
+      };
+
+      this.eventSource.onerror = () => {
+        this.showTimelineSpinner = false;
+      };
+    }
+  }
+
+  public enqueueItem(item: TimelineItem) {
+    while (
+      this.timelineItems.length >= this.limit &&
+      this.timelineType === "livestream"
+    ) {
+      this.dequeuePastOneItem();
+    }
+
+    const dataLength = this.timelineItems.length;
+
+    // events may not be chronologically sorted by default
+    if (dataLength === 0) {
+      this.timelineItems = [item];
+    } else if (this.timelineItems[0].timestamp < item.timestamp) {
+      this.timelineItems = [item, ...this.timelineItems];
+    } else if (
+      this.timelineItems[dataLength - 1].timestamp > item.timestamp
+    ) {
+      this.timelineItems = [...this.timelineItems, item];
+    } else {
+      let currentIndex = 0;
+      let currentItem = this.timelineItems[currentIndex];
+      while (
+        currentItem.timestamp > item.timestamp &&
+        currentIndex < this.timelineItems.length
+      ) {
+        currentIndex = currentIndex + 1;
+        currentItem = this.timelineItems[currentIndex];
+      }
+      this.timelineItems.splice(currentIndex, 0, item);
+      this.showTimelineSpinner = false;
+    }
+  }
+
+  dequeuePastOneItem() {
+    this.timelineItems.shift();
+  }
+
+  renderTimeline(theTimelineItems: TimelineItem[]) {
+    if (theTimelineItems?.length) {
+      return html`
+        <cjaas-timeline
+          id="cjaas-timeline-component"
+          .timelineItems=${theTimelineItems}
+          limit=${this.limit}
+          type=${this.timelineType}
+        ></cjaas-timeline>
+      `;
+    } else {
+      return html`
+        <div class="empty-state">
+          ${this.showTimelineSpinner
+            ? html`
+                <div class="spinner-container">
+                  <md-spinner size="32"></md-spinner>
+                </div>
+              `
+            : html`
+                <div class="spinner-container">
+                  <h3>No Timeline available</h3>
+                  <p class="error-message">
+                    ${this.errorMessage || nothing}
+                  </p>
+                </div>
+              `}
+        </div>
+      `;
+    }
   }
 
   getFormattedProfile() {
@@ -178,11 +382,7 @@ export default class CjaasProfileWidget extends LitElement {
             <span>All</span>
           </md-tab>
           <md-tab-panel slot="panel">
-            <cjaas-timeline
-              .streamId=${this.authToken}
-              .filter=${`person eq '${this.customer}'`}
-              type="journey-and-stream"
-            ></cjaas-timeline>
+            ${this.renderTimeline(this.timelineItems)}
           </md-tab-panel>
         `
       : html`
@@ -202,9 +402,7 @@ export default class CjaasProfileWidget extends LitElement {
               </md-tab>
               <md-tab-panel slot="panel">
                 <!-- use verbose journey events with timeline comp -->
-                <cjaas-timeline
-                  .tapeEvents="${x.journeyEvents}"
-                ></cjaas-timeline>
+                ${this.renderTimeline(x.journeyEvents)}
               </md-tab-panel>
             `;
           })}
