@@ -13,7 +13,7 @@ import {
   internalProperty,
   property,
   LitElement,
-  PropertyValues,
+  PropertyValues
 } from "lit-element";
 import { Profile } from "./types/cjaas";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
@@ -21,6 +21,7 @@ import styles from "./assets/styles/View.scss";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { DateTime } from "luxon";
 import { nothing } from "lit-html";
+import { defaultTemplate } from "./assets/default-template";
 
 export interface ServerSentEvent {
   data: string;
@@ -41,7 +42,7 @@ export type TimelineItem = {
 @customElementWithCheck("cjaas-profile-view-widget")
 export default class CjaasProfileWidget extends LitElement {
   @property() customer: string | undefined;
-  @property() template: any | null | undefined = null;
+  @property() template: any | null | undefined = defaultTemplate;
   @property({ attribute: "auth-token" }) authToken:
     | string
     | null
@@ -53,7 +54,7 @@ export default class CjaasProfileWidget extends LitElement {
   // timeline properties
   @property({ type: Array }) timelineItems: TimelineItem[] = [];
   @property() filter: string | undefined;
-  @property({ reflect: true }) pagination: string = "$top=15";
+  @property({ reflect: true }) pagination = "$top=15";
   @property({ type: Number }) limit = 5;
   @property({ reflect: true }) timelineType:
     | "journey"
@@ -109,9 +110,9 @@ export default class CjaasProfileWidget extends LitElement {
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.authToken,
+        Authorization: "SharedAccessSignature " + this.authToken
       },
-      data,
+      data
     };
     return axios(url, options)
       .then((x: AxiosResponse) => x.data)
@@ -133,7 +134,7 @@ export default class CjaasProfileWidget extends LitElement {
           return {
             query: y,
             result: x.attributeView[i].result.split(","),
-            journeyEvents,
+            journeyEvents
           };
         });
 
@@ -213,9 +214,9 @@ export default class CjaasProfileWidget extends LitElement {
     // gets historic journey
     fetch(`${this.baseURL}/journey?${this.getTimelineAPIQueryParams(true)}`, {
       headers: {
-        "content-type": "application/json; charset=UTF-8",
+        "content-type": "application/json; charset=UTF-8"
       },
-      method: "GET",
+      method: "GET"
     })
       .then((x: Response) => x.json())
       .then((x: Array<ServerSentEvent>) => {
@@ -226,7 +227,7 @@ export default class CjaasProfileWidget extends LitElement {
       .then(() => {
         this.showTimelineSpinner = false;
       })
-      .catch((err) => {
+      .catch(err => {
         this.showTimelineSpinner = false;
         this.errorMessage = `Failure to fetch Journey ${err}`;
       });
