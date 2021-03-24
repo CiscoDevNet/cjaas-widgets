@@ -13,7 +13,7 @@ import {
   internalProperty,
   property,
   LitElement,
-  PropertyValues
+  PropertyValues,
 } from "lit-element";
 import { Profile } from "./types/cjaas";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
@@ -109,9 +109,9 @@ export default class CjaasProfileWidget extends LitElement {
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.authToken
+        Authorization: "SharedAccessSignature " + this.authToken,
       },
-      data
+      data,
     };
     return axios(url, options)
       .then((x: AxiosResponse) => x.data)
@@ -133,7 +133,7 @@ export default class CjaasProfileWidget extends LitElement {
           return {
             query: y,
             result: x.attributeView[i].result.split(","),
-            journeyEvents
+            journeyEvents,
           };
         });
 
@@ -213,9 +213,9 @@ export default class CjaasProfileWidget extends LitElement {
     // gets historic journey
     fetch(`${this.baseURL}/journey?${this.getTimelineAPIQueryParams(true)}`, {
       headers: {
-        "content-type": "application/json; charset=UTF-8"
+        "content-type": "application/json; charset=UTF-8",
       },
-      method: "GET"
+      method: "GET",
     })
       .then((x: Response) => x.json())
       .then((x: Array<ServerSentEvent>) => {
