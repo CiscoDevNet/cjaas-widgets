@@ -1,4 +1,4 @@
-# CJaaS Profile View Widdget
+# CJaaS Profile View Widget
 
 This widget uses CJaaS Common Components to output a combined customer profile view that includes Profile information an ACtivity Timeline side by side.
 
