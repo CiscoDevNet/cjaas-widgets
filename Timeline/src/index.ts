@@ -39,7 +39,8 @@ export interface ServerSentEvent {
 @customElementWithCheck("cjaas-timeline-widget")
 export default class CjaasTimelineWidget extends LitElement {
   @property({ type: Array }) timelineItems: TimelineItem[] = [];
-  @property({ type: String }) baseURL = "https://trycjaas.exp.bz";
+  @property({ type: String }) baseURL =
+    "https://uswest-nonprod.cjaas.cisco.com";
   @property() filter: string | undefined;
   @property({ attribute: "auth-token" }) authToken: string | null = null;
   @property({ reflect: true }) pagination: string = "$top=15";
