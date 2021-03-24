@@ -76,6 +76,60 @@ In case you are an administrator for Contact Center Agent Desktop or are working
 
 This specific Widget Starter is designed to be places in a ["panel"](https://www.cisco.com/c/en/us/td/docs/voice_ip_comm/cust_contact/contact_center/CJP/SetupandAdministrationGuide_2/b_mp-release-2/b_cc-release-2_chapter_011.html#topic_BF0EBDF65DCB0A552164D6306657C892__AuxPane) area of JSON layout specification. This is due to this widget relying on a task-specific information with the reference derived from the current location/address bar value.
 
+**Example**
+
+```js
+{
+  "comp": "cjaas-profile-view-widget",
+  "script": /** URL bundle Location **/,
+  "properties": {
+    "customer": "98033-Yana", /** Static customer reference here is provided for demo data. Please modify this widget to access active contact ID with the help of WXCC JS SDK **/
+    "timelineType": "journey-and-stream",
+    "authToken": /** Your CJaaS authentication token **/,
+    "template": {
+      "Name": "My Template",
+      "DatapointCount": 100,
+      "Attributes": [
+        {
+          "Version": "0.1",
+          "Event": "Quote",
+          "Metadata": "email",
+          "DisplayName": "Email",
+          "AggregationMode": "Value",
+          "type": "tab",
+          "Limit": 1,
+          "tag": "email"
+        },
+        {
+          "Version": "0.1",
+          "Event": "Quote",
+          "Metadata": "firstName",
+          "DisplayName": "First Name",
+          "AggregationMode": "Value",
+          "tag": "name",
+          "Limit": 1,
+          "type": "inline"
+        },
+        {
+          "Version": "0.1",
+          "Event": "Quote",
+          "Limit": 1,
+          "Metadata": "lastName",
+          "DisplayName": "Last Name",
+          "AggregationMode": "Value",
+          "tag": "name",
+          "type": "inline"
+        }
+      ]
+    }
+  },
+  "wrapper": {
+    "title": "Customer Journey as a Service Profile View",
+    "maximizeAreaName": "app-maximize-area"
+  }
+}
+```
+
 **NOTE**: If you place this widget in another area in JSON layout specification ("header" or a custom page in "navigation"), some task-specific function might not work. This is to be expected.
 
 Please feel free to reach out to your partner or Cisco directly with any additional questions.
