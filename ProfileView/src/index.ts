@@ -48,7 +48,7 @@ export default class CjaasProfileWidget extends LitElement {
     | undefined = null;
 
   @property({ type: String, attribute: "base-url" }) baseURL =
-    "https://uswest-nonprod.cjaas.cisco.com";
+    "https://trycjaas.exp.bz";
 
   // timeline properties
   @property({ type: Array }) timelineItems: TimelineItem[] = [];

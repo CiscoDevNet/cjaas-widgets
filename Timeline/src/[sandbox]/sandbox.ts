@@ -9,7 +9,7 @@ import "@momentum-ui/web-components";
 import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
 import styles from "./sandbox.scss";
-import ".."
+import "..";
 
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
