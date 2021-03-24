@@ -42,7 +42,10 @@ export type TimelineItem = {
 @customElementWithCheck("cjaas-profile-view-widget")
 export default class CjaasProfileWidget extends LitElement {
   @property() customer: string | undefined;
-  @property() template: any | null | undefined = defaultTemplate;
+  @property({ attribute: "default-template" }) template:
+    | any
+    | null
+    | undefined = defaultTemplate;
   @property({ attribute: "auth-token" }) authToken:
     | string
     | null
