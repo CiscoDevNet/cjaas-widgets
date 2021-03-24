@@ -172,9 +172,7 @@ export default class CjaasTimelineWidget extends LitElement {
       this.timelineItems = [item];
     } else if (this.timelineItems[0].timestamp < item.timestamp) {
       this.timelineItems = [item, ...this.timelineItems];
-    } else if (
-      this.timelineItems[dataLength - 1].timestamp > item.timestamp
-    ) {
+    } else if (this.timelineItems[dataLength - 1].timestamp > item.timestamp) {
       this.timelineItems = [...this.timelineItems, item];
     } else {
       let currentIndex = 0;
