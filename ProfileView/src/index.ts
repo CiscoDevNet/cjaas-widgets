@@ -42,7 +42,7 @@ export type TimelineItem = {
 @customElementWithCheck("cjaas-profile-view-widget")
 export default class CjaasProfileWidget extends LitElement {
   @property() customer: string | undefined;
-  @property({ attribute: "default-template" }) template:
+  @property() template:
     | any
     | null
     | undefined = defaultTemplate;
@@ -52,8 +52,7 @@ export default class CjaasProfileWidget extends LitElement {
     | undefined = null;
 
   @property({ type: String, attribute: "base-url" }) baseURL =
-    // "https://trycjaas.exp.bz";
-    "https://uswest-nonprod.cjaas.cisco.com";
+    "https://trycjaas.exp.bz";
 
   // timeline properties
   @property({ type: Array }) timelineItems: TimelineItem[] = [];
@@ -70,7 +69,6 @@ export default class CjaasProfileWidget extends LitElement {
   @internalProperty() errorMessage = "";
 
   @internalProperty() profile: any;
-  @internalProperty() presetTags: any = {};
   @internalProperty() showSpinner = false;
 
   updated(changedProperties: PropertyValues) {
@@ -97,7 +95,6 @@ export default class CjaasProfileWidget extends LitElement {
   getProfile() {
     const url = `${this.baseURL}/v1/journey/profileview?personid=${this.customer}`;
     this.showSpinner = true;
-    this.requestUpdate();
 
     // set verbose as true for tabbed attributes
     const template = Object.assign({}, this.template);
@@ -142,8 +139,6 @@ export default class CjaasProfileWidget extends LitElement {
           };
         });
 
-        // extracts tagged data from result
-        this.setTaggedResults();
         this.showSpinner = false;
         this.requestUpdate();
       })
@@ -152,31 +147,6 @@ export default class CjaasProfileWidget extends LitElement {
         this.showSpinner = false;
         this.requestUpdate();
       });
-  }
-
-  // result from api is split and stored back to the input template.
-  // This is because the api does not return reliable template back.
-  setTaggedResults() {
-    const PRESET_TAGS = ["name", "email"];
-
-    PRESET_TAGS.forEach((x: string) => {
-      let matches = this.profile!.filter((y: any) => y.query.tag === x);
-      if (x === "name") {
-        matches = matches.sort((a: any) => {
-          if (a.query.Metadata === "firstName") {
-            return -1;
-          } else if (a.query.Metadata === "lastName") {
-            return 1;
-          } else return 0;
-        });
-        // latest first name & last name
-        this.presetTags["name"] = [matches[0].result[0], matches[1].result[0]];
-      } else if (x === "email") {
-        this.presetTags["email"] = matches.map((y: any) => y.result).join(", ");
-      } else {
-        this.presetTags[x] = matches.map((y: any) => y.result);
-      }
-    });
   }
 
   // Timeline Logic
@@ -345,8 +315,7 @@ export default class CjaasProfileWidget extends LitElement {
     return html`
       <div class="profile-bound default-template">
         <cjaas-profile
-          .profile=${this.profile}
-          .presetTags=${this.presetTags}
+          .profileData=${this.profile}
         ></cjaas-profile>
         <section class="customer-journey" title="Customer Journey">
           <div class="header inner-header">
@@ -404,7 +373,7 @@ export default class CjaasProfileWidget extends LitElement {
             return html`
               <md-tab slot="tab">
                 <span>${x.query.DisplayName}</span
-                ><md-badge small>${x.journeyEvents.length}</md-badge>
+                ><md-badge small>${x.journeyEvents ? x.journeyEvents.length : "0"}</md-badge>
               </md-tab>
               <md-tab-panel slot="panel">
                 <!-- use verbose journey events with timeline comp -->
