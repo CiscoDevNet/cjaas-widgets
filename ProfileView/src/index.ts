@@ -13,7 +13,7 @@ import {
   internalProperty,
   property,
   LitElement,
-  PropertyValues,
+  PropertyValues
 } from "lit-element";
 import { Profile } from "./types/cjaas";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
@@ -21,6 +21,7 @@ import styles from "./assets/styles/View.scss";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { DateTime } from "luxon";
 import { nothing } from "lit-html";
+import { defaultTemplate } from "./assets/default-template";
 
 export interface ServerSentEvent {
   data: string;
@@ -41,7 +42,7 @@ export type TimelineItem = {
 @customElementWithCheck("cjaas-profile-view-widget")
 export default class CjaasProfileWidget extends LitElement {
   @property() customer: string | undefined;
-  @property() template: any | null | undefined = null;
+  @property() template: any | null | undefined = defaultTemplate;
   @property({ attribute: "auth-token" }) authToken:
     | string
     | null
@@ -53,7 +54,7 @@ export default class CjaasProfileWidget extends LitElement {
   // timeline properties
   @property({ type: Array }) timelineItems: TimelineItem[] = [];
   @property() filter: string | undefined;
-  @property({ reflect: true }) pagination: string = "$top=15";
+  @property({ reflect: true }) pagination = "$top=15";
   @property({ type: Number }) limit = 5;
   @property({ reflect: true }) timelineType:
     | "journey"
@@ -65,7 +66,6 @@ export default class CjaasProfileWidget extends LitElement {
   @internalProperty() errorMessage = "";
 
   @internalProperty() profile: any;
-  @internalProperty() presetTags: any = {};
   @internalProperty() showSpinner = false;
 
   updated(changedProperties: PropertyValues) {
@@ -92,7 +92,6 @@ export default class CjaasProfileWidget extends LitElement {
   getProfile() {
     const url = `${this.baseURL}/v1/journey/profileview?personid=${this.customer}`;
     this.showSpinner = true;
-    this.requestUpdate();
 
     // set verbose as true for tabbed attributes
     const template = Object.assign({}, this.template);
@@ -109,9 +108,9 @@ export default class CjaasProfileWidget extends LitElement {
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.authToken,
+        Authorization: "SharedAccessSignature " + this.authToken
       },
-      data,
+      data
     };
     return axios(url, options)
       .then((x: AxiosResponse) => x.data)
@@ -133,12 +132,10 @@ export default class CjaasProfileWidget extends LitElement {
           return {
             query: y,
             result: x.attributeView[i].result.split(","),
-            journeyEvents,
+            journeyEvents
           };
         });
 
-        // extracts tagged data from result
-        this.setTaggedResults();
         this.showSpinner = false;
         this.requestUpdate();
       })
@@ -147,31 +144,6 @@ export default class CjaasProfileWidget extends LitElement {
         this.showSpinner = false;
         this.requestUpdate();
       });
-  }
-
-  // result from api is split and stored back to the input template.
-  // This is because the api does not return reliable template back.
-  setTaggedResults() {
-    const PRESET_TAGS = ["name", "email"];
-
-    PRESET_TAGS.forEach((x: string) => {
-      let matches = this.profile!.filter((y: any) => y.query.tag === x);
-      if (x === "name") {
-        matches = matches.sort((a: any) => {
-          if (a.query.Metadata === "firstName") {
-            return -1;
-          } else if (a.query.Metadata === "lastName") {
-            return 1;
-          } else return 0;
-        });
-        // latest first name & last name
-        this.presetTags["name"] = [matches[0].result[0], matches[1].result[0]];
-      } else if (x === "email") {
-        this.presetTags["email"] = matches.map((y: any) => y.result).join(", ");
-      } else {
-        this.presetTags[x] = matches.map((y: any) => y.result);
-      }
-    });
   }
 
   // Timeline Logic
@@ -213,9 +185,9 @@ export default class CjaasProfileWidget extends LitElement {
     // gets historic journey
     fetch(`${this.baseURL}/journey?${this.getTimelineAPIQueryParams(true)}`, {
       headers: {
-        "content-type": "application/json; charset=UTF-8",
+        "content-type": "application/json; charset=UTF-8"
       },
-      method: "GET",
+      method: "GET"
     })
       .then((x: Response) => x.json())
       .then((x: Array<ServerSentEvent>) => {
@@ -226,7 +198,7 @@ export default class CjaasProfileWidget extends LitElement {
       .then(() => {
         this.showTimelineSpinner = false;
       })
-      .catch((err) => {
+      .catch(err => {
         this.showTimelineSpinner = false;
         this.errorMessage = `Failure to fetch Journey ${err}`;
       });
@@ -339,10 +311,7 @@ export default class CjaasProfileWidget extends LitElement {
   getFormattedProfile() {
     return html`
       <div class="profile-bound default-template">
-        <cjaas-profile
-          .profile=${this.profile}
-          .presetTags=${this.presetTags}
-        ></cjaas-profile>
+        <cjaas-profile .profileData=${this.profile}></cjaas-profile>
         <section class="customer-journey" title="Customer Journey">
           <div class="header inner-header">
             <h4>Customer Journey</h4>
@@ -399,7 +368,9 @@ export default class CjaasProfileWidget extends LitElement {
             return html`
               <md-tab slot="tab">
                 <span>${x.query.DisplayName}</span
-                ><md-badge small>${x.journeyEvents.length}</md-badge>
+                ><md-badge small
+                  >${x.journeyEvents ? x.journeyEvents.length : "0"}</md-badge
+                >
               </md-tab>
               <md-tab-panel slot="panel">
                 <!-- use verbose journey events with timeline comp -->
@@ -420,7 +391,7 @@ export default class CjaasProfileWidget extends LitElement {
 
   render() {
     return html`
-      <div class="outer-container">
+      <div class="outer-container" part="profile-widget-outer">
         ${this.profile
           ? this.getFormattedProfile()
           : html`
