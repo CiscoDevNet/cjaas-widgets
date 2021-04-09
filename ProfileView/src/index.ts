@@ -42,10 +42,7 @@ export type TimelineItem = {
 @customElementWithCheck("cjaas-profile-view-widget")
 export default class CjaasProfileWidget extends LitElement {
   @property() customer: string | undefined;
-  @property() template:
-    | any
-    | null
-    | undefined = defaultTemplate;
+  @property() template: any | null | undefined = defaultTemplate;
   @property({ attribute: "auth-token" }) authToken:
     | string
     | null
@@ -314,9 +311,7 @@ export default class CjaasProfileWidget extends LitElement {
   getFormattedProfile() {
     return html`
       <div class="profile-bound default-template">
-        <cjaas-profile
-          .profileData=${this.profile}
-        ></cjaas-profile>
+        <cjaas-profile .profileData=${this.profile}></cjaas-profile>
         <section class="customer-journey" title="Customer Journey">
           <div class="header inner-header">
             <h4>Customer Journey</h4>
@@ -373,7 +368,9 @@ export default class CjaasProfileWidget extends LitElement {
             return html`
               <md-tab slot="tab">
                 <span>${x.query.DisplayName}</span
-                ><md-badge small>${x.journeyEvents ? x.journeyEvents.length : "0"}</md-badge>
+                ><md-badge small
+                  >${x.journeyEvents ? x.journeyEvents.length : "0"}</md-badge
+                >
               </md-tab>
               <md-tab-panel slot="panel">
                 <!-- use verbose journey events with timeline comp -->
@@ -394,7 +391,7 @@ export default class CjaasProfileWidget extends LitElement {
 
   render() {
     return html`
-      <div class="outer-container">
+      <div class="outer-container" part="profile-widget-outer">
         ${this.profile
           ? this.getFormattedProfile()
           : html`
