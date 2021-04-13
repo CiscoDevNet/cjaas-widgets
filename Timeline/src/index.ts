@@ -20,6 +20,9 @@ import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
 import { DateTime } from "luxon";
 
+import "@cjaas/common-components/dist/comp/cjaas-timeline";
+import "@cjaas/common-components/dist/comp/cjaas-timeline-item";
+
 export type TimelineItem = {
   title: string;
   text?: string;

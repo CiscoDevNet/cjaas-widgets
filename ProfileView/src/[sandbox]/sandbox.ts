@@ -5,8 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
-import "@momentum-ui/web-components";
-import "@cjaas/common-components";
+
+import "@momentum-ui/web-components/dist/comp/md-theme";
+import "@momentum-ui/web-components/dist/comp/md-checkbox";
+import "@momentum-ui/web-components/dist/comp/md-label";
+import "@momentum-ui/web-components/dist/comp/md-input";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
 import "..";
 import styles from "./sandbox.scss";

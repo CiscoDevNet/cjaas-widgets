@@ -26,7 +26,8 @@ const pModules = path.resolve("node_modules");
 
 const common: webpack.Configuration = {
   output: {
-    publicPath: "/"
+    publicPath: "/",
+    jsonpFunction: "profileWidget"
   },
   resolve: {
     extensions: [".ts", ".js", ".scss"],

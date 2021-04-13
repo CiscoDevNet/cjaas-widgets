@@ -23,6 +23,18 @@ import { DateTime } from "luxon";
 import { nothing } from "lit-html";
 import { defaultTemplate } from "./assets/default-template";
 
+import "@momentum-ui/web-components/dist/comp/md-badge";
+import "@momentum-ui/web-components/dist/comp/md-button";
+import "@momentum-ui/web-components/dist/comp/md-icon";
+import "@momentum-ui/web-components/dist/comp/md-spinner";
+import "@momentum-ui/web-components/dist/comp/md-tab";
+import "@momentum-ui/web-components/dist/comp/md-tabs";
+import "@momentum-ui/web-components/dist/comp/md-tab-panel";
+
+import "@cjaas/common-components/dist/comp/cjaas-profile";
+import "@cjaas/common-components/dist/comp/cjaas-timeline";
+import "@cjaas/common-components/dist/comp/cjaas-timeline-item";
+
 export interface ServerSentEvent {
   data: string;
 }
