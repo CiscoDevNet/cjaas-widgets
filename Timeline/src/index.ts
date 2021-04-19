@@ -222,7 +222,9 @@ export default class CjaasTimelineWidget extends LitElement {
                     `
                   : html`
                       <div class="spinner-container">
-                        <h3>No Timeline available</h3>
+                        <slot name="ll10n-no-timeline-message">
+                          <h3>No Timeline available</h3>
+                        </slot>
                         <p class="error-message">
                           ${this.errorMessage || nothing}
                         </p>

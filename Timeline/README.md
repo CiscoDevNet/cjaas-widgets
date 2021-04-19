@@ -2,22 +2,23 @@
 
 This widget uses CJaaS Common Components to output a combined customer Timeline that includes Timeline information.
 
-
 ## Timeline Widget Properties
 
 The CJaaS Timeline Widget accepts specific properties to interact with the CJaaS API
-* _customer: string_ -  an identifier of the customer, i.e. "560000-John"
-* _template: any | JSON | Object_  -  for user-provided data-shape template.
-* _auth-token: string_ -  an unique Auth token to enable the CJaaS tape stream. You can get a token here: https://forms.office.com/Pages/ResponsePage.aspx?id=Yq_hWgWVl0CmmsFVPveEDqqpouLp2otDkH7uBREgKh5URVhNWkY2M0lOTE83M05FTzg2TERLMVdTWS4u
-* _base-url: string_ -  defaults to "https://trycjaas.exp.bz" at present, can be modified for changing APIs
+
+- _customer: string_ - an identifier of the customer, i.e. "560000-John"
+- _template: any | JSON | Object_ - for user-provided data-shape template.
+- _auth-token: string_ - an unique Auth token to enable the CJaaS tape stream. You can get a token here: https://forms.office.com/Pages/ResponsePage.aspx?id=Yq_hWgWVl0CmmsFVPveEDqqpouLp2otDkH7uBREgKh5URVhNWkY2M0lOTE83M05FTzg2TERLMVdTWS4u
+- _base-url: string_ - defaults to "https://trycjaas.exp.bz" at present, can be modified for changing APIs
 
 ```html
-   <cjaas-timeline-widget
-      type="journey-and-stream"
-      auth-token="<your-auth-token>"
-      limit="15"
-   ></cjaas-timeline-widget>
+<cjaas-timeline-widget
+  type="journey-and-stream"
+  auth-token="<your-auth-token>"
+  limit="15"
+></cjaas-timeline-widget>
 ```
+
 ## Setup
 
 Install dependencies:
@@ -76,4 +77,20 @@ This specific Widget Starter is designed to be places in a ["panel"](https://www
 
 **NOTE**: If you place this widget in another area in JSON layout specification ("header" or a custom page in "navigation"), some task-specific function might not work. This is to be expected.
 
-Please feel free to reach out to your partner or Cisco directly with any additional questions.
+## Localization
+
+By default, if a timeline cannot be returned the widget will print "No Timeline available". This can be replaced via a named slot for your custom or localized text content:
+
+```html
+<cjaas-timeline-widget
+  id="timeline-widget"
+  type="journey-and-stream"
+  auth-token="missing"
+  limit="15"
+>
+  <h3 slot="ll10n-no-timeline-message">No hay línea de tiempo disponible</h3>
+</cjaas-timeline-widget>
+```
+
+Please feel free to reach out to your partner or Cisco directly with any
+additional questions.

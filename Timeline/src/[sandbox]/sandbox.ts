@@ -94,6 +94,19 @@ export class Sandbox extends LitElement {
               limit="15"
             ></cjaas-timeline-widget>
           </div>
+          <div
+            style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
+            class="widget-container"
+          >
+            <cjaas-timeline-widget
+              id="timeline-widget"
+              type="journey-and-stream"
+              auth-token="missing"
+              limit="15"
+            >
+              <h3 slot="ll10n-no-timeline-message">No hay línea de tiempo disponible</h3>
+            </cjaas-timeline-widget>
+          </div>
         </div>
       </md-theme>
     `;
