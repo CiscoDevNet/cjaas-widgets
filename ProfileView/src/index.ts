@@ -297,7 +297,9 @@ export default class CjaasProfileWidget extends LitElement {
               `
             : html`
                 <div class="spinner-container">
-                  <h3>No Timeline available</h3>
+                  <slot name="ll10n-no-timeline-message">
+                    <h3>No Timeline available</h3>
+                  </slot>
                   <p class="error-message">
                     ${this.errorMessage || nothing}
                   </p>
@@ -314,7 +316,9 @@ export default class CjaasProfileWidget extends LitElement {
         <cjaas-profile .profileData=${this.profile}></cjaas-profile>
         <section class="customer-journey" title="Customer Journey">
           <div class="header inner-header">
-            <h4>Customer Journey</h4>
+            <slot name="l10n-header-text">
+              <h4>Customer Journey</h4>
+            </slot>
           </div>
           ${this.getTabs()}
         </section>
@@ -357,7 +361,9 @@ export default class CjaasProfileWidget extends LitElement {
         `
       : html`
           <div class="center full-height">
-            <div>No data to show</div>
+            <slot name="l10n-no-data-message">
+              <div>No data to show</div>
+            </slot>
           </div>
         `;
     if (tabs && tabs.length > 0) {
@@ -403,7 +409,11 @@ export default class CjaasProfileWidget extends LitElement {
                       </div>
                     `
                   : html`
-                      <div class="spinner-container">No Profile available</div>
+                      <div class="spinner-container">
+                        <slot name="l10n-no-profile-message">
+                          No Profile available
+                        </slot>
+                      </div>
                     `}
               </div>
             `}

@@ -96,6 +96,22 @@ export class Sandbox extends LitElement {
               timelineType="journey-and-stream"
             ></cjaas-profile-view-widget>
           </div>
+          <div
+            style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
+            class="widget-container"
+          >
+            <cjaas-profile-view-widget
+              id="view"
+              customer="560021-Venki"
+              .template=${sampleTemplate}
+              auth-token="missing"
+              timelineType="journey-and-stream"
+            >
+              <h3 slot="l10n-header-text">Texto de encabezado personalizado</h3>
+              <h4 slot="l10n-no-data-message">No hay datos para mostrar</h4>
+              <h4 slot="l10n-no-profile-message">No hay perfil disponible</h4>
+            </cjaas-profile-view-widget>
+          </div>
         </div>
       </md-theme>
     `;
