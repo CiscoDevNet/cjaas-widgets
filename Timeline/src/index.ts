@@ -41,6 +41,8 @@ export default class CjaasTimelineWidget extends LitElement {
   @property({ type: Array }) timelineItems: TimelineItem[] = [];
   @property({ type: String }) baseURL = "https://trycjaas.exp.bz";
   @property() filter: string | undefined;
+
+  // widget takes care of URI encoding. Input should not be URI encoded
   @property({ attribute: "auth-token" }) authToken: string | null = null;
   @property({ reflect: true }) pagination: string = "$top=15";
   @property({ type: Number }) limit = 5;
@@ -68,7 +70,14 @@ export default class CjaasTimelineWidget extends LitElement {
 
   // defaults to top 10 for journey
   getAPIQueryParams(forJourney = false) {
-    let url = this.authToken;
+    // signature needs to be URI encoded for it to work
+    // as query strings
+    let signature = this.authToken?.replace(/sig=(.*)/, (...matches) => {
+      return "sig=" + encodeURIComponent(matches[1]);
+    });
+
+    let url = signature;
+
     if (this.filter) {
       url += `&$filter=${this.filter}`;
     }
