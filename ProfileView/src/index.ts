@@ -391,11 +391,13 @@ export default class CjaasProfileWidget extends LitElement {
               </md-tab>
               <md-tab-panel slot="panel">
                 <!-- use verbose journey events with timeline comp -->
-                ${this.renderTimeline(
+                ${x.journeyEvents ? this.renderTimeline(
                   x.journeyEvents.map((y: any) =>
                     this.getTimelineItemFromMessage(y)
                   )
-                )}
+                ):
+                nothing
+                }
               </md-tab-panel>
             `;
           })}
