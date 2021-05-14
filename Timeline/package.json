@@ -30,7 +30,7 @@
     "@momentum-ui/core": "^19.10.0",
     "@momentum-ui/icons": "^8.8.2",
     "@momentum-ui/utils": "^6.2.12",
-    "@momentum-ui/web-components": "^2.2.0",
+    "@momentum-ui/web-components": "^2.2.2",
     "lit-element": "2.3.1",
     "lit-html": "1.2.1"
   },
@@ -41,7 +41,7 @@
     "@momentum-ui/core": "^19.10.0",
     "@momentum-ui/icons": "^8.8.2",
     "@momentum-ui/utils": "^6.2.12",
-    "@momentum-ui/web-components": "^2.2.0",
+    "@momentum-ui/web-components": "^2.2.2",
     "@open-wc/testing-helpers": "1.8.9",
     "@types/axios": "^0.14.0",
     "@types/copy-webpack-plugin": "^5.0.0",

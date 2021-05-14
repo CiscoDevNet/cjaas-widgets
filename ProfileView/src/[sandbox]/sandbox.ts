@@ -92,20 +92,22 @@ export class Sandbox extends LitElement {
               id="view"
               customer="560021-Venki"
               .template=${sampleTemplate}
-              auth-token="st=demoassure&so=sandbox&ss=stream&sp=w&se=2021-04-06T07:38:17Z&sk=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztQ4xKyn5APjdSY="
+              sas-token="st=demoassure&so=sandbox&ss=stream&sp=w&se=2021-04-06T07:38:17Z&sk=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztQ4xKyn5APjdSY="
               timelineType="journey-and-stream"
-            ></cjaas-profile-view-widget>
-          </div>
-          <div
+              base-url="https://trycjaas.exp.bz"
+              ></cjaas-profile-view-widget>
+            </div>
+            <div
             style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
             class="widget-container"
-          >
+            >
             <cjaas-profile-view-widget
               id="view"
               customer="560021-Venki"
               .template=${sampleTemplate}
-              auth-token="missing"
+              sas-token="missing"
               timelineType="journey-and-stream"
+              base-url="https://trycjaas.exp.bz"
             >
               <h3 slot="l10n-header-text">Texto de encabezado personalizado</h3>
               <h4 slot="l10n-no-data-message">No hay datos para mostrar</h4>

@@ -43,13 +43,13 @@ export type TimelineItem = {
 export default class CjaasProfileWidget extends LitElement {
   @property() customer: string | undefined;
   @property() template: any | null | undefined = defaultTemplate;
-  @property({ attribute: "auth-token" }) authToken:
+  @property({ attribute: "sas-token" }) sasToken:
     | string
     | null
     | undefined = null;
 
-  @property({ type: String, attribute: "base-url" }) baseURL =
-    "https://trycjaas.exp.bz";
+  @property({ type: String, attribute: "base-url" }) baseURL: string | undefined =
+    undefined;
 
   // timeline properties
   @property({ type: Array }) timelineItems: TimelineItem[] = [];
@@ -80,8 +80,8 @@ export default class CjaasProfileWidget extends LitElement {
     }
 
     if (
-      this.authToken &&
-      (changedProperties.has("authToken") || changedProperties.has("filter"))
+      this.sasToken &&
+      (changedProperties.has("sasToken") || changedProperties.has("filter"))
     ) {
       this.timelineItems = [];
       this.requestUpdate();
@@ -89,7 +89,14 @@ export default class CjaasProfileWidget extends LitElement {
     }
   }
 
+  baseUrlCheck(){
+    if (this.baseURL === undefined) {
+      throw new Error("You must provide a Base URL");
+    }
+  }
+
   getProfile() {
+    this.baseUrlCheck()
     const url = `${this.baseURL}/v1/journey/profileview?personid=${this.customer}`;
     this.showSpinner = true;
 
@@ -108,7 +115,7 @@ export default class CjaasProfileWidget extends LitElement {
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.authToken,
+        Authorization: "SharedAccessSignature " + this.sasToken,
       },
       data,
     };
@@ -149,7 +156,7 @@ export default class CjaasProfileWidget extends LitElement {
   // Timeline Logic
   // defaults to top 10 for journey
   getTimelineAPIQueryParams(forJourney = false) {
-    let url = this.authToken?.replace(/sig=(.*)/, (...matches) => {
+    let url = this.sasToken?.replace(/sig=(.*)/, (...matches) => {
       return "sig=" + encodeURIComponent(matches[1]);
     });
 
@@ -184,7 +191,7 @@ export default class CjaasProfileWidget extends LitElement {
 
   getJourney() {
     this.showTimelineSpinner = true;
-
+    this.baseUrlCheck()
     // gets historic journey
     fetch(`${this.baseURL}/journey?${this.getTimelineAPIQueryParams(true)}`, {
       headers: {
@@ -220,6 +227,7 @@ export default class CjaasProfileWidget extends LitElement {
     }
 
     if (this.timelineType !== "journey") {
+      this.baseUrlCheck()
       this.eventSource = new EventSource(
         `${this.baseURL}/real-time?${this.getTimelineAPIQueryParams()}`
       );
@@ -353,7 +361,7 @@ export default class CjaasProfileWidget extends LitElement {
     // tab data should return the event as such.. Should be rendered by stream component.
     const tabs = this.profile.filter((x: any) => x.query.type === "tab");
     // TODO: Track the selected tab to apply a class to the badge for color synching, making blue when selected
-    const activityTab = this.authToken
+    const activityTab = this.sasToken
       ? html`
           <md-tab slot="tab">
             <span>All</span>
