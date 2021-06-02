@@ -39,11 +39,11 @@ export interface ServerSentEvent {
 @customElementWithCheck("cjaas-timeline-widget")
 export default class CjaasTimelineWidget extends LitElement {
   @property({ type: Array }) timelineItems: TimelineItem[] = [];
-  @property({ type: String }) baseURL = "https://trycjaas.exp.bz";
+  @property({ type: String, attribute: "base-url" }) baseURL: string | undefined = undefined;
   @property() filter: string | undefined;
 
   // widget takes care of URI encoding. Input should not be URI encoded
-  @property({ attribute: "auth-token" }) authToken: string | null = null;
+  @property({ type: String, attribute: "sas-token" }) sasToken: string | null = null;
   @property({ reflect: true }) pagination: string = "$top=15";
   @property({ type: Number }) limit = 5;
   @property({ reflect: true }) type:
@@ -59,8 +59,8 @@ export default class CjaasTimelineWidget extends LitElement {
     super.updated(changedProperties);
 
     if (
-      this.authToken &&
-      (changedProperties.has("authToken") || changedProperties.has("filter"))
+      this.sasToken &&
+      (changedProperties.has("sasToken") || changedProperties.has("filter"))
     ) {
       this.timelineItems = [];
       this.requestUpdate();
@@ -68,11 +68,18 @@ export default class CjaasTimelineWidget extends LitElement {
     }
   }
 
+  baseUrlCheck(){
+    if (this.baseURL === undefined) {
+      console.error("You must provide a Base URL");
+      throw new Error("You must provide a Base URL");
+    }
+  }
+
   // defaults to top 10 for journey
   getAPIQueryParams(forJourney = false) {
     // signature needs to be URI encoded for it to work
     // as query strings
-    let signature = this.authToken?.replace(/sig=(.*)/, (...matches) => {
+    let signature = this.sasToken?.replace(/sig=(.*)/, (...matches) => {
       return "sig=" + encodeURIComponent(matches[1]);
     });
 
@@ -109,7 +116,7 @@ export default class CjaasTimelineWidget extends LitElement {
 
   getJourney() {
     this.showSpinner = true;
-
+    this.baseUrlCheck()
     // gets historic journey
     fetch(`${this.baseURL}/journey?${this.getAPIQueryParams(true)}`, {
       headers: {
@@ -142,6 +149,7 @@ export default class CjaasTimelineWidget extends LitElement {
     }
 
     if (this.type !== "journey") {
+      this.baseUrlCheck()
       this.eventSource = new EventSource(
         `${this.baseURL}/real-time?${this.getAPIQueryParams()}`
       );
