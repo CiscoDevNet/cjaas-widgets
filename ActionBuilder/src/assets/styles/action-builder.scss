@@ -1,0 +1,31 @@
+@import "../../assets/styles/mixins.scss";
+@import "../../assets/styles/variables";
+
+* {
+  box-sizing: border-box;
+}
+
+:host {
+  padding: 12px;
+  display: block;
+  color: var(--md-secondary-text-color, #545454);
+}
+
+md-icon {
+  margin: 0 8px;
+}
+
+.footer {
+  display: flex;
+  md-dropdown {
+    margin: 0 12px;
+  }
+}
+.cta {
+  height: 48px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 24px;
+}
