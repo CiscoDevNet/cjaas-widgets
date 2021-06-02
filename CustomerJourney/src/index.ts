@@ -157,22 +157,24 @@ export default class CustomerJourneyWidget extends LitElement {
   renderFilterButtons() {
 
     return this.eventTypes.map(item => {
-      // make conditional for active or not
       return html`<md-button id="filter-${item}" ?active=${this.checkFilter(item)} outline color="blue" size=28 @click=${() =>
         this.toggleFilter(item)}>${item}</md-button>`
     })
   }
 
   renderEvents() {
-    // check for active filters
     // check for date range
     // clip off to top 5 or paginate ?
-    const showItem = (type: string) => {
-      return this.activeTypes.includes(type)
-    }
+    let date!: string;
 
     return this.events.map(event => {
+      let advanceDate = false
+      if (date !== DateTime.fromISO(event.time).toFormat("dd LLL yyyy")) {
+        date = DateTime.fromISO(event.time).toFormat("dd LLL yyyy")
+        advanceDate = true;
+      }
       return html`
+      ${advanceDate && html`<h4>${date}</h4>` || nothing}
       <cjaas-timeline-item .data=${event} title=${event.type} class="show-${this.activeTypes.includes(event.type)}">
       </cjaas-timeline-item>
       `
