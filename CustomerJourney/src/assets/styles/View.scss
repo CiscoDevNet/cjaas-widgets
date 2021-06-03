@@ -13,6 +13,7 @@
   display: block;
   border-radius: 0.5rem;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.16), 0px 0px 1px rgba(0, 0, 0, 0.18);
+  overflow: auto;
 }
 
 .outer-container {
@@ -70,6 +71,21 @@
 
 .empty-state {
   height: 100%;
+}
+nav {
+  padding: 0.5rem;
+  text-align: center;
+}
+md-badge {
+  margin: 0.5rem;
+  display: block;
+}
+.filter-buttons > md-button {
+  display: inline-block;
+  margin-bottom: .5rem;
+}
+.timeline-item {
+  margin: 0 0.5rem 0.5rem 0.5rem;
 }
 
 .show-true {

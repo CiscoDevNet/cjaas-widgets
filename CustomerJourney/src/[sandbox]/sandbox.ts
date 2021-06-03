@@ -14,7 +14,7 @@ import "..";
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
   @internalProperty() darkTheme = false;
-  @internalProperty() containerWidth = "1000px";
+  @internalProperty() containerWidth = "80vw";
   @internalProperty() containerHeight = "80vh";
   @internalProperty() selectedComponent = "Activity Item";
   static get styles() {
@@ -89,7 +89,7 @@ export class Sandbox extends LitElement {
           >
             <customer-journey-widget
               id="timeline-widget"
-              customer="560021-Venki"
+              customer="98126-Kevin"
               sas-token="st=demoassure&so=sandbox&ss=stream&sp=w&se=2021-04-06T07:38:17Z&sk=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztQ4xKyn5APjdSY="
               base-url="https://trycjaas.exp.bz"
             ></customer-journey-widget>
