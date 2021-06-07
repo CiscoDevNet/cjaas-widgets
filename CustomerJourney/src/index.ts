@@ -47,9 +47,10 @@ export default class CustomerJourneyWidget extends LitElement {
     | string
     | null = null;
   @property({ reflect: true }) pagination = "$top=15";
-  // @property({ type: Number }) limit = 5;
+  @property({ type: Number }) limit = 5;
 
   @internalProperty() events: Array<CustomerEvent> = [];
+  @internalProperty() newestEvents: Array<CustomerEvent> = [];
   @internalProperty() eventSource: EventSource | null = null;
   @internalProperty() eventTypes: Array<string> = [];
   @internalProperty() activeTypes: Array<string> = [];
@@ -65,7 +66,7 @@ export default class CustomerJourneyWidget extends LitElement {
     const data = await this.getExistingEvents();
     this.events = JSON.parse(data);
     this.getEventTypes();
-    // this.activeTypes = this.eventTypes;
+    this.activeTypes = this.eventTypes;
     this.loading = false;
     this.requestUpdate();
     this.subscribeToStream();
@@ -153,7 +154,7 @@ export default class CustomerJourneyWidget extends LitElement {
       }
 
       if (data) {
-        this.events.unshift(data);
+        this.newestEvents.unshift(data);
         this.requestUpdate();
       }
     };
@@ -257,6 +258,30 @@ export default class CustomerJourneyWidget extends LitElement {
     `;
   }
 
+  showNewEvents(){
+    if (this.newestEvents.length > 0 ) {
+      this.events.unshift(...this.newestEvents)
+      this.newestEvents = []
+      this.requestUpdate()
+    }
+  }
+
+
+  renderNewEventStack(){
+
+    return this.newestEvents.length > 0 ? html`
+      <div class="new-events">
+        <md-chip
+        small
+        color="blue"
+        @click=${()=>this.showNewEvents()}
+        value="Show ${this.newestEvents.length} new events"></md-chip>
+      </div>
+    `
+    :
+    nothing
+  }
+
   calculateOldestEntry() {
     switch (this.activeDateRange) {
       case "day":
@@ -273,6 +298,8 @@ export default class CustomerJourneyWidget extends LitElement {
 
   renderEvents() {
     let date!: string;
+    let localLimit = this.limit
+    let numberOfResults = 0;
 
     return this.events.map(event => {
       if (DateTime.fromISO(event.time) > this.calculateOldestEntry()) {
@@ -284,7 +311,8 @@ export default class CustomerJourneyWidget extends LitElement {
         }
         console.log(event.data)
         const titleString = `${event.type}: ${Object.keys(event.data)[0]}`
-        return html`
+        numberOfResults++
+        return numberOfResults <= localLimit ? html`
           ${(advanceDate &&
             html`
               <md-badge outlined small>${date}</md-badge>
@@ -298,7 +326,12 @@ export default class CustomerJourneyWidget extends LitElement {
             id=${event.id}
           >
           </cjaas-timeline-item>
-        `;
+        `
+        :
+        nothing
+        ;
+      } else {
+        return html `<md-link @click=${()=>{console.log("more")}}>Load More</md-link>`
       }
     });
   }
@@ -323,7 +356,14 @@ export default class CustomerJourneyWidget extends LitElement {
               </div>
             </nav>
             <section id="events-list">
+              ${this.renderNewEventStack()}
               ${this.renderEvents()}
+              ${this.events.length > this.limit && this.activeTypes.length > 0
+                ? html `
+                <md-link
+                @click=${(e:Event)=>{e.preventDefault(); this.limit+=5}}>Load More</md-link>
+                `
+                : nothing}
             </section>
           </div>
         `;
