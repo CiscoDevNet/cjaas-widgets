@@ -80,7 +80,7 @@ export class Sandbox extends LitElement {
       <div class="toggle">
         ${this.themeToggle()}
       </div>
-      <md-theme ?darkTheme=${this.darkTheme}>
+      <md-theme ?darkTheme=${this.darkTheme} lumos>
         <div class="container">
           <h2 class="sandbox-header">Timeline</h2>
           <div

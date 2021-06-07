@@ -21,6 +21,7 @@ import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
 import { DateTime } from "luxon";
 import { Button, ButtonGroup } from "@momentum-ui/web-components";
+import { ServerSentEvent } from "./types/cjaas";
 
 export interface CustomerEvent {
   data: Record<string, any>;
@@ -49,6 +50,7 @@ export default class CustomerJourneyWidget extends LitElement {
   // @property({ type: Number }) limit = 5;
 
   @internalProperty() events: Array<CustomerEvent> = [];
+  @internalProperty() eventSource: EventSource | null = null;
   @internalProperty() eventTypes: Array<string> = [];
   @internalProperty() activeTypes: Array<string> = [];
   @internalProperty() activeDateRange!: string;
@@ -56,15 +58,26 @@ export default class CustomerJourneyWidget extends LitElement {
   @internalProperty() errorMessage = "";
 
   @query(".date-filters") dateFilters!: HTMLElement;
+  @query("#events-list") eventsList!: HTMLElement;
 
   async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     const data = await this.getExistingEvents();
     this.events = JSON.parse(data);
     this.getEventTypes();
-    this.activeTypes = this.eventTypes;
+    // this.activeTypes = this.eventTypes;
     this.loading = false;
     this.requestUpdate();
+    this.subscribeToStream();
+  }
+
+  updated(changedProperties: PropertyValues) {
+    super.updated(changedProperties);
+
+    if (changedProperties.has("events")) {
+      this.getEventTypes();
+      this.requestUpdate();
+    }
   }
 
   baseUrlCheck() {
@@ -72,24 +85,6 @@ export default class CustomerJourneyWidget extends LitElement {
       console.error("You must provide a Base URL");
       throw new Error("You must provide a Base URL");
     }
-  }
-
-  getTimelineItemFromMessage(message: any) {
-    // KPH: maybe still useful?
-    const item: any = {};
-
-    item.title = message.type;
-    item.timestamp = DateTime.fromISO(message.time);
-    item.id = message.id;
-    if (message.person && message.person.indexOf("anon") === -1) {
-      item.person = message.person;
-    }
-
-    if (message.data) {
-      item.data = message.data;
-    }
-
-    return item;
   }
 
   async getExistingEvents() {
@@ -114,6 +109,59 @@ export default class CustomerJourneyWidget extends LitElement {
         this.errorMessage = `Failure to fetch Journey ${err}`;
       });
   }
+  getAPIQueryParams(forJourney = false) {
+    // signature needs to be URI encoded for it to work
+    // as query strings
+    const signature = this.sasToken?.replace(/sig=(.*)/, (...matches) => {
+      return "sig=" + encodeURIComponent(matches[1]);
+    });
+
+    let url = signature;
+
+    // if (this.filter) {
+    //   url += `&$filter=${this.filter}`;
+    // }
+
+    if (this.pagination) {
+      url += `&${this.pagination}`;
+    } else if (!this.pagination && forJourney) {
+      url += "&$top=10";
+    }
+    return url;
+  }
+
+  subscribeToStream() {
+    if (this.eventSource) {
+      this.eventSource.close();
+    }
+
+    // if (this.type === "journey" || this.type === "journey-and-stream") {
+    //   this.getJourney();
+    // }
+
+    this.baseUrlCheck();
+    this.eventSource = new EventSource(
+      `${this.baseURL}/real-time?${this.getAPIQueryParams()}`
+    );
+
+    this.eventSource.onmessage = (event: ServerSentEvent) => {
+      let data;
+      try {
+        data = JSON.parse(event.data);
+      } catch (err) {
+        // received just the timestamp
+      }
+
+      if (data) {
+        this.events.unshift(data);
+        this.requestUpdate();
+      }
+    };
+
+    this.eventSource.onerror = () => {
+      this.loading = false;
+    };
+  }
 
   getEventTypes() {
     const eventArray: Set<string> = new Set();
@@ -123,12 +171,14 @@ export default class CustomerJourneyWidget extends LitElement {
     this.eventTypes = Array.from(eventArray);
   }
 
-  toggleFilter(type: string) {
+  toggleFilter(type: string, e:Event) {
     if (this.activeTypes.includes(type)) {
       this.activeTypes = this.activeTypes.filter(item => item !== type);
     } else {
       this.activeTypes.push(type);
     }
+
+    (e.target! as HTMLElement).blur()
     this.requestUpdate();
   }
 
@@ -145,7 +195,7 @@ export default class CustomerJourneyWidget extends LitElement {
           outline
           color="blue"
           size="28"
-          @click=${() => this.toggleFilter(item)}
+          @click=${(e:Event) => this.toggleFilter(item, e)}
           >${item}</md-button
         >
       `;
@@ -157,6 +207,7 @@ export default class CustomerJourneyWidget extends LitElement {
     button.active = !button.active;
     this.activeDateRange = button.id.substr(12, button.id.length - 1);
     this.deactivateOtherButtons(button.id);
+    (e.target! as HTMLElement).blur()
     this.requestUpdate();
   }
 
@@ -221,17 +272,18 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   renderEvents() {
-    // check for date range
-    // clip off to top 5 or paginate ?
     let date!: string;
 
     return this.events.map(event => {
       if (DateTime.fromISO(event.time) > this.calculateOldestEntry()) {
         let advanceDate = false;
         if (date !== DateTime.fromISO(event.time).toFormat("dd LLL yyyy")) {
+          // KPH: check if the date on this iteration should render a new date-marker badge
           date = DateTime.fromISO(event.time).toFormat("dd LLL yyyy");
           advanceDate = true;
         }
+        console.log(event.data)
+        const titleString = `${event.type}: ${Object.keys(event.data)[0]}`
         return html`
           ${(advanceDate &&
             html`
@@ -240,7 +292,7 @@ export default class CustomerJourneyWidget extends LitElement {
             nothing}
           <cjaas-timeline-item
             .data=${event}
-            title=${event.type}
+            title=${titleString}
             class="timeline-item show-${this.activeTypes.includes(event.type)}"
             timestamp=${event.time}
             id=${event.id}
@@ -258,7 +310,7 @@ export default class CustomerJourneyWidget extends LitElement {
   render() {
     return this.loading
       ? html`
-          <md-loading></md-loading>
+          <md-loading size="large"></md-loading>
         `
       : html`
           <div class="container">
