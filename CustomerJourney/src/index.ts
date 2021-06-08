@@ -341,18 +341,18 @@ export default class CustomerJourneyWidget extends LitElement {
           ? html`
               ${(advanceDate &&
                 html`
-                  <md-tooltip
+                  <!-- <md-tooltip
                     message="click to hide events for this date"
                     placement="top"
+                  > -->
+                  <md-badge
+                    outlined
+                    small
+                    id=${date}
+                    @click=${(e: Event) => this.hideDate(e)}
+                    >${date}</md-badge
                   >
-                    <md-badge
-                      outlined
-                      small
-                      id=${date}
-                      @click=${(e: Event) => this.hideDate(e)}
-                      >${date}</md-badge
-                    >
-                  </md-tooltip>
+                  <!-- </md-tooltip> -->
                 `) ||
                 nothing}
               <cjaas-timeline-item
