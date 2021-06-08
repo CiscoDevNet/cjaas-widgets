@@ -299,6 +299,9 @@ export default class CustomerJourneyWidget extends LitElement {
         small
         color=${this.liveLoading ? "green" : "gray"}
         @click=${() => this.toggleLiveEvents()}
+        @keydown=${(e: KeyboardEvent) => {
+          (e.code === "Enter" || e.code === "Space") && this.toggleLiveEvents();
+        }}
         value="${this.liveLoading ? "Stop" : "Show"} Live Events"
         icon=${this.liveLoading ? "icon-pause_12" : "icon-play_12"}
       ></md-chip>

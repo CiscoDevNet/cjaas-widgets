@@ -110,11 +110,12 @@ md-badge, md-link {
   display: none;
 }
 
-.new-events {
+.new-events, .filter-buttons, .date-filters {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
   gap: .5rem;
-  padding: .5rem;
+  padding: .25rem;
 
 }
 
