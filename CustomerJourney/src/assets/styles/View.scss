@@ -109,3 +109,27 @@ md-badge, md-chip, md-link {
 .show-false {
   display: none;
 }
+
+.expanded {
+  // :host {
+  //   justify-content: flex-end;
+  // }
+
+  &.container {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  nav {
+    width: 50%;
+    text-align: left;
+  }
+
+  section#events-list {
+    width: 50%;
+    height: 100%;
+    overflow: auto;
+  }
+}

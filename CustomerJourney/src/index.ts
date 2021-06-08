@@ -17,12 +17,13 @@ import {
   query
 } from "lit-element";
 import { nothing } from "lit-html";
+import { classMap } from "lit-html/directives/class-map";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
 import { DateTime } from "luxon";
 import { Button, ButtonGroup } from "@momentum-ui/web-components";
 import { ServerSentEvent } from "./types/cjaas";
-
+import "@cjaas/common-components/dist/comp/cjaas-timeline-item";
 export interface CustomerEvent {
   data: Record<string, any>;
   firstName: string;
@@ -56,10 +57,14 @@ export default class CustomerJourneyWidget extends LitElement {
   @internalProperty() activeTypes: Array<string> = [];
   @internalProperty() activeDateRange!: string;
   @internalProperty() loading = true;
+  @internalProperty() expanded = true;
   @internalProperty() errorMessage = "";
 
   @query(".date-filters") dateFilters!: HTMLElement;
   @query("#events-list") eventsList!: HTMLElement;
+  @query(".container") container!: HTMLElement;
+
+  activeDates: Array<string> = [];
 
   async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
@@ -70,6 +75,25 @@ export default class CustomerJourneyWidget extends LitElement {
     this.loading = false;
     this.requestUpdate();
     this.subscribeToStream();
+
+    // @ts-ignore
+    const ro = new ResizeObserver((entries: any) => {
+      for (const entry of entries) {
+        const cr = entry.contentRect;
+        if (cr.width < 589) {
+          this.expanded = false;
+        } else {
+          this.expanded = true;
+        }
+      }
+    });
+    ro.observe(this.container as Element);
+  }
+
+  private get resizeClassMap() {
+    return {
+      expanded: this.expanded
+    };
   }
 
   updated(changedProperties: PropertyValues) {
@@ -119,10 +143,6 @@ export default class CustomerJourneyWidget extends LitElement {
 
     let url = signature;
 
-    // if (this.filter) {
-    //   url += `&$filter=${this.filter}`;
-    // }
-
     if (this.pagination) {
       url += `&${this.pagination}`;
     } else if (!this.pagination && forJourney) {
@@ -135,10 +155,6 @@ export default class CustomerJourneyWidget extends LitElement {
     if (this.eventSource) {
       this.eventSource.close();
     }
-
-    // if (this.type === "journey" || this.type === "journey-and-stream") {
-    //   this.getJourney();
-    // }
 
     this.baseUrlCheck();
     this.eventSource = new EventSource(
@@ -172,14 +188,14 @@ export default class CustomerJourneyWidget extends LitElement {
     this.eventTypes = Array.from(eventArray);
   }
 
-  toggleFilter(type: string, e:Event) {
+  toggleFilter(type: string, e: Event) {
     if (this.activeTypes.includes(type)) {
       this.activeTypes = this.activeTypes.filter(item => item !== type);
     } else {
       this.activeTypes.push(type);
     }
 
-    (e.target! as HTMLElement).blur()
+    (e.target! as HTMLElement).blur();
     this.requestUpdate();
   }
 
@@ -196,7 +212,7 @@ export default class CustomerJourneyWidget extends LitElement {
           outline
           color="blue"
           size="28"
-          @click=${(e:Event) => this.toggleFilter(item, e)}
+          @click=${(e: Event) => this.toggleFilter(item, e)}
           >${item}</md-button
         >
       `;
@@ -208,7 +224,7 @@ export default class CustomerJourneyWidget extends LitElement {
     button.active = !button.active;
     this.activeDateRange = button.id.substr(12, button.id.length - 1);
     this.deactivateOtherButtons(button.id);
-    (e.target! as HTMLElement).blur()
+    (e.target! as HTMLElement).blur();
     this.requestUpdate();
   }
 
@@ -258,28 +274,27 @@ export default class CustomerJourneyWidget extends LitElement {
     `;
   }
 
-  showNewEvents(){
-    if (this.newestEvents.length > 0 ) {
-      this.events.unshift(...this.newestEvents)
-      this.newestEvents = []
-      this.requestUpdate()
+  showNewEvents() {
+    if (this.newestEvents.length > 0) {
+      this.events.unshift(...this.newestEvents);
+      this.newestEvents = [];
+      this.requestUpdate();
     }
   }
 
-
-  renderNewEventStack(){
-
-    return this.newestEvents.length > 0 ? html`
-      <div class="new-events">
-        <md-chip
-        small
-        color="blue"
-        @click=${()=>this.showNewEvents()}
-        value="Show ${this.newestEvents.length} new events"></md-chip>
-      </div>
-    `
-    :
-    nothing
+  renderNewEventStack() {
+    return this.newestEvents.length > 0
+      ? html`
+          <div class="new-events">
+            <md-chip
+              small
+              color="blue"
+              @click=${() => this.showNewEvents()}
+              value="Show ${this.newestEvents.length} new events"
+            ></md-chip>
+          </div>
+        `
+      : nothing;
   }
 
   calculateOldestEntry() {
@@ -292,46 +307,66 @@ export default class CustomerJourneyWidget extends LitElement {
         return DateTime.now().minus({ month: 1 });
       default:
         return DateTime.now().minus({ year: 1 });
-        break;
     }
+  }
+
+  hideDate(e: Event) {
+    const date = (e.target! as HTMLElement).id;
+    if (this.activeDates.includes(date)) {
+      this.activeDates = this.activeDates.filter(e => e !== date);
+    } else {
+      this.activeDates.push(date);
+    }
+    this.requestUpdate();
   }
 
   renderEvents() {
     let date!: string;
-    let localLimit = this.limit
+    const localLimit = this.limit;
     let numberOfResults = 0;
 
     return this.events.map(event => {
       if (DateTime.fromISO(event.time) > this.calculateOldestEntry()) {
         let advanceDate = false;
-        if (date !== DateTime.fromISO(event.time).toFormat("dd LLL yyyy")) {
+        const stringDate = DateTime.fromISO(event.time).toFormat("dd LLL yyyy");
+        if (date !== stringDate) {
           // KPH: check if the date on this iteration should render a new date-marker badge
-          date = DateTime.fromISO(event.time).toFormat("dd LLL yyyy");
+          date = stringDate;
           advanceDate = true;
+          // this.activeDates.indexOf(date) === -1 ? this.activeDates.push(stringDate) : nothing
         }
-        console.log(event.data)
-        const titleString = `${event.type}: ${Object.keys(event.data)[0]}`
-        numberOfResults++
-        return numberOfResults <= localLimit ? html`
-          ${(advanceDate &&
-            html`
-              <md-badge outlined small>${date}</md-badge>
-            `) ||
-            nothing}
-          <cjaas-timeline-item
-            .data=${event}
-            title=${titleString}
-            class="timeline-item show-${this.activeTypes.includes(event.type)}"
-            timestamp=${event.time}
-            id=${event.id}
-          >
-          </cjaas-timeline-item>
-        `
-        :
-        nothing
-        ;
-      } else {
-        return html `<md-link @click=${()=>{console.log("more")}}>Load More</md-link>`
+        const titleString = `${event.type}: ${Object.keys(event.data)[0]}`;
+        numberOfResults++;
+        return numberOfResults <= localLimit
+          ? html`
+              ${(advanceDate &&
+                html`
+                  <md-tooltip
+                    message="click to hide events for this date"
+                    placement="top"
+                  >
+                    <md-badge
+                      outlined
+                      small
+                      id=${date}
+                      @click=${(e: Event) => this.hideDate(e)}
+                      >${date}</md-badge
+                    >
+                  </md-tooltip>
+                `) ||
+                nothing}
+              <cjaas-timeline-item
+                .data=${event}
+                title=${titleString}
+                class="timeline-item show-${this.activeTypes.includes(
+                  event.type
+                ) || this.activeDates.includes(stringDate)}"
+                timestamp=${event.time}
+                id=${event.id}
+              >
+              </cjaas-timeline-item>
+            `
+          : nothing;
       }
     });
   }
@@ -341,32 +376,38 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   render() {
-    return this.loading
-      ? html`
-          <md-loading size="large"></md-loading>
-        `
-      : html`
-          <div class="container">
-            <nav>
-              <div class="filter-buttons">
-                ${this.renderFilterButtons()}
-              </div>
-              <div class="date-filters">
-                ${this.renderDateRangeButtons()}
-              </div>
-            </nav>
-            <section id="events-list">
-              ${this.renderNewEventStack()}
-              ${this.renderEvents()}
-              ${this.events.length > this.limit && this.activeTypes.length > 0
-                ? html `
-                <md-link
-                @click=${(e:Event)=>{e.preventDefault(); this.limit+=5}}>Load More</md-link>
-                `
-                : nothing}
-            </section>
-          </div>
-        `;
+    return html`
+      <div class="container ${classMap(this.resizeClassMap)}">
+        ${this.loading
+          ? html`
+              <md-loading size="middle"></md-loading>
+            `
+          : html`
+              <nav>
+                <div class="filter-buttons">
+                  ${this.renderFilterButtons()}
+                </div>
+                <div class="date-filters">
+                  ${this.renderDateRangeButtons()}
+                </div>
+              </nav>
+              <section id="events-list">
+                ${this.renderNewEventStack()} ${this.renderEvents()}
+                ${this.events.length > this.limit && this.activeTypes.length > 0
+                  ? html`
+                      <md-link
+                        @click=${(e: Event) => {
+                          e.preventDefault();
+                          this.limit += 5;
+                        }}
+                        >Load More</md-link
+                      >
+                    `
+                  : nothing}
+              </section>
+            `}
+      </div>
+    `;
   }
 }
 
