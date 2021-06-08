@@ -56,6 +56,7 @@ export default class CustomerJourneyWidget extends LitElement {
   @internalProperty() eventTypes: Array<string> = [];
   @internalProperty() activeTypes: Array<string> = [];
   @internalProperty() activeDateRange!: string;
+  @internalProperty() liveLoading = false;
   @internalProperty() loading = true;
   @internalProperty() expanded = true;
   @internalProperty() errorMessage = "";
@@ -171,6 +172,9 @@ export default class CustomerJourneyWidget extends LitElement {
 
       if (data) {
         this.newestEvents.unshift(data);
+        if (this.liveLoading) {
+          this.showNewEvents();
+        }
         this.requestUpdate();
       }
     };
@@ -282,19 +286,33 @@ export default class CustomerJourneyWidget extends LitElement {
     }
   }
 
+  toggleLiveEvents() {
+    this.liveLoading = !this.liveLoading;
+    if (this.newestEvents.length > 0) {
+      this.showNewEvents();
+    }
+  }
+
   renderNewEventStack() {
-    return this.newestEvents.length > 0
-      ? html`
-          <div class="new-events">
+    return html`
+      <md-chip
+        small
+        color=${this.liveLoading ? "green" : "gray"}
+        @click=${() => this.toggleLiveEvents()}
+        value="${this.liveLoading ? "Stop" : "Show"} Live Events"
+        icon=${this.liveLoading ? "icon-pause_12" : "icon-play_12"}
+      ></md-chip>
+      ${this.newestEvents.length > 0
+        ? html`
             <md-chip
               small
               color="blue"
               @click=${() => this.showNewEvents()}
               value="Show ${this.newestEvents.length} new events"
             ></md-chip>
-          </div>
-        `
-      : nothing;
+          `
+        : nothing}
+    `;
   }
 
   calculateOldestEntry() {
@@ -392,7 +410,10 @@ export default class CustomerJourneyWidget extends LitElement {
                 </div>
               </nav>
               <section id="events-list">
-                ${this.renderNewEventStack()} ${this.renderEvents()}
+                <div class="new-events">
+                  ${this.renderNewEventStack()}
+                </div>
+                ${this.renderEvents()}
                 ${this.events.length > this.limit && this.activeTypes.length > 0
                   ? html`
                       <md-link

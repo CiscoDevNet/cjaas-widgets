@@ -91,7 +91,7 @@ md-button.date-filter[active]::part(button) {
   background-color: rgb(22, 166, 147);
 }
 
-md-badge, md-chip, md-link {
+md-badge, md-link {
   margin: 0.5rem;
   display: block;
 }
@@ -110,10 +110,15 @@ md-badge, md-chip, md-link {
   display: none;
 }
 
+.new-events {
+  display: flex;
+  justify-content: center;
+  gap: .5rem;
+  padding: .5rem;
+
+}
+
 .expanded {
-  // :host {
-  //   justify-content: flex-end;
-  // }
 
   &.container {
     display: flex;
