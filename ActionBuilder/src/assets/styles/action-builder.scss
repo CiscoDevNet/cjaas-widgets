@@ -12,14 +12,18 @@
 }
 
 md-icon {
+  cursor: pointer;
   margin: 0 8px;
 }
 
-.footer {
-  display: flex;
+.targets {
   md-dropdown {
     margin: 0 12px;
   }
+}
+
+.target-container {
+  display: flex;
 }
 .cta {
   height: 48px;

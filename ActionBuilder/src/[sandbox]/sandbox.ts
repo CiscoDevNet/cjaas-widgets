@@ -10,6 +10,7 @@ import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
 import styles from "./sandbox.scss";
 import "..";
+import { mockAction, mockTemplate } from "./sandbox.mock";
 
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
@@ -87,7 +88,14 @@ export class Sandbox extends LitElement {
             style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
             class="widget-container"
           >
-            <cjaas-action-builder></cjaas-action-builder>
+            <cjaas-action-builder
+              .mockTemplate=${mockTemplate}
+              .mockAction=${mockAction}
+              template-id="first-template"
+              sas-token="st=demoassure&so=sandbox&ss=stream&sp=w&se=2021-04-06T07:38:17Z&sk=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztQ4xKyn5APjdSY="
+              timelineType="journey-and-stream"
+              base-url="https://trycjaas.exp.bz"
+            ></cjaas-action-builder>
           </div>
         </div>
       </md-theme>

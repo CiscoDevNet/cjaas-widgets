@@ -1,65 +1,166 @@
-/**
- * Copyright (c) Cisco Systems, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
+export const mockTemplate = {
+  name: "first-template",
+  org: "sandbox",
+  tenant: "demoassure",
+  attributes: [
+    {
+      version: "0.1",
+      event: "Quote",
+      metadata: "email",
+      limit: 1,
+      displayName: "Email",
+      lookbackDurationType: "days",
+      lookbackPeriod: 50,
+      aggregationMode: "Value",
+      verbose: false,
+    },
+    {
+      version: "0.1",
+      event: "Quote",
+      metadata: "Make",
+      limit: 1,
+      displayName: "Make",
+      lookbackDurationType: "days",
+      lookbackPeriod: 50,
+      aggregationMode: "Value",
+      verbose: false,
+    },
+    {
+      version: "0.1",
+      event: "Quote",
+      metadata: "Model",
+      limit: 1,
+      displayName: "Model",
+      lookbackDurationType: "days",
+      lookbackPeriod: 50,
+      aggregationMode: "Value",
+      verbose: false,
+    },
+    {
+      version: "0.1",
+      event: "Quote",
+      metadata: "License Plate",
+      limit: 1,
+      displayName: "License Plate",
+      lookbackDurationType: "days",
+      lookbackPeriod: 50,
+      aggregationMode: "Value",
+      verbose: false,
+    },
+    {
+      version: "0.1",
+      event: "Quote",
+      metadata: "ltv",
+      limit: 1,
+      displayName: "LTV",
+      lookbackDurationType: "days",
+      lookbackPeriod: 50,
+      aggregationMode: "Value",
+      verbose: false,
+    },
+    {
+      version: "0.1",
+      event: "Quote",
+      metadata: "firstName",
+      limit: 1,
+      displayName: "First Name",
+      lookbackDurationType: "days",
+      lookbackPeriod: 50,
+      aggregationMode: "Value",
+      verbose: false,
+    },
+    {
+      version: "0.1",
+      event: "Quote",
+      metadata: "zipCode",
+      limit: 1,
+      displayName: "Zip Code",
+      lookbackDurationType: "days",
+      lookbackPeriod: 50,
+      aggregationMode: "Value",
+      verbose: false,
+    },
+    {
+      version: "0.1",
+      event: "Quote",
+      metadata: "street",
+      limit: 1,
+      displayName: "Street",
+      lookbackDurationType: "days",
+      lookbackPeriod: 50,
+      aggregationMode: "Value",
+      verbose: false,
+    },
+    {
+      version: "0.1",
+      event: "Quote",
+      metadata: "apt",
+      limit: 1,
+      displayName: "Apt",
+      lookbackDurationType: "days",
+      lookbackPeriod: 50,
+      aggregationMode: "Value",
+      verbose: false,
+    },
+    {
+      version: "0.1",
+      event: "Quote",
+      metadata: "city",
+      limit: 1,
+      displayName: "City",
+      lookbackDurationType: "days",
+      lookbackPeriod: 50,
+      aggregationMode: "Value",
+      verbose: false,
+    },
+    {
+      version: "0.1",
+      event: "Quote",
+      metadata: "lastName",
+      limit: 1,
+      displayName: "Last Name",
+      lookbackDurationType: "days",
+      lookbackPeriod: 50,
+      aggregationMode: "Value",
+      verbose: false,
+    },
+  ],
+};
 
-export const mockedTimelineItems: any = [
-  {
-    data: {
-      firstName: "Jackson",
-      lastName: "Browne",
-      email: "jackson@gmail.com"
-    },
-    id: "mock22087-284d-46db-9e4e-0001",
-    title: "Add To Cart",
-    person: "560021-Venki",
-    timestamp: "2021-02-16T05:00:05.596Z"
+export const mockAction = {
+  name: "first",
+  version: "1.0",
+  active: true,
+  org: "acmecorp",
+  namespace: "sandbox",
+  templateId: "xxx",
+  rules: {
+    AND: [
+      {
+        field: "ltv",
+        operator: "GT",
+        value: "5000",
+      },
+      {
+        field: "zipCode",
+        operator: "EQ",
+        value: "560021",
+      },
+      {
+        field: "firstName",
+        operator: "EQ",
+        value: "XYZ",
+      },
+    ],
   },
-  {
-    data: {
-      firstName: "Led",
-      lastName: "Zeppelin",
-      email: "zeppelin@gmail.com"
+  actions: [
+    {
+      type: "WebexWalkin",
+      actionConfig: {
+        agentId: "123",
+        nickName: "Nick",
+        welcomeMessage: "Welcome!",
+      },
     },
-    id: "mock22087-284d-46db-9e4e-2222",
-    title: "Add To Cart",
-    person: "560021-Venki",
-    timestamp: "2021-03-17T01:00:05.596Z"
-  },
-  {
-    data: {
-      firstName: "Tom",
-      lastName: "Petty",
-      email: "tom@gmail.com"
-    },
-    id: "mock22087-284d-46db-9e4e-1110",
-    title: "Add To Cart",
-    person: "560021-Venki",
-    timestamp: "2021-03-20T13:00:05.596Z"
-  },
-  {
-    data: {
-      firstName: "Bruce",
-      lastName: "Springsteen",
-      email: "springsteen@gmail.com"
-    },
-    id: "mock22087-284d-46db-9e4e-8888",
-    title: "Add To Cart",
-    person: "560021-Venki",
-    timestamp: "2021-03-20T12:00:05.596Z"
-  },
-  {
-    data: {
-      firstName: "Janis",
-      lastName: "Joplin",
-      email: "joplin@gmail.com"
-    },
-    id: "mock22087-284d-46db-9e4e-4555",
-    title: "Add To Cart",
-    person: "560021-Venki",
-    timestamp: "2021-03-05T19:00:05.596Z"
-  }
-];
+  ],
+};
