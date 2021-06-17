@@ -99,6 +99,7 @@ export default class CjaasActionBuilder extends LitElement {
     return styles;
   }
 
+  // fetch action from server or use mockAction
   getAction(): Promise<ACTION> {
     let url = `${this.baseURL}/v1/journey/actions/${this.actionName}`;
 
@@ -122,6 +123,7 @@ export default class CjaasActionBuilder extends LitElement {
     });
   }
 
+  // fetch template from server or use mockTemplate
   getTemplates() {
     let url = `${this.baseURL}/v1/views?id=${this.templateId}`;
 
@@ -149,6 +151,8 @@ export default class CjaasActionBuilder extends LitElement {
     });
   }
 
+  // name input for action
+  // templateid is formed from namespace-organization-actionName
   getNameInputTemplate() {
     return html`
       <md-input
@@ -202,6 +206,7 @@ export default class CjaasActionBuilder extends LitElement {
     `;
   }
 
+  // Readonly view should showup when editing an action
   render() {
     if (this.templateAPIInProgress || this.actionAPIInProgress) {
       return html`
