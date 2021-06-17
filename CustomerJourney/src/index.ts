@@ -21,7 +21,7 @@ import { classMap } from "lit-html/directives/class-map";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
 import { DateTime } from "luxon";
-import { Button, ButtonGroup } from "@momentum-ui/web-components";
+import { Button, ButtonGroup, Input } from "@momentum-ui/web-components";
 import { ServerSentEvent } from "./types/cjaas";
 import "@cjaas/common-components/dist/comp/cjaas-timeline-item";
 export interface CustomerEvent {
@@ -58,12 +58,13 @@ export default class CustomerJourneyWidget extends LitElement {
   @internalProperty() activeDateRange!: string;
   @internalProperty() liveLoading = false;
   @internalProperty() loading = true;
-  @internalProperty() expanded = true;
+  @internalProperty() expanded = false;
   @internalProperty() errorMessage = "";
 
   @query(".date-filters") dateFilters!: HTMLElement;
   @query("#events-list") eventsList!: HTMLElement;
   @query(".container") container!: HTMLElement;
+  @query("#customerInput") customerInput!: HTMLInputElement;
 
   activeDates: Array<string> = [];
 
@@ -97,6 +98,25 @@ export default class CustomerJourneyWidget extends LitElement {
     };
   }
 
+  async update(changedProperties: PropertyValues) {
+    super.update(changedProperties);
+
+    if (changedProperties.has("customer")) {
+      this.newestEvents = [];
+      const data = await this.getExistingEvents();
+      this.events = data.events;
+      this.getEventTypes();
+      this.activeTypes = this.eventTypes;
+      this.loading = false;
+      this.requestUpdate();
+      this.subscribeToStream();
+    }
+  }
+
+  changeCustomer() {
+    this.customer = this.customerInput.value;
+  }
+
   updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
 
@@ -116,7 +136,7 @@ export default class CustomerJourneyWidget extends LitElement {
   async getExistingEvents() {
     this.loading = true;
     this.baseUrlCheck();
-    return fetch(`${this.baseURL}/Journey/${this.customer}`, {
+    return fetch(`${this.baseURL}/v1/journey/events/${this.customer}`, {
       headers: {
         "content-type": "application/json; charset=UTF-8",
         accept: "application/json",
@@ -128,6 +148,7 @@ export default class CustomerJourneyWidget extends LitElement {
         return x.json();
       })
       .then(data => {
+        console.log("hey", data);
         return data;
       })
       .catch(err => {
@@ -227,8 +248,6 @@ export default class CustomerJourneyWidget extends LitElement {
     const button = e.target as Button.ELEMENT;
     button.active = !button.active;
     this.activeDateRange = button.id.substr(12, button.id.length - 1);
-    this.deactivateOtherButtons(button.id);
-    (e.target! as HTMLElement).blur();
     this.requestUpdate();
   }
 
@@ -243,38 +262,35 @@ export default class CustomerJourneyWidget extends LitElement {
 
   renderDateRangeButtons() {
     return html`
-      <md-button
-        class="date-filter"
-        id="filter-last-day"
-        ?active=${false}
-        outline
-        color="mint"
-        size="28"
-        @click=${(e: Event) => this.toggleActive(e)}
-        >Last Day</md-button
-      >
-
-      <md-button
-        class="date-filter"
-        id="filter-last-week"
-        ?active=${false}
-        outline
-        color="mint"
-        size="28"
-        @click=${(e: Event) => this.toggleActive(e)}
-        >Last Week</md-button
-      >
-
-      <md-button
-        class="date-filter"
-        id="filter-last-month"
-        ?active=${false}
-        outline
-        color="mint"
-        size="28"
-        @click=${(e: Event) => this.toggleActive(e)}
-        >Last Month</md-button
-      >
+      <md-button-group>
+        <button
+          slot="button"
+          id="filter-last-day"
+          type="button"
+          @click=${(e: Event) => this.toggleActive(e)}
+          value="Day"
+        >
+          Day
+        </button>
+        <button
+          slot="button"
+          id="filter-last-week"
+          type="button"
+          @click=${(e: Event) => this.toggleActive(e)}
+          value="Week"
+        >
+          Week
+        </button>
+        <button
+          slot="button"
+          id="filter-last-month"
+          type="button"
+          @click=${(e: Event) => this.toggleActive(e)}
+          value="Month"
+        >
+          Month
+        </button>
+      </md-button-group>
     `;
   }
 
@@ -295,19 +311,19 @@ export default class CustomerJourneyWidget extends LitElement {
 
   renderNewEventStack() {
     return html`
-      <md-chip
-        small
-        color=${this.liveLoading ? "green" : "gray"}
+      <md-toggle-switch
+        smaller
         @click=${() => this.toggleLiveEvents()}
-        @keydown=${(e: KeyboardEvent) => {
-          (e.code === "Enter" || e.code === "Space") && this.toggleLiveEvents();
-        }}
-        value="${this.liveLoading ? "Stop" : "Show"} Live Events"
-        icon=${this.liveLoading ? "icon-pause_12" : "icon-play_12"}
-      ></md-chip>
+        ?checked=${this.liveLoading}
+      >
+        <span style="font-size:.75rem;">
+          Show live events
+        </span>
+      </md-toggle-switch>
       ${this.newestEvents.length > 0
         ? html`
             <md-chip
+              class="event-counter"
               small
               color="blue"
               @click=${() => this.showNewEvents()}
@@ -362,10 +378,6 @@ export default class CustomerJourneyWidget extends LitElement {
           ? html`
               ${(advanceDate &&
                 html`
-                  <!-- <md-tooltip
-                    message="click to hide events for this date"
-                    placement="top"
-                  > -->
                   <md-badge
                     outlined
                     small
@@ -373,7 +385,6 @@ export default class CustomerJourneyWidget extends LitElement {
                     @click=${(e: Event) => this.hideDate(e)}
                     >${date}</md-badge
                   >
-                  <!-- </md-tooltip> -->
                 `) ||
                 nothing}
               <cjaas-timeline-item
@@ -398,6 +409,17 @@ export default class CustomerJourneyWidget extends LitElement {
 
   render() {
     return html`
+      <div class="profile ${classMap(this.resizeClassMap)}">
+        <md-input
+          id="customerInput"
+          class="profile"
+          shape="pill"
+          placeholder="Journey ID e.g. '98126-Kevin'"
+        ></md-input>
+        <md-button @click=${() => this.changeCustomer()}
+          >Load Journey</md-button
+        >
+      </div>
       <div class="container ${classMap(this.resizeClassMap)}">
         ${this.loading
           ? html`
@@ -408,13 +430,10 @@ export default class CustomerJourneyWidget extends LitElement {
                 <div class="filter-buttons">
                   ${this.renderFilterButtons()}
                 </div>
-                <div class="date-filters">
-                  ${this.renderDateRangeButtons()}
-                </div>
               </nav>
               <section id="events-list">
                 <div class="new-events">
-                  ${this.renderNewEventStack()}
+                  ${this.renderDateRangeButtons()} ${this.renderNewEventStack()}
                 </div>
                 ${this.renderEvents()}
                 ${this.events.length > this.limit && this.activeTypes.length > 0

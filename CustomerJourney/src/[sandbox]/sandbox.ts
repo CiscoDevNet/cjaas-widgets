@@ -90,8 +90,8 @@ export class Sandbox extends LitElement {
             <customer-journey-widget
               id="timeline-widget"
               customer="98126-Kevin"
-              sas-token="st=demoassure&so=sandbox&ss=stream&sp=w&se=2021-04-06T07:38:17Z&sk=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztQ4xKyn5APjdSY="
-              base-url="https://trycjaas.exp.bz"
+              sas-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=7G8UdEipQHnWOV3hRbTqkNxxjQNHkkQYGDlCrgEhK0k="
+              base-url="https://cjaas-devus1-edge.azurewebsites.net"
             ></customer-journey-widget>
           </div>
         </div>
