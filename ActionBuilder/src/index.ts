@@ -62,7 +62,7 @@ export default class CjaasActionBuilder extends LitElement {
   @internalProperty() templateAPIInProgress = false;
   @internalProperty() actionAPIInProgress = false;
 
-  @query(".action-name") actionNameElement: any;
+  @query("#action-name") actionNameElement: any;
 
   updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
