@@ -90,10 +90,8 @@ export class Sandbox extends LitElement {
           >
             <cjaas-action-builder
               .mockTemplate=${mockTemplate}
-              .mockAction=${mockAction}
               template-id="first-template"
               sas-token="st=demoassure&so=sandbox&ss=stream&sp=w&se=2021-04-06T07:38:17Z&sk=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztQ4xKyn5APjdSY="
-              timelineType="journey-and-stream"
               base-url="https://trycjaas.exp.bz"
             ></cjaas-action-builder>
           </div>

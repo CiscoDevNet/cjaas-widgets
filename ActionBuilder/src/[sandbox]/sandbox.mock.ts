@@ -155,7 +155,7 @@ export const mockAction = {
   },
   actions: [
     {
-      type: "WebexWalkin",
+      actionType: "WebexWalkin",
       actionConfig: {
         agentId: "123",
         nickName: "Nick",
