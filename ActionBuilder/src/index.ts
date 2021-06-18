@@ -117,10 +117,12 @@ export default class CjaasActionBuilder extends LitElement {
         "content-type": "application/json; charset=UTF-8",
       },
       method: "GET",
-    }).then((x) => {
-      this.actionAPIInProgress = false;
-      return x.json();
-    });
+    })
+      .then((x) => {
+        this.actionAPIInProgress = false;
+        return x.json();
+      })
+      .then((x) => x.data);
   }
 
   // fetch template from server or use mockTemplate
@@ -145,10 +147,12 @@ export default class CjaasActionBuilder extends LitElement {
         "content-type": "application/json; charset=UTF-8",
       },
       method: "GET",
-    }).then((x) => {
-      this.templateAPIInProgress = false;
-      return x.json();
-    });
+    })
+      .then((x) => {
+        this.templateAPIInProgress = false;
+        return x.json();
+      })
+      .then((x) => x.data);
   }
 
   // name input for action
