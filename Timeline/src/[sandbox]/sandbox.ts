@@ -90,9 +90,10 @@ export class Sandbox extends LitElement {
             <cjaas-timeline-widget
               id="timeline-widget"
               type="journey-and-stream"
-              sas-token="st=demostore&so=sandbox&ss=datasink&sp=w&se=2021-04-23T18:25:43.511Z&sk=sandbox&sig=TEUtd3qKp6pYjoTM7GEHDZeKRfnIWr90MQoW6r2xsB0="
+              tape-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=7G8UdEipQHnWOV3hRbTqkNxxjQNHkkQYGDlCrgEhK0k="
+              stream-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-06-17T19:18:05.538Z&sk=sandbox&sig=nJOri1M66leDMnfL93UlufHegDf3hAwoQ/Mj37ReQBs="
               limit="15"
-              base-url="https://trycjaas.exp.bz"
+              base-url="https://uswest-nonprod.cjaas.cisco.com"
             ></cjaas-timeline-widget>
           </div>
           <div
@@ -104,7 +105,7 @@ export class Sandbox extends LitElement {
               type="journey-and-stream"
               sas-token="missing"
               limit="15"
-              base-url="https://trycjaas.exp.bz"
+              base-url="https://uswest-nonprod.cjaas.cisco.com"
             >
               <h3 slot="ll10n-no-timeline-message">No hay línea de tiempo disponible</h3>
             </cjaas-timeline-widget>

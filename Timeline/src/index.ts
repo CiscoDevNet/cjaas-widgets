@@ -34,6 +34,7 @@ export type TimelineItem = {
 
 export interface ServerSentEvent {
   data: string;
+  events: []
 }
 
 @customElementWithCheck("cjaas-timeline-widget")
@@ -44,6 +45,8 @@ export default class CjaasTimelineWidget extends LitElement {
 
   // widget takes care of URI encoding. Input should not be URI encoded
   @property({ type: String, attribute: "sas-token" }) sasToken: string | null = null;
+  @property({ type: String, attribute: "tape-token" }) tapeToken: string | null = null;
+  @property({ type: String, attribute: "stream-token" }) streamToken: string | null = null;
   @property({ reflect: true }) pagination: string = "$top=15";
   @property({ type: Number }) limit = 5;
   @property({ reflect: true }) type:
@@ -59,8 +62,8 @@ export default class CjaasTimelineWidget extends LitElement {
     super.updated(changedProperties);
 
     if (
-      this.sasToken &&
-      (changedProperties.has("sasToken") || changedProperties.has("filter"))
+      this.tapeToken &&
+      (changedProperties.has("tapeToken") || changedProperties.has("filter"))
     ) {
       this.timelineItems = [];
       this.requestUpdate();
@@ -79,7 +82,8 @@ export default class CjaasTimelineWidget extends LitElement {
   getAPIQueryParams(forJourney = false) {
     // signature needs to be URI encoded for it to work
     // as query strings
-    let signature = this.sasToken?.replace(/sig=(.*)/, (...matches) => {
+    "so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=7G8UdEipQHnWOV3hRbTqkNxxjQNHkkQYGDlCrgEhK0k="
+    let signature = this.tapeToken?.replace(/sig=(.*)/, (...matches) => {
       return "sig=" + encodeURIComponent(matches[1]);
     });
 
@@ -118,15 +122,16 @@ export default class CjaasTimelineWidget extends LitElement {
     this.showSpinner = true;
     this.baseUrlCheck()
     // gets historic journey
-    fetch(`${this.baseURL}/journey?${this.getAPIQueryParams(true)}`, {
+    fetch(`${this.baseURL}/v1/journey/events?${this.getAPIQueryParams(true)}`, {
       headers: {
         "content-type": "application/json; charset=UTF-8",
+        Authorization: `SharedAccessSignature ${this.tapeToken}`
       },
       method: "GET",
     })
       .then((x: Response) => x.json())
-      .then((x: Array<ServerSentEvent>) => {
-        x?.map((y: ServerSentEvent) =>
+      .then((x: ServerSentEvent) => {
+        x?.events?.map((y: ServerSentEvent) =>
           this.getTimelineItemFromMessage(y)
         ).map((z: TimelineItem) => this.enqueueItem(z));
       })
@@ -151,9 +156,9 @@ export default class CjaasTimelineWidget extends LitElement {
     if (this.type !== "journey") {
       this.baseUrlCheck()
       this.eventSource = new EventSource(
-        `${this.baseURL}/real-time?${this.getAPIQueryParams()}`
+        `${this.baseURL}/v1/journey/streams?${this.streamToken}`
       );
-
+      // @ts-ignore
       this.eventSource.onmessage = (event: ServerSentEvent) => {
         let data;
         try {
