@@ -13,7 +13,7 @@ import {
   internalProperty,
   property,
   LitElement,
-  PropertyValues,
+  PropertyValues
 } from "lit-element";
 import { nothing } from "lit-html";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
@@ -34,20 +34,28 @@ export type TimelineItem = {
 
 export interface ServerSentEvent {
   data: string;
-  events: []
+  events: [];
 }
 
 @customElementWithCheck("cjaas-timeline-widget")
 export default class CjaasTimelineWidget extends LitElement {
   @property({ type: Array }) timelineItems: TimelineItem[] = [];
-  @property({ type: String, attribute: "base-url" }) baseURL: string | undefined = undefined;
+  @property({ type: String, attribute: "base-url" }) baseURL:
+    | string
+    | undefined = undefined;
   @property() filter: string | undefined;
 
   // widget takes care of URI encoding. Input should not be URI encoded
-  @property({ type: String, attribute: "sas-token" }) sasToken: string | null = null;
-  @property({ type: String, attribute: "tape-token" }) tapeToken: string | null = null;
-  @property({ type: String, attribute: "stream-token" }) streamToken: string | null = null;
-  @property({ reflect: true }) pagination: string = "$top=15";
+  @property({ type: String, attribute: "sas-token" }) sasToken:
+    | string
+    | null = null;
+  @property({ type: String, attribute: "tape-token" }) tapeToken:
+    | string
+    | null = null;
+  @property({ type: String, attribute: "stream-token" }) streamToken:
+    | string
+    | null = null;
+  @property({ reflect: true }) pagination = "$top=15";
   @property({ type: Number }) limit = 5;
   @property({ reflect: true }) type:
     | "journey"
@@ -71,7 +79,7 @@ export default class CjaasTimelineWidget extends LitElement {
     }
   }
 
-  baseUrlCheck(){
+  baseUrlCheck() {
     if (this.baseURL === undefined) {
       console.error("You must provide a Base URL");
       throw new Error("You must provide a Base URL");
@@ -82,8 +90,8 @@ export default class CjaasTimelineWidget extends LitElement {
   getAPIQueryParams(forJourney = false) {
     // signature needs to be URI encoded for it to work
     // as query strings
-    "so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=7G8UdEipQHnWOV3hRbTqkNxxjQNHkkQYGDlCrgEhK0k="
-    let signature = this.tapeToken?.replace(/sig=(.*)/, (...matches) => {
+    "so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=7G8UdEipQHnWOV3hRbTqkNxxjQNHkkQYGDlCrgEhK0k=";
+    const signature = this.tapeToken?.replace(/sig=(.*)/, (...matches) => {
       return "sig=" + encodeURIComponent(matches[1]);
     });
 
@@ -120,25 +128,25 @@ export default class CjaasTimelineWidget extends LitElement {
 
   getJourney() {
     this.showSpinner = true;
-    this.baseUrlCheck()
+    this.baseUrlCheck();
     // gets historic journey
     fetch(`${this.baseURL}/v1/journey/events?${this.getAPIQueryParams(true)}`, {
       headers: {
         "content-type": "application/json; charset=UTF-8",
         Authorization: `SharedAccessSignature ${this.tapeToken}`
       },
-      method: "GET",
+      method: "GET"
     })
       .then((x: Response) => x.json())
       .then((x: ServerSentEvent) => {
-        x?.events?.map((y: ServerSentEvent) =>
-          this.getTimelineItemFromMessage(y)
-        ).map((z: TimelineItem) => this.enqueueItem(z));
+        x?.events
+          ?.map((y: ServerSentEvent) => this.getTimelineItemFromMessage(y))
+          .map((z: TimelineItem) => this.enqueueItem(z));
       })
       .then(() => {
         this.showSpinner = false;
       })
-      .catch((err) => {
+      .catch(err => {
         this.showSpinner = false;
         this.errorMessage = `Failure to fetch Journey ${err}`;
       });
@@ -154,7 +162,7 @@ export default class CjaasTimelineWidget extends LitElement {
     }
 
     if (this.type !== "journey") {
-      this.baseUrlCheck()
+      this.baseUrlCheck();
       this.eventSource = new EventSource(
         `${this.baseURL}/v1/journey/streams?${this.streamToken}`
       );
@@ -164,7 +172,7 @@ export default class CjaasTimelineWidget extends LitElement {
         try {
           data = JSON.parse(event.data);
         } catch (err) {
-          // received just the timestamp
+          console.error(err);
         }
 
         if (data) {

@@ -43,11 +43,9 @@ export type TimelineItem = {
 export default class CjaasProfileWidget extends LitElement {
   @property() customer: string | undefined;
   @property() template: any | null | undefined = defaultTemplate;
-  @property({ attribute: "sas-token" }) sasToken:
-    | string
-    | null
-    | undefined = null;
-
+  @property({ type: String, attribute: "stream-token" }) streamToken: string | null = null;
+  @property({ type: String, attribute: "profile-read-token" }) profileReadToken: string | null = null;
+  @property({ type: String, attribute: "profile-write-token" }) profileWriteToken: string | null = null;
   @property({ type: String, attribute: "base-url" }) baseURL: string | undefined =
     undefined;
 
@@ -68,6 +66,11 @@ export default class CjaasProfileWidget extends LitElement {
   @internalProperty() profile: any;
   @internalProperty() showSpinner = false;
 
+  // connectedCallback(){
+  //   super.connectedCallback()
+  //   this.subscribeToStream()
+  // }
+
   updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
 
@@ -79,13 +82,10 @@ export default class CjaasProfileWidget extends LitElement {
       this.getProfile();
     }
 
-    if (
-      this.sasToken &&
-      (changedProperties.has("sasToken") || changedProperties.has("filter"))
-    ) {
+    if (changedProperties.has("profile-read-token") || changedProperties.has("profile-write-token") || changedProperties.has("filter")) {
       this.timelineItems = [];
-      this.requestUpdate();
       this.subscribeToStream();
+      // this.requestUpdate();
     }
   }
 
@@ -115,7 +115,7 @@ export default class CjaasProfileWidget extends LitElement {
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.sasToken,
+        Authorization: "SharedAccessSignature " + this.profileWriteToken,
       },
       data,
     };
@@ -156,7 +156,7 @@ export default class CjaasProfileWidget extends LitElement {
   // Timeline Logic
   // defaults to top 10 for journey
   getTimelineAPIQueryParams(forJourney = false) {
-    let url = this.sasToken?.replace(/sig=(.*)/, (...matches) => {
+    let url = this.profileReadToken?.replace(/sig=(.*)/, (...matches) => {
       return "sig=" + encodeURIComponent(matches[1]);
     });
 
@@ -193,7 +193,7 @@ export default class CjaasProfileWidget extends LitElement {
     this.showTimelineSpinner = true;
     this.baseUrlCheck()
     // gets historic journey
-    fetch(`${this.baseURL}/journey?${this.getTimelineAPIQueryParams(true)}`, {
+    fetch(`${this.baseURL}/v1/journey/events?${this.getTimelineAPIQueryParams(true)}`, {
       headers: {
         "content-type": "application/json; charset=UTF-8",
       },
@@ -219,19 +219,12 @@ export default class CjaasProfileWidget extends LitElement {
       this.eventSource.close();
     }
 
-    if (
-      this.timelineType === "journey" ||
-      this.timelineType === "journey-and-stream"
-    ) {
-      this.getJourney();
-    }
-
-    if (this.timelineType !== "journey") {
       this.baseUrlCheck()
+      if (this.streamToken === null) {debugger;}
       this.eventSource = new EventSource(
-        `${this.baseURL}/real-time?${this.getTimelineAPIQueryParams()}`
+        `${this.baseURL}/v1/journey/streams?${this.streamToken}`
       );
-
+      // @ts-ignore
       this.eventSource.onmessage = (event: ServerSentEvent) => {
         let data;
         try {
@@ -242,13 +235,13 @@ export default class CjaasProfileWidget extends LitElement {
 
         if (data) {
           this.enqueueItem(this.getTimelineItemFromMessage(data));
+          this.showSpinner = false;
         }
       };
 
       this.eventSource.onerror = () => {
-        this.showTimelineSpinner = false;
+        this.showSpinner = false;
       };
-    }
   }
 
   public enqueueItem(item: TimelineItem) {
@@ -258,7 +251,6 @@ export default class CjaasProfileWidget extends LitElement {
     ) {
       this.dequeuePastOneItem();
     }
-
     const dataLength = this.timelineItems.length;
 
     // events may not be chronologically sorted by default
@@ -361,7 +353,8 @@ export default class CjaasProfileWidget extends LitElement {
     // tab data should return the event as such.. Should be rendered by stream component.
     const tabs = this.profile.filter((x: any) => x.query.type === "tab");
     // TODO: Track the selected tab to apply a class to the badge for color synching, making blue when selected
-    const activityTab = this.sasToken
+    debugger;
+    const activityTab = this.profileReadToken || this.profileWriteToken
       ? html`
           <md-tab slot="tab">
             <span>All</span>

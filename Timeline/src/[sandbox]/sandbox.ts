@@ -107,7 +107,9 @@ export class Sandbox extends LitElement {
               limit="15"
               base-url="https://uswest-nonprod.cjaas.cisco.com"
             >
-              <h3 slot="ll10n-no-timeline-message">No hay línea de tiempo disponible</h3>
+              <h3 slot="ll10n-no-timeline-message">
+                No hay línea de tiempo disponible
+              </h3>
             </cjaas-timeline-widget>
           </div>
         </div>
