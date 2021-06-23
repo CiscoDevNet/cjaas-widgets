@@ -13,9 +13,12 @@ The CJaaS Timeline Widget accepts specific properties to interact with the CJaaS
 
 ```html
 <cjaas-timeline-widget
+  id="timeline-widget"
   type="journey-and-stream"
-  auth-token="<your-auth-token>"
+  tape-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=etc."
+  stream-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=etc."
   limit="15"
+  base-url="https://uswest-nonprod.cjaas.cisco.com"
 ></cjaas-timeline-widget>
 ```
 
