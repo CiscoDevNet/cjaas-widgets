@@ -1,0 +1,169 @@
+@import "../../assets/styles/mixins.scss";
+@import "../../assets/styles/variables";
+
+* {
+  box-sizing: border-box;
+}
+
+:host {
+  color: var(--md-primary-text-color, var(--color-gray-100));
+  width: calc(100% - 1.5rem);
+  height: calc(100% - 1.5rem);
+  margin: 12px;
+  display: block;
+  border-radius: 0.5rem;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.16), 0px 0px 1px rgba(0, 0, 0, 0.18);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.outer-container {
+  height: 100%;
+  padding: 0 12px 12px 12px;
+  overflow: auto;
+
+  .inner-header {
+    border-bottom: 0;
+  }
+
+  .header {
+    height: 3rem;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--color-gray-30);
+    font-size: 1rem;
+    font-weight: bold;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: normal;
+  }
+}
+
+.spinner-container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.header .spinner-container {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+  word-break: break-word;
+}
+
+.full-height {
+  height: 100%;
+}
+
+.empty-state {
+  height: 100%;
+}
+
+md-loading {
+  align-self: center;
+}
+
+nav {
+  padding: 0.5rem;
+  text-align: center;
+}
+
+md-button[active]::part(button) {
+  background-color: rgb(0, 122, 163);
+}
+md-button.date-filter[active]::part(button) {
+  background-color: rgb(22, 166, 147);
+}
+
+md-badge,
+md-link {
+  margin: 0.5rem;
+  display: block;
+}
+
+div.profile {
+  display: flex;
+  justify-content: space-around;
+  align-self: center;
+  padding: 0.5rem;
+  max-width: 400px;
+  gap: 0.5rem;
+  height: 3rem;
+  &.expanded {
+    align-self: flex-end;
+  }
+}
+md-input.profile {
+  width: 15rem;
+}
+.filter-buttons > md-button {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}
+.timeline-item {
+  margin: 0 0.5rem 0.5rem 0.5rem;
+}
+
+.show-true {
+  display: inherit;
+}
+.show-false {
+  display: none;
+}
+
+.new-events,
+.filter-buttons,
+.date-filters {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.25rem;
+}
+
+.new-events {
+  justify-content: flex-start;
+  align-items: flex-end;
+  padding: 0.5rem;
+}
+
+.event-counter {
+  align-self: center;
+}
+
+.expanded {
+  &.container {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  nav {
+    width: 50%;
+    text-align: left;
+  }
+
+  section#events-list {
+    width: 50%;
+    height: 100%;
+    overflow: auto;
+  }
+}
