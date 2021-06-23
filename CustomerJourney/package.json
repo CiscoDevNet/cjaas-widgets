@@ -100,5 +100,9 @@
     "hooks": {
       "pre-commit": ""
     }
+  },
+  "dependencies": {
+    "@types/eventsource": "^1.1.5",
+    "eventsource": "^1.1.0"
   }
 }

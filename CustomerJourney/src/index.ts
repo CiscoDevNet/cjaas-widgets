@@ -23,6 +23,7 @@ import styles from "./assets/styles/View.scss";
 import { DateTime } from "luxon";
 import { Button, ButtonGroup, Input } from "@momentum-ui/web-components";
 import { ServerSentEvent } from "./types/cjaas";
+import { EventSourceInitDict } from "eventsource";
 import "@cjaas/common-components/dist/comp/cjaas-timeline-item";
 export interface CustomerEvent {
   data: Record<string, any>;
@@ -44,7 +45,10 @@ export default class CustomerJourneyWidget extends LitElement {
     | string
     | undefined = undefined;
   @property({ type: String }) customer: string | null = null;
-  @property({ type: String, attribute: "sas-token" }) sasToken:
+  @property({ type: String, attribute: "tape-token" }) tapeToken:
+    | string
+    | null = null;
+  @property({ type: String, attribute: "stream-token" }) streamToken:
     | string
     | null = null;
   @property({ reflect: true }) pagination = "$top=15";
@@ -71,7 +75,7 @@ export default class CustomerJourneyWidget extends LitElement {
   async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     const data = await this.getExistingEvents();
-    this.events = JSON.parse(data);
+    this.events = data.events;
     this.getEventTypes();
     this.activeTypes = this.eventTypes;
     this.loading = false;
@@ -140,7 +144,7 @@ export default class CustomerJourneyWidget extends LitElement {
       headers: {
         "content-type": "application/json; charset=UTF-8",
         accept: "application/json",
-        Authorization: `SharedAccessSignature ${this.sasToken}`
+        Authorization: `SharedAccessSignature ${this.tapeToken}`
       },
       method: "GET"
     })
@@ -148,7 +152,6 @@ export default class CustomerJourneyWidget extends LitElement {
         return x.json();
       })
       .then(data => {
-        console.log("hey", data);
         return data;
       })
       .catch(err => {
@@ -156,20 +159,14 @@ export default class CustomerJourneyWidget extends LitElement {
         this.errorMessage = `Failure to fetch Journey ${err}`;
       });
   }
-  getAPIQueryParams(forJourney = false) {
+  getAPIQueryParams(token: string) {
     // signature needs to be URI encoded for it to work
     // as query strings
-    const signature = this.sasToken?.replace(/sig=(.*)/, (...matches) => {
+    const signature = token.replace(/sig=(.*)/, (...matches) => {
       return "sig=" + encodeURIComponent(matches[1]);
     });
 
-    let url = signature;
-
-    if (this.pagination) {
-      url += `&${this.pagination}`;
-    } else if (!this.pagination && forJourney) {
-      url += "&$top=10";
-    }
+    const url = signature;
     return url;
   }
 
@@ -179,12 +176,23 @@ export default class CustomerJourneyWidget extends LitElement {
     }
 
     this.baseUrlCheck();
-    this.eventSource = new EventSource(
-      `${this.baseURL}/real-time?${this.getAPIQueryParams()}`
-    );
+    if (this.streamToken) {
+      const header: EventSourceInitDict = {
+        headers: {
+          "content-type": "application/json; charset=UTF-8",
+          accept: "application/json",
+          Authorization: `SharedAccessSignature ${this.streamToken}`
+        }
+      };
+      this.eventSource = new EventSource(
+        `${this.baseURL}/v1/journey/streams/${this.customer}?${this.streamToken}`,
+        header
+      );
+    }
 
-    this.eventSource.onmessage = (event: ServerSentEvent) => {
+    this.eventSource!.onmessage = (event: ServerSentEvent) => {
       let data;
+      console.log("hey", data);
       try {
         data = JSON.parse(event.data);
       } catch (err) {
@@ -200,7 +208,7 @@ export default class CustomerJourneyWidget extends LitElement {
       }
     };
 
-    this.eventSource.onerror = () => {
+    this.eventSource!.onerror = () => {
       this.loading = false;
     };
   }
