@@ -13,7 +13,7 @@ import {
   internalProperty,
   property,
   LitElement,
-  PropertyValues
+  PropertyValues,
 } from "lit-element";
 import { nothing } from "lit-html";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
@@ -43,18 +43,17 @@ export default class CjaasTimelineWidget extends LitElement {
   @property({ type: String, attribute: "base-url" }) baseURL:
     | string
     | undefined = undefined;
+  @property({ type: String, attribute: "base-stream-url" }) baseStreamURL:
+    | string
+    | undefined = undefined;
   @property() filter: string | undefined;
 
-  // widget takes care of URI encoding. Input should not be URI encoded
-  @property({ type: String, attribute: "sas-token" }) sasToken:
+  @property({ type: String, attribute: "tape-read-token" }) tapeReadToken:
     | string
-    | null = null;
-  @property({ type: String, attribute: "tape-token" }) tapeToken:
+    | undefined;
+  @property({ type: String, attribute: "stream-read-token" }) streamReadToken:
     | string
-    | null = null;
-  @property({ type: String, attribute: "stream-token" }) streamToken:
-    | string
-    | null = null;
+    | undefined;
   @property({ reflect: true }) pagination = "$top=15";
   @property({ type: Number }) limit = 5;
   @property({ reflect: true }) type:
@@ -70,8 +69,9 @@ export default class CjaasTimelineWidget extends LitElement {
     super.updated(changedProperties);
 
     if (
-      this.tapeToken &&
-      (changedProperties.has("tapeToken") || changedProperties.has("filter"))
+      this.tapeReadToken &&
+      (changedProperties.has("tapeReadToken") ||
+        changedProperties.has("filter"))
     ) {
       this.timelineItems = [];
       this.requestUpdate();
@@ -86,14 +86,17 @@ export default class CjaasTimelineWidget extends LitElement {
     }
   }
 
+  getSASTokenForQueryParams(token: string | undefined): string | undefined {
+    return token?.replace(/sig=(.*)/, (...matches) => {
+      return "sig=" + encodeURIComponent(matches[1]);
+    });
+  }
   // defaults to top 10 for journey
   getAPIQueryParams(forJourney = false) {
     // signature needs to be URI encoded for it to work
     // as query strings
     "so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=7G8UdEipQHnWOV3hRbTqkNxxjQNHkkQYGDlCrgEhK0k=";
-    const signature = this.tapeToken?.replace(/sig=(.*)/, (...matches) => {
-      return "sig=" + encodeURIComponent(matches[1]);
-    });
+    const signature = this.getSASTokenForQueryParams(this.tapeReadToken);
 
     let url = signature;
 
@@ -133,9 +136,9 @@ export default class CjaasTimelineWidget extends LitElement {
     fetch(`${this.baseURL}/v1/journey/events?${this.getAPIQueryParams(true)}`, {
       headers: {
         "content-type": "application/json; charset=UTF-8",
-        Authorization: `SharedAccessSignature ${this.tapeToken}`
+        Authorization: `SharedAccessSignature ${this.tapeReadToken}`,
       },
-      method: "GET"
+      method: "GET",
     })
       .then((x: Response) => x.json())
       .then((x: ServerSentEvent) => {
@@ -146,7 +149,7 @@ export default class CjaasTimelineWidget extends LitElement {
       .then(() => {
         this.showSpinner = false;
       })
-      .catch(err => {
+      .catch((err) => {
         this.showSpinner = false;
         this.errorMessage = `Failure to fetch Journey ${err}`;
       });
@@ -164,7 +167,10 @@ export default class CjaasTimelineWidget extends LitElement {
     if (this.type !== "journey") {
       this.baseUrlCheck();
       this.eventSource = new EventSource(
-        `${this.baseURL}/v1/journey/streams?${this.streamToken}`
+        `${this.baseStreamURL ||
+          this.baseURL}/v1/journey/streams?${this.getSASTokenForQueryParams(
+          this.streamReadToken
+        )}`
       );
       // @ts-ignore
       this.eventSource.onmessage = (event: ServerSentEvent) => {
