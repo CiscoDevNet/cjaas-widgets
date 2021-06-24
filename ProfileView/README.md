@@ -6,56 +6,64 @@ This widget uses CJaaS Common Components to output a combined customer profile v
 
 The CJaaS Profile Widget accepts specific properties to interact with the CJaaS API
 
-- _customer: string_ - an identifier of the customer, i.e. "560000-John"
-- _template: any | JSON | Object_ - for user-provided data-shape template.
-- _auth-token: string_ - an unique Auth token to enable the CJaaS tape stream. You can get a token here: https://forms.office.com/Pages/ResponsePage.aspx?id=Yq_hWgWVl0CmmsFVPveEDqqpouLp2otDkH7uBREgKh5URVhNWkY2M0lOTE83M05FTzg2TERLMVdTWS4u
-- _base-url: string_ - defaults to "https://trycjaas.exp.bz" at present, can be modified for changing APIs
+- `customer: string` - an identifier of the customer, i.e. "560000-John"
+- `template: any | JSON | Object` - for user-provided data-shape template.
+- `tape-read-token: string` - SAS token for CJaaS tape GET operations
+- `profile-read-token: string` - SAS token for profile endpoint GET operations
+- `profile-write-token: string` - SAS token for profile endpoint POST operations (necessary for sending the template object)
+- `stream-token: string` - SAS token for stream endpoint subscription
+- `base-url: string` - Base URL for all typical CJaaS endpoints
+- `base-stream-url: string` - Temp stream URL differs from Base URL
 
 ```html
 <cjaas-profile-view-widget
-  customer="560021-Venki"
-  .template="${sampleTemplateObject}"
-  auth-token="your-auth-token"
-  timelineType="journey-and-stream"
+    customer="560021-Venki"
+    .template=${sampleTemplate}
+    tape-read-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=etc"
+    profile-write-token="so=demoassure&sn=sandbox&ss=profile&sp=w&se=2022-06-17T21:36:08.050Z&sk=sandbox&sig=etc"
+    stream-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-06-17T19:18:05.538Z&sk=sandbox&sig=etc"
+    timelineType="journey-and-stream"
+    base-url="https://uswest-nonprod.cjaas.cisco.com"
+    base-stream-url="https://cjaas-devus1.azurewebsites.net"
 ></cjaas-profile-view-widget>
 ```
 
-## Setup
+## Getting started
 
-Install dependencies:
-
-`npm install` or `yarn`
-
-## Development
-
-### Getting started
+**NOTE:** _Use Node version 12_
 
 To run your widget on `localhost`, please navigate to widget's root directory in Terminal (Command line tool) and run the following commands (Assuming you have [`yarn`](https://classic.yarnpkg.com/en/docs/install/#mac-stable) installed globally on your machine):
 
 1. Clone this repo.
-2. Navigate to th widget/widget starter folder.
-3. Run `yarn` from the root of the repo.
-4. Run `yarn start` or `npm run start` to start the playground (sandbox) app.
+2. Navigate to the widget folder.
+3. Run `yarn install`
+4. Run `yarn start` to start the sandbox app.
 
-### Editing widget
-
-There is generally no need for you to modify anything outside of the `src/components` folder. To customize you widget, we suggest for you to work within this directory. You are free to create your components and structure them however you see fit.
-
-### Building/exporting widget
-
-Once you are ready to export your widget, all you need is to run the following command in Terminal (Command line tool):
-Note: Built on Node version 10.13.0 (will be upgraded in near future)
-
-```
-yarn dist
+## Build and Deploy Modules
+Once your widget is complete, it must be exported as a JS module that can be delivered via CDN. The build is configured to export a Web Component that can be used in your project.
+- run `yarn dist` to create a compiled, minified JS module
+- rename and upload the bundled module to your hosting service
+- import according to your web application's config.
+A basic usage may look like this, inside your applications `index.html`:
+```html
+<!-- ProfileView widget -->
+<script src="https://cjaas.cisco.com/web-components/v6/profile-3.0.0.js"></script>
 ```
 
-This will create a `dist` folder in the root directory of your widget with generated files.
-`index.js` file that contains your entire set of widgets. `widget.js` contains the Activity and Profile widgets that can be plugged into dashboards like Webex CC Agent Dashboard. Additionally, it generates the fonts, icons and its styles necessary for the components to use momentum icons & fonts. Your host web page needs to import these resources. These files can be renamed and uploaded to a preferred location on a CDN (e.g. an S3 bucket on AWS. Please keep in mind that this file has to be publicly available over the internet to be accessible to Agent or Supervisor Desktop).
+## CJaaS API
+These widgets, and any widgets you might build, are the best place to develop API interactions, like a mini front-end application. Be sure to test your API calls in the sandbox environment, and stay informed about any changes to the backend services.
 
-```
-<script src="PATH TO YOUR WIDGET/INDEX.JS"></script>
-```
+The latest endpoints can be explored at https://uswest-nonprod.cjaas.cisco.com/swagger/ui#/
+### API Fundamentals
+Authorized API calls require valid SAS Tokens and base URLs
+#### BaseURL
+Widgets that can be used by other organizations benefit from a `base-url` attribute that allows users to provide their own CJaaS API instance.
+#### SAS Tokens
+API calls are validated with an access token, which is managed and generated by using the CJaaS Admin Portal. Some widgets make multiple calls to different endpoints, and may need multiple tokens to be provided (as is the case with ProfileView widget, for example, which has `profile-read-token`, `profile-write-token` and `stream-token` to carry out all of the widget's jobs).
+
+Review the SAS Token Requirements that accompany each endpoint at https://uswest-nonprod.cjaas.cisco.com/swagger/ui#/
+
+**NOTE:** Every API call's token has a unique hash that ties it to the secret access key, and you cannot swap one for the other or modify the string without generating a server error.
 
 ### Sharing widget information with Agent/Supervisor Desktop administrator
 
@@ -76,62 +84,6 @@ In case you are an administrator for Contact Center Agent Desktop or are working
 
 This specific Widget Starter is designed to be places in a ["panel"](https://www.cisco.com/c/en/us/td/docs/voice_ip_comm/cust_contact/contact_center/CJP/SetupandAdministrationGuide_2/b_mp-release-2/b_cc-release-2_chapter_011.html#topic_BF0EBDF65DCB0A552164D6306657C892__AuxPane) area of JSON layout specification. This is due to this widget relying on a task-specific information with the reference derived from the current location/address bar value.
 
-**Example**
-
-```js
-{
-  "comp": "cjaas-profile-view-widget",
-  "script": /** URL bundle Location **/,
-  "properties": {
-    "customer": "98033-Yana", /** Static customer reference here is provided for demo data. Please modify this widget to access active contact ID with the help of WXCC JS SDK **/
-    "timelineType": "journey-and-stream",
-    "authToken": /** Your CJaaS authentication token **/,
-    "template": {
-      "Name": "My Template",
-      "DatapointCount": 100,
-      "Attributes": [
-        {
-          "Version": "0.1",
-          "Event": "Quote",
-          "Metadata": "email",
-          "DisplayName": "Email",
-          "AggregationMode": "Value",
-          "type": "tab",
-          "Limit": 1,
-          "tag": "email"
-        },
-        {
-          "Version": "0.1",
-          "Event": "Quote",
-          "Metadata": "firstName",
-          "DisplayName": "First Name",
-          "AggregationMode": "Value",
-          "tag": "name",
-          "Limit": 1,
-          "type": "inline"
-        },
-        {
-          "Version": "0.1",
-          "Event": "Quote",
-          "Limit": 1,
-          "Metadata": "lastName",
-          "DisplayName": "Last Name",
-          "AggregationMode": "Value",
-          "tag": "name",
-          "type": "inline"
-        }
-      ]
-    }
-  },
-  "wrapper": {
-    "title": "Customer Journey as a Service Profile View",
-    "maximizeAreaName": "app-maximize-area"
-  }
-}
-```
-
-**NOTE**: If you place this widget in another area in JSON layout specification ("header" or a custom page in "navigation"), some task-specific function might not work. This is to be expected.
-
 ## Localization & Named Slots
 Default messages appear for conditions when profile data is missing or a profile cannot be fetched. These, as well as the widet header text, can be replaced with your own Localized language by targeting the correct named slots, as shown below:
 
@@ -147,7 +99,7 @@ Default messages appear for conditions when profile data is missing or a profile
   <h4 slot="l10n-no-data-message">No hay datos para mostrar</h4>
   <h4 slot="l10n-no-profile-message">No hay perfil disponible</h4>
 </cjaas-profile-view-widget>
-``` 
+```
 
 Please feel free to reach out to your partner or Cisco directly with any
 additional questions.
