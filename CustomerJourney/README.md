@@ -1,60 +1,43 @@
-# CJaaS Timeline Widget
+# CJaaS Customer Journey Widget
 
-This widget uses CJaaS Common Components to output a combined customer Timeline that includes Timeline information.
+This widget uses the CJaaS API to display an individual customer's journey as a history of events. It first retrieves the complete event history from the tape endpoint and compiles toggles for all event types, and then subscribes to a live stream of new events so they appear in real time.
 
-## Timeline Widget Properties
+## Customer Journey Widget Properties
 
-The CJaaS Timeline Widget accepts specific properties to interact with the CJaaS API
+The CJaaS Profile Widget accepts specific properties to interact with the CJaaS API
 
-- _customer: string_ - an identifier of the customer, i.e. "560000-John"
-- _template: any | JSON | Object_ - for user-provided data-shape template.
-- _auth-token: string_ - an unique Auth token to enable the CJaaS tape stream. You can get a token here: https://forms.office.com/Pages/ResponsePage.aspx?id=Yq_hWgWVl0CmmsFVPveEDqqpouLp2otDkH7uBREgKh5URVhNWkY2M0lOTE83M05FTzg2TERLMVdTWS4u
-- _base-url: string_ - defaults to "https://trycjaas.exp.bz" at present, can be modified for changing APIs
+- `customer: string` - an identifier of the customer, i.e. "560000-John"
+- `tape-token: string` - SAS token for CJaaS tape GET operations
+- `stream-token: string` - SAS token for stream endpoint subscription
+- `base-url: string` - Base URL for all typical CJaaS endpoints
+- `base-stream-url: string` - Temp stream URL differs from Base URL
 
 ```html
-<cjaas-timeline-widget
-  type="journey-and-stream"
-  auth-token="<your-auth-token>"
-  limit="15"
-></cjaas-timeline-widget>
+ <customer-journey-widget
+      customer="98126-Kevin"
+      tape-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=etc"
+      stream-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-06-21T18:15:15.804Z&sk=sandbox&sig=etc"
+      base-url="https://uswest-nonprod.cjaas.cisco.com"
+      base-stream-url="https://cjaas-devus1.azurewebsites.net"
+></customer-journey-widget>
 ```
 
-## Setup
+## Getting started
 
-Install dependencies:
-
-`npm install` or `yarn`
-
-## Development
-
-### Getting started
+**NOTE:** _Use Node version 12_
 
 To run your widget on `localhost`, please navigate to widget's root directory in Terminal (Command line tool) and run the following commands (Assuming you have [`yarn`](https://classic.yarnpkg.com/en/docs/install/#mac-stable) installed globally on your machine):
 
 1. Clone this repo.
-2. Navigate to th widget/widget starter folder.
-3. Run `yarn` from the root of the repo.
-4. Run `yarn start` or `npm run start` to start the playground (sandbox) app.
+2. Navigate to the widget folder.
+3. Run `yarn install`
+4. Run `yarn start` to start the sandbox app.
 
-### Editing widget
-
-There is generally no need for you to modify anything outside of the `src/components` folder. To customize you widget, we suggest for you to work within this directory. You are free to create your components and structure them however you see fit.
-
-### Building/exporting widget
-
-Once you are ready to export your widget, all you need is to run the following command in Terminal (Command line tool):
-Note: Built on Node version 10.13.0 (will be upgraded in near future)
-
-```
-yarn dist
-```
-
-This will create a `dist` folder in the root directory of your widget with generated files.
-`index.js` file that contains your entire set of widgets. `widget.js` contains the Timeline widget that can be plugged into dashboards like Webex CC Agent Dashboard. Additionally, it generates the fonts, icons and its styles necessary for the components to use momentum icons & fonts. Your host web page needs to import these resources. These files can be renamed and uploaded to a preferred location on a CDN (e.g. an S3 bucket on AWS. Please keep in mind that this file has to be publicly available over the internet to be accessible to Agent or Supervisor Desktop).
-
-```
-<script src="PATH TO YOUR WIDGET/INDEX.JS"></script>
-```
+## Build and Deploy Modules
+Once your widget is complete, it must be exported as a JS module that can be delivered via CDN. The build is configured to export a Web Component that can be used in your project.
+- run `yarn dist` to create a compiled, minified JS module
+- rename and upload the bundled module to your hosting service
+- import according to your web application's config.
 
 ### Sharing widget information with Agent/Supervisor Desktop administrator
 
@@ -74,23 +57,3 @@ To be able to place your custom widget within Agent/Supervisor Desktop, Contact 
 In case you are an administrator for Contact Center Agent Desktop or are working with an administrator, you might be trying to place this component in a JSON layout specification file to test in your Contact Center environment.
 
 This specific Widget Starter is designed to be places in a ["panel"](https://www.cisco.com/c/en/us/td/docs/voice_ip_comm/cust_contact/contact_center/CJP/SetupandAdministrationGuide_2/b_mp-release-2/b_cc-release-2_chapter_011.html#topic_BF0EBDF65DCB0A552164D6306657C892__AuxPane) area of JSON layout specification. This is due to this widget relying on a task-specific information with the reference derived from the current location/address bar value.
-
-**NOTE**: If you place this widget in another area in JSON layout specification ("header" or a custom page in "navigation"), some task-specific function might not work. This is to be expected.
-
-## Localization
-
-By default, if a timeline cannot be returned the widget will print "No Timeline available". This can be replaced via a named slot for your custom or localized text content:
-
-```html
-<cjaas-timeline-widget
-  id="timeline-widget"
-  type="journey-and-stream"
-  auth-token="missing"
-  limit="15"
->
-  <h3 slot="ll10n-no-timeline-message">No hay línea de tiempo disponible</h3>
-</cjaas-timeline-widget>
-```
-
-Please feel free to reach out to your partner or Cisco directly with any
-additional questions.
