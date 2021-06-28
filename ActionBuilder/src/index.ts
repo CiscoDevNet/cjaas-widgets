@@ -31,6 +31,7 @@ const SUPPORTED_TRIGGER_TYPES: triggerType[] = [
   "IMIFlowTrigger",
   "ChatBot",
 ];
+
 @customElementWithCheck("cjaas-action-builder")
 export default class CjaasActionBuilder extends LitElement {
   @property() mockAction: any;
@@ -48,7 +49,7 @@ export default class CjaasActionBuilder extends LitElement {
     | string
     | undefined = undefined;
 
-  @internalProperty() conditions: ACTION["rules"] = {};
+  @internalProperty() conditions: ConditionBlockInterface = {};
 
   @internalProperty() actionConfig: ACTION | undefined;
   @internalProperty() triggerType: triggerType | undefined;
@@ -63,6 +64,9 @@ export default class CjaasActionBuilder extends LitElement {
   @internalProperty() actionAPIInProgress = false;
 
   @query("#action-name") actionNameElement: any;
+  @query("cjaas-condition-block") rootConditionBlockElement: any;
+
+  // rootInnerRelation: "AND" | "OR" = "AND";
 
   updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
@@ -187,7 +191,9 @@ export default class CjaasActionBuilder extends LitElement {
           ? this.conditions[relation]
           : []}
         .optionsList=${this.optionsList}
-      ></cjaas-condition-block>
+        @updated-condition=${(ev: CustomEvent) => this.updateConditions(ev)}
+      >
+      </cjaas-condition-block>
 
       <div class="targets">
         ${this.getTargets()}
@@ -208,6 +214,13 @@ export default class CjaasActionBuilder extends LitElement {
         .message=${this.errorMessage}
       ></md-alert-banner>
     `;
+  }
+
+  updateConditions(event: CustomEvent) {
+    let conditions = this.rootConditionBlockElement?.getValue();
+    if (conditions) {
+      this.conditions = conditions;
+    }
   }
 
   // Readonly view should showup when editing an action
@@ -544,7 +557,7 @@ export default class CjaasActionBuilder extends LitElement {
     // TODO:
     // Add more validations
     // this.validateConditions()
-    let _name = this.actionNameElement?.value.trim();
+    let _name = this.actionNameElement?.value?.trim();
 
     // any because filter is not recognized by TS type inference
     const actions: any = this.targets
@@ -626,7 +639,7 @@ export default class CjaasActionBuilder extends LitElement {
   getAgentOfferPayload() {
     let imageURL = (<HTMLInputElement>(
       this.shadowRoot?.querySelector("#offer_url")
-    ))?.value.trim();
+    ))?.value?.trim();
     let imageWidth = (<HTMLInputElement>(
       this.shadowRoot?.querySelector("#max_width")
     ))?.value;
@@ -643,13 +656,13 @@ export default class CjaasActionBuilder extends LitElement {
   getWebexWalkinPayload() {
     let agentId = (<HTMLInputElement>(
       this.shadowRoot?.querySelector("#walkin_agent_id")
-    ))?.value.trim();
+    ))?.value?.trim();
     let welcomeMessage = (<HTMLInputElement>(
       this.shadowRoot?.querySelector("#preferred_message")
-    ))?.value.trim();
+    ))?.value?.trim();
     let nickname = (<HTMLInputElement>(
       this.shadowRoot?.querySelector("#walkin_agent_name")
-    ))?.value.trim();
+    ))?.value?.trim();
 
     return {
       actionType: "WebexWalkin" as triggerType,
@@ -664,7 +677,7 @@ export default class CjaasActionBuilder extends LitElement {
   getWebhookPayload() {
     const url = (<HTMLInputElement>(
       this.shadowRoot?.querySelector("#webhook_url")
-    ))?.value.trim();
+    ))?.value?.trim();
 
     return {
       actionType: "WebhookTrigger" as triggerType,
@@ -677,7 +690,7 @@ export default class CjaasActionBuilder extends LitElement {
   getIMIFlowPayload() {
     const url = (<HTMLInputElement>(
       this.shadowRoot?.querySelector("#imi_flow_url")
-    ))?.value.trim();
+    ))?.value?.trim();
 
     return {
       actionType: "IMIFlowTrigger" as triggerType,
@@ -690,7 +703,7 @@ export default class CjaasActionBuilder extends LitElement {
   getChatBotPayload() {
     const botURL = (<HTMLInputElement>(
       this.shadowRoot?.querySelector("#chatbot_url")
-    ))?.value.trim();
+    ))?.value?.trim();
 
     const botWidth = (<HTMLInputElement>(
       this.shadowRoot?.querySelector("#chatbot_width")
@@ -706,8 +719,7 @@ export default class CjaasActionBuilder extends LitElement {
   }
 
   getConditions() {
-    let element = this.shadowRoot?.querySelector("cjaas-condition-block");
-    let conditions: ACTION["rules"] = <ACTION["rules"]>element?.getValue();
+    let conditions = this.rootConditionBlockElement?.getValue();
 
     return conditions;
   }
@@ -747,17 +759,21 @@ export interface ACTION {
   organization?: string;
   namespace?: string; //"sandbox",
   templateId: string; // "xxx",
-  rules: {
-    [key: string]: Array<{
-      field: string;
-      operator: Comparator;
-      value: string;
-    }>;
-  };
+  rules: ConditionBlockInterface;
   actions: Array<{
     actionType: string | undefined;
     actionConfig: any;
   }>;
+}
+
+export interface ConditionInterface {
+  field: string;
+  operator: Comparator;
+  value: string;
+}
+
+export interface ConditionBlockInterface {
+  [key: string]: Array<ConditionInterface | ConditionBlockInterface>;
 }
 
 export type SASTOKEN = string | null | undefined;
