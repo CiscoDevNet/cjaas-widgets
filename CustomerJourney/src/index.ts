@@ -14,7 +14,7 @@ import {
   property,
   LitElement,
   PropertyValues,
-  query
+  query,
 } from "lit-element";
 import { nothing } from "lit-html";
 import { classMap } from "lit-html/directives/class-map";
@@ -98,7 +98,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
   private get resizeClassMap() {
     return {
-      expanded: this.expanded
+      expanded: this.expanded,
     };
   }
 
@@ -144,17 +144,17 @@ export default class CustomerJourneyWidget extends LitElement {
       headers: {
         "content-type": "application/json; charset=UTF-8",
         accept: "application/json",
-        Authorization: `SharedAccessSignature ${this.tapeToken}`
+        Authorization: `SharedAccessSignature ${this.tapeToken}`,
       },
-      method: "GET"
+      method: "GET",
     })
       .then((x: Response) => {
         return x.json();
       })
-      .then(data => {
+      .then((data) => {
         return data;
       })
-      .catch(err => {
+      .catch((err) => {
         this.loading = false;
         this.errorMessage = `Failure to fetch Journey ${err}`;
       });
@@ -181,8 +181,8 @@ export default class CustomerJourneyWidget extends LitElement {
         headers: {
           "content-type": "application/json; charset=UTF-8",
           accept: "application/json",
-          Authorization: `SharedAccessSignature ${this.streamToken}`
-        }
+          Authorization: `SharedAccessSignature ${this.streamToken}`,
+        },
       };
       this.eventSource = new EventSource(
         `${this.baseURL}/v1/journey/streams/${this.customer}?${this.streamToken}`,
@@ -215,7 +215,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
   getEventTypes() {
     const eventArray: Set<string> = new Set();
-    this.events.forEach(event => {
+    this.events.forEach((event) => {
       eventArray.add(event.type);
     });
     this.eventTypes = Array.from(eventArray);
@@ -223,7 +223,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
   toggleFilter(type: string, e: Event) {
     if (this.activeTypes.includes(type)) {
-      this.activeTypes = this.activeTypes.filter(item => item !== type);
+      this.activeTypes = this.activeTypes.filter((item) => item !== type);
     } else {
       this.activeTypes.push(type);
     }
@@ -237,7 +237,7 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   renderFilterButtons() {
-    return this.eventTypes.map(item => {
+    return this.eventTypes.map((item) => {
       return html`
         <md-button
           id="filter-${item}"
@@ -358,7 +358,7 @@ export default class CustomerJourneyWidget extends LitElement {
   hideDate(e: Event) {
     const date = (e.target! as HTMLElement).id;
     if (this.activeDates.includes(date)) {
-      this.activeDates = this.activeDates.filter(e => e !== date);
+      this.activeDates = this.activeDates.filter((e) => e !== date);
     } else {
       this.activeDates.push(date);
     }
@@ -370,7 +370,7 @@ export default class CustomerJourneyWidget extends LitElement {
     const localLimit = this.limit;
     let numberOfResults = 0;
 
-    return this.events.map(event => {
+    return this.events.map((event) => {
       if (DateTime.fromISO(event.time) > this.calculateOldestEntry()) {
         let advanceDate = false;
         const stringDate = DateTime.fromISO(event.time).toFormat("dd LLL yyyy");
@@ -380,7 +380,8 @@ export default class CustomerJourneyWidget extends LitElement {
           advanceDate = true;
           // this.activeDates.indexOf(date) === -1 ? this.activeDates.push(stringDate) : nothing
         }
-        const titleString = `${event.type}: ${Object.keys(event.data)[0]}`;
+
+        const titleString = this.getTitleString(event);
         numberOfResults++;
         return numberOfResults <= localLimit
           ? html`
@@ -409,6 +410,22 @@ export default class CustomerJourneyWidget extends LitElement {
           : nothing;
       }
     });
+  }
+
+  getTitleString(event: CustomerEvent) {
+    let type = event.type;
+
+    let subTitle;
+    if (type === "Identify") {
+      subTitle = event.person;
+    } else if (type === "Page Visit") {
+      subTitle = event.data?.page?.url;
+    } else {
+      let keys = Object.keys(event.data || {});
+      subTitle = event.data ? event.data[keys[0]] : "";
+    }
+
+    return `${type}${subTitle ? " : " : ""}${subTitle || ""}`;
   }
 
   static get styles() {
