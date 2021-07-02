@@ -11,8 +11,7 @@ The CJaaS Timeline Widget accepts specific properties to interact with the CJaaS
 - `tape-token: string` - SAS Token for tape GET operations
 - `stream-token: string` - SAS Token for tape stream subscription operations
 - `limit: number` - set how many events to display
-- `base-url: string` - defaults to "https://trycjaas.exp.bz" at present, can be modified for changing APIs
-
+- `base-url: string` - defaults to undefined
 ```html
  <cjaas-timeline-widget
     id="timeline-widget"
