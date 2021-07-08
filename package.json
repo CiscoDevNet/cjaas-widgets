@@ -5,5 +5,8 @@
   "author": {
     "name": "Kevin Hyde",
     "email": "kehyde@cisco.com"
+  },
+  "scripts": {
+    "build-all": "cd ProfileView && yarn && yarn dist && open . && cd ../CustomerJourney && yarn && yarn dist && open . && cd ../ActionBuilder && yarn && yarn dist && open . && cd ../Timeline && yarn && yarn dist && open ."
   }
 }
