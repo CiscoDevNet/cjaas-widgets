@@ -49,8 +49,8 @@ export default class CjaasProfileWidget extends LitElement {
   @property({ type: String, attribute: "tape-read-token" }) tapeReadToken:
     | string
     | null = null;
-  @property({ type: String, attribute: "profile-read-token" })
-  profileReadToken: string | null = null;
+  @property({ type: String, attribute: "profile-write-token" })
+  profileWriteToken: string | null = null;
   @property({ type: String, attribute: "base-url" }) baseURL:
     | string
     | undefined = undefined;
@@ -92,7 +92,6 @@ export default class CjaasProfileWidget extends LitElement {
     }
 
     if (
-      changedProperties.has("profileReadToken") ||
       changedProperties.has("profileWriteToken") ||
       changedProperties.has("filter")
     ) {
@@ -136,7 +135,7 @@ export default class CjaasProfileWidget extends LitElement {
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.profileReadToken,
+        Authorization: "SharedAccessSignature " + this.profileWriteToken,
       },
       data,
     };
@@ -405,7 +404,7 @@ export default class CjaasProfileWidget extends LitElement {
     const tabs = this.profile.filter((x: any) => x.query.type === "tab");
     // TODO: Track the selected tab to apply a class to the badge for color synching, making blue when selected
     debugger;
-    const activityTab = this.profileReadToken
+    const activityTab = this.profileWriteToken
       ? html`
           <md-tab slot="tab">
             <span>All</span>
