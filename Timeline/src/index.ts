@@ -61,6 +61,7 @@ export default class CjaasTimelineWidget extends LitElement {
     | "livestream"
     | "journey-and-stream" = "livestream";
 
+  @property({ attribute: "person-id" }) personId: string | undefined;
   @internalProperty() eventSource: EventSource | null = null;
   @internalProperty() showSpinner = false;
   @internalProperty() errorMessage = "";
@@ -71,7 +72,8 @@ export default class CjaasTimelineWidget extends LitElement {
     if (
       this.tapeReadToken &&
       (changedProperties.has("tapeReadToken") ||
-        changedProperties.has("filter"))
+        changedProperties.has("filter") ||
+        changedProperties.has("personId"))
     ) {
       this.timelineItems = [];
       this.requestUpdate();
@@ -132,8 +134,15 @@ export default class CjaasTimelineWidget extends LitElement {
   getJourney() {
     this.showSpinner = true;
     this.baseUrlCheck();
+    let url;
+    if (this.personId) {
+      url = `${this.baseURL}/v1/journey/streams/historic/${this.personId}`;
+    } else {
+      url = `${this.baseURL}/v1/journey/streams/historic`;
+    }
+
     // gets historic journey
-    fetch(`${this.baseURL}/v1/journey/events?${this.getAPIQueryParams(true)}`, {
+    fetch(`${url}?${this.getAPIQueryParams(true)}`, {
       headers: {
         "content-type": "application/json; charset=UTF-8",
         Authorization: `SharedAccessSignature ${this.tapeReadToken}`,
@@ -166,12 +175,20 @@ export default class CjaasTimelineWidget extends LitElement {
 
     if (this.type !== "journey") {
       this.baseUrlCheck();
+
+      let url;
+      if (this.personId) {
+        url = `${this.baseStreamURL || this.baseURL}/v1/journey/streams/${
+          this.personId
+        }`;
+      } else {
+        url = `${this.baseStreamURL || this.baseURL}/v1/journey/streams`;
+      }
+
       this.eventSource = new EventSource(
-        `${this.baseStreamURL ||
-          this.baseURL}/v1/journey/streams?${this.getSASTokenForQueryParams(
-          this.streamReadToken
-        )}`
+        `${url}?${this.getSASTokenForQueryParams(this.streamReadToken)}`
       );
+
       // @ts-ignore
       this.eventSource.onmessage = (event: ServerSentEvent) => {
         let data;
@@ -248,26 +265,36 @@ export default class CjaasTimelineWidget extends LitElement {
       <div class="outer-container">
         ${this.timelineItems?.length
           ? this.renderTimeline()
-          : html`
-              <div class="empty-state">
-                ${this.showSpinner
-                  ? html`
-                      <div class="spinner-container">
-                        <md-spinner size="32"></md-spinner>
-                      </div>
-                    `
-                  : html`
-                      <div class="spinner-container">
-                        <slot name="ll10n-no-timeline-message">
-                          <h3>No Timeline available</h3>
-                        </slot>
-                        <p class="error-message">
-                          ${this.errorMessage || nothing}
-                        </p>
-                      </div>
-                    `}
-              </div>
-            `}
+          : this.getEmptyStateTemplate()}
+      </div>
+    `;
+  }
+
+  getEmptyStateTemplate() {
+    return html`
+      <div class="empty-state">
+        ${this.showSpinner ? this.getSpinner() : this.getEmptyStateMessage()}
+      </div>
+    `;
+  }
+
+  getSpinner() {
+    return html`
+      <div class="spinner-container">
+        <md-spinner size="32"></md-spinner>
+      </div>
+    `;
+  }
+
+  getEmptyStateMessage() {
+    return html`
+      <div class="spinner-container">
+        <slot name="ll10n-no-timeline-message">
+          <h3>No Timeline available</h3>
+        </slot>
+        <p class="error-message">
+          ${this.errorMessage || nothing}
+        </p>
       </div>
     `;
   }

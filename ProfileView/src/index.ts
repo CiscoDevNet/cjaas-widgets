@@ -51,8 +51,6 @@ export default class CjaasProfileWidget extends LitElement {
     | null = null;
   @property({ type: String, attribute: "profile-read-token" })
   profileReadToken: string | null = null;
-  @property({ type: String, attribute: "profile-write-token" })
-  profileWriteToken: string | null = null;
   @property({ type: String, attribute: "base-url" }) baseURL:
     | string
     | undefined = undefined;
@@ -138,7 +136,7 @@ export default class CjaasProfileWidget extends LitElement {
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.profileWriteToken,
+        Authorization: "SharedAccessSignature " + this.profileReadToken,
       },
       data,
     };
@@ -216,17 +214,21 @@ export default class CjaasProfileWidget extends LitElement {
     this.showTimelineSpinner = true;
     this.baseUrlCheck();
     // gets historic journey
-    fetch(
-      `${this.baseURL}/v1/journey/events?${this.getTimelineAPIQueryParams(
-        true
-      )}`,
-      {
-        headers: {
-          "content-type": "application/json; charset=UTF-8",
-        },
-        method: "GET",
-      }
-    )
+
+    let url;
+
+    if (this.customer) {
+      url = `${this.baseURL}/v1/journey/streams/historic/${this.customer}`;
+    } else {
+      url = `${this.baseURL}/v1/journey/streams/historic`;
+    }
+
+    fetch(`${url}?${this.getTimelineAPIQueryParams(true)}`, {
+      headers: {
+        "content-type": "application/json; charset=UTF-8",
+      },
+      method: "GET",
+    })
       .then((x: Response) => x.json())
       .then((x: { events: Array<ServerSentEvent> }) => {
         x?.events
@@ -251,9 +253,16 @@ export default class CjaasProfileWidget extends LitElement {
     if (this.streamReadToken === null) {
       debugger;
     }
-    this.eventSource = new EventSource(
-      `${this.baseURL}/v1/journey/streams?${this.streamReadToken}`
-    );
+
+    let url;
+
+    if (this.customer) {
+      url = `${this.baseURL}/v1/journey/streams/${this.customer}`;
+    } else {
+      url = `${this.baseURL}/v1/journey/streams`;
+    }
+
+    this.eventSource = new EventSource(`${url}?${this.streamReadToken}`);
     // @ts-ignore
     this.eventSource.onmessage = (event: ServerSentEvent) => {
       let data;
@@ -320,27 +329,39 @@ export default class CjaasProfileWidget extends LitElement {
         ></cjaas-timeline>
       `;
     } else {
-      return html`
-        <div class="empty-state">
-          ${this.showTimelineSpinner
-            ? html`
-                <div class="spinner-container">
-                  <md-spinner size="32"></md-spinner>
-                </div>
-              `
-            : html`
-                <div class="spinner-container">
-                  <slot name="ll10n-no-timeline-message">
-                    <h3>No Timeline available</h3>
-                  </slot>
-                  <p class="error-message">
-                    ${this.errorMessage || nothing}
-                  </p>
-                </div>
-              `}
-        </div>
-      `;
+      return this.getEmptyStateTemplate();
     }
+  }
+
+  getEmptyStateTemplate() {
+    return html`
+      <div class="empty-state">
+        ${this.showTimelineSpinner
+          ? this.getSpinner()
+          : this.getTimelineEmptyStateMessage()}
+      </div>
+    `;
+  }
+
+  getTimelineEmptyStateMessage() {
+    return html`
+      <div class="spinner-container">
+        <slot name="ll10n-no-timeline-message">
+          <h3>No Timeline available</h3>
+        </slot>
+        <p class="error-message">
+          ${this.errorMessage || nothing}
+        </p>
+      </div>
+    `;
+  }
+
+  getSpinner() {
+    return html`
+      <div class="spinner-container">
+        <md-spinner size="32"></md-spinner>
+      </div>
+    `;
   }
 
   getFormattedProfile() {
@@ -384,52 +405,52 @@ export default class CjaasProfileWidget extends LitElement {
     const tabs = this.profile.filter((x: any) => x.query.type === "tab");
     // TODO: Track the selected tab to apply a class to the badge for color synching, making blue when selected
     debugger;
-    const activityTab =
-      this.profileReadToken || this.profileWriteToken
-        ? html`
-            <md-tab slot="tab">
-              <span>All</span>
-            </md-tab>
-            <md-tab-panel slot="panel">
-              ${this.renderTimeline(this.timelineItems)}
-            </md-tab-panel>
-          `
-        : html`
-            <div class="center full-height">
-              <slot name="l10n-no-data-message">
-                <div>No data to show</div>
-              </slot>
-            </div>
-          `;
+    const activityTab = this.profileReadToken
+      ? html`
+          <md-tab slot="tab">
+            <span>All</span>
+          </md-tab>
+          <md-tab-panel slot="panel">
+            ${this.renderTimeline(this.timelineItems)}
+          </md-tab-panel>
+        `
+      : html`
+          <div class="center full-height">
+            <slot name="l10n-no-data-message">
+              <div>No data to show</div>
+            </slot>
+          </div>
+        `;
     if (tabs && tabs.length > 0) {
       return html`
         <md-tabs>
-          ${activityTab}
-          ${tabs.map((x: any) => {
-            return html`
-              <md-tab slot="tab">
-                <span>${x.query.DisplayName}</span
-                ><md-badge small
-                  >${x.journeyEvents ? x.journeyEvents.length : "0"}</md-badge
-                >
-              </md-tab>
-              <md-tab-panel slot="panel">
-                <!-- use verbose journey events with timeline comp -->
-                ${x.journeyEvents
-                  ? this.renderTimeline(
-                      x.journeyEvents.map((y: any) =>
-                        this.getTimelineItemFromMessage(y)
-                      )
-                    )
-                  : nothing}
-              </md-tab-panel>
-            `;
-          })}
+          ${activityTab} ${tabs.map((x: any) => {})}
         </md-tabs>
       `;
     } else {
       return activityTab;
     }
+  }
+
+  getTab(tab: any) {
+    return html`
+      <md-tab slot="tab">
+        <span>${tab.query.DisplayName}</span
+        ><md-badge small
+          >${tab.journeyEvents ? tab.journeyEvents.length : "0"}</md-badge
+        >
+      </md-tab>
+      <md-tab-panel slot="panel">
+        <!-- use verbose journey events with timeline comp -->
+        ${tab.journeyEvents
+          ? this.renderTimeline(
+              tab.journeyEvents.map((y: any) =>
+                this.getTimelineItemFromMessage(y)
+              )
+            )
+          : nothing}
+      </md-tab-panel>
+    `;
   }
 
   static get styles() {
@@ -441,23 +462,27 @@ export default class CjaasProfileWidget extends LitElement {
       <div class="outer-container" part="profile-widget-outer">
         ${this.profile
           ? this.getFormattedProfile()
-          : html`
-              <div class="empty-state">
-                ${this.showSpinner
-                  ? html`
-                      <div class="spinner-container">
-                        <md-spinner size="32"></md-spinner>
-                      </div>
-                    `
-                  : html`
-                      <div class="spinner-container">
-                        <slot name="l10n-no-profile-message">
-                          No Profile available
-                        </slot>
-                      </div>
-                    `}
-              </div>
-            `}
+          : this.getProfileEmptyStateTemplate()}
+      </div>
+    `;
+  }
+
+  getProfileEmptyStateTemplate() {
+    return html`
+      <div class="empty-state">
+        ${this.showSpinner
+          ? this.getSpinner()
+          : this.getProfileEmptyStateMessage()}
+      </div>
+    `;
+  }
+
+  getProfileEmptyStateMessage() {
+    return html`
+      <div class="spinner-container">
+        <slot name="l10n-no-profile-message">
+          No Profile available
+        </slot>
       </div>
     `;
   }
