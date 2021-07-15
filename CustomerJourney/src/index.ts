@@ -14,7 +14,7 @@ import {
   property,
   LitElement,
   PropertyValues,
-  query,
+  query
 } from "lit-element";
 import { nothing } from "lit-html";
 import { classMap } from "lit-html/directives/class-map";
@@ -44,7 +44,7 @@ export default class CustomerJourneyWidget extends LitElement {
   @property({ type: String, attribute: "base-url" }) baseURL:
     | string
     | undefined = undefined;
-  @property({ type: String }) customer: string | null = null;
+  @property({ type: String, reflect: true }) customer: string | null = null;
   @property({ type: String, attribute: "tape-token" }) tapeToken:
     | string
     | null = null;
@@ -53,6 +53,7 @@ export default class CustomerJourneyWidget extends LitElement {
     | null = null;
   @property({ reflect: true }) pagination = "$top=15";
   @property({ type: Number }) limit = 5;
+  @property({ attribute: false }) interactionData: Interaction | undefined;
 
   @internalProperty() events: Array<CustomerEvent> = [];
   @internalProperty() newestEvents: Array<CustomerEvent> = [];
@@ -72,8 +73,14 @@ export default class CustomerJourneyWidget extends LitElement {
 
   activeDates: Array<string> = [];
 
-  async firstUpdated(changedProperties: PropertyValues) {
-    super.firstUpdated(changedProperties);
+  connectedCallback() {
+    super.connectedCallback();
+    if (this.interactionData) {
+      this.customer = this.interactionData["ani"];
+    }
+  }
+
+  async lifecycleTasks() {
     const data = await this.getExistingEvents();
     this.events = data.events;
     this.getEventTypes();
@@ -81,6 +88,11 @@ export default class CustomerJourneyWidget extends LitElement {
     this.loading = false;
     this.requestUpdate();
     this.subscribeToStream();
+  }
+
+  async firstUpdated(changedProperties: PropertyValues) {
+    super.firstUpdated(changedProperties);
+    await this.lifecycleTasks();
 
     // @ts-ignore
     const ro = new ResizeObserver((entries: any) => {
@@ -98,22 +110,24 @@ export default class CustomerJourneyWidget extends LitElement {
 
   private get resizeClassMap() {
     return {
-      expanded: this.expanded,
+      expanded: this.expanded
     };
   }
 
   async update(changedProperties: PropertyValues) {
     super.update(changedProperties);
 
+    if (changedProperties.has("interactionData")) {
+      if (this.interactionData) {
+        this.customer = this.interactionData["ani"];
+      } else {
+        this.customer = null;
+      }
+    }
+
     if (changedProperties.has("customer")) {
       this.newestEvents = [];
-      const data = await this.getExistingEvents();
-      this.events = data.events;
-      this.getEventTypes();
-      this.activeTypes = this.eventTypes;
-      this.loading = false;
-      this.requestUpdate();
-      this.subscribeToStream();
+      await this.lifecycleTasks();
     }
   }
 
@@ -144,17 +158,17 @@ export default class CustomerJourneyWidget extends LitElement {
       headers: {
         "content-type": "application/json; charset=UTF-8",
         accept: "application/json",
-        Authorization: `SharedAccessSignature ${this.tapeToken}`,
+        Authorization: `SharedAccessSignature ${this.tapeToken}`
       },
-      method: "GET",
+      method: "GET"
     })
       .then((x: Response) => {
         return x.json();
       })
-      .then((data) => {
+      .then(data => {
         return data;
       })
-      .catch((err) => {
+      .catch(err => {
         this.loading = false;
         this.errorMessage = `Failure to fetch Journey ${err}`;
       });
@@ -181,8 +195,8 @@ export default class CustomerJourneyWidget extends LitElement {
         headers: {
           "content-type": "application/json; charset=UTF-8",
           accept: "application/json",
-          Authorization: `SharedAccessSignature ${this.streamToken}`,
-        },
+          Authorization: `SharedAccessSignature ${this.streamToken}`
+        }
       };
       this.eventSource = new EventSource(
         `${this.baseURL}/v1/journey/streams/${this.customer}?${this.streamToken}`,
@@ -192,7 +206,6 @@ export default class CustomerJourneyWidget extends LitElement {
 
     this.eventSource!.onmessage = (event: ServerSentEvent) => {
       let data;
-      console.log("hey", data);
       try {
         data = JSON.parse(event.data);
       } catch (err) {
@@ -215,7 +228,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
   getEventTypes() {
     const eventArray: Set<string> = new Set();
-    this.events.forEach((event) => {
+    this.events.forEach(event => {
       eventArray.add(event.type);
     });
     this.eventTypes = Array.from(eventArray);
@@ -223,7 +236,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
   toggleFilter(type: string, e: Event) {
     if (this.activeTypes.includes(type)) {
-      this.activeTypes = this.activeTypes.filter((item) => item !== type);
+      this.activeTypes = this.activeTypes.filter(item => item !== type);
     } else {
       this.activeTypes.push(type);
     }
@@ -237,7 +250,7 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   renderFilterButtons() {
-    return this.eventTypes.map((item) => {
+    return this.eventTypes.map(item => {
       return html`
         <md-button
           id="filter-${item}"
@@ -358,7 +371,7 @@ export default class CustomerJourneyWidget extends LitElement {
   hideDate(e: Event) {
     const date = (e.target! as HTMLElement).id;
     if (this.activeDates.includes(date)) {
-      this.activeDates = this.activeDates.filter((e) => e !== date);
+      this.activeDates = this.activeDates.filter(e => e !== date);
     } else {
       this.activeDates.push(date);
     }
@@ -370,7 +383,7 @@ export default class CustomerJourneyWidget extends LitElement {
     const localLimit = this.limit;
     let numberOfResults = 0;
 
-    return this.events.map((event) => {
+    return this.events.map(event => {
       if (DateTime.fromISO(event.time) > this.calculateOldestEntry()) {
         let advanceDate = false;
         const stringDate = DateTime.fromISO(event.time).toFormat("dd LLL yyyy");
@@ -413,7 +426,7 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   getTitleString(event: CustomerEvent) {
-    let type = event.type;
+    const type = event.type;
 
     let subTitle;
     if (type === "Identify") {
@@ -421,7 +434,7 @@ export default class CustomerJourneyWidget extends LitElement {
     } else if (type === "Page Visit") {
       subTitle = event.data?.page?.url;
     } else {
-      let keys = Object.keys(event.data || {});
+      const keys = Object.keys(event.data || {});
       subTitle = event.data ? event.data[keys[0]] : "";
     }
 

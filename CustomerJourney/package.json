@@ -26,22 +26,22 @@
     "lit-html": "1.2.1"
   },
   "peerDependencies": {
-    "@cjaas/common-components": "2.1.1",
-    "@momentum-ui/core": "^19.10.0",
-    "@momentum-ui/icons": "^8.8.2",
-    "@momentum-ui/utils": "^6.2.12",
-    "@momentum-ui/web-components": "^2.2.2",
+    "@cjaas/common-components": "2.2.0-dev1",
+    "@momentum-ui/core": "^19.15.3",
+    "@momentum-ui/icons": "^8.20.1",
+    "@momentum-ui/utils": "^6.2.15",
+    "@momentum-ui/web-components": "^2.4.0-dev1",
     "lit-element": "2.3.1",
     "lit-html": "1.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
     "@babel/preset-env": "^7.9.0",
-    "@cjaas/common-components": "2.1.1",
-    "@momentum-ui/core": "^19.10.0",
-    "@momentum-ui/icons": "^8.8.2",
-    "@momentum-ui/utils": "^6.2.12",
-    "@momentum-ui/web-components": "^2.2.2",
+    "@cjaas/common-components": "2.2.0-dev1",
+    "@momentum-ui/core": "^19.15.3",
+    "@momentum-ui/icons": "^8.20.1",
+    "@momentum-ui/utils": "^6.2.15",
+    "@momentum-ui/web-components": "^2.4.0-dev1",
     "@open-wc/testing-helpers": "1.8.9",
     "@types/axios": "^0.14.0",
     "@types/copy-webpack-plugin": "^5.0.0",
@@ -73,6 +73,7 @@
     "identity-obj-proxy": "^3.0.0",
     "jest": "26.4.2",
     "jest-config": "26.4.2",
+    "lit": "^2.0.0-rc.2",
     "lit-element": "2.3.1",
     "lit-html": "1.2.1",
     "lit-scss-loader": "^1.0.0",
@@ -103,6 +104,7 @@
   },
   "dependencies": {
     "@types/eventsource": "^1.1.5",
-    "eventsource": "^1.1.0"
+    "eventsource": "^1.1.0",
+    "lit": "^2.0.0-rc.2"
   }
 }

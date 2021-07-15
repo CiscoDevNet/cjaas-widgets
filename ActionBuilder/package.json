@@ -100,5 +100,8 @@
     "hooks": {
       "pre-commit": ""
     }
+  },
+  "dependencies": {
+    "lit": "^2.0.0-rc.2"
   }
 }
