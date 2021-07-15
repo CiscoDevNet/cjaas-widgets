@@ -23,6 +23,7 @@ import "@momentum-ui/web-components/dist/comp/md-alert-banner";
 import "@momentum-ui/web-components/dist/comp/md-button";
 import "@momentum-ui/web-components/dist/comp/md-dropdown";
 import { nothing } from "lit-html";
+import { ConditionBlock } from "@cjaas/common-components";
 
 const SUPPORTED_TRIGGER_TYPES: triggerType[] = [
   "WebexWalkin",
@@ -49,7 +50,7 @@ export default class CjaasActionBuilder extends LitElement {
     | string
     | undefined = undefined;
 
-  @internalProperty() conditions: ConditionBlockInterface = {};
+  @internalProperty() conditions: ConditionBlockInterface | undefined;
 
   @internalProperty() actionConfig: ACTION | undefined;
   @internalProperty() triggerType: triggerType | undefined;
@@ -64,7 +65,7 @@ export default class CjaasActionBuilder extends LitElement {
   @internalProperty() actionAPIInProgress = false;
 
   @query("#action-name") actionNameElement: any;
-  @query("cjaas-condition-block") rootConditionBlockElement: any;
+  @query("#root-element") rootConditionBlockElement: any;
 
   // rootInnerRelation: "AND" | "OR" = "AND";
 
@@ -78,7 +79,11 @@ export default class CjaasActionBuilder extends LitElement {
       this.getTemplates()?.then((x: any) => {
         this._templateResponse = x;
 
-        this.optionsList = x.attributes;
+        this.optionsList = x.attributes.map((y: any) => {
+          y.idForAttribute = `'${y.event}','${y.metadata}','${y.aggregationMode}'`;
+
+          return y;
+        });
       });
     }
 
@@ -176,25 +181,20 @@ export default class CjaasActionBuilder extends LitElement {
   }
 
   getEditActionTemplate() {
-    let relation = <"AND" | "OR">Object.keys(this.conditions || {})[0];
+    let relation;
+    if (this.conditions) {
+      relation =
+        typeof this.conditions !== "string"
+          ? (<MultiLineCondition>this.conditions)?.logic
+          : "AND";
+    }
 
     return html`
       <div>
         <md-icon name="icon-location_32" size="24"></md-icon
         ><span>Journey</span>
       </div>
-
-      <cjaas-condition-block
-        .root=${true}
-        .innerRelation=${relation}
-        .conditions=${this.conditions && this.conditions[relation]
-          ? this.conditions[relation]
-          : []}
-        .optionsList=${this.optionsList}
-        @updated-condition=${(ev: CustomEvent) => this.updateConditions(ev)}
-      >
-      </cjaas-condition-block>
-
+      ${this.renderRootConditionBlock(relation)}
       <div class="targets">
         ${this.getTargets()}
       </div>
@@ -216,9 +216,38 @@ export default class CjaasActionBuilder extends LitElement {
     `;
   }
 
+  renderRootConditionBlock(relation: any) {
+    return html`
+      <cjaas-condition-block
+        id="root-element"
+        .root=${true}
+        .innerRelation=${relation}
+        .conditions=${this.conditions}
+        .optionsList=${this.optionsList}
+        @updated-condition=${(ev: CustomEvent) => this.updateConditions(ev)}
+      >
+      </cjaas-condition-block>
+    `;
+  }
+
+  renderRootCondition() {
+    return html`
+      <cjaas-condition
+        id="root-element"
+        .index=${0}
+        .dirty=${false}
+        .condition=${(<SingleLineCondition>this.conditions)?.condition}
+        .relation=${"AND"}
+        .optionsList=${this.optionsList}
+      >
+      </cjaas-condition>
+    `;
+  }
+
   updateConditions(event: CustomEvent) {
     let conditions = this.rootConditionBlockElement?.getValue();
     if (conditions) {
+      console.log(conditions, "from update conditions");
       this.conditions = conditions;
     }
   }
@@ -275,10 +304,10 @@ export default class CjaasActionBuilder extends LitElement {
   }
 
   getConditionBlockSummary(rules: any, relation: string | null = null) {
-    let innerRelation = Object.keys(rules)[0];
+    let innerRelation = rules.logic || "AND";
 
-    let conditionList = rules[innerRelation].map((x: any) => {
-      if (this.isConditionBlock(x)) {
+    let conditionList = rules.args.map((x: any) => {
+      if (ConditionBlock.Shared.isConditionBlock(x)) {
         return html`
           ${this.getConditionBlockSummary(x, innerRelation)}
         `;
@@ -331,17 +360,10 @@ export default class CjaasActionBuilder extends LitElement {
       GT: "greater than",
       LTE: "lesser than or equal to",
       LT: "lesser than",
+      HAS: "contains",
     };
 
     return operatorMap[operator];
-  }
-
-  isConditionBlock(x: any) {
-    let keys = Object.keys(x);
-
-    if (["AND", "OR"].indexOf(keys[0]) !== -1) {
-      return true;
-    }
   }
 
   getFieldName(field: string) {
@@ -548,6 +570,8 @@ export default class CjaasActionBuilder extends LitElement {
   saveTrigger() {
     this.conditions = this.getConditions();
 
+    console.log(this.conditions);
+
     if (this.targets.length === 0 || this.targets[0].actionType === undefined) {
       this.errorMessage = "No Trigger Configured.";
       this.showErrorMessage = true;
@@ -573,11 +597,15 @@ export default class CjaasActionBuilder extends LitElement {
       return;
     }
 
+    if (!this.conditions) {
+      return;
+    }
+
     let result: ACTION = {
       organization: this.getOrganization(this.actionWriteSasToken) || "",
       namespace: this.getNamespace(this.actionWriteSasToken) || "",
       name: this.actionConfig?.name || _name,
-      version: this.actionConfig?.version || "1.0",
+      cooldownPeriodInMinutes: 1,
       active: this.actionConfig?.active || true,
       templateId: <string>this.templateId,
       rules: this.conditions,
@@ -721,6 +749,13 @@ export default class CjaasActionBuilder extends LitElement {
   getConditions() {
     let conditions = this.rootConditionBlockElement?.getValue();
 
+    if (typeof conditions === "string") {
+      return {
+        condition: conditions,
+        logic: "SINGLE",
+      };
+    }
+
     return conditions;
   }
 }
@@ -751,12 +786,12 @@ export interface CONFIG {
 }
 
 export type LogicalOperator = "OR" | "AND";
-export type Comparator = "EQ" | "NEQ" | "GTE" | "GT" | "LTE" | "LT";
+export type Comparator = "EQ" | "NEQ" | "GTE" | "GT" | "LTE" | "LT" | "HAS";
 export interface ACTION {
   name: string;
-  version: string;
   active: boolean;
   organization?: string;
+  cooldownPeriodInMinutes: 1;
   namespace?: string; //"sandbox",
   templateId: string; // "xxx",
   rules: ConditionBlockInterface;
@@ -772,8 +807,16 @@ export interface ConditionInterface {
   value: string;
 }
 
-export interface ConditionBlockInterface {
-  [key: string]: Array<ConditionInterface | ConditionBlockInterface>;
+type ConditionBlockInterface = MultiLineCondition | SingleLineCondition;
+
+export interface MultiLineCondition {
+  args: Array<string | ConditionBlockInterface>;
+  logic: "AND" | "OR";
+}
+
+export interface SingleLineCondition {
+  logic: "SINGLE";
+  condition: string;
 }
 
 export type SASTOKEN = string | null | undefined;
