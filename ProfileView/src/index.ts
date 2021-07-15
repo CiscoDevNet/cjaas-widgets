@@ -423,7 +423,7 @@ export default class CjaasProfileWidget extends LitElement {
     if (tabs && tabs.length > 0) {
       return html`
         <md-tabs>
-          ${activityTab} ${tabs.map((x: any) => {})}
+          ${activityTab} ${tabs.map((x: any) => this.getTab(x))}
         </md-tabs>
       `;
     } else {

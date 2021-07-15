@@ -88,6 +88,7 @@ export class Sandbox extends LitElement {
             style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
             class="widget-container"
           >
+            <!-- We might need this read token very soon -->
             <!-- profile-read-token="so=demoassure&sn=sandbox&ss=profile&sp=r&se=2022-06-17T23:47:34.409Z&sk=sandbox&sig=61BLCJ5+vZtOOvut/7khUQyg0N9KlvbPrJWrYa9lf28=" -->
             <cjaas-profile-view-widget
               id="view"
