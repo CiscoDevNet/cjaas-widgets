@@ -13,7 +13,7 @@ import {
   internalProperty,
   property,
   LitElement,
-  PropertyValues,
+  PropertyValues
 } from "lit-element";
 import { Profile } from "./types/cjaas";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
@@ -75,11 +75,6 @@ export default class CjaasProfileWidget extends LitElement {
   @internalProperty() profile: any;
   @internalProperty() showSpinner = false;
 
-  // connectedCallback(){
-  //   super.connectedCallback()
-  //   this.subscribeToStream()
-  // }
-
   updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
 
@@ -97,7 +92,6 @@ export default class CjaasProfileWidget extends LitElement {
     ) {
       this.timelineItems = [];
       this.subscribeToStream();
-      // this.requestUpdate();
     }
 
     if (
@@ -106,6 +100,7 @@ export default class CjaasProfileWidget extends LitElement {
     ) {
       this.timelineItems = [];
       this.getJourney();
+      this.subscribeToStream();
     }
   }
 
@@ -135,9 +130,9 @@ export default class CjaasProfileWidget extends LitElement {
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.profileWriteToken,
+        Authorization: "SharedAccessSignature " + this.profileWriteToken
       },
-      data,
+      data
     };
     return axios(url, options)
       .then((x: AxiosResponse) => x.data)
@@ -159,7 +154,7 @@ export default class CjaasProfileWidget extends LitElement {
           return {
             query: y,
             result: x.attributeView[i].result.split(","),
-            journeyEvents,
+            journeyEvents
           };
         });
 
@@ -168,6 +163,7 @@ export default class CjaasProfileWidget extends LitElement {
       })
       .catch((err: Error) => {
         console.log(err);
+        this.profile = undefined;
         this.showSpinner = false;
         this.requestUpdate();
       });
@@ -222,9 +218,9 @@ export default class CjaasProfileWidget extends LitElement {
 
     fetch(`${url}?${this.getTimelineAPIQueryParams(true)}`, {
       headers: {
-        "content-type": "application/json; charset=UTF-8",
+        "content-type": "application/json; charset=UTF-8"
       },
-      method: "GET",
+      method: "GET"
     })
       .then((x: Response) => x.json())
       .then((x: { events: Array<ServerSentEvent> }) => {
@@ -235,7 +231,7 @@ export default class CjaasProfileWidget extends LitElement {
       .then(() => {
         this.showTimelineSpinner = false;
       })
-      .catch((err) => {
+      .catch(err => {
         this.showTimelineSpinner = false;
         this.errorMessage = `Failure to fetch Journey ${err}`;
       });
@@ -248,7 +244,7 @@ export default class CjaasProfileWidget extends LitElement {
 
     this.baseUrlCheck();
     if (this.streamReadToken === null) {
-      debugger;
+      console.error("Please provide a Stream Read Token");
     }
 
     let url;
@@ -401,7 +397,6 @@ export default class CjaasProfileWidget extends LitElement {
     // tab data should return the event as such.. Should be rendered by stream component.
     const tabs = this.profile.filter((x: any) => x.query.type === "tab");
     // TODO: Track the selected tab to apply a class to the badge for color synching, making blue when selected
-    debugger;
     const activityTab = this.profileWriteToken
       ? html`
           <md-tab slot="tab">
