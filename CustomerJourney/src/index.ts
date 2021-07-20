@@ -154,7 +154,7 @@ export default class CustomerJourneyWidget extends LitElement {
   async getExistingEvents() {
     this.loading = true;
     this.baseUrlCheck();
-    return fetch(`${this.baseURL}/v1/journey/events/${this.customer}`, {
+    return fetch(`${this.baseURL}/v1/journey/streams/historic/${this.customer}`, {
       headers: {
         "content-type": "application/json; charset=UTF-8",
         accept: "application/json",
@@ -173,6 +173,7 @@ export default class CustomerJourneyWidget extends LitElement {
         this.errorMessage = `Failure to fetch Journey ${err}`;
       });
   }
+  
   getAPIQueryParams(token: string) {
     // signature needs to be URI encoded for it to work
     // as query strings

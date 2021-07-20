@@ -22,6 +22,8 @@ import styles from "./assets/styles/action-builder.scss";
 import "@momentum-ui/web-components/dist/comp/md-alert-banner";
 import "@momentum-ui/web-components/dist/comp/md-button";
 import "@momentum-ui/web-components/dist/comp/md-dropdown";
+import "@momentum-ui/web-components/dist/comp/md-input";
+
 import { nothing } from "lit-html";
 
 const SUPPORTED_TRIGGER_TYPES: triggerType[] = [
