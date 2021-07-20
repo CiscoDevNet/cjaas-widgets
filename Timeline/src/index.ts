@@ -88,17 +88,12 @@ export default class CjaasTimelineWidget extends LitElement {
     }
   }
 
-  getSASTokenForQueryParams(token: string | undefined): string | undefined {
-    return token?.replace(/sig=(.*)/, (...matches) => {
-      return "sig=" + encodeURIComponent(matches[1]);
-    });
-  }
   // defaults to top 10 for journey
   getAPIQueryParams(forJourney = false) {
     // signature needs to be URI encoded for it to work
     // as query strings
-    "so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=7G8UdEipQHnWOV3hRbTqkNxxjQNHkkQYGDlCrgEhK0k=";
-    const signature = this.getSASTokenForQueryParams(this.tapeReadToken);
+    // "so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=7G8UdEipQHnWOV3hRbTqkNxxjQNHkkQYGDlCrgEhK0k=";
+    const signature = this.tapeReadToken;
 
     let url = signature;
 
@@ -185,9 +180,7 @@ export default class CjaasTimelineWidget extends LitElement {
         url = `${this.baseStreamURL || this.baseURL}/v1/journey/streams`;
       }
 
-      this.eventSource = new EventSource(
-        `${url}?${this.getSASTokenForQueryParams(this.streamReadToken)}`
-      );
+      this.eventSource = new EventSource(`${url}?${this.streamReadToken}`);
 
       // @ts-ignore
       this.eventSource.onmessage = (event: ServerSentEvent) => {

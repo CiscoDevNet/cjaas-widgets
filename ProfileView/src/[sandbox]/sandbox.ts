@@ -94,9 +94,9 @@ export class Sandbox extends LitElement {
               id="view"
               customer="560021-Venki"
               .template=${sampleTemplate}
-              profile-write-token="so=demoassure&sn=sandbox&ss=profile&sp=w&se=2022-06-17T21:36:08.050Z&sk=sandbox&sig=gm/XQ+jtu8uWPrUtpRfR6P4DHwrJV2CJokIH3BcgzdE="
-              tape-read-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=7G8UdEipQHnWOV3hRbTqkNxxjQNHkkQYGDlCrgEhK0k="
-              stream-read-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-06-17T19:18:05.538Z&sk=sandbox&sig=nJOri1M66leDMnfL93UlufHegDf3hAwoQ/Mj37ReQBs="
+              profile-write-token="so=demoassure&sn=sandbox&ss=profile&sp=w&se=2022-06-17T21:36:08.050Z&sk=sandbox&sig=gm%2FXQ%2Bjtu8uWPrUtpRfR6P4DHwrJV2CJokIH3BcgzdE%3D"
+              tape-read-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=7G8UdEipQHnWOV3hRbTqkNxxjQNHkkQYGDlCrgEhK0k%3D"
+              stream-read-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-06-17T19:18:05.538Z&sk=sandbox&sig=nJOri1M66leDMnfL93UlufHegDf3hAwoQ%2FMj37ReQBs%3D"
               timelineType="journey-and-stream"
               base-url="https://uswest-nonprod.cjaas.cisco.com"
             ></cjaas-profile-view-widget>

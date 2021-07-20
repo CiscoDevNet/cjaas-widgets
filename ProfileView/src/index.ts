@@ -176,9 +176,7 @@ export default class CjaasProfileWidget extends LitElement {
   // Timeline Logic
   // defaults to top 10 for journey
   getTimelineAPIQueryParams(forJourney = false) {
-    let url = this.tapeReadToken?.replace(/sig=(.*)/, (...matches) => {
-      return "sig=" + encodeURIComponent(matches[1]);
-    });
+    let url = this.tapeReadToken;
 
     if (this.filter) {
       url += `&$filter=${this.filter}`;
