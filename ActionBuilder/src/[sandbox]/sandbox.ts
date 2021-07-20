@@ -96,9 +96,9 @@ export class Sandbox extends LitElement {
                 : undefined
             }}"
               template-id="first-template"
-              view-sas-token="so=demoassure&sn=sandbox&ss=action&sp=r&se=2022-06-07T21:12:12.788Z&sk=sandbox&sig=Q3JWxWIsgsPnvRwdNILRG9wYQV9m4rsEHElSYvgPe30="
-              action-read-sas-token="so=demoassure&sn=sandbox&ss=action&sp=r&se=2022-06-07T21:12:12.788Z&sk=sandbox&sig=Q3JWxWIsgsPnvRwdNILRG9wYQV9m4rsEHElSYvgPe30="
-              action-write-sas-token="so=demoassure&sn=sandbox&ss=action&sp=w&se=2022-06-14T16:23:02.854Z&sk=sandbox&sig=M9y4tTOzkrCaRmFOVTSGg4GCLWU6xE8knwR4k+Xrf9g="
+              view-sas-token="so=demoassure&sn=sandbox&ss=action&sp=r&se=2022-06-07T21:12:12.788Z&sk=sandbox&sig=Q3JWxWIsgsPnvRwdNILRG9wYQV9m4rsEHElSYvgPe30%3D"
+              action-read-sas-token="so=demoassure&sn=sandbox&ss=action&sp=r&se=2022-06-07T21:12:12.788Z&sk=sandbox&sig=Q3JWxWIsgsPnvRwdNILRG9wYQV9m4rsEHElSYvgPe30%3D"
+              action-write-sas-token="so=demoassure&sn=sandbox&ss=action&sp=w&se=2022-06-14T16:23:02.854Z&sk=sandbox&sig=M9y4tTOzkrCaRmFOVTSGg4GCLWU6xE8knwR4k%2BXrf9g%3D"
               base-url="https://cjaas-devus1-edge.azurewebsites.net/"
             ></cjaas-action-builder>
           </div>

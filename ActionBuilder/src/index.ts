@@ -66,6 +66,7 @@ export default class CjaasActionBuilder extends LitElement {
 
   @query("#action-name") actionNameElement: any;
   @query("#root-element") rootConditionBlockElement: any;
+  disableSaveButton = false;
 
   // rootInnerRelation: "AND" | "OR" = "AND";
 
@@ -172,6 +173,7 @@ export default class CjaasActionBuilder extends LitElement {
         .value=${this.actionConfig?.name || ""}
         id="action-name"
         placeholder="Action Name"
+        .required=${true}
         .helpText=${this.actionConfig?.name
           ? ""
           : "Action Name cannot be changed later!"}
@@ -199,7 +201,10 @@ export default class CjaasActionBuilder extends LitElement {
         ${this.getTargets()}
       </div>
       <div class="cta">
-        <md-button color="green" @click=${() => this.saveTrigger()}
+        <md-button
+          color="green"
+          .disabled=${this.disableSaveButton}
+          @click=${() => this.saveTrigger()}
           >Save</md-button
         >
       </div>
@@ -280,7 +285,9 @@ export default class CjaasActionBuilder extends LitElement {
     return html`
       Jouney
       <div>
-        ${this.getConditionBlockSummary(this.actionConfig?.rules)}
+        ${this.getConditionBlockSummary(
+          this.actionConfig?.rules as ConditionBlockInterface
+        )}
       </div>
       <div class="targets-readonly">
         ${this.getTargetSummary()}
@@ -303,20 +310,34 @@ export default class CjaasActionBuilder extends LitElement {
     });
   }
 
-  getConditionBlockSummary(rules: any, relation: string | null = null) {
-    let innerRelation = rules.logic || "AND";
+  getConditionBlockSummary(
+    rules: ConditionBlockInterface | string,
+    relation: string | null = null
+  ) {
+    let innerRelation = typeof rules !== "string" ? rules?.logic : "AND";
 
-    let conditionList = rules.args.map((x: any) => {
-      if (ConditionBlock.Shared.isConditionBlock(x)) {
-        return html`
-          ${this.getConditionBlockSummary(x, innerRelation)}
-        `;
-      } else {
-        return html`
-          ${this.getConditionSummary(x)}
-        `;
-      }
-    });
+    let conditionList: Array<string> = [];
+
+    if (typeof rules === "string") {
+      conditionList = [rules];
+    } else if ((rules as MultiLineCondition).args) {
+      let _rules: any = (rules as MultiLineCondition).args.map(
+        (x: string | ConditionBlockInterface) => {
+          if (ConditionBlock.Shared.isConditionBlock(x)) {
+            return html`
+              ${this.getConditionBlockSummary(x, innerRelation)}
+            `;
+          } else {
+            return html`
+              ${this.getConditionSummary(x as string | SingleLineCondition)}
+            `;
+          }
+        }
+      );
+      conditionList.push(..._rules);
+    } else if (rules.logic === "SINGLE") {
+      conditionList.push(rules.condition);
+    }
 
     let text = nothing;
 
@@ -341,14 +362,21 @@ export default class CjaasActionBuilder extends LitElement {
     `;
   }
 
-  getConditionSummary(condition: {
-    field: string;
-    operator: string;
-    value: string;
-  }) {
+  getConditionSummary(condition: string | SingleLineCondition) {
+    const conditionAsString: string = (condition as SingleLineCondition)
+      ?.condition
+      ? (condition as SingleLineCondition).condition
+      : (condition as string);
+
+    const [_original, field, operator, value] =
+      conditionAsString?.match(/('.*')\s(.*?)\s(.*)/) || [];
+
+    const _field =
+      this.optionsList.find((x) => x.idForAttribute === field)?.displayName ||
+      field;
+
     return html`
-      if ${this.getFieldName(condition.field)} is
-      ${this.getReadableOperator(condition.operator)} ${condition.value}
+      if ${field} is ${this.getReadableOperator(operator)} ${value}
     `;
   }
 
@@ -567,10 +595,12 @@ export default class CjaasActionBuilder extends LitElement {
     return matches && matches[1];
   }
 
-  saveTrigger() {
-    this.conditions = this.getConditions();
-
-    console.log(this.conditions);
+  isConditionValid(name: string) {
+    if (!name || !name.trim()) {
+      this.errorMessage = "Action is missing name.";
+      this.showErrorMessage = true;
+      return;
+    }
 
     if (this.targets.length === 0 || this.targets[0].actionType === undefined) {
       this.errorMessage = "No Trigger Configured.";
@@ -578,10 +608,17 @@ export default class CjaasActionBuilder extends LitElement {
       return;
     }
 
-    // TODO:
-    // Add more validations
-    // this.validateConditions()
+    return true;
+  }
+
+  saveTrigger() {
+    this.conditions = this.getConditions();
+
     let _name = this.actionNameElement?.value?.trim();
+
+    if (!this.isConditionValid(_name)) {
+      return;
+    }
 
     // any because filter is not recognized by TS type inference
     const actions: any = this.targets
@@ -617,6 +654,7 @@ export default class CjaasActionBuilder extends LitElement {
 
   postResult(result: ACTION) {
     let url = `${this.baseURL}/v1/journey/actions`;
+    this.disableSaveButton = true;
 
     fetch(url, {
       headers: {
@@ -627,11 +665,14 @@ export default class CjaasActionBuilder extends LitElement {
       body: JSON.stringify(result),
     }).then(
       (x) => {
+        this.disableSaveButton = false;
         if (x) {
           this.setSuccessMessage();
         }
       },
       (err) => {
+        this.disableSaveButton = false;
+
         this.showErrorMessage = true;
         console.log(err);
       }
