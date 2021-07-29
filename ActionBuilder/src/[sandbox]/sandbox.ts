@@ -90,11 +90,6 @@ export class Sandbox extends LitElement {
           >
             <cjaas-action-builder
               .mockTemplate=${mockTemplate}
-              actionName="{{
-              actionNameToEdit
-                ? 'demoassure_sandbox_' + actionNameToEdit
-                : undefined
-            }}"
               template-id="first-template"
               view-sas-token="so=demoassure&sn=sandbox&ss=action&sp=r&se=2022-06-07T21:12:12.788Z&sk=sandbox&sig=Q3JWxWIsgsPnvRwdNILRG9wYQV9m4rsEHElSYvgPe30%3D"
               action-read-sas-token="so=demoassure&sn=sandbox&ss=action&sp=r&se=2022-06-07T21:12:12.788Z&sk=sandbox&sig=Q3JWxWIsgsPnvRwdNILRG9wYQV9m4rsEHElSYvgPe30%3D"

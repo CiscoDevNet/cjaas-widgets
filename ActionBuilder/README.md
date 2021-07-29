@@ -10,7 +10,7 @@ This widget allows CJaaS admin to configure actions to a given template. The act
   .actionName=${actionNameToEdit}
   template-id="first-template"
   action-read-sas-token="st=demoassure&so=sandbox&ss=action&sp=r&se=2021-04-06T07:38:17Z&sk=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztXXXXXXXXXXXX="
-  action-read-sas-token="st=demoassure&so=sandbox&ss=action&sp=w&se=2021-04-06T07:38:17Z&sk=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztXXXXXXXXXXXX="
+  action-write-sas-token="st=demoassure&so=sandbox&ss=action&sp=w&se=2021-04-06T07:38:17Z&sk=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztXXXXXXXXXXXX="
   view-sas-token="st=demoassure&so=sandbox&ss=views&sp=r&se=2021-04-06T07:38:17Z&sk=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztXXXXXXXXXXXX="
   base-url="https://uswest-nonprod.cjaas.cisco.com"
 ></cjaas-action-builder>
