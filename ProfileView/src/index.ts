@@ -13,7 +13,7 @@ import {
   internalProperty,
   property,
   LitElement,
-  PropertyValues,
+  PropertyValues
 } from "lit-element";
 import { Profile } from "./types/cjaas";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
@@ -22,6 +22,15 @@ import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { DateTime } from "luxon";
 import { nothing } from "lit-html";
 import { defaultTemplate } from "./assets/default-template";
+import "@momentum-ui/web-components/dist/comp/md-button";
+import "@momentum-ui/web-components/dist/comp/md-badge";
+import "@momentum-ui/web-components/dist/comp/md-icon";
+import "@momentum-ui/web-components/dist/comp/md-spinner";
+import "@momentum-ui/web-components/dist/comp/md-tab";
+import "@momentum-ui/web-components/dist/comp/md-tabs";
+import "@momentum-ui/web-components/dist/comp/md-tab-panel";
+import "@cjaas/common-components/dist/comp/cjaas-timeline";
+import "@cjaas/common-components/dist/comp/cjaas-profile";
 
 export interface ServerSentEvent {
   data: string;
@@ -49,8 +58,6 @@ export default class CjaasProfileWidget extends LitElement {
   @property({ type: String, attribute: "tape-read-token" }) tapeReadToken:
     | string
     | null = null;
-  @property({ type: String, attribute: "profile-read-token" })
-  profileReadToken: string | null = null;
   @property({ type: String, attribute: "profile-write-token" })
   profileWriteToken: string | null = null;
   @property({ type: String, attribute: "base-url" }) baseURL:
@@ -77,11 +84,6 @@ export default class CjaasProfileWidget extends LitElement {
   @internalProperty() profile: any;
   @internalProperty() showSpinner = false;
 
-  // connectedCallback(){
-  //   super.connectedCallback()
-  //   this.subscribeToStream()
-  // }
-
   updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
 
@@ -94,13 +96,11 @@ export default class CjaasProfileWidget extends LitElement {
     }
 
     if (
-      changedProperties.has("profileReadToken") ||
       changedProperties.has("profileWriteToken") ||
       changedProperties.has("filter")
     ) {
       this.timelineItems = [];
       this.subscribeToStream();
-      // this.requestUpdate();
     }
 
     if (
@@ -109,6 +109,7 @@ export default class CjaasProfileWidget extends LitElement {
     ) {
       this.timelineItems = [];
       this.getJourney();
+      this.subscribeToStream();
     }
   }
 
@@ -138,9 +139,9 @@ export default class CjaasProfileWidget extends LitElement {
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.profileWriteToken,
+        Authorization: "SharedAccessSignature " + this.profileWriteToken
       },
-      data,
+      data
     };
     return axios(url, options)
       .then((x: AxiosResponse) => x.data)
@@ -162,7 +163,7 @@ export default class CjaasProfileWidget extends LitElement {
           return {
             query: y,
             result: x.attributeView[i].result.split(","),
-            journeyEvents,
+            journeyEvents
           };
         });
 
@@ -171,6 +172,7 @@ export default class CjaasProfileWidget extends LitElement {
       })
       .catch((err: Error) => {
         console.log(err);
+        this.profile = undefined;
         this.showSpinner = false;
         this.requestUpdate();
       });
@@ -179,9 +181,7 @@ export default class CjaasProfileWidget extends LitElement {
   // Timeline Logic
   // defaults to top 10 for journey
   getTimelineAPIQueryParams(forJourney = false) {
-    let url = this.tapeReadToken?.replace(/sig=(.*)/, (...matches) => {
-      return "sig=" + encodeURIComponent(matches[1]);
-    });
+    let url = this.tapeReadToken;
 
     if (this.filter) {
       url += `&$filter=${this.filter}`;
@@ -216,17 +216,21 @@ export default class CjaasProfileWidget extends LitElement {
     this.showTimelineSpinner = true;
     this.baseUrlCheck();
     // gets historic journey
-    fetch(
-      `${this.baseURL}/v1/journey/events?${this.getTimelineAPIQueryParams(
-        true
-      )}`,
-      {
-        headers: {
-          "content-type": "application/json; charset=UTF-8",
-        },
-        method: "GET",
-      }
-    )
+
+    let url;
+
+    if (this.customer) {
+      url = `${this.baseURL}/v1/journey/streams/historic/${this.customer}`;
+    } else {
+      url = `${this.baseURL}/v1/journey/streams/historic`;
+    }
+
+    fetch(`${url}?${this.getTimelineAPIQueryParams(true)}`, {
+      headers: {
+        "content-type": "application/json; charset=UTF-8"
+      },
+      method: "GET"
+    })
       .then((x: Response) => x.json())
       .then((x: { events: Array<ServerSentEvent> }) => {
         x?.events
@@ -236,7 +240,7 @@ export default class CjaasProfileWidget extends LitElement {
       .then(() => {
         this.showTimelineSpinner = false;
       })
-      .catch((err) => {
+      .catch(err => {
         this.showTimelineSpinner = false;
         this.errorMessage = `Failure to fetch Journey ${err}`;
       });
@@ -249,11 +253,18 @@ export default class CjaasProfileWidget extends LitElement {
 
     this.baseUrlCheck();
     if (this.streamReadToken === null) {
-      debugger;
+      console.error("Please provide a Stream Read Token");
     }
-    this.eventSource = new EventSource(
-      `${this.baseURL}/v1/journey/streams?${this.streamReadToken}`
-    );
+
+    let url;
+
+    if (this.customer) {
+      url = `${this.baseURL}/v1/journey/streams/${this.customer}`;
+    } else {
+      url = `${this.baseURL}/v1/journey/streams`;
+    }
+
+    this.eventSource = new EventSource(`${url}?${this.streamReadToken}`);
     // @ts-ignore
     this.eventSource.onmessage = (event: ServerSentEvent) => {
       let data;
@@ -320,27 +331,39 @@ export default class CjaasProfileWidget extends LitElement {
         ></cjaas-timeline>
       `;
     } else {
-      return html`
-        <div class="empty-state">
-          ${this.showTimelineSpinner
-            ? html`
-                <div class="spinner-container">
-                  <md-spinner size="32"></md-spinner>
-                </div>
-              `
-            : html`
-                <div class="spinner-container">
-                  <slot name="ll10n-no-timeline-message">
-                    <h3>No Timeline available</h3>
-                  </slot>
-                  <p class="error-message">
-                    ${this.errorMessage || nothing}
-                  </p>
-                </div>
-              `}
-        </div>
-      `;
+      return this.getEmptyStateTemplate();
     }
+  }
+
+  getEmptyStateTemplate() {
+    return html`
+      <div class="empty-state">
+        ${this.showTimelineSpinner
+          ? this.getSpinner()
+          : this.getTimelineEmptyStateMessage()}
+      </div>
+    `;
+  }
+
+  getTimelineEmptyStateMessage() {
+    return html`
+      <div class="spinner-container">
+        <slot name="ll10n-no-timeline-message">
+          <h3>No Timeline available</h3>
+        </slot>
+        <p class="error-message">
+          ${this.errorMessage || nothing}
+        </p>
+      </div>
+    `;
+  }
+
+  getSpinner() {
+    return html`
+      <div class="spinner-container">
+        <md-spinner size="32"></md-spinner>
+      </div>
+    `;
   }
 
   getFormattedProfile() {
@@ -383,53 +406,52 @@ export default class CjaasProfileWidget extends LitElement {
     // tab data should return the event as such.. Should be rendered by stream component.
     const tabs = this.profile.filter((x: any) => x.query.type === "tab");
     // TODO: Track the selected tab to apply a class to the badge for color synching, making blue when selected
-    debugger;
-    const activityTab =
-      this.profileReadToken || this.profileWriteToken
-        ? html`
-            <md-tab slot="tab">
-              <span>All</span>
-            </md-tab>
-            <md-tab-panel slot="panel">
-              ${this.renderTimeline(this.timelineItems)}
-            </md-tab-panel>
-          `
-        : html`
-            <div class="center full-height">
-              <slot name="l10n-no-data-message">
-                <div>No data to show</div>
-              </slot>
-            </div>
-          `;
+    const activityTab = this.profileWriteToken
+      ? html`
+          <md-tab slot="tab">
+            <span>All</span>
+          </md-tab>
+          <md-tab-panel slot="panel">
+            ${this.renderTimeline(this.timelineItems)}
+          </md-tab-panel>
+        `
+      : html`
+          <div class="center full-height">
+            <slot name="l10n-no-data-message">
+              <div>No data to show</div>
+            </slot>
+          </div>
+        `;
     if (tabs && tabs.length > 0) {
       return html`
         <md-tabs>
-          ${activityTab}
-          ${tabs.map((x: any) => {
-            return html`
-              <md-tab slot="tab">
-                <span>${x.query.DisplayName}</span
-                ><md-badge small
-                  >${x.journeyEvents ? x.journeyEvents.length : "0"}</md-badge
-                >
-              </md-tab>
-              <md-tab-panel slot="panel">
-                <!-- use verbose journey events with timeline comp -->
-                ${x.journeyEvents
-                  ? this.renderTimeline(
-                      x.journeyEvents.map((y: any) =>
-                        this.getTimelineItemFromMessage(y)
-                      )
-                    )
-                  : nothing}
-              </md-tab-panel>
-            `;
-          })}
+          ${activityTab} ${tabs.map((x: any) => this.getTab(x))}
         </md-tabs>
       `;
     } else {
       return activityTab;
     }
+  }
+
+  getTab(tab: any) {
+    return html`
+      <md-tab slot="tab">
+        <span>${tab.query.DisplayName}</span
+        ><md-badge small
+          >${tab.journeyEvents ? tab.journeyEvents.length : "0"}</md-badge
+        >
+      </md-tab>
+      <md-tab-panel slot="panel">
+        <!-- use verbose journey events with timeline comp -->
+        ${tab.journeyEvents
+          ? this.renderTimeline(
+              tab.journeyEvents.map((y: any) =>
+                this.getTimelineItemFromMessage(y)
+              )
+            )
+          : nothing}
+      </md-tab-panel>
+    `;
   }
 
   static get styles() {
@@ -441,28 +463,31 @@ export default class CjaasProfileWidget extends LitElement {
       <div class="outer-container" part="profile-widget-outer">
         ${this.profile
           ? this.getFormattedProfile()
-          : html`
-              <div class="empty-state">
-                ${this.showSpinner
-                  ? html`
-                      <div class="spinner-container">
-                        <md-spinner size="32"></md-spinner>
-                      </div>
-                    `
-                  : html`
-                      <div class="spinner-container">
-                        <slot name="l10n-no-profile-message">
-                          No Profile available
-                        </slot>
-                      </div>
-                    `}
-              </div>
-            `}
+          : this.getProfileEmptyStateTemplate()}
+      </div>
+    `;
+  }
+
+  getProfileEmptyStateTemplate() {
+    return html`
+      <div class="empty-state">
+        ${this.showSpinner
+          ? this.getSpinner()
+          : this.getProfileEmptyStateMessage()}
+      </div>
+    `;
+  }
+
+  getProfileEmptyStateMessage() {
+    return html`
+      <div class="spinner-container">
+        <slot name="l10n-no-profile-message">
+          No Profile available
+        </slot>
       </div>
     `;
   }
 }
-
 declare global {
   interface HTMLElementTagNameMap {
     "cjaas-profile-view-widget": CjaasProfileWidget;

@@ -88,21 +88,23 @@ export class Sandbox extends LitElement {
             style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
             class="widget-container"
           >
+            <!-- We might need this read token very soon -->
+            <!-- profile-read-token="so=demoassure&sn=sandbox&ss=profile&sp=r&se=2022-06-17T23:47:34.409Z&sk=sandbox&sig=61BLCJ5+vZtOOvut/7khUQyg0N9KlvbPrJWrYa9lf28=" -->
             <cjaas-profile-view-widget
               id="view"
               customer="560021-Venki"
               .template=${sampleTemplate}
-              profile-read-token="so=demoassure&sn=sandbox&ss=profile&sp=r&se=2022-06-17T23:47:34.409Z&sk=sandbox&sig=61BLCJ5+vZtOOvut/7khUQyg0N9KlvbPrJWrYa9lf28="
-              profile-write-token="so=demoassure&sn=sandbox&ss=profile&sp=w&se=2022-06-17T21:36:08.050Z&sk=sandbox&sig=gm/XQ+jtu8uWPrUtpRfR6P4DHwrJV2CJokIH3BcgzdE="
-              stream-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-06-17T19:18:05.538Z&sk=sandbox&sig=nJOri1M66leDMnfL93UlufHegDf3hAwoQ/Mj37ReQBs="
+              profile-write-token="so=demoassure&sn=sandbox&ss=profile&sp=w&se=2022-06-17T21:36:08.050Z&sk=sandbox&sig=gm%2FXQ%2Bjtu8uWPrUtpRfR6P4DHwrJV2CJokIH3BcgzdE%3D"
+              tape-read-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=7G8UdEipQHnWOV3hRbTqkNxxjQNHkkQYGDlCrgEhK0k%3D"
+              stream-read-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-06-17T19:18:05.538Z&sk=sandbox&sig=nJOri1M66leDMnfL93UlufHegDf3hAwoQ%2FMj37ReQBs%3D"
               timelineType="journey-and-stream"
               base-url="https://uswest-nonprod.cjaas.cisco.com"
-              ></cjaas-profile-view-widget>
-            </div>
-            <div
+            ></cjaas-profile-view-widget>
+          </div>
+          <div
             style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
             class="widget-container"
-            >
+          >
             <cjaas-profile-view-widget
               id="view"
               customer="560021-Venki"
