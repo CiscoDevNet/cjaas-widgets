@@ -28,7 +28,7 @@ import { ConditionBlock } from "@cjaas/common-components";
 const SUPPORTED_TRIGGER_TYPES: triggerType[] = [
   "WebexWalkin",
   "AgentOffer",
-  "WebhookTrigger",
+  "Webhook",
   "IMIFlowTrigger",
   "ChatBot",
 ];
@@ -60,7 +60,7 @@ export default class CjaasActionBuilder extends LitElement {
   @internalProperty() _templateResponse: any;
   @internalProperty() optionsList: any[] = [];
   @internalProperty() readOnlyMode = false;
-  @internalProperty() targets: ACTION["actions"] = [];
+  @internalProperty() targets: ACTION["actionTriggers"] = [];
   @internalProperty() templateAPIInProgress = false;
   @internalProperty() actionAPIInProgress = false;
 
@@ -96,7 +96,7 @@ export default class CjaasActionBuilder extends LitElement {
       this.getAction().then((x: ACTION) => {
         this.actionConfig = x;
         this.conditions = x.rules;
-        this.targets = x.actions;
+        this.targets = x.actionTriggers;
 
         this.readOnlyMode = true;
 
@@ -137,7 +137,7 @@ export default class CjaasActionBuilder extends LitElement {
 
   // fetch template from server or use mockTemplate
   getTemplates() {
-    let url = `${this.baseURL}/v1/views?id=${this.templateId}`;
+    let url = `${this.baseURL}/v1/journey/views/templates?id=${this.templateId}`;
 
     if (this.mockTemplate) {
       return new Promise((resolve, reject) => {
@@ -162,7 +162,7 @@ export default class CjaasActionBuilder extends LitElement {
         this.templateAPIInProgress = false;
         return x.json();
       })
-      .then((x) => x.data);
+      .then((x) => x.data[0]);
   }
 
   // name input for action
@@ -252,7 +252,6 @@ export default class CjaasActionBuilder extends LitElement {
   updateConditions(event: CustomEvent) {
     let conditions = this.rootConditionBlockElement?.getValue();
     if (conditions) {
-      console.log(conditions, "from update conditions");
       this.conditions = conditions;
     }
   }
@@ -296,16 +295,14 @@ export default class CjaasActionBuilder extends LitElement {
   }
 
   getTargetSummary() {
-    return this.actionConfig?.actions.map((x: any, i: number) => {
+    return this.actionConfig?.actionTriggers.map((x: any, i: number) => {
       let filler = "then";
       if (i > 0) {
         filler = "and";
       }
 
       return html`
-        <div class="target-summary">
-          ${filler} trigger <b>${x.actionType}</b>
-        </div>
+        <div class="target-summary">${filler} trigger <b>${x.type}</b></div>
       `;
     });
   }
@@ -323,7 +320,7 @@ export default class CjaasActionBuilder extends LitElement {
     } else if ((rules as MultiLineCondition).args) {
       let _rules: any = (rules as MultiLineCondition).args.map(
         (x: string | ConditionBlockInterface) => {
-          if (ConditionBlock.Shared.isConditionBlock(x)) {
+          if (this.isConditionBlock(x)) {
             return html`
               ${this.getConditionBlockSummary(x, innerRelation)}
             `;
@@ -418,7 +415,7 @@ export default class CjaasActionBuilder extends LitElement {
             .options=${SUPPORTED_TRIGGER_TYPES}
             placeholder="Target"
             @dropdown-selected=${(ev: any) => {
-              this.setTarget(ev.detail.option, 0);
+              this.setTargetType(ev.detail.option, 0);
             }}
           ></md-dropdown>
         </div>
@@ -431,17 +428,14 @@ export default class CjaasActionBuilder extends LitElement {
             ${i === 0 ? "then" : "and"} trigger
             <md-dropdown
               .options=${SUPPORTED_TRIGGER_TYPES}
-              .selectedKey=${<any>x.actionType}
+              .selectedKey=${<any>x.type}
               placeholder="Target"
               @dropdown-selected=${(ev: any) => {
-                this.setTarget(ev.detail.option, i);
+                this.setTargetType(ev.detail.option, i);
               }}
             >
             </md-dropdown>
-            ${this.getPayloadTemplate(
-              <triggerType>x.actionType,
-              x.actionConfig
-            )}
+            ${this.getPayloadTemplate(<triggerType>x.type, x)}
             <div class="add-below-icon" title="Add New Condition">
               <md-icon
                 name="icon-add_24"
@@ -462,13 +456,12 @@ export default class CjaasActionBuilder extends LitElement {
     }
   }
 
-  setTarget(option: string, index: number) {
+  setTargetType(option: triggerType, index: number) {
     if (this.targets[index]) {
-      this.targets[index].actionType = option;
+      this.targets[index].type = option;
     } else {
       this.targets[index] = {
-        actionType: option,
-        actionConfig: {},
+        type: option,
       };
     }
 
@@ -476,15 +469,16 @@ export default class CjaasActionBuilder extends LitElement {
   }
 
   addNewTarget(index: number = 0) {
+    this.setTarget();
     this.targets.splice(index + 1, 0, {
-      actionType: undefined,
-      actionConfig: undefined,
+      type: undefined,
     });
 
     this.requestUpdate();
   }
 
   deleteTarget(index: number) {
+    this.setTarget();
     this.targets.splice(index, 1);
     this.requestUpdate();
   }
@@ -498,9 +492,9 @@ export default class CjaasActionBuilder extends LitElement {
           .value=${config?.agentId || null}
         ></md-input>
         <md-input
-          id="walkin_agent_name"
-          placeholder="Nick Name"
-          .value=${config?.nickname || null}
+          id="interrupt_title"
+          placeholder="Title"
+          .value=${config?.title || null}
         ></md-input>
         <md-input
           id="preferred_message"
@@ -543,11 +537,18 @@ export default class CjaasActionBuilder extends LitElement {
 
   getIMIFlowTemplate(config: any) {
     return html`
-      <md-input
-        id="imi_flow_url"
-        .value=${config?.url || null}
-        placeholder="IMI FLOW URL"
-      ></md-input>
+      <div>
+        <md-input
+          id="imi_flow_url"
+          .value=${config?.flowURL || null}
+          placeholder="IMI Flow URL"
+        ></md-input>
+        <md-input
+          id="imi_flow_id"
+          .value=${config?.flowId || null}
+          placeholder="IMI Flow Id"
+        ></md-input>
+      </div>
     `;
   }
 
@@ -556,7 +557,7 @@ export default class CjaasActionBuilder extends LitElement {
       <div>
         <md-input
           id="chatbot_url"
-          .value=${config.botURL || null}
+          .value=${config?.botURL || null}
           placeholder="ChatBot URL"
         ></md-input>
         <md-input
@@ -574,7 +575,7 @@ export default class CjaasActionBuilder extends LitElement {
       return this.getWalkinTemplate(config);
     } else if (triggerType === "AgentOffer") {
       return this.getAgentOfferTemplate(config);
-    } else if (triggerType === "WebhookTrigger") {
+    } else if (triggerType === "Webhook") {
       return this.getWebhookTemplate(config);
     } else if (triggerType === "IMIFlowTrigger") {
       return this.getIMIFlowTemplate(config);
@@ -595,14 +596,14 @@ export default class CjaasActionBuilder extends LitElement {
     return matches && matches[1];
   }
 
-  isConditionValid(name: string) {
+  isActionNamed(name: string) {
     if (!name || !name.trim()) {
       this.errorMessage = "Action is missing name.";
       this.showErrorMessage = true;
       return;
     }
 
-    if (this.targets.length === 0 || this.targets[0].actionType === undefined) {
+    if (this.targets.length === 0 || this.targets[0].type === undefined) {
       this.errorMessage = "No Trigger Configured.";
       this.showErrorMessage = true;
       return;
@@ -611,30 +612,71 @@ export default class CjaasActionBuilder extends LitElement {
     return true;
   }
 
+  areConditionsValid(conditions: ConditionBlockInterface) {
+    let _name = this.actionNameElement?.value?.trim();
+    if (!this.isActionNamed(_name || this.actionConfig?.name)) {
+      return false;
+    }
+
+    const containsError = function(condition: MultiLineCondition) {
+      let error;
+      for (const x of (condition as MultiLineCondition)?.args) {
+        if (!(x as MultiLineCondition).args) {
+          continue;
+        } else if ((x as MultiLineCondition).args.length < 2) {
+          error = true;
+          break;
+        } else {
+          let _error: any = containsError(x as MultiLineCondition);
+          if (_error) {
+            error = _error;
+            break;
+          }
+        }
+      }
+
+      return error;
+    };
+
+    if ((conditions as MultiLineCondition).args) {
+      const error = containsError(conditions as MultiLineCondition);
+
+      if (error) {
+        this.errorMessage = "A Block must have atleast 2 conditions";
+        this.showErrorMessage = true;
+        return false;
+      }
+
+      return true;
+    }
+
+    return true;
+  }
+
+  setTarget() {
+    this.targets = this.targets?.map((x) => {
+      return this.getPayload(x.type as triggerType);
+    }) as ACTION["actionTriggers"];
+  }
+
   saveTrigger() {
     this.conditions = this.getConditions();
 
     let _name = this.actionNameElement?.value?.trim();
 
-    if (!this.isConditionValid(_name)) {
-      return;
-    }
-
     // any because filter is not recognized by TS type inference
-    const actions: any = this.targets
-      ?.map((x) => {
-        return this.getPayload(<triggerType>x.actionType) || null;
-      })
-      .filter((x) => !!x);
+    this.setTarget();
+    const actionTriggers: any = this.targets.filter((x) => !!x);
 
     // TODO:
     // implement an alert md dialog component
-    if (!actions || actions.length === 0) {
-      alert("No Actions configured");
+    if (!actionTriggers || actionTriggers.length === 0) {
+      this.errorMessage = "No Actions configured";
+      this.showErrorMessage = true;
       return;
     }
 
-    if (!this.conditions) {
+    if (!this.conditions || !this.areConditionsValid(this.conditions)) {
       return;
     }
 
@@ -646,7 +688,7 @@ export default class CjaasActionBuilder extends LitElement {
       active: this.actionConfig?.active || true,
       templateId: <string>this.templateId,
       rules: this.conditions,
-      actions,
+      actionTriggers,
     };
 
     this.postResult(result);
@@ -663,20 +705,25 @@ export default class CjaasActionBuilder extends LitElement {
       },
       method: "POST",
       body: JSON.stringify(result),
-    }).then(
-      (x) => {
-        this.disableSaveButton = false;
-        if (x) {
-          this.setSuccessMessage();
-        }
-      },
-      (err) => {
-        this.disableSaveButton = false;
+    })
+      .then((x) => x.json())
+      .then(
+        (x) => {
+          this.disableSaveButton = false;
+          if (x.error) {
+            this.errorMessage = x.error?.message[0]?.description;
+            this.showErrorMessage = true;
+          } else if (x) {
+            this.setSuccessMessage();
+          }
+        },
+        (err) => {
+          this.disableSaveButton = false;
 
-        this.showErrorMessage = true;
-        console.log(err);
-      }
-    );
+          this.showErrorMessage = true;
+          console.log(err);
+        }
+      );
   }
 
   setSuccessMessage() {
@@ -691,12 +738,12 @@ export default class CjaasActionBuilder extends LitElement {
 
   getPayload(
     triggerType: triggerType
-  ): { actionType: triggerType; actionConfig: any } | undefined {
+  ): { type: triggerType; [key: string]: any } | undefined {
     if (triggerType == "AgentOffer") {
       return this.getAgentOfferPayload();
     } else if (triggerType === "WebexWalkin") {
       return this.getWebexWalkinPayload();
-    } else if (triggerType === "WebhookTrigger") {
+    } else if (triggerType === "Webhook") {
       return this.getWebhookPayload();
     } else if (triggerType === "IMIFlowTrigger") {
       return this.getIMIFlowPayload();
@@ -709,16 +756,16 @@ export default class CjaasActionBuilder extends LitElement {
     let imageURL = (<HTMLInputElement>(
       this.shadowRoot?.querySelector("#offer_url")
     ))?.value?.trim();
-    let imageWidth = (<HTMLInputElement>(
-      this.shadowRoot?.querySelector("#max_width")
-    ))?.value;
+    let imageWidth = parseInt(
+      (<HTMLInputElement>this.shadowRoot?.querySelector("#max_width"))?.value ||
+        "0",
+      10
+    );
 
     return {
-      actionType: "AgentOffer" as triggerType,
-      actionConfig: {
-        imageURL,
-        imageWidth,
-      },
+      type: "AgentOffer" as triggerType,
+      imageURL,
+      imageWidth,
     };
   }
 
@@ -729,43 +776,42 @@ export default class CjaasActionBuilder extends LitElement {
     let welcomeMessage = (<HTMLInputElement>(
       this.shadowRoot?.querySelector("#preferred_message")
     ))?.value?.trim();
-    let nickname = (<HTMLInputElement>(
-      this.shadowRoot?.querySelector("#walkin_agent_name")
+    let title = (<HTMLInputElement>(
+      this.shadowRoot?.querySelector("#interrupt_title")
     ))?.value?.trim();
 
     return {
-      actionType: "WebexWalkin" as triggerType,
-      actionConfig: {
-        agentId,
-        nickname,
-        welcomeMessage,
-      },
+      type: "WebexWalkin" as triggerType,
+      agentId,
+      title,
+      welcomeMessage,
     };
   }
 
   getWebhookPayload() {
-    const url = (<HTMLInputElement>(
+    const webhookURL = (<HTMLInputElement>(
       this.shadowRoot?.querySelector("#webhook_url")
     ))?.value?.trim();
 
     return {
-      actionType: "WebhookTrigger" as triggerType,
-      actionConfig: {
-        url,
-      },
+      type: "Webhook" as triggerType,
+      webhookURL,
     };
   }
 
   getIMIFlowPayload() {
-    const url = (<HTMLInputElement>(
+    const flowURL = (<HTMLInputElement>(
       this.shadowRoot?.querySelector("#imi_flow_url")
     ))?.value?.trim();
 
+    const flowId = (<HTMLInputElement>(
+      this.shadowRoot?.querySelector("#imi_flow_id")
+    ))?.value?.trim();
+
     return {
-      actionType: "IMIFlowTrigger" as triggerType,
-      actionConfig: {
-        url,
-      },
+      type: "IMIFlowTrigger" as triggerType,
+      flowURL,
+      flowId,
     };
   }
 
@@ -774,21 +820,27 @@ export default class CjaasActionBuilder extends LitElement {
       this.shadowRoot?.querySelector("#chatbot_url")
     ))?.value?.trim();
 
-    const botWidth = (<HTMLInputElement>(
-      this.shadowRoot?.querySelector("#chatbot_width")
-    ))?.value;
+    const botWidth = parseInt(
+      (<HTMLInputElement>this.shadowRoot?.querySelector("#chatbot_width"))
+        ?.value,
+      10
+    );
 
     return {
-      actionType: "ChatBot" as triggerType,
-      actionConfig: {
-        botURL,
-        botWidth,
-      },
+      type: "ChatBot" as triggerType,
+      botURL,
+      botWidth,
     };
   }
 
   getConditions() {
     let conditions = this.rootConditionBlockElement?.getValue();
+
+    if (conditions?.error) {
+      this.errorMessage = conditions.description;
+      this.showErrorMessage = true;
+      return;
+    }
 
     if (typeof conditions === "string") {
       return {
@@ -798,6 +850,16 @@ export default class CjaasActionBuilder extends LitElement {
     }
 
     return conditions;
+  }
+
+  isConditionBlock(x: any) {
+    if (!x) {
+      return false;
+    }
+
+    if (typeof x === "object" && x.args) {
+      return true;
+    }
   }
 }
 
@@ -815,7 +877,7 @@ export interface CONDITION {
 
 export type triggerType =
   | "WebexWalkin"
-  | "WebhookTrigger"
+  | "Webhook"
   | "AgentOffer"
   | "ChatBot"
   | "IMIFlowTrigger";
@@ -836,9 +898,9 @@ export interface ACTION {
   namespace?: string; //"sandbox",
   templateId: string; // "xxx",
   rules: ConditionBlockInterface;
-  actions: Array<{
-    actionType: string | undefined;
-    actionConfig: any;
+  actionTriggers: Array<{
+    type: triggerType | undefined;
+    [key: string]: any;
   }>;
 }
 
