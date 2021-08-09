@@ -24,8 +24,9 @@ import "@momentum-ui/web-components/dist/comp/md-button";
 import "@momentum-ui/web-components/dist/comp/md-dropdown";
 import "@momentum-ui/web-components/dist/comp/md-input";
 
-import { nothing } from "lit-html";
+import { nothing, TemplateResult } from "lit-html";
 import { ConditionBlock } from "@cjaas/common-components";
+import { Template } from "lit";
 
 const SUPPORTED_TRIGGER_TYPES: triggerType[] = [
   "WebexWalkin",
@@ -39,7 +40,7 @@ const SUPPORTED_TRIGGER_TYPES: triggerType[] = [
 export default class CjaasActionBuilder extends LitElement {
   @property() mockAction: any;
   @property() mockTemplate: any;
-  @property({ attribute: "action-id" }) actionName: string | undefined;
+  @property({ attribute: "action-name" }) actionName: string | undefined;
   @property({ attribute: "template-id" }) templateId: string | undefined;
   @property({ attribute: "action-read-sas-token" })
   actionReadSasToken: SASTOKEN = null;
@@ -284,7 +285,7 @@ export default class CjaasActionBuilder extends LitElement {
 
   getActionSummary() {
     return html`
-      Jouney
+      <span class="title">Jouney</span>
       <div>
         ${this.getConditionBlockSummary(
           this.actionConfig?.rules as ConditionBlockInterface
@@ -298,13 +299,15 @@ export default class CjaasActionBuilder extends LitElement {
 
   getTargetSummary() {
     return this.actionConfig?.actionTriggers.map((x: any, i: number) => {
-      let filler = "then";
+      let filler = "Then";
       if (i > 0) {
         filler = "and";
       }
 
       return html`
-        <div class="target-summary">${filler} trigger <b>${x.type}</b></div>
+        <div class="target-summary">
+          <span class="static">${filler} trigger</span> <b>${x.type}</b>
+        </div>
       `;
     });
   }
@@ -315,19 +318,20 @@ export default class CjaasActionBuilder extends LitElement {
   ) {
     let innerRelation = typeof rules !== "string" ? rules?.logic : "AND";
 
-    let conditionList: Array<string> = [];
+    let conditionList: Array<TemplateResult> = [];
 
     if (typeof rules === "string") {
-      conditionList = [rules];
+      conditionList = [this.getConditionSummary(rules)];
     } else if ((rules as MultiLineCondition).args) {
       let _rules: any = (rules as MultiLineCondition).args.map(
-        (x: string | ConditionBlockInterface) => {
+        (x: string | ConditionBlockInterface, index: number) => {
           if (this.isConditionBlock(x)) {
             return html`
               ${this.getConditionBlockSummary(x, innerRelation)}
             `;
           } else {
             return html`
+              ${index > 0 ? innerRelation : ""}
               ${this.getConditionSummary(x as string | SingleLineCondition)}
             `;
           }
@@ -335,7 +339,7 @@ export default class CjaasActionBuilder extends LitElement {
       );
       conditionList.push(..._rules);
     } else if (rules.logic === "SINGLE") {
-      conditionList.push(rules.condition);
+      conditionList.push(this.getConditionSummary(rules.condition));
     }
 
     let text = nothing;
@@ -347,17 +351,19 @@ export default class CjaasActionBuilder extends LitElement {
     }
 
     return html`
+      <!-- pre block  -->
       ${text}${relation ? "(" : nothing}
 
+      <!-- intedation starts for  -->
       <div class=${relation ? "intend" : nothing}>
         ${conditionList.map(
           (x: any, i: number) =>
             html`
-              <div>${x} ${i === conditionList.length - 1 ? nothing : text}</div>
+              <div>${x}</div>
             `
         )}
       </div>
-      ${relation ? ")" : nothing}
+      ${relation ? `)` : nothing}
     `;
   }
 
@@ -375,7 +381,11 @@ export default class CjaasActionBuilder extends LitElement {
       field;
 
     return html`
-      if ${field} is ${this.getReadableOperator(operator)} ${value}
+      <span class="static">if</span>
+      <span class="field">&nbsp;${_field}&nbsp;</span>
+      <span class="static">is</span>
+      <span class="operator">${this.getReadableOperator(operator)}</span>
+      ${value}
     `;
   }
 
@@ -387,7 +397,7 @@ export default class CjaasActionBuilder extends LitElement {
       GT: "greater than",
       LTE: "lesser than or equal to",
       LT: "lesser than",
-      HAS: "contains",
+      HAS: "containing",
     };
 
     return operatorMap[operator];
@@ -400,7 +410,7 @@ export default class CjaasActionBuilder extends LitElement {
 
   getReadOnlyTemplate() {
     return html`
-      <div>${this.getActionSummary()}</div>
+      <div class="summary">${this.getActionSummary()}</div>
       <md-button class="edit-button" @click=${() => (this.readOnlyMode = false)}
         >Edit Action</md-button
       >
