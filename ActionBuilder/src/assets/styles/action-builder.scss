@@ -63,3 +63,24 @@ md-icon {
 .edit-button {
   margin: 12px 0;
 }
+
+.summary {
+  font-size: 12px;
+  color: #000000;
+  margin: 12px 0;
+  .static {
+    font-style: italic;
+    color: #00000099;
+  }
+  .title {
+    margin-bottom: 16px;
+    font-weight: 700;
+  }
+  .operator {
+    color: #000000b3;
+  }
+  .field {
+    font-weight: 500;
+    color: #005073;
+  }
+}
