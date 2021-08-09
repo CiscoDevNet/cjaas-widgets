@@ -93,7 +93,7 @@ export default class CjaasTimelineWidget extends LitElement {
     // signature needs to be URI encoded for it to work
     // as query strings
     // "so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=7G8UdEipQHnWOV3hRbTqkNxxjQNHkkQYGDlCrgEhK0k=";
-    const signature = this.tapeReadToken;
+    const signature = forJourney ? this.tapeReadToken : this.streamReadToken;
 
     let url = signature;
 
@@ -153,7 +153,7 @@ export default class CjaasTimelineWidget extends LitElement {
       .then(() => {
         this.showSpinner = false;
       })
-      .catch((err) => {
+      .catch((err: any) => {
         this.showSpinner = false;
         this.errorMessage = `Failure to fetch Journey ${err}`;
       });
@@ -180,7 +180,7 @@ export default class CjaasTimelineWidget extends LitElement {
         url = `${this.baseStreamURL || this.baseURL}/v1/journey/streams`;
       }
 
-      this.eventSource = new EventSource(`${url}?${this.streamReadToken}`);
+      this.eventSource = new EventSource(`${url}?${this.getAPIQueryParams()}`);
 
       // @ts-ignore
       this.eventSource.onmessage = (event: ServerSentEvent) => {
