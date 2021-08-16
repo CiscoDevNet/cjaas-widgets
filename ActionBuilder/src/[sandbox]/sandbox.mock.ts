@@ -8,6 +8,7 @@ export const mockTemplate = {
       event: "Quote",
       metadata: "email",
       limit: 1,
+      metadataType: "string",
       displayName: "Email",
       lookbackDurationType: "days",
       lookbackPeriod: 50,
@@ -18,6 +19,7 @@ export const mockTemplate = {
       version: "0.1",
       event: "Quote",
       metadata: "Make",
+      metadataType: "string",
       limit: 1,
       displayName: "Make",
       lookbackDurationType: "days",
@@ -28,6 +30,7 @@ export const mockTemplate = {
     {
       version: "0.1",
       event: "Quote",
+      metadataType: "string",
       metadata: "Model",
       limit: 1,
       displayName: "Model",
@@ -40,6 +43,7 @@ export const mockTemplate = {
       version: "0.1",
       event: "Quote",
       metadata: "License Plate",
+      metadataType: "string",
       limit: 1,
       displayName: "License Plate",
       lookbackDurationType: "days",
@@ -49,6 +53,7 @@ export const mockTemplate = {
     },
     {
       version: "0.1",
+      metadataType: "string",
       event: "Quote",
       metadata: "ltv",
       limit: 1,
@@ -63,6 +68,7 @@ export const mockTemplate = {
       event: "Quote",
       metadata: "firstName",
       limit: 1,
+      metadataType: "string",
       displayName: "First Name",
       lookbackDurationType: "days",
       lookbackPeriod: 50,
@@ -77,6 +83,7 @@ export const mockTemplate = {
       displayName: "Zip Code",
       lookbackDurationType: "days",
       lookbackPeriod: 50,
+      metadataType: "string",
       aggregationMode: "Value",
       verbose: false,
     },
@@ -87,6 +94,7 @@ export const mockTemplate = {
       limit: 1,
       displayName: "Street",
       lookbackDurationType: "days",
+      metadataType: "string",
       lookbackPeriod: 50,
       aggregationMode: "Value",
       verbose: false,
@@ -95,6 +103,7 @@ export const mockTemplate = {
       version: "0.1",
       event: "Quote",
       metadata: "apt",
+      metadataType: "string",
       limit: 1,
       displayName: "Apt",
       lookbackDurationType: "days",
@@ -105,6 +114,7 @@ export const mockTemplate = {
     {
       version: "0.1",
       event: "Quote",
+      metadataType: "string",
       metadata: "city",
       limit: 1,
       displayName: "City",
@@ -116,6 +126,7 @@ export const mockTemplate = {
     {
       version: "0.1",
       event: "Quote",
+      metadataType: "string",
       metadata: "lastName",
       limit: 1,
       displayName: "Last Name",
@@ -135,32 +146,15 @@ export const mockAction = {
   namespace: "sandbox",
   templateId: "xxx",
   rules: {
-    AND: [
-      {
-        field: "ltv",
-        operator: "GT",
-        value: "5000",
-      },
-      {
-        field: "zipCode",
-        operator: "EQ",
-        value: "560021",
-      },
-      {
-        field: "firstName",
-        operator: "EQ",
-        value: "XYZ",
-      },
-    ],
+    args: ["Quote,ltv,value EQ 1000", "Quote,zipcode,value EQ 560021"],
+    logic: "AND",
   },
-  actions: [
+  actionsTriggers: [
     {
-      actionType: "WebexWalkin",
-      actionConfig: {
-        agentId: "123",
-        nickName: "Nick",
-        welcomeMessage: "Welcome!",
-      },
+      type: "WebexWalkin",
+      agentId: "123",
+      nickName: "Nick",
+      welcomeMessage: "Welcome!",
     },
   ],
 };

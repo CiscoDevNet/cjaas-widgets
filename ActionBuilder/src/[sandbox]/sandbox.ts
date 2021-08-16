@@ -90,16 +90,25 @@ export class Sandbox extends LitElement {
           >
             <cjaas-action-builder
               .mockTemplate=${mockTemplate}
-              actionName="{{
-              actionNameToEdit
-                ? 'demoassure_sandbox_' + actionNameToEdit
-                : undefined
-            }}"
               template-id="first-template"
-              view-sas-token="so=demoassure&sn=sandbox&ss=action&sp=r&se=2022-06-07T21:12:12.788Z&sk=sandbox&sig=Q3JWxWIsgsPnvRwdNILRG9wYQV9m4rsEHElSYvgPe30%3D"
+              view-sas-token="so=demoassure&sn=sandbox&ss=profile&sp=r&se=2022-06-17T23:47:34.409Z&sk=sandbox&sig=61BLCJ5%2BvZtOOvut%2F7khUQyg0N9KlvbPrJWrYa9lf28%3D"
               action-read-sas-token="so=demoassure&sn=sandbox&ss=action&sp=r&se=2022-06-07T21:12:12.788Z&sk=sandbox&sig=Q3JWxWIsgsPnvRwdNILRG9wYQV9m4rsEHElSYvgPe30%3D"
               action-write-sas-token="so=demoassure&sn=sandbox&ss=action&sp=w&se=2022-06-14T16:23:02.854Z&sk=sandbox&sig=M9y4tTOzkrCaRmFOVTSGg4GCLWU6xE8knwR4k%2BXrf9g%3D"
               base-url="https://uswest-nonprod.cjaas.cisco.com"
+            ></cjaas-action-builder>
+          </div>
+          <hr />
+          <div
+            style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
+            class="widget-container"
+          >
+            <cjaas-action-builder
+              action-name="test Nested"
+              template-id="first-template"
+              view-sas-token="so=demoassure&sn=sandbox&ss=profile&sp=r&se=2022-06-17T23:47:34.409Z&sk=sandbox&sig=61BLCJ5%2BvZtOOvut%2F7khUQyg0N9KlvbPrJWrYa9lf28%3D"
+              action-read-sas-token="so=demoassure&sn=sandbox&ss=action&sp=r&se=2022-06-07T21:12:12.788Z&sk=sandbox&sig=Q3JWxWIsgsPnvRwdNILRG9wYQV9m4rsEHElSYvgPe30%3D"
+              action-write-sas-token="so=demoassure&sn=sandbox&ss=action&sp=w&se=2022-06-14T16:23:02.854Z&sk=sandbox&sig=M9y4tTOzkrCaRmFOVTSGg4GCLWU6xE8knwR4k%2BXrf9g%3D"
+              base-url="https://cjaas-devus1-edge.azurewebsites.net"
             ></cjaas-action-builder>
           </div>
         </div>
