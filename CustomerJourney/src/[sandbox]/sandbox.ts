@@ -93,6 +93,7 @@ export class Sandbox extends LitElement {
               tape-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=7G8UdEipQHnWOV3hRbTqkNxxjQNHkkQYGDlCrgEhK0k%3D"
               stream-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-06-21T18:15:15.804Z&sk=sandbox&sig=e4E8GTO8EBYnR4ZVC9ksM0PUWTABW0pEWb3PjuVlv7w%3D"
               base-url="https://uswest-nonprod.cjaas.cisco.com"
+              limit="100"
             ></customer-journey-widget>
           </div>
         </div>
