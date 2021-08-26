@@ -16,7 +16,6 @@ import {
   PropertyValues,
   query
 } from "lit-element";
-import { nothing } from "lit-html";
 import { classMap } from "lit-html/directives/class-map";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
@@ -58,7 +57,7 @@ export default class CustomerJourneyWidget extends LitElement {
   @internalProperty() events: Array<CustomerEvent> = [];
   @internalProperty() newestEvents: Array<CustomerEvent> = [];
   @internalProperty() eventSource: EventSource | null = null;
-  @internalProperty() liveLoading = false;
+  @internalProperty() liveStream = false;
   @internalProperty() loading = true;
   @internalProperty() expanded = false;
   @internalProperty() errorMessage = "";
@@ -184,11 +183,7 @@ export default class CustomerJourneyWidget extends LitElement {
       let data;
       try {
         data = JSON.parse(event.data);
-        this.newestEvents.unshift(data);
-        if (this.liveLoading) {
-          this.showNewEvents();
-        }
-        this.requestUpdate();
+        this.newestEvents = [...this.newestEvents, data];
       } catch (err) {
         console.log("Event Source Ping: ", event);
       }
@@ -199,56 +194,20 @@ export default class CustomerJourneyWidget extends LitElement {
     };
   }
 
-  showNewEvents() {
-    if (this.newestEvents.length > 0) {
-      this.events = [...this.events, ...this.newestEvents];
-      this.newestEvents = [];
-      this.requestUpdate();
-    }
-  }
-
-  toggleLiveEvents() {
-    this.liveLoading = !this.liveLoading;
-    if (this.newestEvents.length > 0) {
-      this.showNewEvents();
-    }
-  }
-
-  renderNewEventQueueToggle() {
-    return html`
-      <md-toggle-switch
-        smaller
-        @click=${() => this.toggleLiveEvents()}
-        ?checked=${this.liveLoading}
-      >
-        <span style="font-size:.75rem;">
-          Show live events
-        </span>
-      </md-toggle-switch>
-      ${this.renderNewEventCounter()}
-    `;
-  }
-
-  renderNewEventCounter() {
-    return this.newestEvents.length > 0
-      ? html`
-          <md-chip
-            class="event-counter"
-            small
-            color="blue"
-            @click=${() => this.showNewEvents()}
-            value="Show ${this.newestEvents.length} new events"
-          ></md-chip>
-        `
-      : nothing;
+  updateComprehensiveEventList() {
+    this.events = [...this.newestEvents, ...this.events];
+    this.newestEvents = [];
   }
 
   renderEvents() {
     return html`
       <cjaas-timeline
         .timelineItems=${this.events}
+        .newestEvents=${this.newestEvents}
+        @new-event-queue-cleared=${this.updateComprehensiveEventList}
         limit=${this.limit}
         show-filters
+        ?live-stream=${this.liveStream}
       ></cjaas-timeline>
     `;
   }
@@ -262,9 +221,6 @@ export default class CustomerJourneyWidget extends LitElement {
   renderEventList() {
     return html`
       <section id="events-list">
-        <div class="new-events">
-          ${this.renderNewEventQueueToggle()}
-        </div>
         ${this.renderEvents()}
       </section>
     `;
@@ -283,9 +239,7 @@ export default class CustomerJourneyWidget extends LitElement {
           shape="pill"
           placeholder="Journey ID e.g. '98126-Kevin'"
         ></md-input>
-        <md-button @click=${() => this.changeCustomer()}
-          >Load Journey</md-button
-        >
+        <md-button @click=${this.changeCustomer}>Load Journey</md-button>
       </div>
       <div class="container ${classMap(this.resizeClassMap)}">
         ${this.loading ? this.renderLoader() : this.renderEventList()}
