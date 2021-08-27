@@ -106,6 +106,11 @@ export default class CjaasTimelineWidget extends LitElement {
     }
   }
 
+  updateComprehensiveEventList() {
+    this.events = [...this.newestEvents, ...this.events];
+    this.newestEvents = [];
+  }
+
   async getExistingEvents() {
     this.showSpinner = true;
     this.baseUrlCheck();
@@ -128,7 +133,8 @@ export default class CjaasTimelineWidget extends LitElement {
       })
       .catch(err => {
         this.showSpinner = false;
-        this.errorMessage = `Failure to fetch Journey ${err}`;
+        console.error("Could not fetch Customer Journey events. ", err);
+        this.errorMessage = `Failure to fetch Journey for ${this.personId}. ${err}`;
       });
   }
 
@@ -152,24 +158,23 @@ export default class CjaasTimelineWidget extends LitElement {
       );
     }
 
-    this.eventSource!.onmessage = (event: ServerSentEvent) => {
-      let data;
-      try {
-        data = JSON.parse(event.data);
-        this.newestEvents = [data, ...this.newestEvents];
-      } catch (err) {
-        console.log("Event Source Ping: ", event);
-      }
-    };
+    if (this.eventSource) {
+      this.eventSource!.onmessage = (event: ServerSentEvent) => {
+        let data;
+        try {
+          data = JSON.parse(event.data);
+          this.newestEvents = [data, ...this.newestEvents];
+        } catch (err) {
+          console.log("Event Source Ping");
+        }
+      };
 
-    this.eventSource!.onerror = () => {
-      this.showSpinner = false;
-    };
-  }
-
-  updateComprehensiveEventList() {
-    this.events = [...this.newestEvents, ...this.events];
-    this.newestEvents = [];
+      this.eventSource!.onerror = () => {
+        this.showSpinner = false;
+      };
+    } else {
+      console.error(`No event source is active for ${this.personId}`);
+    }
   }
 
   static get styles() {

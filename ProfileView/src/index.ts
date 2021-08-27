@@ -31,28 +31,26 @@ import "@momentum-ui/web-components/dist/comp/md-tabs";
 import "@momentum-ui/web-components/dist/comp/md-tab-panel";
 import "@cjaas/common-components/dist/comp/cjaas-timeline";
 import "@cjaas/common-components/dist/comp/cjaas-profile";
-
-export interface ServerSentEvent {
-  data: string;
-}
-
-export type TimelineItem = {
-  title: string;
-  text?: string;
-  person?: string;
-  subText?: string;
-  data?: any;
-  footer?: string;
-  timestamp?: any;
-  showMore?: boolean;
+import { EventSourceInitDict } from "eventsource";
+import { ServerSentEvent } from "./types/cjaas";
+export interface CustomerEvent {
+  data: Record<string, any>;
+  firstName: string;
+  lastName: string;
+  email: string;
+  datacontenttype: string;
   id: string;
-};
-
+  person: string;
+  source: string;
+  specversion: string;
+  time: string;
+  type: string;
+}
 @customElementWithCheck("cjaas-profile-view-widget")
 export default class CjaasProfileWidget extends LitElement {
   @property() customer: string | undefined;
   @property() template: any | null | undefined = defaultTemplate;
-  @property({ type: String, attribute: "stream-read-token" }) streamReadToken:
+  @property({ type: String, attribute: "stream-read-token" }) streamToken:
     | string
     | null = null;
   @property({ type: String, attribute: "tape-read-token" }) tapeReadToken:
@@ -66,23 +64,42 @@ export default class CjaasProfileWidget extends LitElement {
   @property({ type: String, attribute: "base-stream-url" }) baseStreamURL:
     | string
     | undefined = undefined;
-
-  // timeline properties
-  @property({ type: Array }) timelineItems: TimelineItem[] = [];
-  @property() filter: string | undefined;
-  @property({ reflect: true }) pagination = "$top=15";
   @property({ type: Number }) limit = 5;
-  @property({ reflect: true }) timelineType:
-    | "journey"
-    | "livestream"
-    | "journey-and-stream" = "livestream";
-
+  @internalProperty() liveStream = false;
+  @internalProperty() events: CustomerEvent[] = [];
+  @internalProperty() newestEvents: Array<CustomerEvent> = [];
   @internalProperty() eventSource: EventSource | null = null;
   @internalProperty() showTimelineSpinner = false;
   @internalProperty() errorMessage = "";
-
   @internalProperty() profile: any;
   @internalProperty() showSpinner = false;
+
+  async lifecycleTasks() {
+    const data = await this.getExistingEvents();
+    this.events = data.events;
+    this.showSpinner = false;
+    this.requestUpdate();
+    this.subscribeToStream();
+  }
+
+  async firstUpdated(changedProperties: PropertyValues) {
+    super.firstUpdated(changedProperties);
+    await this.lifecycleTasks();
+
+    // Preserve for responsive display development
+    // @ts-ignore
+    // const ro = new ResizeObserver((entries: any) => {
+    //   for (const entry of entries) {
+    //     const cr = entry.contentRect;
+    //     if (cr.width < 589) {
+    //       this.expanded = false;
+    //     } else {
+    //       this.expanded = true;
+    //     }
+    //   }
+    // });
+    // ro.observe(this.container as Element);
+  }
 
   updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
@@ -99,17 +116,14 @@ export default class CjaasProfileWidget extends LitElement {
       changedProperties.has("profileWriteToken") ||
       changedProperties.has("filter")
     ) {
-      this.timelineItems = [];
-      this.subscribeToStream();
+      this.lifecycleTasks();
     }
 
     if (
       changedProperties.has("streamToken") ||
       changedProperties.has("customer")
     ) {
-      this.timelineItems = [];
-      this.getJourney();
-      this.subscribeToStream();
+      this.lifecycleTasks();
     }
   }
 
@@ -171,28 +185,11 @@ export default class CjaasProfileWidget extends LitElement {
         this.requestUpdate();
       })
       .catch((err: Error) => {
-        console.log(err);
+        console.error("Could not load the Profile Data. ", err);
         this.profile = undefined;
         this.showSpinner = false;
         this.requestUpdate();
       });
-  }
-
-  // Timeline Logic
-  // defaults to top 10 for journey
-  getTimelineAPIQueryParams(forJourney = false) {
-    let url = this.tapeReadToken;
-
-    if (this.filter) {
-      url += `&$filter=${this.filter}`;
-    }
-
-    if (this.pagination) {
-      url += `&${this.pagination}`;
-    } else if (!this.pagination && forJourney) {
-      url += "&$top=10";
-    }
-    return url;
   }
 
   getTimelineItemFromMessage(message: any) {
@@ -212,37 +209,30 @@ export default class CjaasProfileWidget extends LitElement {
     return item;
   }
 
-  getJourney() {
+  async getExistingEvents() {
     this.showTimelineSpinner = true;
     this.baseUrlCheck();
-    // gets historic journey
-
-    let url;
-
-    if (this.customer) {
-      url = `${this.baseURL}/v1/journey/streams/historic/${this.customer}`;
-    } else {
-      url = `${this.baseURL}/v1/journey/streams/historic`;
-    }
-
-    fetch(`${url}?${this.getTimelineAPIQueryParams(true)}`, {
-      headers: {
-        "content-type": "application/json; charset=UTF-8"
-      },
-      method: "GET"
-    })
-      .then((x: Response) => x.json())
-      .then((x: { events: Array<ServerSentEvent> }) => {
-        x?.events
-          ?.map((y: ServerSentEvent) => this.getTimelineItemFromMessage(y))
-          .map((z: TimelineItem) => this.enqueueItem(z));
+    return fetch(
+      `${this.baseURL}/v1/journey/streams/historic/${this.customer}`,
+      {
+        headers: {
+          "content-type": "application/json; charset=UTF-8",
+          accept: "application/json",
+          Authorization: `SharedAccessSignature ${this.tapeReadToken}`
+        },
+        method: "GET"
+      }
+    )
+      .then((x: Response) => {
+        return x.json();
       })
-      .then(() => {
-        this.showTimelineSpinner = false;
+      .then(data => {
+        return data;
       })
       .catch(err => {
         this.showTimelineSpinner = false;
-        this.errorMessage = `Failure to fetch Journey ${err}`;
+        console.error("Could not fetch Customer Journey events. ", err);
+        this.errorMessage = `Failure to fetch Journey for ${this.customer}. ${err}`;
       });
   }
 
@@ -252,82 +242,54 @@ export default class CjaasProfileWidget extends LitElement {
     }
 
     this.baseUrlCheck();
-    if (this.streamReadToken === null) {
-      console.error("Please provide a Stream Read Token");
+    if (this.streamToken) {
+      const header: EventSourceInitDict = {
+        headers: {
+          "content-type": "application/json; charset=UTF-8",
+          accept: "application/json",
+          Authorization: `SharedAccessSignature ${this.streamToken}`
+        }
+      };
+      this.eventSource = new EventSource(
+        `${this.baseURL}/v1/journey/streams/${this.customer}?${this.streamToken}`,
+        header
+      );
     }
 
-    let url;
+    if (this.eventSource) {
+      this.eventSource!.onmessage = (event: ServerSentEvent) => {
+        let data;
+        try {
+          data = JSON.parse(event.data);
+          this.newestEvents = [data, ...this.newestEvents];
+        } catch (err) {
+          console.log("Event Source Ping");
+        }
+      };
 
-    if (this.customer) {
-      url = `${this.baseURL}/v1/journey/streams/${this.customer}`;
+      this.eventSource!.onerror = () => {
+        this.showTimelineSpinner = false;
+      };
     } else {
-      url = `${this.baseURL}/v1/journey/streams`;
-    }
-
-    this.eventSource = new EventSource(`${url}?${this.streamReadToken}`);
-    // @ts-ignore
-    this.eventSource.onmessage = (event: ServerSentEvent) => {
-      let data;
-      try {
-        data = JSON.parse(event.data);
-      } catch (err) {
-        // received just the timestamp
-      }
-
-      if (data) {
-        this.enqueueItem(this.getTimelineItemFromMessage(data));
-        this.showSpinner = false;
-      }
-    };
-
-    this.eventSource.onerror = () => {
-      this.showSpinner = false;
-    };
-  }
-
-  public enqueueItem(item: TimelineItem) {
-    while (
-      this.timelineItems.length >= this.limit &&
-      this.timelineType === "livestream"
-    ) {
-      this.dequeuePastOneItem();
-    }
-    const dataLength = this.timelineItems.length;
-
-    // events may not be chronologically sorted by default
-    if (dataLength === 0) {
-      this.timelineItems = [item];
-    } else if (this.timelineItems[0].timestamp < item.timestamp) {
-      this.timelineItems = [item, ...this.timelineItems];
-    } else if (this.timelineItems[dataLength - 1].timestamp > item.timestamp) {
-      this.timelineItems = [...this.timelineItems, item];
-    } else {
-      let currentIndex = 0;
-      let currentItem = this.timelineItems[currentIndex];
-      while (
-        currentItem.timestamp > item.timestamp &&
-        currentIndex < this.timelineItems.length
-      ) {
-        currentIndex = currentIndex + 1;
-        currentItem = this.timelineItems[currentIndex];
-      }
-      this.timelineItems.splice(currentIndex, 0, item);
-      this.showTimelineSpinner = false;
+      console.error(`No event source is active for ${this.customer}`);
     }
   }
 
-  dequeuePastOneItem() {
-    this.timelineItems.shift();
+  updateComprehensiveEventList() {
+    this.events = [...this.newestEvents, ...this.events];
+    this.newestEvents = [];
   }
 
-  renderTimeline(theTimelineItems: TimelineItem[]) {
+  renderTimeline(theTimelineItems: CustomerEvent[]) {
     if (theTimelineItems?.length) {
       return html`
         <cjaas-timeline
-          id="cjaas-timeline-component"
-          .timelineItems=${theTimelineItems}
+          .timelineItems=${this.events}
+          .newestEvents=${this.newestEvents}
+          @new-event-queue-cleared=${this.updateComprehensiveEventList}
           limit=${this.limit}
-          type=${this.timelineType}
+          show-filters
+          ?live-stream=${this.liveStream}
         ></cjaas-timeline>
       `;
     } else {
@@ -412,7 +374,7 @@ export default class CjaasProfileWidget extends LitElement {
             <span>All</span>
           </md-tab>
           <md-tab-panel slot="panel">
-            ${this.renderTimeline(this.timelineItems)}
+            ${this.renderTimeline(this.events)}
           </md-tab-panel>
         `
       : html`

@@ -153,7 +153,8 @@ export default class CustomerJourneyWidget extends LitElement {
       })
       .catch(err => {
         this.loading = false;
-        this.errorMessage = `Failure to fetch Journey ${err}`;
+        console.error("Could not fetch Customer Journey events. ", err);
+        this.errorMessage = `Failure to fetch Journey for ${this.customer}. ${err}`;
       });
   }
 
@@ -177,19 +178,23 @@ export default class CustomerJourneyWidget extends LitElement {
       );
     }
 
-    this.eventSource!.onmessage = (event: ServerSentEvent) => {
-      let data;
-      try {
-        data = JSON.parse(event.data);
-        this.newestEvents = [data, ...this.newestEvents];
-      } catch (err) {
-        console.log("Event Source Ping: ", event);
-      }
-    };
+    if (this.eventSource) {
+      this.eventSource!.onmessage = (event: ServerSentEvent) => {
+        let data;
+        try {
+          data = JSON.parse(event.data);
+          this.newestEvents = [data, ...this.newestEvents];
+        } catch (err) {
+          console.log("Event Source Ping");
+        }
+      };
 
-    this.eventSource!.onerror = () => {
-      this.loading = false;
-    };
+      this.eventSource!.onerror = () => {
+        this.loading = false;
+      };
+    } else {
+      console.error(`No event source is active for ${this.customer}`);
+    }
   }
 
   updateComprehensiveEventList() {
