@@ -14,7 +14,7 @@ import "..";
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
   @internalProperty() darkTheme = false;
-  @internalProperty() containerWidth = "1000px";
+  @internalProperty() containerWidth = "600px";
   @internalProperty() containerHeight = "80vh";
   @internalProperty() selectedComponent = "Activity Item";
   static get styles() {
@@ -89,11 +89,11 @@ export class Sandbox extends LitElement {
           >
             <cjaas-timeline-widget
               id="timeline-widget"
-              type="journey-and-stream"
-              filter="person eq 'v3nki@cisco.com'"
+              person-id=""
               tape-read-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=7G8UdEipQHnWOV3hRbTqkNxxjQNHkkQYGDlCrgEhK0k%3D"
-              stream-read-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-06-17T19:18:05.538Z&sk=sandbox&sig=nJOri1M66leDMnfL93UlufHegDf3hAwoQ%2FMj37ReQBs%3D"
+              stream-read-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-06-21T18:15:15.804Z&sk=sandbox&sig=e4E8GTO8EBYnR4ZVC9ksM0PUWTABW0pEWb3PjuVlv7w%3D"
               limit="15"
+              show-filters
               base-url="https://uswest-nonprod.cjaas.cisco.com"
             ></cjaas-timeline-widget>
           </div>

@@ -50,7 +50,6 @@ export default class CustomerJourneyWidget extends LitElement {
   @property({ type: String, attribute: "stream-token" }) streamToken:
     | string
     | null = null;
-  @property({ reflect: true }) pagination = "$top=15"; // Not Implemented as of 8/26/21
   @property({ type: Number }) limit = 5;
   @property({ attribute: false }) interactionData: Interaction | undefined;
 
@@ -135,7 +134,6 @@ export default class CustomerJourneyWidget extends LitElement {
   async getExistingEvents() {
     this.loading = true;
     this.baseUrlCheck();
-    // TO DO: Paginate the results, only get the top 100, but come back for more when requested
     return fetch(
       `${this.baseURL}/v1/journey/streams/historic/${this.customer}`,
       {
@@ -183,7 +181,7 @@ export default class CustomerJourneyWidget extends LitElement {
       let data;
       try {
         data = JSON.parse(event.data);
-        this.newestEvents = [...this.newestEvents, data];
+        this.newestEvents = [data, ...this.newestEvents];
       } catch (err) {
         console.log("Event Source Ping: ", event);
       }
