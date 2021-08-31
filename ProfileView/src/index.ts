@@ -13,7 +13,7 @@ import {
   internalProperty,
   property,
   LitElement,
-  PropertyValues
+  PropertyValues,
 } from "lit-element";
 import { Profile } from "./types/cjaas";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
@@ -127,7 +127,7 @@ export default class CjaasProfileWidget extends LitElement {
     // set verbose as true for tabbed attributes
     const template = Object.assign({}, this.template);
     template.Attributes = template.Attributes.map((x: any) => {
-      if (x.type === "tab") {
+      if (x.type === "tab" || x?.attributes?.type === "tab") {
         x.Verbose = true;
       }
       return x;
@@ -139,9 +139,9 @@ export default class CjaasProfileWidget extends LitElement {
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.profileWriteToken
+        Authorization: "SharedAccessSignature " + this.profileWriteToken,
       },
-      data
+      data,
     };
     return axios(url, options)
       .then((x: AxiosResponse) => x.data)
@@ -163,7 +163,7 @@ export default class CjaasProfileWidget extends LitElement {
           return {
             query: y,
             result: x.attributeView[i].result.split(","),
-            journeyEvents
+            journeyEvents,
           };
         });
 
@@ -227,9 +227,9 @@ export default class CjaasProfileWidget extends LitElement {
 
     fetch(`${url}?${this.getTimelineAPIQueryParams(true)}`, {
       headers: {
-        "content-type": "application/json; charset=UTF-8"
+        "content-type": "application/json; charset=UTF-8",
       },
-      method: "GET"
+      method: "GET",
     })
       .then((x: Response) => x.json())
       .then((x: { events: Array<ServerSentEvent> }) => {
@@ -240,7 +240,7 @@ export default class CjaasProfileWidget extends LitElement {
       .then(() => {
         this.showTimelineSpinner = false;
       })
-      .catch(err => {
+      .catch((err: any) => {
         this.showTimelineSpinner = false;
         this.errorMessage = `Failure to fetch Journey ${err}`;
       });
@@ -404,7 +404,10 @@ export default class CjaasProfileWidget extends LitElement {
 
   getTabs() {
     // tab data should return the event as such.. Should be rendered by stream component.
-    const tabs = this.profile.filter((x: any) => x.query.type === "tab");
+    const tabs = this.profile.filter(
+      (x: any) => x.query.type === "tab" || x.query?.attributes?.type === "tab"
+    );
+
     // TODO: Track the selected tab to apply a class to the badge for color synching, making blue when selected
     const activityTab = this.profileWriteToken
       ? html`

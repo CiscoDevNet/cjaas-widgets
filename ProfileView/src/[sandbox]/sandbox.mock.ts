@@ -25,7 +25,7 @@ export const agentContactData: any /** Service.Aqm.Contact.AgentContact["data"] 
       customer: {
         id: "customer@gmail.com",
         pType: "Customer",
-        type: "Customer"
+        type: "Customer",
       },
       "df276f7a-5113-4d30-831b-ba2d51010203": {
         name: "",
@@ -43,8 +43,8 @@ export const agentContactData: any /** Service.Aqm.Contact.AgentContact["data"] 
         siteId: "472",
         type: "Agent",
         channelId: "0c80138c-1ed9-4b44-bb71-2c2ce8a5b0c7",
-        isWrapUp: false
-      }
+        isWrapUp: false,
+      },
     },
     interactionId: "1627c9fb-7fdd-49a6-a7a9-56c69c4e6199",
     orgId: "f222e3af-1a53-42ef-9deb-7520034b8a10",
@@ -75,13 +75,13 @@ export const agentContactData: any /** Service.Aqm.Contact.AgentContact["data"] 
       customerNumber: "+12065554518",
       reasonCode: "33",
       IvrPath: "none",
-      pathId: "100"
+      pathId: "100",
     },
     media: {},
     owner: "43bfcdef-5551-45b1-a8f9-a0b33e66e3fe",
     mediaChannel: "chat",
     contactDirection: {
-      type: "INBOUND"
+      type: "INBOUND",
     },
     callFlowParams: {
       Sales: {
@@ -89,9 +89,9 @@ export const agentContactData: any /** Service.Aqm.Contact.AgentContact["data"] 
         qualifier: "vteam",
         description: "(vteam, A valid VTeam.)",
         valueDataType: "string",
-        value: "3381"
-      }
-    }
+        value: "3381",
+      },
+    },
   },
   interactionId: "1627c9fb-7fdd-49a6-a7a9-56c69c4e6199",
   orgId: "f222e3af-1a53-42ef-9deb-7520034b8a10",
@@ -101,26 +101,26 @@ export const agentContactData: any /** Service.Aqm.Contact.AgentContact["data"] 
   isConferencing: false,
   updatedBy: undefined,
   queueMgr: "",
-  type: ""
+  type: "",
 };
 
 export const buddyAgentPayload: any /** Service.Aqm.Contact.BuddyAgents **/ = {
   agentProfileId: "AXCLfZhH9S1oTdqE1OFw",
   channelName: "chat",
-  state: "Available"
+  state: "Available",
 };
 
 export const vTeamListpayload: any /** Service.Aqm.Contact.VTeam **/ = {
   agentProfileId: "AXCLfZhH9S1oTdqE1OFw",
   agentSessionId: "5a84d32c-691b-4500-b163-d6cdba2a3163",
   channelType: "chat",
-  type: "inboundqueue"
+  type: "inboundqueue",
 };
 
 export const consultQueue: any /** Service.Aqm.Contact.ConsultQueue **/ = {
   agentId: "df276f7a-5113-4d30-831b-ba2d51010203",
   queueId: "3268",
-  trackingId: "3d0ab7d7-e92a-4b24-a238-92f940e64489"
+  trackingId: "3d0ab7d7-e92a-4b24-a238-92f940e64489",
 };
 
 export const consultAgent: any /** Service.Aqm.Contact.ConsultAgent **/ = {
@@ -130,19 +130,19 @@ export const consultAgent: any /** Service.Aqm.Contact.ConsultAgent **/ = {
   destAgentTeamId: "960",
   destSiteId: "472",
   mediaType: "telephony",
-  trackingId: "3d0ab7d7-e92a-4b24-a198-92f940e64489"
+  trackingId: "3d0ab7d7-e92a-4b24-a198-92f940e64489",
 };
 
 export const consultDN: any /** Service.Aqm.Contact.ConsultDN **/ = {
   destAgentId: "9997770095",
   destinationType: "DN",
   mediaType: "telephony",
-  trackingId: "3d0ab7d7-e92a-2324-a198-92f940e64489"
+  trackingId: "3d0ab7d7-e92a-2324-a198-92f940e64489",
 };
 
 export const vteamTransferMockPayLoad = {
   vteamId: "AXDiuOLjKin42Ov3QJXN",
-  vteamType: "inboundqueue"
+  vteamType: "inboundqueue",
 };
 
 export const blindTransferMockPayLoad = {
@@ -151,14 +151,14 @@ export const blindTransferMockPayLoad = {
   mediaType: "chat",
   destAgentTeamId: "964",
   destAgentDN: "9997770095",
-  destSiteId: "472"
+  destSiteId: "472",
 };
 
 export const consultTransferMockPayLoad = {
   agentId: "43bfcdef-5551-45b1-a8f9-a0b33e66e3fe",
   destAgentId: "f795f41f-3782-44fa-97a4-c8b4dc029477",
   mediaType: "telephony",
-  mediaResourceId: "b102ed10-fac2-4f8e-bece-1c2da6ba6dd8"
+  mediaResourceId: "b102ed10-fac2-4f8e-bece-1c2da6ba6dd8",
 };
 
 export const sampleEvent = {
@@ -168,8 +168,8 @@ export const sampleEvent = {
       referrer: "",
       search: "",
       title: "Car Insurance | Full Coverage Auto Insurance | Demo Assure",
-      url: "https://www.demoassure.com/auto"
-    }
+      url: "https://www.demoassure.com/auto",
+    },
   },
   datacontenttype: "application/json",
   id: "8783c5ff-8f93-46ec-81a3-ee55b859416c",
@@ -177,7 +177,7 @@ export const sampleEvent = {
   source: "Website",
   specversion: "1.0",
   time: "2021-01-18T06:19:16.783Z",
-  type: "Page Visit"
+  type: "Page Visit",
 };
 
 export const sampleTemplate = {
@@ -190,9 +190,11 @@ export const sampleTemplate = {
       Metadata: "email",
       DisplayName: "Email",
       AggregationMode: "Value",
-      type: "tab",
       tag: "email",
-      Limit: 1
+      Limit: 1,
+      attributes: {
+        type: "tab",
+      },
     },
     {
       Version: "0.1",
@@ -201,7 +203,9 @@ export const sampleTemplate = {
       DisplayName: "Make",
       AggregationMode: "Value",
       Limit: 1,
-      type: "table"
+      attributes: {
+        type: "table",
+      },
     },
     {
       Version: "0.1",
@@ -210,7 +214,9 @@ export const sampleTemplate = {
       DisplayName: "Model",
       Limit: 1,
       AggregationMode: "Value",
-      type: "table"
+      attributes: {
+        type: "table",
+      },
     },
     {
       Version: "0.1",
@@ -219,7 +225,9 @@ export const sampleTemplate = {
       DisplayName: "License Plate",
       Limit: 1,
       AggregationMode: "Value",
-      type: "table"
+      attributes: {
+        type: "table",
+      },
     },
     {
       Version: "0.1",
@@ -228,7 +236,9 @@ export const sampleTemplate = {
       DisplayName: "LTV",
       AggregationMode: "Value",
       Limit: 1,
-      type: "table",
+      attributes: {
+        type: "table",
+      },
       // eslint-disable-next-line prettier/prettier
       formatValue: (val: string) => {
         if (val) {
@@ -236,7 +246,7 @@ export const sampleTemplate = {
         }
 
         return val;
-      }
+      },
     },
     {
       Version: "0.1",
@@ -246,7 +256,6 @@ export const sampleTemplate = {
       Limit: 1,
       AggregationMode: "Value",
       tag: "name",
-      type: "inline"
     },
     {
       Version: "0.1",
@@ -255,7 +264,9 @@ export const sampleTemplate = {
       Metadata: "zipCode",
       DisplayName: "Zip Code",
       AggregationMode: "Value",
-      type: "table"
+      attributes: {
+        type: "table",
+      },
     },
     {
       Version: "0.1",
@@ -264,7 +275,9 @@ export const sampleTemplate = {
       DisplayName: "Street",
       Limit: 1,
       AggregationMode: "Value",
-      type: "table"
+      attributes: {
+        type: "table",
+      },
     },
     {
       Version: "0.1",
@@ -273,7 +286,9 @@ export const sampleTemplate = {
       Metadata: "apt",
       DisplayName: "Apt",
       AggregationMode: "Value",
-      type: "table"
+      attributes: {
+        type: "table",
+      },
     },
     {
       Version: "0.1",
@@ -282,7 +297,9 @@ export const sampleTemplate = {
       Metadata: "city",
       DisplayName: "City",
       AggregationMode: "Value",
-      type: "table"
+      attributes: {
+        type: "table",
+      },
     },
     {
       Version: "0.1",
@@ -292,7 +309,6 @@ export const sampleTemplate = {
       DisplayName: "Last Name",
       AggregationMode: "Value",
       tag: "name",
-      type: "inline"
-    }
-  ]
+    },
+  ],
 };
