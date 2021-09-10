@@ -58,7 +58,6 @@ export default class CustomerJourneyWidget extends LitElement {
   @internalProperty() eventSource: EventSource | null = null;
   @internalProperty() liveStream = false;
   @internalProperty() loading = true;
-  @internalProperty() expanded = false;
   @internalProperty() errorMessage = "";
 
   @query(".container") container!: HTMLElement;
@@ -82,25 +81,6 @@ export default class CustomerJourneyWidget extends LitElement {
   async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     await this.lifecycleTasks();
-
-    // @ts-ignore
-    const ro = new ResizeObserver((entries: any) => {
-      for (const entry of entries) {
-        const cr = entry.contentRect;
-        if (cr.width < 589) {
-          this.expanded = false;
-        } else {
-          this.expanded = true;
-        }
-      }
-    });
-    ro.observe(this.container as Element);
-  }
-
-  private get resizeClassMap() {
-    return {
-      expanded: this.expanded
-    };
   }
 
   async update(changedProperties: PropertyValues) {
@@ -209,7 +189,7 @@ export default class CustomerJourneyWidget extends LitElement {
         .newestEvents=${this.newestEvents}
         @new-event-queue-cleared=${this.updateComprehensiveEventList}
         limit=${this.limit}
-        show-filters
+        event-filters
         ?live-stream=${this.liveStream}
       ></cjaas-timeline>
     `;
@@ -235,7 +215,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
   render() {
     return html`
-      <div class="profile ${classMap(this.resizeClassMap)}">
+      <div class="profile">
         <md-input
           id="customerInput"
           class="profile"
@@ -244,7 +224,7 @@ export default class CustomerJourneyWidget extends LitElement {
         ></md-input>
         <md-button @click=${this.changeCustomer}>Load Journey</md-button>
       </div>
-      <div class="container ${classMap(this.resizeClassMap)}">
+      <div class="container">
         ${this.loading ? this.renderLoader() : this.renderEventList()}
       </div>
     `;

@@ -84,7 +84,7 @@ export class Sandbox extends LitElement {
         <div class="container">
           <h2 class="sandbox-header">Timeline</h2>
           <div
-            style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
+            style=${`width: ${this.containerWidth}; height: ${this.containerHeight};`}
             class="widget-container"
           >
             <customer-journey-widget

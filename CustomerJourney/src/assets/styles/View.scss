@@ -13,7 +13,6 @@
   display: block;
   border-radius: 0.5rem;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.16), 0px 0px 1px rgba(0, 0, 0, 0.18);
-  overflow: auto;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -72,10 +71,6 @@
   height: 100%;
 }
 
-.empty-state {
-  height: 100%;
-}
-
 md-loading {
   align-self: center;
 }
@@ -106,10 +101,8 @@ div.profile {
   max-width: 400px;
   gap: 0.5rem;
   height: 3rem;
-  &.expanded {
-    align-self: flex-end;
-  }
 }
+
 md-input.profile {
   width: 15rem;
 }
@@ -148,21 +141,14 @@ md-input.profile {
   align-self: center;
 }
 
-.expanded {
-  &.container {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: flex-start;
-  }
+.container {
+  width: 100%;
+  height: calc(100% - 1.5rem);
+  overflow: hidden;
+  max-width: 40rem;
+  margin: 0 auto;
+}
 
-  nav {
-    width: 50%;
-    text-align: left;
-  }
-
-  section#events-list {
-    height: 100%;
-    overflow: auto;
-  }
+#events-list {
+  height: 100%;
 }

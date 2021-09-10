@@ -92,7 +92,7 @@ export class Sandbox extends LitElement {
             <!-- profile-read-token="so=demoassure&sn=sandbox&ss=profile&sp=r&se=2022-06-17T23:47:34.409Z&sk=sandbox&sig=61BLCJ5+vZtOOvut/7khUQyg0N9KlvbPrJWrYa9lf28=" -->
             <cjaas-profile-view-widget
               id="view"
-              customer="30313-Elena"
+              customer="30313-Carl"
               .template=${sampleTemplate}
               profile-write-token="so=demoassure&sn=sandbox&ss=profile&sp=w&se=2022-06-17T21:36:08.050Z&sk=sandbox&sig=gm%2FXQ%2Bjtu8uWPrUtpRfR6P4DHwrJV2CJokIH3BcgzdE%3D"
               tape-read-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=7G8UdEipQHnWOV3hRbTqkNxxjQNHkkQYGDlCrgEhK0k%3D"

@@ -85,20 +85,6 @@ export default class CjaasProfileWidget extends LitElement {
   async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     await this.lifecycleTasks();
-
-    // Preserve for responsive display development
-    // @ts-ignore
-    // const ro = new ResizeObserver((entries: any) => {
-    //   for (const entry of entries) {
-    //     const cr = entry.contentRect;
-    //     if (cr.width < 589) {
-    //       this.expanded = false;
-    //     } else {
-    //       this.expanded = true;
-    //     }
-    //   }
-    // });
-    // ro.observe(this.container as Element);
   }
 
   updated(changedProperties: PropertyValues) {
@@ -288,7 +274,7 @@ export default class CjaasProfileWidget extends LitElement {
           .newestEvents=${this.newestEvents}
           @new-event-queue-cleared=${this.updateComprehensiveEventList}
           limit=${this.limit}
-          show-filters
+          event-filters
           ?live-stream=${this.liveStream}
         ></cjaas-timeline>
       `;
