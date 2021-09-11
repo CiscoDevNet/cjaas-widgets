@@ -150,7 +150,7 @@ export default class CjaasProfileWidget extends LitElement {
           // if attribute is of tab type
           // save journey events as well
           let journeyEvents = null;
-          if (y.type === "tab") {
+          if (y.type === "tab" || y.attributes?.type === "tab") {
             try {
               journeyEvents = JSON.parse(
                 x.attributeView[i].journeyEvents || "null"

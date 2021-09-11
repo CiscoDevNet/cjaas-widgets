@@ -259,7 +259,7 @@ export const sampleTemplate = {
     },
     {
       Version: "0.1",
-      Event: "Quote",
+      Event: "Entered ZipCode",
       Limit: 1,
       Metadata: "zipCode",
       DisplayName: "Zip Code",
