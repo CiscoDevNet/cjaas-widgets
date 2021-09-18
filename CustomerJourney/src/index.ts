@@ -50,7 +50,7 @@ export default class CustomerJourneyWidget extends LitElement {
   @property({ type: String, attribute: "stream-token" }) streamToken:
     | string
     | null = null;
-  @property({ type: Number }) limit = 5;
+  @property({ type: Number }) limit = 20;
   @property({ attribute: false }) interactionData: Interaction | undefined;
 
   @internalProperty() events: Array<CustomerEvent> = [];
