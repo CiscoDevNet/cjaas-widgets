@@ -16,6 +16,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  overflow: hidden;
 }
 
 .outer-container {
@@ -98,9 +99,21 @@ div.profile {
   justify-content: space-around;
   align-self: center;
   padding: 0.5rem;
-  max-width: 400px;
+  max-width: var(--default-width);
   gap: 0.5rem;
-  height: 3rem;
+  height: 100%;
+}
+md-accordion::part(accordion) {
+  max-height: 100%;
+}
+
+md-accordion,
+md-accordion-item {
+  width: var(--default-width);
+}
+
+md-accordion-item {
+  overflow: hidden;
 }
 
 md-input.profile {

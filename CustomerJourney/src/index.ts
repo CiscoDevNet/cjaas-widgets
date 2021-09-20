@@ -6,8 +6,6 @@
  *
  */
 
-// This file imports all of the webcomponents from "components" folder
-
 import {
   html,
   internalProperty,
@@ -184,14 +182,9 @@ export default class CustomerJourneyWidget extends LitElement {
 
   renderEvents() {
     return html`
-      <cjaas-timeline
-        .timelineItems=${this.events}
-        .newestEvents=${this.newestEvents}
-        @new-event-queue-cleared=${this.updateComprehensiveEventList}
-        limit=${this.limit}
-        event-filters
-        ?live-stream=${this.liveStream}
-      ></cjaas-timeline>
+      <cjaas-timeline .timelineItems=${this.events} .newestEvents=${this.newestEvents}
+        @new-event-queue-cleared=${this.updateComprehensiveEventList} limit=${this.limit} event-filters
+        ?live-stream=${this.liveStream}></cjaas-timeline>
     `;
   }
 
@@ -216,16 +209,17 @@ export default class CustomerJourneyWidget extends LitElement {
   render() {
     return html`
       <div class="profile">
-        <md-input
-          id="customerInput"
-          class="profile"
-          shape="pill"
-          placeholder="Journey ID e.g. '98126-Kevin'"
-        ></md-input>
-        <md-button @click=${this.changeCustomer}>Load Journey</md-button>
-      </div>
-      <div class="container">
-        ${this.loading ? this.renderLoader() : this.renderEventList()}
+        <md-accordion multiple>
+          <md-accordion-item slot="accordion-item" label="Search">
+            <md-input id="customerInput" class="profile" shape="pill" placeholder="Journey ID e.g. '98126-Kevin'"></md-input>
+            <md-button @click=${this.changeCustomer}>Load Journey</md-button>
+          </md-accordion-item>
+          <md-accordion-item expanded slot="accordion-item">
+            <div class="container">
+              ${this.loading ? this.renderLoader() : this.renderEventList()}
+            </div>
+          </md-accordion-item>
+        </md-accordion>
       </div>
     `;
   }
