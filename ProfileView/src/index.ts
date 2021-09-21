@@ -127,7 +127,7 @@ export default class CjaasProfileWidget extends LitElement {
     // set verbose as true for tabbed attributes
     const template = Object.assign({}, this.template);
     template.Attributes = template.Attributes.map((x: any) => {
-      if (x.type === "tab" || x?.attributes?.type === "tab") {
+      if (x.type === "tab" || x?.widgetAttributes?.type === "tab") {
         x.Verbose = true;
       }
       return x;
@@ -150,7 +150,7 @@ export default class CjaasProfileWidget extends LitElement {
           // if attribute is of tab type
           // save journey events as well
           let journeyEvents = null;
-          if (y.type === "tab" || y.attributes?.type === "tab") {
+          if (y.type === "tab" || y.widgetAttributes?.type === "tab") {
             try {
               journeyEvents = JSON.parse(
                 x.attributeView[i].journeyEvents || "null"
@@ -405,7 +405,8 @@ export default class CjaasProfileWidget extends LitElement {
   getTabs() {
     // tab data should return the event as such.. Should be rendered by stream component.
     const tabs = this.profile.filter(
-      (x: any) => x.query.type === "tab" || x.query?.attributes?.type === "tab"
+      (x: any) =>
+        x.query.type === "tab" || x.query?.widgetAttributes?.type === "tab"
     );
 
     // TODO: Track the selected tab to apply a class to the badge for color synching, making blue when selected
