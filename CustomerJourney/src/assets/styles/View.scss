@@ -96,24 +96,45 @@ md-link {
 
 div.profile {
   display: flex;
-  justify-content: space-around;
+  flex-flow: column;
+  justify-content: flex-start;
   align-self: center;
   padding: 0.5rem;
-  max-width: var(--default-width);
+  width: var(--default-width);
   gap: 0.5rem;
   height: 100%;
 }
-md-accordion::part(accordion) {
-  max-height: 100%;
+
+cjaas-profile::part(profile) {
+  border: 1px solid var(--md-quaternary-bg-color, #dedede);
+  border-radius: 0.5rem;
 }
 
-md-accordion,
-md-accordion-item {
-  width: var(--default-width);
+details:last-child {
+  flex-grow: 1;
+  overflow-y: hidden;
 }
 
-md-accordion-item {
-  overflow: hidden;
+details summary {
+  display: flex;
+  justify-content: space-between;
+  padding: .5rem;
+  margin-bottom: .5rem;
+}
+details summary md-icon {
+  // content: "▲";
+  color: var(--md-secondary-text-color, #545454);
+  transform: rotate(-180deg);
+  transition: all 200ms ease-in-out;
+}
+details[open] summary md-icon {
+  transform: rotate(0deg);
+}
+
+.search-ui {
+  display: flex;
+  flex-flow: row;
+  gap: 1rem;
 }
 
 md-input.profile {

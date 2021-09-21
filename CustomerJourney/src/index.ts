@@ -14,14 +14,16 @@ import {
   PropertyValues,
   query
 } from "lit-element";
-import { classMap } from "lit-html/directives/class-map";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
+import { sampleTemplate } from "./[sandbox]/sandbox.mock";
 import styles from "./assets/styles/View.scss";
-import { ServerSentEvent } from "./types/cjaas";
+import { Profile, ServerSentEvent } from "./types/cjaas";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { EventSourceInitDict } from "eventsource";
 import "@cjaas/common-components/dist/comp/cjaas-timeline-item";
 import "@cjaas/common-components/dist/comp/cjaas-timeline";
 import "@cjaas/common-components/dist/comp/cjaas-event-toggles";
+import "@cjaas/common-components/dist/comp/cjaas-profile";
 export interface CustomerEvent {
   data: Record<string, any>;
   firstName: string;
@@ -42,6 +44,9 @@ export default class CustomerJourneyWidget extends LitElement {
     | string
     | undefined = undefined;
   @property({ type: String, reflect: true }) customer: string | null = null;
+  @property({ type: String, attribute: "write-token" }) writeToken:
+    | string
+    | null = null;
   @property({ type: String, attribute: "tape-token" }) tapeToken:
     | string
     | null = null;
@@ -50,7 +55,9 @@ export default class CustomerJourneyWidget extends LitElement {
     | null = null;
   @property({ type: Number }) limit = 20;
   @property({ attribute: false }) interactionData: Interaction | undefined;
+  @property({ attribute: false }) template: any;
 
+  @internalProperty() profileData = [];
   @internalProperty() events: Array<CustomerEvent> = [];
   @internalProperty() newestEvents: Array<CustomerEvent> = [];
   @internalProperty() eventSource: EventSource | null = null;
@@ -71,6 +78,7 @@ export default class CustomerJourneyWidget extends LitElement {
   async lifecycleTasks() {
     const data = await this.getExistingEvents();
     this.events = data.events;
+    this.getProfile();
     this.loading = false;
     this.requestUpdate();
     this.subscribeToStream();
@@ -107,6 +115,65 @@ export default class CustomerJourneyWidget extends LitElement {
       console.error("You must provide a Base URL");
       throw new Error("You must provide a Base URL");
     }
+  }
+
+  getProfile() {
+    this.baseUrlCheck();
+    const url = `${this.baseURL}/v1/journey/profileview?personid=${this.customer}`;
+    // this.showSpinner = true;
+
+    // set verbose as true for tabbed attributes
+    const template = Object.assign({}, this.template);
+    template.Attributes = template.Attributes.map((x: any) => {
+      if (x.type === "tab") {
+        x.Verbose = true;
+      }
+      return x;
+    });
+
+    const data = JSON.stringify(template);
+    const options: AxiosRequestConfig = {
+      url,
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+        Authorization: "SharedAccessSignature " + this.writeToken
+      },
+      data
+    };
+    return axios(url, options)
+      .then((x: AxiosResponse) => x.data)
+      .then((x: Profile) => {
+        this.profileData = this.template.Attributes.map((y: any, i: number) => {
+          // if attribute is of tab type
+          // save journey events as well
+          let journeyEvents = null;
+          if (y.type === "tab") {
+            try {
+              journeyEvents = JSON.parse(
+                x.attributeView[i].journeyEvents || "null"
+              );
+            } catch {
+              console.error("Error while parsing Journey Event");
+            }
+          }
+
+          return {
+            query: y,
+            result: x.attributeView[i].result.split(","),
+            journeyEvents
+          };
+        });
+
+        // this.showSpinner = false;
+        this.requestUpdate();
+      })
+      .catch((err: Error) => {
+        console.error("Could not load the Profile Data. ", err);
+        this.profileData = [];
+        // this.showSpinner = false;
+        this.requestUpdate();
+      });
   }
 
   async getExistingEvents() {
@@ -182,9 +249,14 @@ export default class CustomerJourneyWidget extends LitElement {
 
   renderEvents() {
     return html`
-      <cjaas-timeline .timelineItems=${this.events} .newestEvents=${this.newestEvents}
-        @new-event-queue-cleared=${this.updateComprehensiveEventList} limit=${this.limit} event-filters
-        ?live-stream=${this.liveStream}></cjaas-timeline>
+      <cjaas-timeline
+        .timelineItems=${this.events}
+        .newestEvents=${this.newestEvents}
+        @new-event-queue-cleared=${this.updateComprehensiveEventList}
+        limit=${this.limit}
+        event-filters
+        ?live-stream=${this.liveStream}
+      ></cjaas-timeline>
     `;
   }
 
@@ -209,17 +281,36 @@ export default class CustomerJourneyWidget extends LitElement {
   render() {
     return html`
       <div class="profile">
-        <md-accordion multiple>
-          <md-accordion-item slot="accordion-item" label="Search">
-            <md-input id="customerInput" class="profile" shape="pill" placeholder="Journey ID e.g. '98126-Kevin'"></md-input>
+        <details open>
+          <summary
+            >Search
+            <md-icon name="icon-arrow-down_12"></md-icon>
+          </summary>
+          <div class="search-ui">
+            <md-input
+              id="customerInput"
+              class="profile"
+              shape="pill"
+              placeholder="Journey ID e.g. '98126-Kevin'"
+            ></md-input>
             <md-button @click=${this.changeCustomer}>Load Journey</md-button>
-          </md-accordion-item>
-          <md-accordion-item expanded slot="accordion-item">
-            <div class="container">
-              ${this.loading ? this.renderLoader() : this.renderEventList()}
-            </div>
-          </md-accordion-item>
-        </md-accordion>
+          </div>
+        </details>
+        <details open>
+          <summary
+            >Profile<md-icon name="icon-arrow-down_12"></md-icon>
+          </summary>
+          <cjaas-profile .profileData=${this.profileData}></cjaas-profile>
+        </details>
+        <details open>
+          <summary
+            >Journey
+            <md-icon name="icon-arrow-down_12"></md-icon>
+          </summary>
+          <div class="container">
+            ${this.loading ? this.renderLoader() : this.renderEventList()}
+          </div>
+        </details>
       </div>
     `;
   }
