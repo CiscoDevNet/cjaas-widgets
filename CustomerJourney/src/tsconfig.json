@@ -10,6 +10,8 @@
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
 
+    "resolveJsonModule": true,
+
     "declaration": true,
     "declarationDir": "../dist/types",
 

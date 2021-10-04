@@ -10,8 +10,8 @@ import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
 import { sampleTemplate } from "./sandbox.mock";
 import styles from "./sandbox.scss";
+import * as iconData from "@/assets/icons.json";
 import "..";
-
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
   @internalProperty() darkTheme = false;
@@ -92,6 +92,7 @@ export class Sandbox extends LitElement {
               id="timeline-widget"
               customer="98126-Kevin"
               .template=${sampleTemplate}
+              .eventIconTemplate=${iconData}
               write-token="so=demoassure&sn=sandbox&ss=profile&sp=w&se=2022-06-17T21:36:08.050Z&sk=sandbox&sig=gm%2FXQ%2Bjtu8uWPrUtpRfR6P4DHwrJV2CJokIH3BcgzdE%3D"
               tape-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=7G8UdEipQHnWOV3hRbTqkNxxjQNHkkQYGDlCrgEhK0k%3D"
               stream-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-06-21T18:15:15.804Z&sk=sandbox&sig=e4E8GTO8EBYnR4ZVC9ksM0PUWTABW0pEWb3PjuVlv7w%3D"

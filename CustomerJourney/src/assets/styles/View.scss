@@ -101,7 +101,6 @@ div.profile {
   align-self: center;
   padding: 0.5rem;
   width: var(--default-width);
-  gap: 0.5rem;
   height: 100%;
 }
 
@@ -118,15 +117,16 @@ details:last-child {
 details summary {
   display: flex;
   justify-content: space-between;
-  padding: .5rem;
-  margin-bottom: .5rem;
+  padding: 0.25rem;
+  font-size: .75rem;
 }
+
 details summary md-icon {
-  // content: "▲";
   color: var(--md-secondary-text-color, #545454);
   transform: rotate(-180deg);
   transition: all 200ms ease-in-out;
 }
+
 details[open] summary md-icon {
   transform: rotate(0deg);
 }
@@ -134,11 +134,12 @@ details[open] summary md-icon {
 .search-ui {
   display: flex;
   flex-flow: row;
+  justify-content: space-evenly;
   gap: 1rem;
 }
 
 md-input.profile {
-  width: 15rem;
+  width: 14rem;
 }
 .filter-buttons > md-button {
   display: inline-block;

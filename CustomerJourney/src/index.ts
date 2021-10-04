@@ -15,61 +15,133 @@ import {
   query
 } from "lit-element";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
-import { sampleTemplate } from "./[sandbox]/sandbox.mock";
 import styles from "./assets/styles/View.scss";
+import * as iconData from "@/assets/icons.json";
 import { Profile, ServerSentEvent } from "./types/cjaas";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { EventSourceInitDict } from "eventsource";
-import "@cjaas/common-components/dist/comp/cjaas-timeline-item";
+import { Timeline } from "@cjaas/common-components/dist/types/components/timeline/Timeline";
 import "@cjaas/common-components/dist/comp/cjaas-timeline";
-import "@cjaas/common-components/dist/comp/cjaas-event-toggles";
 import "@cjaas/common-components/dist/comp/cjaas-profile";
-export interface CustomerEvent {
-  data: Record<string, any>;
-  firstName: string;
-  lastName: string;
-  email: string;
-  datacontenttype: string;
-  id: string;
-  person: string;
-  source: string;
-  specversion: string;
-  time: string;
-  type: string;
-}
 
 @customElementWithCheck("customer-journey-widget")
 export default class CustomerJourneyWidget extends LitElement {
+  /**
+   * Path to the proper Customer Journey API deployment
+   * @attr base-url
+   */
   @property({ type: String, attribute: "base-url" }) baseURL:
     | string
     | undefined = undefined;
+  /**
+   * Customer ID used for Journey lookup
+   * @attr customer
+   */
   @property({ type: String, reflect: true }) customer: string | null = null;
+  /**
+   * SAS Token that provides write permissions to Journey API (used for POST data template in Profile retrieval)
+   * @attr write-token
+   */
   @property({ type: String, attribute: "write-token" }) writeToken:
     | string
     | null = null;
+  /**
+   * SAS Token that provides read permissions for Historical Journey
+   * @attr tape-token
+   */
   @property({ type: String, attribute: "tape-token" }) tapeToken:
     | string
     | null = null;
+  /**
+   * SAS Token that provides read permissions for Journey Stream
+   * @attr stream-token
+   */
   @property({ type: String, attribute: "stream-token" }) streamToken:
     | string
     | null = null;
+  /**
+   * Set the number of Timeline Events to display
+   * @attr limit
+   */
   @property({ type: Number }) limit = 20;
+  /**
+   * Property to pass in WxCC Global state about current interaction
+   * @prop interactionData
+   * @type Interaction
+   */
   @property({ attribute: false }) interactionData: Interaction | undefined;
+  /**
+   * Property to pass in data template to retrieve customer Profile in desired format
+   * @prop template
+   */
   @property({ attribute: false }) template: any;
+  /**
+   * Property to pass in JSON template to set color and icon settings
+   * @prop eventIconTemplate
+   */
+  @property({ attribute: false })
+  eventIconTemplate: any = iconData;
+  /**
+   * Property to pass in setting for showcase data
+   * @prop showcaseData
+   */
+  @property({ attribute: false })
+  showcaseData = "";
 
+  /**
+   * Data pulled from Journey Profile retrieval (will match shape of provided Template)
+   * @prop profileData
+   */
   @internalProperty() profileData = [];
-  @internalProperty() events: Array<CustomerEvent> = [];
-  @internalProperty() newestEvents: Array<CustomerEvent> = [];
+  /**
+   * Timeline data fetched from journey history
+   * @prop events
+   */
+  @internalProperty() events: Array<Timeline.CustomerEvent> = [];
+  /**
+   * Queue array of incoming events via Stream
+   * @prop newestEvents
+   */
+  @internalProperty() newestEvents: Array<Timeline.CustomerEvent> = [];
+  /**
+   * Store for Stream event source
+   * @prop eventSource
+   */
   @internalProperty() eventSource: EventSource | null = null;
+  /**
+   * Internal toggle to either queue or immediately load new events occurring in the stream
+   * @prop liveStream
+   */
   @internalProperty() liveStream = false;
+  /**
+   * Internal toggle of loading state
+   * @prop loading
+   */
   @internalProperty() loading = true;
+  /**
+   * Internal store for error message
+   * @prop errorMessage
+   */
   @internalProperty() errorMessage = "";
 
+  /**
+   * Hook to HTML element <div class="container">
+   * @query container
+   */
   @query(".container") container!: HTMLElement;
+  /**
+   * Hook to HTML element <md-input id="customerInput">
+   * @query customerInput
+   */
   @query("#customerInput") customerInput!: HTMLInputElement;
 
   connectedCallback() {
     super.connectedCallback();
+    if (this.eventIconTemplate) {
+      this.eventIconTemplate = JSON.parse(
+        JSON.stringify(this.eventIconTemplate)
+      ).default;
+    }
     if (this.interactionData) {
       this.customer = this.interactionData["ani"];
     }
@@ -91,7 +163,6 @@ export default class CustomerJourneyWidget extends LitElement {
 
   async update(changedProperties: PropertyValues) {
     super.update(changedProperties);
-
     if (changedProperties.has("interactionData")) {
       if (this.interactionData) {
         this.customer = this.interactionData["ani"];
@@ -252,6 +323,8 @@ export default class CustomerJourneyWidget extends LitElement {
       <cjaas-timeline
         .timelineItems=${this.events}
         .newestEvents=${this.newestEvents}
+        .eventIconTemplate=${this.eventIconTemplate}
+        showcase-data=${this.showcaseData}
         @new-event-queue-cleared=${this.updateComprehensiveEventList}
         limit=${this.limit}
         event-filters
@@ -281,7 +354,7 @@ export default class CustomerJourneyWidget extends LitElement {
   render() {
     return html`
       <div class="profile">
-        <details open>
+        <details>
           <summary
             >Search
             <md-icon name="icon-arrow-down_12"></md-icon>
@@ -296,7 +369,7 @@ export default class CustomerJourneyWidget extends LitElement {
             <md-button @click=${this.changeCustomer}>Load Journey</md-button>
           </div>
         </details>
-        <details open>
+        <details ?open=${this.profileData.length > 0}>
           <summary
             >Profile<md-icon name="icon-arrow-down_12"></md-icon>
           </summary>
