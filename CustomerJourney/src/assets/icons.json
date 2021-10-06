@@ -13,7 +13,8 @@
   },
   "Quote": {
     "name": "icon-file-spreadsheet_16",
-    "color": "cobalt"
+    "color": "cobalt",
+    "showcase": "firstName"
   },
   "NPS.*": {
     "name": "icon-analysis_16",

@@ -14,6 +14,7 @@ import {
   PropertyValues,
   query
 } from "lit-element";
+import { ifDefined } from "lit-html/directives/if-defined";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
 import * as iconData from "@/assets/icons.json";
@@ -81,13 +82,6 @@ export default class CustomerJourneyWidget extends LitElement {
    */
   @property({ attribute: false })
   eventIconTemplate: any = iconData;
-  /**
-   * Property to pass in setting for showcase data
-   * @prop showcaseData
-   */
-  @property({ attribute: false })
-  showcaseData = "";
-
   /**
    * Data pulled from Journey Profile retrieval (will match shape of provided Template)
    * @prop profileData
@@ -324,7 +318,6 @@ export default class CustomerJourneyWidget extends LitElement {
         .timelineItems=${this.events}
         .newestEvents=${this.newestEvents}
         .eventIconTemplate=${this.eventIconTemplate}
-        showcase-data=${this.showcaseData}
         @new-event-queue-cleared=${this.updateComprehensiveEventList}
         limit=${this.limit}
         event-filters
