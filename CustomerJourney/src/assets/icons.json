@@ -34,7 +34,8 @@
   },
   "Trigger Sent to Server": {
     "name": "icon-event_16",
-    "color": "violet"
+    "color": "violet",
+    "showcase": "user"
   },
   "Survey Response Collected": {
     "name": "icon-report_16",

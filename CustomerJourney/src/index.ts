@@ -21,9 +21,9 @@ import * as iconData from "@/assets/icons.json";
 import { Profile, ServerSentEvent } from "./types/cjaas";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { EventSourceInitDict } from "eventsource";
-import { Timeline } from "@cjaas/common-components/dist/types/components/timeline/Timeline";
 import "@cjaas/common-components/dist/comp/cjaas-timeline";
 import "@cjaas/common-components/dist/comp/cjaas-profile";
+import { Timeline } from "@cjaas/common-components/dist/types/timeline/Timeline";
 
 @customElementWithCheck("customer-journey-widget")
 export default class CustomerJourneyWidget extends LitElement {
@@ -131,11 +131,6 @@ export default class CustomerJourneyWidget extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    if (this.eventIconTemplate) {
-      this.eventIconTemplate = JSON.parse(
-        JSON.stringify(this.eventIconTemplate)
-      ).default;
-    }
     if (this.interactionData) {
       this.customer = this.interactionData["ani"];
     }
@@ -157,6 +152,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
   async update(changedProperties: PropertyValues) {
     super.update(changedProperties);
+
     if (changedProperties.has("interactionData")) {
       if (this.interactionData) {
         this.customer = this.interactionData["ani"];
@@ -295,7 +291,7 @@ export default class CustomerJourneyWidget extends LitElement {
           data = JSON.parse(event.data);
           this.newestEvents = [data, ...this.newestEvents];
         } catch (err) {
-          console.log("Event Source Ping");
+          console.error(err);
         }
       };
 
