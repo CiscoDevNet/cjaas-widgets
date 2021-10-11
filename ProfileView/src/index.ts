@@ -52,6 +52,9 @@ export type TimelineItem = {
 export default class CjaasProfileWidget extends LitElement {
   @property() customer: string | undefined;
   @property() template: any | null | undefined = defaultTemplate;
+  @property({ type: String, attribute: "template-id" }) templateId:
+    | string
+    | undefined;
   @property({ type: String, attribute: "stream-read-token" }) streamReadToken:
     | string
     | null = null;
@@ -60,6 +63,8 @@ export default class CjaasProfileWidget extends LitElement {
     | null = null;
   @property({ type: String, attribute: "profile-write-token" })
   profileWriteToken: string | null = null;
+  @property({ type: String, attribute: "profile-read-token" })
+  profileReadToken: string | null = null;
   @property({ type: String, attribute: "base-url" }) baseURL:
     | string
     | undefined = undefined;
@@ -83,14 +88,21 @@ export default class CjaasProfileWidget extends LitElement {
 
   @internalProperty() profile: any;
   @internalProperty() showSpinner = false;
+  @internalProperty() templateFromServer: any;
 
   updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
 
+    if (changedProperties.has("templateId")) {
+      this.getTemplateFromAPI();
+    }
+
     if (
       this.customer &&
       this.template &&
-      (changedProperties.has("template") || changedProperties.has("customer"))
+      (changedProperties.has("template") ||
+        changedProperties.has("customer") ||
+        changedProperties.has("templateId"))
     ) {
       this.getProfile();
     }
@@ -119,7 +131,33 @@ export default class CjaasProfileWidget extends LitElement {
     }
   }
 
+  getTemplateFromAPI() {
+    let url = `${this.baseURL}/v1/journey/views/templates?id=${this.templateId}`;
+
+    const options: AxiosRequestConfig = {
+      url,
+      method: "GET",
+      headers: {
+        "Content-type": "application/json",
+        Authorization: "SharedAccessSignature " + this.profileReadToken,
+      },
+    };
+
+    axios(options)
+      .then((x) => x.data)
+      .then((x) => {
+        console.log({ template: x });
+        this.templateFromServer = x.data;
+      });
+  }
+
   getProfile() {
+    if (this.templateId) {
+      this.getProfileFromTemplateId();
+      return;
+    }
+
+    // Rest of the flow is soon to be deprecated
     this.baseUrlCheck();
     const url = `${this.baseURL}/v1/journey/profileview?personid=${this.customer}`;
     this.showSpinner = true;
@@ -176,6 +214,63 @@ export default class CjaasProfileWidget extends LitElement {
         this.showSpinner = false;
         this.requestUpdate();
       });
+  }
+
+  getProfileFromTemplateId() {
+    const url = `${this.baseURL}/v1/journey/views?viewId=${this.templateId}&personId=${this.customer}`;
+
+    const data = {
+      viewId: this.templateId,
+      personId: this.customer,
+      searchFilter: null,
+      skipCache: true,
+    };
+
+    const options: AxiosRequestConfig = {
+      url,
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+        Authorization: "SharedAccessSignature " + this.profileReadToken,
+        "X-CACHE-MAXAGE-HOUR": 5,
+      },
+      // data,
+    };
+
+    axios(options)
+      .then((x) => x.data)
+      .then((x) => {
+        this.setOffProfileLongPolling(x.getUriStatusQuery);
+      });
+  }
+
+  setOffProfileLongPolling(url: string) {
+    let intervalId = setInterval(() => {
+      axios({
+        url,
+        method: "GET",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: "SharedAccessSignature " + this.profileReadToken,
+        },
+      })
+        .then((x) => x.data)
+        .then((x) => {
+          console.log({ profile: x });
+          if (x.runtimeStatus === "Completed") {
+            clearInterval(intervalId);
+            this.profile = x?.output?.ProfileView?.AttributeView.$values.map(
+              (x: any) => {
+                return {
+                  query: x.QueryTemplate,
+                  journeyEvents: x.JourneyEvents?.$values,
+                  result: [x.Result],
+                };
+              }
+            );
+          }
+        });
+    }, 5000);
   }
 
   // Timeline Logic

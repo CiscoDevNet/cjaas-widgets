@@ -41,7 +41,7 @@
     "@momentum-ui/core": "19.15.10",
     "@momentum-ui/icons": "8.21.0",
     "@momentum-ui/utils": "6.2.15",
-    "@momentum-ui/web-components": "^2.4.7",
+    "@momentum-ui/web-components": "2.4.7",
     "@open-wc/testing-helpers": "1.8.9",
     "@types/axios": "^0.14.0",
     "@types/copy-webpack-plugin": "^5.0.0",
