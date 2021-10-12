@@ -23,7 +23,7 @@ import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { EventSourceInitDict } from "eventsource";
 import "@cjaas/common-components/dist/comp/cjaas-timeline";
 import "@cjaas/common-components/dist/comp/cjaas-profile";
-import { Timeline } from "@cjaas/common-components/dist/types/timeline/Timeline";
+import { Timeline } from "@cjaas/common-components/dist/types/components/timeline/Timeline";
 
 @customElementWithCheck("customer-journey-widget")
 export default class CustomerJourneyWidget extends LitElement {
@@ -291,7 +291,7 @@ export default class CustomerJourneyWidget extends LitElement {
           data = JSON.parse(event.data);
           this.newestEvents = [data, ...this.newestEvents];
         } catch (err) {
-          console.error(err);
+          console.error("No data fetched");
         }
       };
 
