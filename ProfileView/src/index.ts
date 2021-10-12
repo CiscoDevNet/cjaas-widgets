@@ -93,10 +93,6 @@ export default class CjaasProfileWidget extends LitElement {
   updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
 
-    // if (changedProperties.has("templateId")) {
-    //   this.getTemplateFromAPI();
-    // }
-
     if (
       this.customer &&
       this.template &&
@@ -163,27 +159,32 @@ export default class CjaasProfileWidget extends LitElement {
     };
     return axios(url, options)
       .then((x: AxiosResponse) => x.data)
-      .then((x: Profile) => {
-        this.profile = this.template.Attributes.map((y: any, i: number) => {
-          // if attribute is of tab type
-          // save journey events as well
-          let journeyEvents = null;
-          if (y.type === "tab" || y.widgetAttributes?.type === "tab") {
-            try {
-              journeyEvents = JSON.parse(
-                x.attributeView[i].journeyEvents || "null"
-              );
-            } catch {
-              console.error("Error while parsing Journey Event");
+      .then((_profile: Profile) => {
+        this.profile = this.template.Attributes.map(
+          (attribute: any, i: number) => {
+            // if attribute is of tab type
+            // save journey events as well
+            let journeyEvents = null;
+            if (
+              attribute.type === "tab" ||
+              attribute.widgetAttributes?.type === "tab"
+            ) {
+              try {
+                journeyEvents = JSON.parse(
+                  _profile.attributeView[i].journeyEvents || "null"
+                );
+              } catch {
+                console.error("Error while parsing Journey Event");
+              }
             }
-          }
 
-          return {
-            query: y,
-            result: x.attributeView[i].result.split(","),
-            journeyEvents,
-          };
-        });
+            return {
+              query: attribute,
+              result: _profile.attributeView[i].result.split(","),
+              journeyEvents,
+            };
+          }
+        );
 
         this.showSpinner = false;
         this.requestUpdate();
@@ -213,8 +214,8 @@ export default class CjaasProfileWidget extends LitElement {
 
     axios(options)
       .then((x) => x.data)
-      .then((x) => {
-        this.setOffProfileLongPolling(x.getUriStatusQuery);
+      .then((response: { getUriStatusQuery: string; id: string }) => {
+        this.setOffProfileLongPolling(response.getUriStatusQuery);
       })
       .catch((err) => {
         console.error("Unable to fetch the Profile", err);
@@ -233,30 +234,30 @@ export default class CjaasProfileWidget extends LitElement {
         },
       })
         .then((x) => x.data)
-        .then((x) => {
-          if (x.runtimeStatus === "Completed") {
+        .then((response: any) => {
+          if (response.runtimeStatus === "Completed") {
             this.showSpinner = false;
             clearInterval(intervalId);
-            this.profile = x?.output?.ProfileView?.AttributeView.$values.map(
-              (x: any) => {
+            this.profile = response?.output?.ProfileView?.AttributeView.$values.map(
+              (attribute: any) => {
                 const query = {
-                  ...x.QueryTemplate,
+                  ...attribute.QueryTemplate,
                   widgetAttributes: {
-                    type: x.QueryTemplate?.WidgetAttributes.type,
-                    tag: x.QueryTemplate?.WidgetAttributes.tag,
+                    type: attribute.QueryTemplate?.WidgetAttributes.type,
+                    tag: attribute.QueryTemplate?.WidgetAttributes.tag,
                   },
                   // temp fix for backward compatibility
                   attributes: {
-                    type: x.QueryTemplate?.WidgetAttributes.type,
-                    tag: x.QueryTemplate?.WidgetAttributes.tag,
+                    type: attribute.QueryTemplate?.WidgetAttributes.type,
+                    tag: attribute.QueryTemplate?.WidgetAttributes.tag,
                   },
                 };
                 return {
                   query: query,
-                  journeyEvents: x.JourneyEvents?.$values.map(
-                    (x: any) => x && JSON.parse(x)
+                  journeyEvents: attribute.JourneyEvents?.$values.map(
+                    (value: string) => value && JSON.parse(value)
                   ),
-                  result: [x.Result],
+                  result: [attribute.Result],
                 };
               }
             );
