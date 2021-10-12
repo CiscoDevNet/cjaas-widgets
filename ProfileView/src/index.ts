@@ -52,6 +52,9 @@ export type TimelineItem = {
 export default class CjaasProfileWidget extends LitElement {
   @property() customer: string | undefined;
   @property() template: any | null | undefined = defaultTemplate;
+  @property({ type: String, attribute: "template-id" }) templateId:
+    | string
+    | undefined;
   @property({ type: String, attribute: "stream-read-token" }) streamReadToken:
     | string
     | null = null;
@@ -60,6 +63,8 @@ export default class CjaasProfileWidget extends LitElement {
     | null = null;
   @property({ type: String, attribute: "profile-write-token" })
   profileWriteToken: string | null = null;
+  @property({ type: String, attribute: "profile-read-token" })
+  profileReadToken: string | null = null;
   @property({ type: String, attribute: "base-url" }) baseURL:
     | string
     | undefined = undefined;
@@ -83,6 +88,7 @@ export default class CjaasProfileWidget extends LitElement {
 
   @internalProperty() profile: any;
   @internalProperty() showSpinner = false;
+  @internalProperty() templateFromServer: any;
 
   updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
@@ -90,7 +96,9 @@ export default class CjaasProfileWidget extends LitElement {
     if (
       this.customer &&
       this.template &&
-      (changedProperties.has("template") || changedProperties.has("customer"))
+      (changedProperties.has("template") ||
+        changedProperties.has("customer") ||
+        changedProperties.has("templateId"))
     ) {
       this.getProfile();
     }
@@ -120,6 +128,12 @@ export default class CjaasProfileWidget extends LitElement {
   }
 
   getProfile() {
+    if (this.templateId) {
+      this.getProfileFromTemplateId();
+      return;
+    }
+
+    // Rest of the flow is soon to be deprecated
     this.baseUrlCheck();
     const url = `${this.baseURL}/v1/journey/profileview?personid=${this.customer}`;
     this.showSpinner = true;
@@ -145,37 +159,111 @@ export default class CjaasProfileWidget extends LitElement {
     };
     return axios(url, options)
       .then((x: AxiosResponse) => x.data)
-      .then((x: Profile) => {
-        this.profile = this.template.Attributes.map((y: any, i: number) => {
-          // if attribute is of tab type
-          // save journey events as well
-          let journeyEvents = null;
-          if (y.type === "tab" || y.widgetAttributes?.type === "tab") {
-            try {
-              journeyEvents = JSON.parse(
-                x.attributeView[i].journeyEvents || "null"
-              );
-            } catch {
-              console.error("Error while parsing Journey Event");
+      .then((_profile: Profile) => {
+        this.profile = this.template.Attributes.map(
+          (attribute: any, i: number) => {
+            // if attribute is of tab type
+            // save journey events as well
+            let journeyEvents = null;
+            if (
+              attribute.type === "tab" ||
+              attribute.widgetAttributes?.type === "tab"
+            ) {
+              try {
+                journeyEvents = JSON.parse(
+                  _profile.attributeView[i].journeyEvents || "null"
+                );
+              } catch {
+                console.error("Error while parsing Journey Event");
+              }
             }
-          }
 
-          return {
-            query: y,
-            result: x.attributeView[i].result.split(","),
-            journeyEvents,
-          };
-        });
+            return {
+              query: attribute,
+              result: _profile.attributeView[i].result.split(","),
+              journeyEvents,
+            };
+          }
+        );
 
         this.showSpinner = false;
         this.requestUpdate();
       })
       .catch((err: Error) => {
-        console.log(err);
+        console.error(err);
         this.profile = undefined;
         this.showSpinner = false;
         this.requestUpdate();
       });
+  }
+
+  getProfileFromTemplateId() {
+    const url = `${this.baseURL}/v1/journey/views?viewId=${this.templateId}&personId=${this.customer}`;
+
+    this.showSpinner = true;
+
+    const options: AxiosRequestConfig = {
+      url,
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+        Authorization: "SharedAccessSignature " + this.profileReadToken,
+        "X-CACHE-MAXAGE-HOUR": 5,
+      },
+    };
+
+    axios(options)
+      .then((x) => x.data)
+      .then((response: { getUriStatusQuery: string; id: string }) => {
+        this.setOffProfileLongPolling(response.getUriStatusQuery);
+      })
+      .catch((err) => {
+        console.error("Unable to fetch the Profile", err);
+        this.showSpinner = false;
+      });
+  }
+
+  setOffProfileLongPolling(url: string) {
+    let intervalId = setInterval(() => {
+      axios({
+        url,
+        method: "GET",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: "SharedAccessSignature " + this.profileReadToken,
+        },
+      })
+        .then((x) => x.data)
+        .then((response: any) => {
+          if (response.runtimeStatus === "Completed") {
+            this.showSpinner = false;
+            clearInterval(intervalId);
+            this.profile = response?.output?.ProfileView?.AttributeView.$values.map(
+              (attribute: any) => {
+                const query = {
+                  ...attribute.QueryTemplate,
+                  widgetAttributes: {
+                    type: attribute.QueryTemplate?.WidgetAttributes.type,
+                    tag: attribute.QueryTemplate?.WidgetAttributes.tag,
+                  },
+                  // temp fix for backward compatibility
+                  attributes: {
+                    type: attribute.QueryTemplate?.WidgetAttributes.type,
+                    tag: attribute.QueryTemplate?.WidgetAttributes.tag,
+                  },
+                };
+                return {
+                  query: query,
+                  journeyEvents: attribute.JourneyEvents?.$values.map(
+                    (value: string) => value && JSON.parse(value)
+                  ),
+                  result: [attribute.Result],
+                };
+              }
+            );
+          }
+        });
+    }, 5000);
   }
 
   // Timeline Logic
