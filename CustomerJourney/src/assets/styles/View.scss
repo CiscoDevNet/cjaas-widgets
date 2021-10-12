@@ -102,6 +102,15 @@ div.profile {
   padding: 0.5rem;
   width: var(--default-width);
   height: 100%;
+
+  header {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 200;
+    color: var(--md-primary-text-color);
+    background-color: var(--md-tertiary-bg-color);
+    border-radius: 0.25rem;
+  }
 }
 
 cjaas-profile::part(profile) {

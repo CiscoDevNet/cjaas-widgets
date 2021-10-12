@@ -24,6 +24,7 @@ import { EventSourceInitDict } from "eventsource";
 import "@cjaas/common-components/dist/comp/cjaas-timeline";
 import "@cjaas/common-components/dist/comp/cjaas-profile";
 import { Timeline } from "@cjaas/common-components/dist/types/components/timeline/Timeline";
+import { nothing } from "lit-html";
 
 @customElementWithCheck("customer-journey-widget")
 export default class CustomerJourneyWidget extends LitElement {
@@ -60,6 +61,11 @@ export default class CustomerJourneyWidget extends LitElement {
   @property({ type: String, attribute: "stream-token" }) streamToken:
     | string
     | null = null;
+  /**
+   * Toggles display of field to find new Journey profiles
+   * @attr visible-search
+   */
+  @property({ type: Boolean, attribute: "visible-search" }) visibleSearch = false;
   /**
    * Set the number of Timeline Events to display
    * @attr limit
@@ -310,15 +316,9 @@ export default class CustomerJourneyWidget extends LitElement {
 
   renderEvents() {
     return html`
-      <cjaas-timeline
-        .timelineItems=${this.events}
-        .newestEvents=${this.newestEvents}
-        .eventIconTemplate=${this.eventIconTemplate}
-        @new-event-queue-cleared=${this.updateComprehensiveEventList}
-        limit=${this.limit}
-        event-filters
-        ?live-stream=${this.liveStream}
-      ></cjaas-timeline>
+      <cjaas-timeline .timelineItems=${this.events} .newestEvents=${this.newestEvents}
+        .eventIconTemplate=${this.eventIconTemplate} @new-event-queue-cleared=${this.updateComprehensiveEventList}
+        limit=${this.limit} event-filters ?live-stream=${this.liveStream}></cjaas-timeline>
     `;
   }
 
@@ -343,30 +343,26 @@ export default class CustomerJourneyWidget extends LitElement {
   render() {
     return html`
       <div class="profile">
-        <details>
-          <summary
-            >Search
+        <header>${this.customer || "Customer Journey"}</header>
+        ${this.visibleSearch ? html`<details>
+          <summary>Journey Search
             <md-icon name="icon-arrow-down_12"></md-icon>
           </summary>
           <div class="search-ui">
-            <md-input
-              id="customerInput"
-              class="profile"
-              shape="pill"
-              placeholder="Journey ID e.g. '98126-Kevin'"
-            ></md-input>
-            <md-button @click=${this.changeCustomer}>Load Journey</md-button>
+            <md-input id="customerInput" class="profile" shape="pill" placeholder="Journey ID e.g. '98126-Kevin'"></md-input>
+            <md-button @click=${this.changeCustomer}>Find</md-button>
           </div>
-        </details>
+        </details>`
+        :
+        nothing
+        }
         <details ?open=${this.profileData.length > 0}>
-          <summary
-            >Profile<md-icon name="icon-arrow-down_12"></md-icon>
+          <summary>Profile<md-icon name="icon-arrow-down_12"></md-icon>
           </summary>
           <cjaas-profile .profileData=${this.profileData}></cjaas-profile>
         </details>
         <details open>
-          <summary
-            >Journey
+          <summary>Journey
             <md-icon name="icon-arrow-down_12"></md-icon>
           </summary>
           <div class="container">
