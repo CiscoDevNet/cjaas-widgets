@@ -92,14 +92,14 @@ export class Sandbox extends LitElement {
             <!-- profile-read-token="so=demoassure&sn=sandbox&ss=profile&sp=r&se=2022-06-17T23:47:34.409Z&sk=sandbox&sig=61BLCJ5+vZtOOvut/7khUQyg0N9KlvbPrJWrYa9lf28=" -->
             <cjaas-profile-view-widget
               id="view"
-              template-id="second-template"
+              template-id="my-new-template"
               customer="560021-Venki"
               profile-read-token="so=demoassure&sn=sandbox&ss=profile&sp=r&se=2024-07-03T17:12:28.082618200Z&sk=sandbox&sig=NiOhZ13iRNK6h1wkdNXfHSZ6abo%2FKhvVj7LE60a%2F7Lg%3D"
               profile-write-token="so=demoassure&sn=sandbox&ss=profile&sp=w&se=2049-02-22T16:45:11.988Z&sk=sandbox&sig=KLtI6vyZXMvvymFjqSR2EOJzeULzm43T6y3HTf63qus%3D"
               tape-read-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2049-02-22T16:44:19.899Z&sk=sandbox&sig=zfaMLDT15AoCvrWle0HSezBwgETtXs5JMTMQDaIkWkQ%3D"
               stream-read-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2049-02-22T16:45:54.572Z&sk=sandbox&sig=Ao2mLkSfBmnQH%2B87LvkIrulx61Bpb5fxFch6lwOLu78%3D"
               timelineType="journey-and-stream"
-              base-url="https://cjaas-devus1.azurewebsites.net"
+              base-url="https://cjaas-devus1-edge.azurewebsites.net"
             ></cjaas-profile-view-widget>
           </div>
           <!-- <div

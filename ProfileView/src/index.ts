@@ -93,9 +93,9 @@ export default class CjaasProfileWidget extends LitElement {
   updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
 
-    if (changedProperties.has("templateId")) {
-      this.getTemplateFromAPI();
-    }
+    // if (changedProperties.has("templateId")) {
+    //   this.getTemplateFromAPI();
+    // }
 
     if (
       this.customer &&
@@ -129,26 +129,6 @@ export default class CjaasProfileWidget extends LitElement {
     if (this.baseURL === undefined) {
       throw new Error("You must provide a Base URL");
     }
-  }
-
-  getTemplateFromAPI() {
-    let url = `${this.baseURL}/v1/journey/views/templates?id=${this.templateId}`;
-
-    const options: AxiosRequestConfig = {
-      url,
-      method: "GET",
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.profileReadToken,
-      },
-    };
-
-    axios(options)
-      .then((x) => x.data)
-      .then((x) => {
-        console.log({ template: x });
-        this.templateFromServer = x.data;
-      });
   }
 
   getProfile() {
@@ -209,7 +189,7 @@ export default class CjaasProfileWidget extends LitElement {
         this.requestUpdate();
       })
       .catch((err: Error) => {
-        console.log(err);
+        console.error(err);
         this.profile = undefined;
         this.showSpinner = false;
         this.requestUpdate();
@@ -219,12 +199,7 @@ export default class CjaasProfileWidget extends LitElement {
   getProfileFromTemplateId() {
     const url = `${this.baseURL}/v1/journey/views?viewId=${this.templateId}&personId=${this.customer}`;
 
-    const data = {
-      viewId: this.templateId,
-      personId: this.customer,
-      searchFilter: null,
-      skipCache: true,
-    };
+    this.showSpinner = true;
 
     const options: AxiosRequestConfig = {
       url,
@@ -234,13 +209,16 @@ export default class CjaasProfileWidget extends LitElement {
         Authorization: "SharedAccessSignature " + this.profileReadToken,
         "X-CACHE-MAXAGE-HOUR": 5,
       },
-      // data,
     };
 
     axios(options)
       .then((x) => x.data)
       .then((x) => {
         this.setOffProfileLongPolling(x.getUriStatusQuery);
+      })
+      .catch((err) => {
+        console.error("Unable to fetch the Profile", err);
+        this.showSpinner = false;
       });
   }
 
@@ -256,14 +234,28 @@ export default class CjaasProfileWidget extends LitElement {
       })
         .then((x) => x.data)
         .then((x) => {
-          console.log({ profile: x });
           if (x.runtimeStatus === "Completed") {
+            this.showSpinner = false;
             clearInterval(intervalId);
             this.profile = x?.output?.ProfileView?.AttributeView.$values.map(
               (x: any) => {
+                const query = {
+                  ...x.QueryTemplate,
+                  widgetAttributes: {
+                    type: x.QueryTemplate?.WidgetAttributes.type,
+                    tag: x.QueryTemplate?.WidgetAttributes.tag,
+                  },
+                  // temp fix for backward compatibility
+                  attributes: {
+                    type: x.QueryTemplate?.WidgetAttributes.type,
+                    tag: x.QueryTemplate?.WidgetAttributes.tag,
+                  },
+                };
                 return {
-                  query: x.QueryTemplate,
-                  journeyEvents: x.JourneyEvents?.$values,
+                  query: query,
+                  journeyEvents: x.JourneyEvents?.$values.map(
+                    (x: any) => x && JSON.parse(x)
+                  ),
                   result: [x.Result],
                 };
               }
