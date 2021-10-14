@@ -101,6 +101,7 @@ export class Sandbox extends LitElement {
             <customer-journey-widget
               id="timeline-widget"
               customer="30313-Carl"
+              user-search
               .template=${sampleTemplate}
               .eventIconTemplate=${iconData}
               write-token=${profileWrite}

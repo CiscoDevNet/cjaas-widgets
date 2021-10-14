@@ -63,9 +63,9 @@ export default class CustomerJourneyWidget extends LitElement {
     | null = null;
   /**
    * Toggles display of field to find new Journey profiles
-   * @attr visible-search
+   * @attr user-search
    */
-  @property({ type: Boolean, attribute: "visible-search" }) visibleSearch = false;
+  @property({ type: Boolean, attribute: "user-search" }) userSearch = false;
   /**
    * Set the number of Timeline Events to display
    * @attr limit
@@ -314,6 +314,12 @@ export default class CustomerJourneyWidget extends LitElement {
     this.newestEvents = [];
   }
 
+  handleKey(e: KeyboardEvent) {
+    if (e.key === "Enter") {
+      e.composedPath()[0].blur()
+    }
+  }
+
   renderEvents() {
     return html`
       <cjaas-timeline .timelineItems=${this.events} .newestEvents=${this.newestEvents}
@@ -343,25 +349,19 @@ export default class CustomerJourneyWidget extends LitElement {
   render() {
     return html`
       <div class="profile">
-        <header>${this.customer || "Customer Journey"}</header>
-        ${this.visibleSearch ? html`<details>
-          <summary>Journey Search
-            <md-icon name="icon-arrow-down_12"></md-icon>
-          </summary>
-          <div class="search-ui">
-            <md-input id="customerInput" class="profile" shape="pill" placeholder="Journey ID e.g. '98126-Kevin'"></md-input>
-            <md-button @click=${this.changeCustomer}>Find</md-button>
-          </div>
-        </details>`
-        :
-        nothing
-        }
-        <details ?open=${this.profileData.length > 0}>
+        <md-tooltip message="Click to search new journey" ?disabled=${!this.userSearch}>
+          <header
+          contenteditable=${this.userSearch ? "true" : "false"}
+          @blur=${(e: Event)=>{this.customer = (e.composedPath()[0].innerText)}}
+          @keydown=${(e:KeyboardEvent)=>this.handleKey(e)}
+          >${this.customer || "Customer Journey"}</header>
+        </md-tooltip>
+        <details class="grid-profile" ?open=${this.profileData.length > 0}>
           <summary>Profile<md-icon name="icon-arrow-down_12"></md-icon>
           </summary>
           <cjaas-profile .profileData=${this.profileData}></cjaas-profile>
         </details>
-        <details open>
+        <details class="grid-timeline" open>
           <summary>Journey
             <md-icon name="icon-arrow-down_12"></md-icon>
           </summary>

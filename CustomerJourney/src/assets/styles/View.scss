@@ -98,12 +98,18 @@ div.profile {
   display: flex;
   flex-flow: column;
   justify-content: flex-start;
+
   align-self: center;
   padding: 0.5rem;
-  width: var(--default-width);
+  min-width: var(--default-width);
   height: 100%;
 
+  md-tooltip {
+    display: block;
+  }
+
   header {
+    grid-area: header;
     text-align: center;
     font-size: 1.5rem;
     font-weight: 200;
@@ -111,6 +117,7 @@ div.profile {
     background-color: var(--md-tertiary-bg-color);
     border-radius: 0.25rem;
   }
+
 }
 
 cjaas-profile::part(profile) {
