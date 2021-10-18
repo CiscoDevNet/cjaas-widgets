@@ -101,6 +101,7 @@ div.profile {
 
   align-self: center;
   padding: 0.5rem;
+  width: inherit;
   min-width: var(--default-width);
   height: 100%;
 
@@ -117,6 +118,29 @@ div.profile {
     background-color: var(--md-tertiary-bg-color);
     border-radius: 0.25rem;
   }
+
+  &.expanded {
+    display: grid;
+    grid-template-areas:
+    "profile header"
+    "profile timeline";
+    justify-content: space-around;
+
+    header {
+      grid-area: header;
+    }
+    .grid-profile {
+      grid-area: profile;
+      width: 22rem;
+    }
+    .grid-timeline {
+      grid-area: timeline;
+      width: 22rem;
+
+    }
+  }
+
+
 
 }
 

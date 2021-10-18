@@ -14,7 +14,7 @@ import {
   PropertyValues,
   query
 } from "lit-element";
-import { ifDefined } from "lit-html/directives/if-defined";
+import { classMap } from "lit-html/directives/class-map.js";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
 import * as iconData from "@/assets/icons.json";
@@ -123,6 +123,11 @@ export default class CustomerJourneyWidget extends LitElement {
    * @prop errorMessage
    */
   @internalProperty() errorMessage = "";
+  /**
+   * Internal toggle for responsive layout
+   * @prop expanded
+   */
+  @internalProperty() expanded = false;
 
   /**
    * Hook to HTML element <div class="container">
@@ -134,6 +139,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * @query customerInput
    */
   @query("#customerInput") customerInput!: HTMLInputElement;
+  @query(".profile") widget!: HTMLElement;
 
   connectedCallback() {
     super.connectedCallback();
@@ -154,6 +160,17 @@ export default class CustomerJourneyWidget extends LitElement {
   async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     await this.lifecycleTasks();
+    const resizeObserver = new ResizeObserver(entries => {
+      if (entries[0].contentRect.width > 740) {
+        this.expanded = true;
+        console.log(this.expanded);
+      } else {
+        this.expanded = false;
+        console.log(this.expanded);
+      }
+    });
+
+    resizeObserver.observe(this.widget);
   }
 
   async update(changedProperties: PropertyValues) {
@@ -316,15 +333,21 @@ export default class CustomerJourneyWidget extends LitElement {
 
   handleKey(e: KeyboardEvent) {
     if (e.key === "Enter") {
-      e.composedPath()[0].blur()
+      e.composedPath()[0].blur();
     }
   }
 
   renderEvents() {
     return html`
-      <cjaas-timeline .timelineItems=${this.events} .newestEvents=${this.newestEvents}
-        .eventIconTemplate=${this.eventIconTemplate} @new-event-queue-cleared=${this.updateComprehensiveEventList}
-        limit=${this.limit} event-filters ?live-stream=${this.liveStream}></cjaas-timeline>
+      <cjaas-timeline
+        .timelineItems=${this.events}
+        .newestEvents=${this.newestEvents}
+        .eventIconTemplate=${this.eventIconTemplate}
+        @new-event-queue-cleared=${this.updateComprehensiveEventList}
+        limit=${this.limit}
+        event-filters
+        ?live-stream=${this.liveStream}
+      ></cjaas-timeline>
     `;
   }
 
@@ -342,27 +365,40 @@ export default class CustomerJourneyWidget extends LitElement {
     `;
   }
 
+  private get classes() {
+    return { expanded: this.expanded };
+  }
+
   static get styles() {
     return styles;
   }
 
   render() {
     return html`
-      <div class="profile">
-        <md-tooltip message="Click to search new journey" ?disabled=${!this.userSearch}>
+      <div class="profile${classMap(this.classes)}">
+        <md-tooltip
+          message="Click to search new journey"
+          ?disabled=${!this.userSearch}
+        >
           <header
-          contenteditable=${this.userSearch ? "true" : "false"}
-          @blur=${(e: Event)=>{this.customer = (e.composedPath()[0].innerText)}}
-          @keydown=${(e:KeyboardEvent)=>this.handleKey(e)}
-          >${this.customer || "Customer Journey"}</header>
+            contenteditable=${this.userSearch ? "true" : "false"}
+            @blur=${(e: Event) => {
+              this.customer = e.composedPath()[0].innerText;
+            }}
+            @keydown=${(e: KeyboardEvent) => this.handleKey(e)}
+          >
+            ${this.customer || "Customer Journey"}
+          </header>
         </md-tooltip>
         <details class="grid-profile" ?open=${this.profileData.length > 0}>
-          <summary>Profile<md-icon name="icon-arrow-down_12"></md-icon>
+          <summary
+            >Profile<md-icon name="icon-arrow-down_12"></md-icon>
           </summary>
           <cjaas-profile .profileData=${this.profileData}></cjaas-profile>
         </details>
         <details class="grid-timeline" open>
-          <summary>Journey
+          <summary
+            >Journey
             <md-icon name="icon-arrow-down_12"></md-icon>
           </summary>
           <div class="container">
