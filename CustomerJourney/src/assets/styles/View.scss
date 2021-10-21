@@ -125,17 +125,18 @@ div.profile {
     "profile header"
     "profile timeline";
     justify-content: space-around;
+    grid-template-rows: auto 1fr;
 
     header {
       grid-area: header;
     }
     .grid-profile {
       grid-area: profile;
-      width: 22rem;
+      width: 26rem;
     }
     .grid-timeline {
       grid-area: timeline;
-      width: 22rem;
+      width: 26rem;
 
     }
   }

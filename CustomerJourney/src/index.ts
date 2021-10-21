@@ -24,7 +24,7 @@ import { EventSourceInitDict } from "eventsource";
 import "@cjaas/common-components/dist/comp/cjaas-timeline";
 import "@cjaas/common-components/dist/comp/cjaas-profile";
 import { Timeline } from "@cjaas/common-components/dist/types/components/timeline/Timeline";
-import { nothing } from "lit-html";
+// import ResizeObserver from "resize-observer-polyfill";
 
 @customElementWithCheck("customer-journey-widget")
 export default class CustomerJourneyWidget extends LitElement {
@@ -160,15 +160,18 @@ export default class CustomerJourneyWidget extends LitElement {
   async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     await this.lifecycleTasks();
-    const resizeObserver = new ResizeObserver(entries => {
-      if (entries[0].contentRect.width > 740) {
-        this.expanded = true;
-        console.log(this.expanded);
-      } else {
-        this.expanded = false;
-        console.log(this.expanded);
+    // @ts-ignore
+    const resizeObserver = new ResizeObserver(
+      (entries: ResizeObserverEntry[]) => {
+        if (entries[0].contentRect.width > 780) {
+          this.expanded = true;
+          console.log(this.expanded);
+        } else {
+          this.expanded = false;
+          console.log(this.expanded);
+        }
       }
-    });
+    );
 
     resizeObserver.observe(this.widget);
   }
