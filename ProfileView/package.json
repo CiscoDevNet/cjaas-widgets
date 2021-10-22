@@ -26,7 +26,7 @@
     "lit-html": "1.2.1"
   },
   "peerDependencies": {
-    "@cjaas/common-components": "3.1.1",
+    "@cjaas/common-components": "4.0.0-dev1",
     "@momentum-ui/core": "19.15.4",
     "@momentum-ui/icons": "8.21.0",
     "@momentum-ui/utils": "6.2.15",
@@ -37,8 +37,8 @@
   "devDependencies": {
     "@babel/core": "^7.9.0",
     "@babel/preset-env": "^7.9.0",
-    "@cjaas/common-components": "3.0.0",
-    "@momentum-ui/core": "19.15.10",
+    "@cjaas/common-components": "4.0.0-dev1",
+    "@momentum-ui/core": "19.15.4",
     "@momentum-ui/icons": "8.21.0",
     "@momentum-ui/utils": "6.2.15",
     "@momentum-ui/web-components": "2.4.7",
@@ -102,6 +102,8 @@
     }
   },
   "dependencies": {
+    "@types/eventsource": "^1.1.5",
+    "eventsource": "^1.1.0",
     "lit": "^2.0.0-rc.2"
   }
 }

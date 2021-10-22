@@ -88,8 +88,7 @@ export class Sandbox extends LitElement {
             style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
             class="widget-container"
           >
-            <!-- We might need this read token very soon -->
-            <!-- profile-read-token="so=demoassure&sn=sandbox&ss=profile&sp=r&se=2022-06-17T23:47:34.409Z&sk=sandbox&sig=61BLCJ5+vZtOOvut/7khUQyg0N9KlvbPrJWrYa9lf28=" -->
+            <!-- ONLY TEST USING THE EDGE SERVER, NEVER PRODUCTION SERVER, IT WILL MESS UP THE WALKING -->
             <cjaas-profile-view-widget
               id="view"
               template-id="my-new-template"
@@ -111,7 +110,7 @@ export class Sandbox extends LitElement {
               customer="560021-Venki"
               .template=${sampleTemplate}
               timelineType="journey-and-stream"
-              base-url="https://uswest-nonprod.cjaas.cisco.com"
+              base-url="https://cjaas-devus1-edge.azurewebsites.net"
             >
               <h3 slot="l10n-header-text">Texto de encabezado personalizado</h3>
               <h4 slot="l10n-no-data-message">No hay datos para mostrar</h4>
