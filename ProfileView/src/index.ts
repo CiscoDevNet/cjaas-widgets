@@ -13,7 +13,7 @@ import {
   internalProperty,
   property,
   LitElement,
-  PropertyValues,
+  PropertyValues
 } from "lit-element";
 import { Profile } from "./types/cjaas";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
@@ -51,26 +51,26 @@ export interface CustomerEvent {
 export default class CjaasProfileWidget extends LitElement {
   @property() customer: string | undefined;
   @property({ type: String, attribute: "template-id" }) templateId:
-  | string
-  | undefined;
+    | string
+    | undefined;
   @property({ type: String, attribute: "stream-read-token" }) streamReadToken:
-  | string
-  | null = null;
+    | string
+    | null = null;
   @property({ type: String, attribute: "tape-read-token" }) tapeReadToken:
-  | string
-  | null = null;
+    | string
+    | null = null;
   @property({ type: String, attribute: "profile-write-token" })
   profileWriteToken: string | null = null;
   @property({ type: String, attribute: "profile-read-token" })
   profileReadToken: string | null = null;
   @property({ type: String, attribute: "base-url" }) baseURL:
-  | string
-  | undefined = undefined;
+    | string
+    | undefined = undefined;
   @property({ type: String, attribute: "base-stream-url" }) baseStreamURL:
-  | string
+    | string
     | undefined = undefined;
 
-    // timeline properties
+  // timeline properties
   @property({ type: Number }) limit = 5;
   @internalProperty() liveStream = false;
   @internalProperty() events: CustomerEvent[] = [];
@@ -114,19 +114,14 @@ export default class CjaasProfileWidget extends LitElement {
       changedProperties.has("profileWriteToken") ||
       changedProperties.has("filter")
     ) {
-      this.lifecycleTasks()
+      this.lifecycleTasks();
     }
 
     if (
       changedProperties.has("streamToken") ||
       changedProperties.has("customer")
-      ) {
-      this.lifecycleTasks()
-    }
-    if (
-      changedProperties.has("profile")
-     ) {
-      console.log("hey")
+    ) {
+      this.lifecycleTasks();
     }
   }
 
@@ -162,9 +157,9 @@ export default class CjaasProfileWidget extends LitElement {
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.profileWriteToken,
+        Authorization: "SharedAccessSignature " + this.profileWriteToken
       },
-      data,
+      data
     };
     return axios(url, options)
       .then((x: AxiosResponse) => x.data)
@@ -190,7 +185,7 @@ export default class CjaasProfileWidget extends LitElement {
             return {
               query: attribute,
               result: _profile.attributeView[i].result.split(","),
-              journeyEvents,
+              journeyEvents
             };
           }
         );
@@ -217,32 +212,32 @@ export default class CjaasProfileWidget extends LitElement {
       headers: {
         "Content-type": "application/json",
         Authorization: "SharedAccessSignature " + this.profileReadToken,
-        "X-CACHE-MAXAGE-HOUR": 5,
-      },
+        "X-CACHE-MAXAGE-HOUR": 5
+      }
     };
 
     axios(options)
-      .then((x) => x.data)
+      .then(x => x.data)
       .then((response: { getUriStatusQuery: string; id: string }) => {
         this.setOffProfileLongPolling(response.getUriStatusQuery);
       })
-      .catch((err) => {
+      .catch(err => {
         console.error("Unable to fetch the Profile", err);
         this.showSpinner = false;
       });
   }
 
   setOffProfileLongPolling(url: string) {
-    let intervalId = setInterval(() => {
+    const intervalId = setInterval(() => {
       axios({
         url,
         method: "GET",
         headers: {
           "Content-type": "application/json",
-          Authorization: "SharedAccessSignature " + this.profileReadToken,
-        },
+          Authorization: "SharedAccessSignature " + this.profileReadToken
+        }
       })
-        .then((x) => x.data)
+        .then(x => x.data)
         .then((response: any) => {
           if (response.runtimeStatus === "Completed") {
             clearInterval(intervalId);
@@ -253,20 +248,20 @@ export default class CjaasProfileWidget extends LitElement {
                   ...attribute.QueryTemplate,
                   widgetAttributes: {
                     type: attribute.QueryTemplate?.WidgetAttributes.type,
-                    tag: attribute.QueryTemplate?.WidgetAttributes.tag,
+                    tag: attribute.QueryTemplate?.WidgetAttributes.tag
                   },
                   // temp fix for backward compatibility
                   attributes: {
                     type: attribute.QueryTemplate?.WidgetAttributes.type,
-                    tag: attribute.QueryTemplate?.WidgetAttributes.tag,
-                  },
+                    tag: attribute.QueryTemplate?.WidgetAttributes.tag
+                  }
                 };
                 return {
                   query: query,
                   journeyEvents: attribute.JourneyEvents?.$values.map(
                     (value: string) => value && JSON.parse(value)
                   ),
-                  result: [attribute.Result],
+                  result: [attribute.Result]
                 };
               }
             );
