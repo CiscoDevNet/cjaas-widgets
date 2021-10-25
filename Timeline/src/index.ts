@@ -13,41 +13,37 @@ import {
   internalProperty,
   property,
   LitElement,
-  PropertyValues,
+  PropertyValues
 } from "lit-element";
 import { nothing } from "lit-html";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
-import { DateTime } from "luxon";
+import { EventSourceInitDict } from "eventsource";
+import { ServerSentEvent } from "./types/cjaas";
 
-export type TimelineItem = {
-  title: string;
-  text?: string;
-  person?: string;
-  subText?: string;
-  data?: any;
-  footer?: string;
-  timestamp?: any;
-  showMore?: boolean;
+export interface CustomerEvent {
+  data: Record<string, any>;
+  firstName: string;
+  lastName: string;
+  email: string;
+  datacontenttype: string;
   id: string;
-};
-
-export interface ServerSentEvent {
-  data: string;
-  events: [];
+  person: string;
+  source: string;
+  specversion: string;
+  time: string;
+  type: string;
 }
 
 @customElementWithCheck("cjaas-timeline-widget")
 export default class CjaasTimelineWidget extends LitElement {
-  @property({ type: Array }) timelineItems: TimelineItem[] = [];
+  @property({ type: Array }) events: CustomerEvent[] = [];
   @property({ type: String, attribute: "base-url" }) baseURL:
     | string
     | undefined = undefined;
   @property({ type: String, attribute: "base-stream-url" }) baseStreamURL:
     | string
     | undefined = undefined;
-  @property() filter: string | undefined;
-
   @property({ type: String, attribute: "tape-read-token" }) tapeReadToken:
     | string
     | undefined;
@@ -56,15 +52,32 @@ export default class CjaasTimelineWidget extends LitElement {
     | undefined;
   @property({ reflect: true }) pagination = "$top=15";
   @property({ type: Number }) limit = 5;
+  @property({ type: Boolean, attribute: "show-filters" }) showFilters = false;
   @property({ reflect: true }) type:
     | "journey"
     | "livestream"
     | "journey-and-stream" = "livestream";
 
-  @property({ attribute: "person-id" }) personId: string | undefined;
+  @property({ attribute: "person-id" }) personId = "";
   @internalProperty() eventSource: EventSource | null = null;
+  @internalProperty() liveStream = false;
   @internalProperty() showSpinner = false;
   @internalProperty() errorMessage = "";
+
+  @internalProperty() newestEvents: Array<CustomerEvent> = [];
+
+  async lifecycleTasks() {
+    const data = await this.getExistingEvents();
+    this.events = data.events;
+    this.showSpinner = false;
+    this.requestUpdate();
+    this.subscribeToStream();
+  }
+
+  async firstUpdated(changedProperties: PropertyValues) {
+    super.firstUpdated(changedProperties);
+    await this.lifecycleTasks();
+  }
 
   updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
@@ -75,9 +88,7 @@ export default class CjaasTimelineWidget extends LitElement {
         changedProperties.has("filter") ||
         changedProperties.has("personId"))
     ) {
-      this.timelineItems = [];
-      this.requestUpdate();
-      this.subscribeToStream();
+      this.lifecycleTasks();
     }
   }
 
@@ -88,74 +99,35 @@ export default class CjaasTimelineWidget extends LitElement {
     }
   }
 
-  // defaults to top 10 for journey
-  getAPIQueryParams(forJourney = false) {
-    // signature needs to be URI encoded for it to work
-    // as query strings
-    // "so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=7G8UdEipQHnWOV3hRbTqkNxxjQNHkkQYGDlCrgEhK0k=";
-    const signature = forJourney ? this.tapeReadToken : this.streamReadToken;
-
-    let url = signature;
-
-    if (this.filter) {
-      url += `&$filter=${this.filter}`;
-    }
-
-    if (this.pagination) {
-      url += `&${this.pagination}`;
-    } else if (!this.pagination && forJourney) {
-      url += "&$top=10";
-    }
-    return url;
+  updateComprehensiveEventList() {
+    this.events = [...this.newestEvents, ...this.events];
+    this.newestEvents = [];
   }
 
-  getTimelineItemFromMessage(message: any) {
-    const item: any = {};
-
-    item.title = message.type;
-    item.timestamp = DateTime.fromISO(message.time);
-    item.id = message.id;
-    if (message.person && message.person.indexOf("anon") === -1) {
-      item.person = message.person;
-    }
-
-    if (message.data) {
-      item.data = message.data;
-    }
-
-    return item;
-  }
-
-  getJourney() {
+  async getExistingEvents() {
     this.showSpinner = true;
     this.baseUrlCheck();
-    let url;
-    if (this.personId) {
-      url = `${this.baseURL}/v1/journey/streams/historic/${this.personId}`;
-    } else {
-      url = `${this.baseURL}/v1/journey/streams/historic`;
-    }
-
-    // gets historic journey
-    fetch(`${url}?${this.getAPIQueryParams(true)}`, {
-      headers: {
-        "content-type": "application/json; charset=UTF-8",
-        Authorization: `SharedAccessSignature ${this.tapeReadToken}`,
-      },
-      method: "GET",
-    })
-      .then((x: Response) => x.json())
-      .then((x: ServerSentEvent) => {
-        x?.events
-          ?.map((y: ServerSentEvent) => this.getTimelineItemFromMessage(y))
-          .map((z: TimelineItem) => this.enqueueItem(z));
+    return fetch(
+      `${this.baseURL}/v1/journey/streams/historic/${this.personId}`,
+      {
+        headers: {
+          "content-type": "application/json; charset=UTF-8",
+          accept: "application/json",
+          Authorization: `SharedAccessSignature ${this.tapeReadToken}`
+        },
+        method: "GET"
+      }
+    )
+      .then((x: Response) => {
+        return x.json();
       })
-      .then(() => {
-        this.showSpinner = false;
+      .then(data => {
+        return data;
       })
-      .catch((err: any) => {
+      .catch(err => {
         this.showSpinner = false;
-        this.errorMessage = `Failure to fetch Journey ${err}`;
+        console.error("Could not fetch Customer Journey events. ", err);
+        this.errorMessage = `Failure to fetch Journey for ${this.personId}. ${err}`;
       });
   }
 
@@ -164,78 +136,38 @@ export default class CjaasTimelineWidget extends LitElement {
       this.eventSource.close();
     }
 
-    if (this.type === "journey" || this.type === "journey-and-stream") {
-      this.getJourney();
+    this.baseUrlCheck();
+    if (this.streamReadToken) {
+      const header: EventSourceInitDict = {
+        headers: {
+          "content-type": "application/json; charset=UTF-8",
+          accept: "application/json",
+          Authorization: `SharedAccessSignature ${this.streamReadToken}`
+        }
+      };
+      this.eventSource = new EventSource(
+        `${this.baseURL}/v1/journey/streams/${this.personId}?${this.streamReadToken}`,
+        header
+      );
     }
 
-    if (this.type !== "journey") {
-      this.baseUrlCheck();
-
-      let url;
-      if (this.personId) {
-        url = `${this.baseStreamURL || this.baseURL}/v1/journey/streams/${
-          this.personId
-        }`;
-      } else {
-        url = `${this.baseStreamURL || this.baseURL}/v1/journey/streams`;
-      }
-
-      this.eventSource = new EventSource(`${url}?${this.getAPIQueryParams()}`);
-
-      // @ts-ignore
-      this.eventSource.onmessage = (event: ServerSentEvent) => {
+    if (this.eventSource) {
+      this.eventSource!.onmessage = (event: ServerSentEvent) => {
         let data;
         try {
           data = JSON.parse(event.data);
+          this.newestEvents = [data, ...this.newestEvents];
         } catch (err) {
-          console.error(err);
-        }
-
-        if (data) {
-          this.enqueueItem(this.getTimelineItemFromMessage(data));
-          this.showSpinner = false;
+          console.log("Event Source Ping");
         }
       };
 
-      this.eventSource.onerror = () => {
+      this.eventSource!.onerror = () => {
         this.showSpinner = false;
       };
-    }
-  }
-
-  public enqueueItem(item: TimelineItem) {
-    while (
-      this.timelineItems.length >= this.limit &&
-      this.type === "livestream"
-    ) {
-      this.dequeuePastOneItem();
-    }
-
-    const dataLength = this.timelineItems.length;
-
-    // events may not be chronologically sorted by default
-    if (dataLength === 0) {
-      this.timelineItems = [item];
-    } else if (this.timelineItems[0].timestamp < item.timestamp) {
-      this.timelineItems = [item, ...this.timelineItems];
-    } else if (this.timelineItems[dataLength - 1].timestamp > item.timestamp) {
-      this.timelineItems = [...this.timelineItems, item];
     } else {
-      let currentIndex = 0;
-      let currentItem = this.timelineItems[currentIndex];
-      while (
-        currentItem.timestamp > item.timestamp &&
-        currentIndex < this.timelineItems.length
-      ) {
-        currentIndex = currentIndex + 1;
-        currentItem = this.timelineItems[currentIndex];
-      }
-      this.timelineItems.splice(currentIndex, 0, item);
+      console.error(`No event source is active for ${this.personId}`);
     }
-  }
-
-  dequeuePastOneItem() {
-    this.timelineItems.shift();
   }
 
   static get styles() {
@@ -245,10 +177,12 @@ export default class CjaasTimelineWidget extends LitElement {
   renderTimeline() {
     return html`
       <cjaas-timeline
-        id="cjaas-timeline-component"
-        .timelineItems=${this.timelineItems}
+        .timelineItems=${this.events}
+        .newestEvents=${this.newestEvents}
+        @new-event-queue-cleared=${this.updateComprehensiveEventList}
         limit=${this.limit}
-        type=${this.type}
+        ?event-filters=${this.showFilters}
+        ?live-stream=${this.liveStream}
       ></cjaas-timeline>
     `;
   }
@@ -256,7 +190,7 @@ export default class CjaasTimelineWidget extends LitElement {
   render() {
     return html`
       <div class="outer-container">
-        ${this.timelineItems?.length
+        ${this.events?.length
           ? this.renderTimeline()
           : this.getEmptyStateTemplate()}
       </div>

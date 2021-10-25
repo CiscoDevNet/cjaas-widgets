@@ -14,7 +14,7 @@ import "..";
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
   @internalProperty() darkTheme = false;
-  @internalProperty() containerWidth = "1000px";
+  @internalProperty() containerWidth = "600px";
   @internalProperty() containerHeight = "80vh";
   @internalProperty() selectedComponent = "Activity Item";
   static get styles() {
@@ -89,12 +89,11 @@ export class Sandbox extends LitElement {
           >
             <cjaas-timeline-widget
               id="timeline-widget"
-              type="journey-and-stream"
-              filter="person eq 'v3nki@cisco.com'"
+              person-id=""
               tape-read-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2049-02-22T16:44:19.899Z&sk=sandbox&sig=zfaMLDT15AoCvrWle0HSezBwgETtXs5JMTMQDaIkWkQ%3D"
               stream-read-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2049-02-22T16:45:54.572Z&sk=sandbox&sig=Ao2mLkSfBmnQH%2B87LvkIrulx61Bpb5fxFch6lwOLu78%3D"
               limit="15"
-              base-url="https://uswest-nonprod.cjaas.cisco.com"
+              base-url="https://cjaas-devus1-edge.azurewebsites.net"
             ></cjaas-timeline-widget>
           </div>
           <div
@@ -107,7 +106,8 @@ export class Sandbox extends LitElement {
               stream-read-token="missing"
               tape-read-token="missing"
               limit="15"
-              base-url="https://uswest-nonprod.cjaas.cisco.com"
+              show-filters
+              base-url="https://cjaas-devus1-edge.azurewebsites.net"
             >
               <h3 slot="ll10n-no-timeline-message">
                 No hay línea de tiempo disponible
