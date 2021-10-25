@@ -15,7 +15,7 @@ import {
   LitElement,
   PropertyValues,
 } from "lit-element";
-import { Profile } from "./types/cjaas";
+import { AttributeView, Profile, ProfileFromSyncAPI } from "./types/cjaas";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
@@ -51,26 +51,26 @@ export interface CustomerEvent {
 export default class CjaasProfileWidget extends LitElement {
   @property() customer: string | undefined;
   @property({ type: String, attribute: "template-id" }) templateId:
-  | string
-  | undefined;
+    | string
+    | undefined;
   @property({ type: String, attribute: "stream-read-token" }) streamReadToken:
-  | string
-  | null = null;
+    | string
+    | null = null;
   @property({ type: String, attribute: "tape-read-token" }) tapeReadToken:
-  | string
-  | null = null;
+    | string
+    | null = null;
   @property({ type: String, attribute: "profile-write-token" })
   profileWriteToken: string | null = null;
   @property({ type: String, attribute: "profile-read-token" })
   profileReadToken: string | null = null;
   @property({ type: String, attribute: "base-url" }) baseURL:
-  | string
-  | undefined = undefined;
+    | string
+    | undefined = undefined;
   @property({ type: String, attribute: "base-stream-url" }) baseStreamURL:
-  | string
+    | string
     | undefined = undefined;
 
-    // timeline properties
+  // timeline properties
   @property({ type: Number }) limit = 5;
   @internalProperty() liveStream = false;
   @internalProperty() events: CustomerEvent[] = [];
@@ -80,14 +80,14 @@ export default class CjaasProfileWidget extends LitElement {
   @internalProperty() showTimelineSpinner = false;
   @internalProperty() showSpinner = false;
   @internalProperty() errorMessage = "";
-  @internalProperty() profile: any;
+  @internalProperty() profile: Profile | undefined;
   @internalProperty() defaultTemplate = defaultTemplate;
   @internalProperty() templateFromServer: any;
 
   async lifecycleTasks() {
     const data = await this.getExistingEvents();
     this.events = data.events;
-    this.showSpinner = false;
+
     this.requestUpdate();
     this.subscribeToStream();
   }
@@ -114,19 +114,14 @@ export default class CjaasProfileWidget extends LitElement {
       changedProperties.has("profileWriteToken") ||
       changedProperties.has("filter")
     ) {
-      this.lifecycleTasks()
+      this.lifecycleTasks();
     }
 
     if (
       changedProperties.has("streamToken") ||
       changedProperties.has("customer")
-      ) {
-      this.lifecycleTasks()
-    }
-    if (
-      changedProperties.has("profile")
-     ) {
-      console.log("hey")
+    ) {
+      this.lifecycleTasks();
     }
   }
 
@@ -168,7 +163,7 @@ export default class CjaasProfileWidget extends LitElement {
     };
     return axios(url, options)
       .then((x: AxiosResponse) => x.data)
-      .then((_profile: Profile) => {
+      .then((_profile: ProfileFromSyncAPI) => {
         this.profile = this.defaultTemplate.Attributes.map(
           (attribute: any, i: number) => {
             // if attribute is of tab type
@@ -193,7 +188,7 @@ export default class CjaasProfileWidget extends LitElement {
               journeyEvents,
             };
           }
-        );
+        ) as Profile;
 
         this.showSpinner = false;
         this.requestUpdate();
@@ -246,30 +241,10 @@ export default class CjaasProfileWidget extends LitElement {
         .then((response: any) => {
           if (response.runtimeStatus === "Completed") {
             clearInterval(intervalId);
+
+            this.profile = this.getProfileFromPolledResponse(response);
+
             this.showSpinner = false;
-            this.profile = response?.output?.ProfileView?.AttributeView.$values.map(
-              (attribute: any) => {
-                const query = {
-                  ...attribute.QueryTemplate,
-                  widgetAttributes: {
-                    type: attribute.QueryTemplate?.WidgetAttributes.type,
-                    tag: attribute.QueryTemplate?.WidgetAttributes.tag,
-                  },
-                  // temp fix for backward compatibility
-                  attributes: {
-                    type: attribute.QueryTemplate?.WidgetAttributes.type,
-                    tag: attribute.QueryTemplate?.WidgetAttributes.tag,
-                  },
-                };
-                return {
-                  query: query,
-                  journeyEvents: attribute.JourneyEvents?.$values.map(
-                    (value: string) => value && JSON.parse(value)
-                  ),
-                  result: [attribute.Result],
-                };
-              }
-            );
           }
         });
     }, 5000);
@@ -301,15 +276,15 @@ export default class CjaasProfileWidget extends LitElement {
         headers: {
           "content-type": "application/json; charset=UTF-8",
           accept: "application/json",
-          Authorization: `SharedAccessSignature ${this.tapeReadToken}`
+          Authorization: `SharedAccessSignature ${this.tapeReadToken}`,
         },
-        method: "GET"
+        method: "GET",
       }
     )
       .then((x: Response) => {
         return x.json();
       })
-      .then(data => {
+      .then((data) => {
         return data;
       })
       .catch((err: any) => {
@@ -330,8 +305,8 @@ export default class CjaasProfileWidget extends LitElement {
         headers: {
           "content-type": "application/json; charset=UTF-8",
           accept: "application/json",
-          Authorization: `SharedAccessSignature ${this.streamReadToken}`
-        }
+          Authorization: `SharedAccessSignature ${this.streamReadToken}`,
+        },
       };
       this.eventSource = new EventSource(
         `${this.baseURL}/v1/journey/streams/${this.customer}?${this.streamReadToken}`,
@@ -429,7 +404,7 @@ export default class CjaasProfileWidget extends LitElement {
 
   getTabs() {
     // tab data should return the event as such.. Should be rendered by stream component.
-    const tabs = this.profile.filter(
+    const tabs = this.profile?.filter(
       (x: any) =>
         x.query.type === "tab" || x.query?.widgetAttributes?.type === "tab"
     );
@@ -460,6 +435,33 @@ export default class CjaasProfileWidget extends LitElement {
     } else {
       return activityTab;
     }
+  }
+
+  // parses the response from polled API to a valid Profile
+  getProfileFromPolledResponse(response: any): Profile {
+    return response?.output?.ProfileView?.AttributeView.$values.map(
+      (attribute: any) => {
+        const query = {
+          ...attribute.QueryTemplate,
+          widgetAttributes: {
+            type: attribute.QueryTemplate?.WidgetAttributes.type,
+            tag: attribute.QueryTemplate?.WidgetAttributes.tag,
+          },
+          // temp fix for backward compatibility
+          attributes: {
+            type: attribute.QueryTemplate?.WidgetAttributes.type,
+            tag: attribute.QueryTemplate?.WidgetAttributes.tag,
+          },
+        };
+        return {
+          query: query,
+          journeyEvents: attribute.JourneyEvents?.$values.map(
+            (value: string) => value && JSON.parse(value)
+          ),
+          result: [attribute.Result],
+        };
+      }
+    );
   }
 
   getTab(tab: any) {
