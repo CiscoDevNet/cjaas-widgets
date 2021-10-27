@@ -75,7 +75,7 @@ cjaas-profile {
   }
 
   md-tabs::part(tabs-content) {
-    overflow: hidden;
+    overflow: inherit;
   }
 
   md-tab {

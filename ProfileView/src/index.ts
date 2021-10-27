@@ -13,9 +13,9 @@ import {
   internalProperty,
   property,
   LitElement,
-  PropertyValues,
+  PropertyValues
 } from "lit-element";
-import { Profile } from "./types/cjaas";
+import {  Profile, ProfileFromSyncAPI } from "./types/cjaas";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
@@ -49,8 +49,10 @@ export interface CustomerEvent {
 @customElementWithCheck("cjaas-profile-view-widget")
 export default class CjaasProfileWidget extends LitElement {
   @property() customer: string | undefined;
-  @property() template: any | null | undefined = defaultTemplate;
-  @property({ type: String, attribute: "stream-read-token" }) streamToken:
+  @property({ type: String, attribute: "template-id" }) templateId:
+    | string
+    | undefined;
+  @property({ type: String, attribute: "stream-read-token" }) streamReadToken:
     | string
     | null = null;
   @property({ type: String, attribute: "tape-read-token" }) tapeReadToken:
@@ -58,26 +60,31 @@ export default class CjaasProfileWidget extends LitElement {
     | null = null;
   @property({ type: String, attribute: "profile-write-token" })
   profileWriteToken: string | null = null;
+  @property({ type: String, attribute: "profile-read-token" })
+  profileReadToken: string | null = null;
   @property({ type: String, attribute: "base-url" }) baseURL:
     | string
     | undefined = undefined;
   @property({ type: String, attribute: "base-stream-url" }) baseStreamURL:
     | string
     | undefined = undefined;
+
+  // timeline properties
   @property({ type: Number }) limit = 5;
   @internalProperty() liveStream = false;
   @internalProperty() events: CustomerEvent[] = [];
   @internalProperty() newestEvents: Array<CustomerEvent> = [];
   @internalProperty() eventSource: EventSource | null = null;
   @internalProperty() showTimelineSpinner = false;
-  @internalProperty() errorMessage = "";
-  @internalProperty() profile: any;
   @internalProperty() showSpinner = false;
+  @internalProperty() errorMessage = "";
+  @internalProperty() profile: Profile | undefined;
+  @internalProperty() defaultTemplate = defaultTemplate;
+  @internalProperty() templateFromServer: any;
 
   async lifecycleTasks() {
     const data = await this.getExistingEvents();
     this.events = data.events;
-    this.showSpinner = false;
     this.requestUpdate();
     this.subscribeToStream();
   }
@@ -92,8 +99,10 @@ export default class CjaasProfileWidget extends LitElement {
 
     if (
       this.customer &&
-      this.template &&
-      (changedProperties.has("template") || changedProperties.has("customer"))
+      this.defaultTemplate &&
+      (changedProperties.has("template") ||
+        changedProperties.has("customer") ||
+        changedProperties.has("templateId"))
     ) {
       this.getProfile();
     }
@@ -120,12 +129,18 @@ export default class CjaasProfileWidget extends LitElement {
   }
 
   getProfile() {
+    if (this.templateId) {
+      this.getProfileFromTemplateId();
+      return;
+    }
+
+    // Rest of the flow is soon to be deprecated
     this.baseUrlCheck();
     const url = `${this.baseURL}/v1/journey/profileview?personid=${this.customer}`;
     this.showSpinner = true;
 
     // set verbose as true for tabbed attributes
-    const template = Object.assign({}, this.template);
+    const template = Object.assign({}, this.defaultTemplate);
     template.Attributes = template.Attributes.map((x: any) => {
       if (x.type === "tab" || x?.widgetAttributes?.type === "tab") {
         x.Verbose = true;
@@ -139,33 +154,38 @@ export default class CjaasProfileWidget extends LitElement {
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.profileWriteToken,
+        Authorization: "SharedAccessSignature " + this.profileWriteToken
       },
-      data,
+      data
     };
     return axios(url, options)
       .then((x: AxiosResponse) => x.data)
-      .then((x: Profile) => {
-        this.profile = this.template.Attributes.map((y: any, i: number) => {
-          // if attribute is of tab type
-          // save journey events as well
-          let journeyEvents = null;
-          if (y.type === "tab" || y.widgetAttributes?.type === "tab") {
-            try {
-              journeyEvents = JSON.parse(
-                x.attributeView[i].journeyEvents || "null"
-              );
-            } catch {
-              console.error("Error while parsing Journey Event");
+      .then((_profile: ProfileFromSyncAPI) => {
+        this.profile = this.defaultTemplate.Attributes.map(
+          (attribute: any, i: number) => {
+            // if attribute is of tab type
+            // save journey events as well
+            let journeyEvents = null;
+            if (
+              attribute.type === "tab" ||
+              attribute.widgetAttributes?.type === "tab"
+            ) {
+              try {
+                journeyEvents = JSON.parse(
+                  _profile.attributeView[i].journeyEvents || "null"
+                );
+              } catch {
+                console.error("Error while parsing Journey Event");
+              }
             }
-          }
 
-          return {
-            query: y,
-            result: x.attributeView[i].result.split(","),
-            journeyEvents,
-          };
-        });
+            return {
+              query: attribute,
+              result: _profile.attributeView[i].result.split(","),
+              journeyEvents
+            };
+          }
+        ) as Profile;
 
         this.showSpinner = false;
         this.requestUpdate();
@@ -176,6 +196,78 @@ export default class CjaasProfileWidget extends LitElement {
         this.showSpinner = false;
         this.requestUpdate();
       });
+  }
+
+  getProfileFromTemplateId() {
+    const url = `${this.baseURL}/v1/journey/views?viewId=${this.templateId}&personId=${this.customer}`;
+
+    this.showSpinner = true;
+
+    const options: AxiosRequestConfig = {
+      url,
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+        Authorization: "SharedAccessSignature " + this.profileReadToken,
+        "X-CACHE-MAXAGE-HOUR": 5
+      }
+    };
+
+    axios(options)
+      .then(x => x.data)
+      .then((response: { getUriStatusQuery: string; id: string }) => {
+        this.setOffProfileLongPolling(response.getUriStatusQuery);
+      })
+      .catch(err => {
+        console.error("Unable to fetch the Profile", err);
+        this.showSpinner = false;
+      });
+  }
+
+  setOffProfileLongPolling(url: string) {
+    const intervalId = setInterval(() => {
+      axios({
+        url,
+        method: "GET",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: "SharedAccessSignature " + this.profileReadToken
+        }
+      })
+        .then(x => x.data)
+        .then((response: any) => {
+          if (response.runtimeStatus === "Completed") {
+            clearInterval(intervalId);
+
+            this.profile = this.getProfileFromPolledResponse(response);
+
+            this.showSpinner = false;
+            this.profile = response?.output?.ProfileView?.AttributeView.$values.map(
+              (attribute: any) => {
+                const query = {
+                  ...attribute.QueryTemplate,
+                  widgetAttributes: {
+                    type: attribute.QueryTemplate?.WidgetAttributes.type,
+                    tag: attribute.QueryTemplate?.WidgetAttributes.tag
+                  },
+                  // temp fix for backward compatibility
+                  attributes: {
+                    type: attribute.QueryTemplate?.WidgetAttributes.type,
+                    tag: attribute.QueryTemplate?.WidgetAttributes.tag
+                  }
+                };
+                return {
+                  query: query,
+                  journeyEvents: attribute.JourneyEvents?.$values.map(
+                    (value: string) => value && JSON.parse(value)
+                  ),
+                  result: [attribute.Result]
+                };
+              }
+            );
+          }
+        });
+    }, 5000);
   }
 
   getTimelineItemFromMessage(message: any) {
@@ -228,16 +320,16 @@ export default class CjaasProfileWidget extends LitElement {
     }
 
     this.baseUrlCheck();
-    if (this.streamToken) {
+    if (this.streamReadToken) {
       const header: EventSourceInitDict = {
         headers: {
           "content-type": "application/json; charset=UTF-8",
           accept: "application/json",
-          Authorization: `SharedAccessSignature ${this.streamToken}`
+          Authorization: `SharedAccessSignature ${this.streamReadToken}`
         }
       };
       this.eventSource = new EventSource(
-        `${this.baseURL}/v1/journey/streams/${this.customer}?${this.streamToken}`,
+        `${this.baseURL}/v1/journey/streams/${this.customer}?${this.streamReadToken}`,
         header
       );
     }
@@ -330,29 +422,9 @@ export default class CjaasProfileWidget extends LitElement {
     `;
   }
 
-  getLoadingSpinner() {
-    return this.showSpinner
-      ? html`
-          <div class="spinner-container">
-            <md-spinner size="20"></md-spinner>
-          </div>
-        `
-      : html`
-          <md-button
-            .circle=${true}
-            color="white"
-            size="28"
-            title="Reload Profile"
-            @click=${() => this.getProfile()}
-          >
-            <md-icon name="icon-refresh_24" size="20"></md-icon>
-          </md-button>
-        `;
-  }
-
   getTabs() {
     // tab data should return the event as such.. Should be rendered by stream component.
-    const tabs = this.profile.filter(
+    const tabs = this.profile?.filter(
       (x: any) =>
         x.query.type === "tab" || x.query?.widgetAttributes?.type === "tab"
     );
@@ -383,6 +455,33 @@ export default class CjaasProfileWidget extends LitElement {
     } else {
       return activityTab;
     }
+  }
+
+  // parses the response from polled API to a valid Profile
+  getProfileFromPolledResponse(response: any): Profile {
+    return response?.output?.ProfileView?.AttributeView.$values.map(
+      (attribute: any) => {
+        const query = {
+          ...attribute.QueryTemplate,
+          widgetAttributes: {
+            type: attribute.QueryTemplate?.WidgetAttributes.type,
+            tag: attribute.QueryTemplate?.WidgetAttributes.tag
+          },
+          // temp fix for backward compatibility
+          attributes: {
+            type: attribute.QueryTemplate?.WidgetAttributes.type,
+            tag: attribute.QueryTemplate?.WidgetAttributes.tag
+          }
+        };
+        return {
+          query: query,
+          journeyEvents: attribute.JourneyEvents?.$values.map(
+            (value: string) => value && JSON.parse(value)
+          ),
+          result: [attribute.Result]
+        };
+      }
+    );
   }
 
   getTab(tab: any) {

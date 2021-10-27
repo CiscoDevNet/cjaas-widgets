@@ -44,7 +44,7 @@ export default class CjaasTimelineWidget extends LitElement {
   @property({ type: String, attribute: "base-stream-url" }) baseStreamURL:
     | string
     | undefined = undefined;
-  @property({ type: String, attribute: "tape-read-token" }) tapeToken:
+  @property({ type: String, attribute: "tape-read-token" }) tapeReadToken:
     | string
     | undefined;
   @property({ type: String, attribute: "stream-read-token" }) streamToken:
@@ -52,6 +52,10 @@ export default class CjaasTimelineWidget extends LitElement {
     | undefined;
   @property({ type: Number }) limit = 5;
   @property({ type: Boolean, attribute: "show-filters" }) showFilters = false;
+  @property({ reflect: true }) type:
+    | "journey"
+    | "livestream"
+    | "journey-and-stream" = "livestream";
 
   @property({ attribute: "person-id" }) personId = "";
   @internalProperty() eventSource: EventSource | null = null;
@@ -77,7 +81,7 @@ export default class CjaasTimelineWidget extends LitElement {
     super.updated(changedProperties);
 
     if (
-      this.tapeToken &&
+      this.tapeReadToken &&
       (changedProperties.has("tapeReadToken") ||
         changedProperties.has("personId"))
     ) {
@@ -106,7 +110,7 @@ export default class CjaasTimelineWidget extends LitElement {
         headers: {
           "content-type": "application/json; charset=UTF-8",
           accept: "application/json",
-          Authorization: `SharedAccessSignature ${this.tapeToken}`
+          Authorization: `SharedAccessSignature ${this.tapeReadToken}`
         },
         method: "GET"
       }

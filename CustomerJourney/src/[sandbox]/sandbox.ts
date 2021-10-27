@@ -98,9 +98,11 @@ export class Sandbox extends LitElement {
             style=${`width: ${this.containerWidth}; height: ${this.containerHeight};`}
             class="widget-container"
           >
+            <!-- ONLY TEST USING THE EDGE SERVER, NEVER PRODUCTION SERVER, IT WILL MESS UP THE WALKIN -->
+            <!-- CHANGE TO PRODUCTION SERVER WHEN SHIPPING TO WXCC DESKTOP -->
             <customer-journey-widget
               id="timeline-widget"
-              customer="30313-Carl"
+              customer="XYZ123@example.com"
               user-search
               .template=${sampleTemplate}
               .eventIconTemplate=${iconData}
