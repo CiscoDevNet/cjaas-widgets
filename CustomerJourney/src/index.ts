@@ -282,7 +282,8 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   getProfileFromTemplateId() {
-    const url = `${this.baseURL}/v1/journey/views?viewId=${this.templateId}&personId=${this.customer}`;
+    const url = `${this.baseURL}/v1/journey/views:build?templateId=${this.templateId}&personId=${this.customer}`;
+    // const url = `http://cjaas-indev2.azurewebsites.net/v1/journey/views:build?templateId=User Logins&personId=XYZ123@example.com`;
 
     // this.showSpinner = true;
 
@@ -298,8 +299,8 @@ export default class CustomerJourneyWidget extends LitElement {
 
     axios(options)
       .then(x => x.data)
-      .then((response: { getUriStatusQuery: string; id: string }) => {
-        this.setOffProfileLongPolling(response.getUriStatusQuery);
+      .then((response) => {
+        this.setOffProfileLongPolling(response.data.getUriStatusQuery);
       })
       .catch(err => {
         console.error("Unable to fetch the Profile", err);
@@ -309,6 +310,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
   setOffProfileLongPolling(url: string) {
     const intervalId = setInterval(() => {
+      console.log("polling . . .")
       axios({
         url,
         method: "GET",
@@ -317,16 +319,16 @@ export default class CustomerJourneyWidget extends LitElement {
           Authorization: "SharedAccessSignature " + this.profileToken
         }
       })
-        .then(x => x.data)
-        .then((response: any) => {
-          if (response.runtimeStatus === "Completed") {
+      .then(x => x.data)
+      .then((response: any) => {
+        if (response.data.runtimeStatus === "Completed") {
             clearInterval(intervalId);
 
-            this.profile = this.getProfileFromPolledResponse(response);
-
+            // this.profile = this.getProfileFromPolledResponse(response);
             // this.showSpinner = false;
-            this.profile = response?.output?.ProfileView?.AttributeView.$values.map(
+            this.profile = response.data.output.attributeView.map(
               (attribute: any) => {
+                debugger;
                 const query = {
                   ...attribute.QueryTemplate,
                   widgetAttributes: {
@@ -372,6 +374,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
   // parses the response from polled API to a valid Profile
   getProfileFromPolledResponse(response: any): Profile {
+    debugger;
     return response?.output?.ProfileView?.AttributeView.$values.map(
       (attribute: any) => {
         const query = {

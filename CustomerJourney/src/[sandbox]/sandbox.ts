@@ -93,7 +93,7 @@ export class Sandbox extends LitElement {
       </div>
       <md-theme ?darkTheme=${this.darkTheme} lumos>
         <div class="container">
-          <h2 class="sandbox-header">Timeline</h2>
+          <h2 class="sandbox-header">Customer Journey Widget</h2>
           <div
             style=${`width: ${this.containerWidth}; height: ${this.containerHeight};`}
             class="widget-container"
@@ -104,7 +104,7 @@ export class Sandbox extends LitElement {
               id="timeline-widget"
               customer="XYZ123@example.com"
               user-search
-              .template=${sampleTemplate}
+              template-id="User Logins"
               .eventIconTemplate=${iconData}
               profile-token=${profileWrite}
               tape-token=${tapeRead}
