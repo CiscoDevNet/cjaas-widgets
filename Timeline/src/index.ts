@@ -20,6 +20,8 @@ import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
 import { EventSourceInitDict } from "eventsource";
 import { ServerSentEvent } from "./types/cjaas";
+import {generateSasToken, TokenArgs} from "./generatesastoken";
+
 
 export interface CustomerEvent {
   data: Record<string, any>;
@@ -38,6 +40,15 @@ export interface CustomerEvent {
 @customElementWithCheck("cjaas-timeline-widget")
 export default class CjaasTimelineWidget extends LitElement {
   @property({ type: Array }) events: CustomerEvent[] = [];
+  @property({ type: String}) secret:
+    | string
+    | undefined = undefined;
+  @property({ type: String}) org:
+    | string
+    | undefined = undefined;
+  @property({ type: String}) namespace:
+    | string
+    | undefined = undefined;
   @property({ type: String, attribute: "base-url" }) baseURL:
     | string
     | undefined = undefined;
@@ -63,8 +74,36 @@ export default class CjaasTimelineWidget extends LitElement {
   @internalProperty() liveStream = false;
   @internalProperty() showSpinner = false;
   @internalProperty() errorMessage = "";
-
   @internalProperty() newestEvents: Array<CustomerEvent> = [];
+
+  /**
+   * Private SAS Tokens generated and stored in component instance
+   */
+  private getTToken() {
+    const tapeArgs: TokenArgs = {
+      secret: this.secret!,
+      organization: this.org!,
+      namespace: this.namespace!,
+      service: "tape",
+      permissions: "r",
+      keyName: this.namespace!,
+      expiration: 1000,
+    }
+    return generateSasToken(tapeArgs)
+  }
+
+  private getSToken() {
+    const tapeArgs: TokenArgs = {
+      secret: this.secret!,
+      organization: this.org!,
+      namespace: this.namespace!,
+      service: "stream",
+      permissions: "r",
+      keyName: this.namespace!,
+      expiration: 1000,
+    }
+    return generateSasToken(tapeArgs)
+  }
 
   async lifecycleTasks() {
     const data = await this.getExistingEvents();
@@ -107,13 +146,14 @@ export default class CjaasTimelineWidget extends LitElement {
   async getExistingEvents() {
     this.showSpinner = true;
     this.baseUrlCheck();
+    console.log(this.getTToken())
     return fetch(
       `${this.baseURL}/v1/journey/streams/historic/${this.personId}`,
       {
         headers: {
           "content-type": "application/json; charset=UTF-8",
           accept: "application/json",
-          Authorization: `SharedAccessSignature ${this.tapeReadToken}`
+          Authorization: `SharedAccessSignature ${this.getTToken()}`
         },
         method: "GET"
       }
@@ -142,11 +182,11 @@ export default class CjaasTimelineWidget extends LitElement {
         headers: {
           "content-type": "application/json; charset=UTF-8",
           accept: "application/json",
-          Authorization: `SharedAccessSignature ${this.streamReadToken}`
+          Authorization: `SharedAccessSignature ${this.getSToken()}`
         }
       };
       this.eventSource = new EventSource(
-        `${this.baseURL}/v1/journey/streams/${this.personId}?${this.streamReadToken}`,
+        `${this.baseURL}/v1/journey/streams/${this.personId}?${this.getSToken()}`,
         header
       );
     }

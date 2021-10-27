@@ -83,7 +83,7 @@ export class Sandbox extends LitElement {
       <md-theme ?darkTheme=${this.darkTheme}>
         <div class="container">
           <h2 class="sandbox-header">Timeline</h2>
-          <div
+          <!-- <div
             style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
             class="widget-container"
           >
@@ -95,19 +95,33 @@ export class Sandbox extends LitElement {
               limit="15"
               base-url="https://cjaas-devus1-edge.azurewebsites.net"
             ></cjaas-timeline-widget>
+          </div> -->
+          <div
+            style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
+            class="widget-container"
+          >
+            <cjaas-timeline-widget
+              secret="8UZowtVLwUiL5iLmz3E49spgNzikMhXgbT36Z9f2xdvOvVfDI3yKNRzLcKiiTz8mch351G6Sx7jbL6Z1b5urgUhcGcjscEdJmMI2ZmcnTqqL5W3Ws8m7BGa0n1ec/r8OmwL2gAEXKNdoDandr6gV3uD0/trfNfPa2ZmVmihOUk5zrEFeA1T7/JT/PJXOptZeyF4XCWKv464lxcV3dToeayT5TiWuclX+b4Yv1ZDsM8E/YnkTzekOtUOQEHYMMFT0rNog0o546aS4NFz68GiZ0sHDbFhTzLXrD4wz7AOK8ZFZ8/zi6Wm9so52DUwg8RL8JTuJR8GXw7/LrcNPkBJn0Q=="
+              org="journeyUi"
+              namespace="sandbox"
+              limit="15"
+              show-filters
+              base-url="https://cjaas-devus2.azurewebsites.net"
+            >
+            </cjaas-timeline-widget>
           </div>
           <div
             style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
             class="widget-container"
           >
             <cjaas-timeline-widget
-              id="timeline-widget"
+              secret="8UZowtVLwUiL5iLmz3E49spgNzikMhXgbT36Z9f2xdvOvVfDI3yKNRzLcKiiTz8mch351G6Sx7jbL6Z1b5urgUhcGcjscEdJmMI2ZmcnTqqL5W3Ws8m7BGa0n1ec/r8OmwL2gAEXKNdoDandr6gV3uD0/trfNfPa2ZmVmihOUk5zrEFeA1T7/JT/PJXOptZeyF4XCWKv464lxcV3dToeayT5TiWuclX+b4Yv1ZDsM8E/YnkTzekOtUOQEHYMMFT0rNog0o546aS4NFz68GiZ0sHDbFhTzLXrD4wz7AOK8ZFZ8/zi6Wm9so52DUwg8RL8JTuJR8GXw7/LrcNPkBJn0Q=="
+              org="journeyUi"
+              namespace="sandbox"
               type="journey-and-stream"
-              stream-read-token="missing"
-              tape-read-token="missing"
               limit="15"
               show-filters
-              base-url="https://cjaas-devus1-edge.azurewebsites.net"
+              base-url="https://cjaas-devus2.azurewebsites.net"
             >
               <h3 slot="ll10n-no-timeline-message">
                 No hay línea de tiempo disponible
