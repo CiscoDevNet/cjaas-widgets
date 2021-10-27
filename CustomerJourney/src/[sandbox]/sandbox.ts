@@ -13,15 +13,15 @@ import styles from "./sandbox.scss";
 import * as iconData from "@/assets/icons.json";
 import "..";
 
-const tapeWrite =
-  "so=demoassure&sn=sandbox&ss=tape&sp=w&se=2049-02-22T16:43:50.607Z&sk=sandbox&sig=%2F6FXalQwJeMHF8vpelI4Hr1rBCnMADmSVEr2CULVvPk%3D";
-const tapeRead =
-  "so=demoassure&sn=sandbox&ss=tape&sp=r&se=2049-02-22T16:44:19.899Z&sk=sandbox&sig=zfaMLDT15AoCvrWle0HSezBwgETtXs5JMTMQDaIkWkQ%3D ";
-const profileWrite =
-  "so=demoassure&sn=sandbox&ss=profile&sp=w&se=2049-02-22T16:45:11.988Z&sk=sandbox&sig=KLtI6vyZXMvvymFjqSR2EOJzeULzm43T6y3HTf63qus%3D ";
-const stream =
-  "so=demoassure&sn=sandbox&ss=stream&sp=r&se=2049-02-22T16:45:54.572Z&sk=sandbox&sig=Ao2mLkSfBmnQH%2B87LvkIrulx61Bpb5fxFch6lwOLu78%3D";
 
+const tapeRead =
+  "so=demoassure&sn=sandbox&ss=tape&sp=rw&se=2021-11-26T16:19:25Z&sk=sandbox&sig=Lg7pzrX0N4%2BZRe01jBtaXAilhGKo11NDyE2htctV3hQ%3D";
+const profileWrite =
+  "so=demoassure&sn=sandbox&ss=profile&sp=rw&se=2021-11-26T16:19:25Z&sk=sandbox&sig=L7Q0owQYwg7b7amsHNCSOXd25xi6oRvtnD0Vk%2BH8GM8%3D";
+const stream =
+  "so=demoassure&sn=sandbox&ss=stream&sp=rw&se=2021-11-26T16:19:25Z&sk=sandbox&sig=0SfXq7AQv%2B%2Fm2G6BpQwQgX5ma4VIrFRGsK7avjwj60I%3D";
+const baseURL =
+  "http://cjaas-indev2.azurewebsites.net";
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
   @internalProperty() darkTheme = false;
@@ -107,7 +107,7 @@ export class Sandbox extends LitElement {
               write-token=${profileWrite}
               tape-token=${tapeRead}
               stream-token=${stream}
-              base-url="https://uswest-nonprod.cjaas.cisco.com"
+              base-url=${baseURL}
               limit="20"
             ></customer-journey-widget>
           </div>

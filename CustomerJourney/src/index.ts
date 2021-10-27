@@ -24,7 +24,7 @@ import { EventSourceInitDict } from "eventsource";
 import "@cjaas/common-components/dist/comp/cjaas-timeline";
 import "@cjaas/common-components/dist/comp/cjaas-profile";
 import { Timeline } from "@cjaas/common-components/dist/types/components/timeline/Timeline";
-// import ResizeObserver from "resize-observer-polyfill";
+import ResizeObserver from "resize-observer-polyfill";
 
 @customElementWithCheck("customer-journey-widget")
 export default class CustomerJourneyWidget extends LitElement {
@@ -390,7 +390,7 @@ export default class CustomerJourneyWidget extends LitElement {
             }}
             @keydown=${(e: KeyboardEvent) => this.handleKey(e)}
           >
-            ${this.customer || "Customer Journey"}
+            ${this.customer?.trim() || "Customer Journey"}
           </header>
         </md-tooltip>
         <details class="grid-profile" ?open=${this.profileData.length > 0}>
