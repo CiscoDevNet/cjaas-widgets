@@ -106,7 +106,7 @@ export class Sandbox extends LitElement {
               user-search
               .template=${sampleTemplate}
               .eventIconTemplate=${iconData}
-              write-token=${profileWrite}
+              profile-token=${profileWrite}
               tape-token=${tapeRead}
               stream-token=${stream}
               base-url=${baseURL}
