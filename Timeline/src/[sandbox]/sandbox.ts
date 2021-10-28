@@ -102,7 +102,7 @@ export class Sandbox extends LitElement {
           >
             <cjaas-timeline-widget
               secret="8UZowtVLwUiL5iLmz3E49spgNzikMhXgbT36Z9f2xdvOvVfDI3yKNRzLcKiiTz8mch351G6Sx7jbL6Z1b5urgUhcGcjscEdJmMI2ZmcnTqqL5W3Ws8m7BGa0n1ec/r8OmwL2gAEXKNdoDandr6gV3uD0/trfNfPa2ZmVmihOUk5zrEFeA1T7/JT/PJXOptZeyF4XCWKv464lxcV3dToeayT5TiWuclX+b4Yv1ZDsM8E/YnkTzekOtUOQEHYMMFT0rNog0o546aS4NFz68GiZ0sHDbFhTzLXrD4wz7AOK8ZFZ8/zi6Wm9so52DUwg8RL8JTuJR8GXw7/LrcNPkBJn0Q=="
-              org="journeyUi"
+              org="demoassure"
               namespace="sandbox"
               limit="15"
               show-filters

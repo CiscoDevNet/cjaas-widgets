@@ -79,30 +79,37 @@ export default class CjaasTimelineWidget extends LitElement {
   /**
    * Private SAS Tokens generated and stored in component instance
    */
-  private getTToken() {
-    const tapeArgs: TokenArgs = {
-      secret: this.secret!,
-      organization: this.org!,
-      namespace: this.namespace!,
-      service: "tape",
-      permissions: "r",
-      keyName: this.namespace!,
-      expiration: 1000,
-    }
-    return generateSasToken(tapeArgs)
-  }
 
-  private getSToken() {
-    const tapeArgs: TokenArgs = {
-      secret: this.secret!,
-      organization: this.org!,
-      namespace: this.namespace!,
-      service: "stream",
-      permissions: "r",
-      keyName: this.namespace!,
-      expiration: 1000,
+  private getTokens() {
+    const that = this;
+    return {
+      getTToken: function() {
+        const tapeArgs: TokenArgs = {
+          secret: that.secret!,
+          organization: that.org!,
+          namespace: that.namespace!,
+          service: "tape",
+          permissions: "r",
+          keyName: "journeyUi",
+          expiration: 1000,
+        }
+        return generateSasToken(tapeArgs)
+      },
+
+      getSToken: function() {
+        const tapeArgs: TokenArgs = {
+          secret: that.secret!,
+          organization: that.org!,
+          namespace: that.namespace!,
+          service: "stream",
+          permissions: "r",
+          keyName: "journeyUi",
+          expiration: 1000,
+        }
+        return generateSasToken(tapeArgs)
+      }
     }
-    return generateSasToken(tapeArgs)
+
   }
 
   async lifecycleTasks() {
@@ -146,14 +153,15 @@ export default class CjaasTimelineWidget extends LitElement {
   async getExistingEvents() {
     this.showSpinner = true;
     this.baseUrlCheck();
-    console.log(this.getTToken())
+    const {getTToken} = this.getTokens()
+    console.log(getTToken())
     return fetch(
       `${this.baseURL}/v1/journey/streams/historic/${this.personId}`,
       {
         headers: {
           "content-type": "application/json; charset=UTF-8",
           accept: "application/json",
-          Authorization: `SharedAccessSignature ${this.getTToken()}`
+          Authorization: `${getTToken()}`
         },
         method: "GET"
       }
@@ -178,15 +186,16 @@ export default class CjaasTimelineWidget extends LitElement {
 
     this.baseUrlCheck();
     if (this.streamReadToken) {
+      const {getSToken} = this.getTokens()
       const header: EventSourceInitDict = {
         headers: {
           "content-type": "application/json; charset=UTF-8",
           accept: "application/json",
-          Authorization: `SharedAccessSignature ${this.getSToken()}`
+          Authorization: `${getSToken()}`
         }
       };
       this.eventSource = new EventSource(
-        `${this.baseURL}/v1/journey/streams/${this.personId}?${this.getSToken()}`,
+        `${this.baseURL}/v1/journey/streams/${this.personId}?${getSToken()}`,
         header
       );
     }
