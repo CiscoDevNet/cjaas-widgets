@@ -146,7 +146,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * @query customerInput
    */
   @query("#customerInput") customerInput!: HTMLInputElement;
-  @query(".profile") widget!: HTMLElement;
+  @query(".profile") widget!: Element;
 
   connectedCallback() {
     super.connectedCallback();
@@ -156,10 +156,9 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   async lifecycleTasks() {
-    const data = await this.getExistingEvents();
-    this.events = data.events;
-    this.getProfile();
+    this.events = await this.getExistingEvents();
     this.loading = false;
+    this.getProfile();
     this.requestUpdate();
     this.subscribeToStream();
   }
@@ -328,26 +327,31 @@ export default class CustomerJourneyWidget extends LitElement {
             // this.showSpinner = false;
             this.profile = response.data.output.attributeView.map(
               (attribute: any) => {
-                debugger;
-                const query = {
-                  ...attribute.QueryTemplate,
-                  widgetAttributes: {
-                    type: attribute.QueryTemplate?.WidgetAttributes.type,
-                    tag: attribute.QueryTemplate?.WidgetAttributes.tag
-                  },
-                  // temp fix for backward compatibility
-                  attributes: {
-                    type: attribute.QueryTemplate?.WidgetAttributes.type,
-                    tag: attribute.QueryTemplate?.WidgetAttributes.tag
+                try {
+                  console.log(attribute.queryTemplate)
+                  const query = {
+                    ...attribute.queryTemplate,
+                    widgetAttributes: {
+                      type: attribute.queryTemplate?.widgetAttributes.type,
+                    tag: attribute.queryTemplate?.widgetAttributes.tag
+                    },
+                    // temp fix for backward compatibility
+                    attributes: {
+                      type: attribute.queryTemplate?.widgetAttributes.type,
+                      tag: attribute.queryTemplate?.widgetAttributes.tag
+                    }
+                  };
+                  return {
+                    query: query,
+                    journeyEvents: attribute.journeyEvents?.map(
+                      (value: string) => value && JSON.parse(value)
+                      ),
+                    result: [attribute.Result]
+                  };
+                }
+                  catch(err) {
+                    console.error(err)
                   }
-                };
-                return {
-                  query: query,
-                  journeyEvents: attribute.JourneyEvents?.$values.map(
-                    (value: string) => value && JSON.parse(value)
-                  ),
-                  result: [attribute.Result]
-                };
               }
             );
           }
@@ -418,7 +422,7 @@ export default class CustomerJourneyWidget extends LitElement {
         return x.json();
       })
       .then(data => {
-        return data;
+        return data.events;
       })
       .catch(err => {
         this.loading = false;
@@ -530,7 +534,7 @@ export default class CustomerJourneyWidget extends LitElement {
             ${this.customer?.trim() || "Customer Journey"}
           </header>
         </md-tooltip>
-        <details class="grid-profile" ?open=${this.profile!.length > 0}>
+        <details class="grid-profile" ?open=${this.profile !== undefined}>
           <summary
             >Profile<md-icon name="icon-arrow-down_12"></md-icon>
           </summary>
