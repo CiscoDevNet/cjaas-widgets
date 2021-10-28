@@ -49,18 +49,21 @@ export default class CjaasTimelineWidget extends LitElement {
   @property({ type: String}) namespace:
     | string
     | undefined = undefined;
+  @property({ type: String, attribute: "app-name"}) appname:
+    | string
+    | undefined = undefined;
   @property({ type: String, attribute: "base-url" }) baseURL:
     | string
     | undefined = undefined;
-  @property({ type: String, attribute: "base-stream-url" }) baseStreamURL:
-    | string
-    | undefined = undefined;
-  @property({ type: String, attribute: "tape-read-token" }) tapeReadToken:
-    | string
-    | undefined;
-  @property({ type: String, attribute: "stream-read-token" }) streamReadToken:
-    | string
-    | undefined;
+    /**
+     * Potentially deprecated
+     */
+  // @property({ type: String, attribute: "tape-read-token" }) tapeReadToken:
+  //   | string
+  //   | undefined;
+  // @property({ type: String, attribute: "stream-read-token" }) streamReadToken:
+  //   | string
+  //   | undefined;
   @property({ reflect: true }) pagination = "$top=15";
   @property({ type: Number }) limit = 5;
   @property({ type: Boolean, attribute: "show-filters" }) showFilters = false;
@@ -90,7 +93,7 @@ export default class CjaasTimelineWidget extends LitElement {
           namespace: that.namespace!,
           service: "tape",
           permissions: "r",
-          keyName: "journeyUi",
+          keyName: that.appname!,
           expiration: 1000,
         }
         return generateSasToken(tapeArgs)
@@ -103,7 +106,7 @@ export default class CjaasTimelineWidget extends LitElement {
           namespace: that.namespace!,
           service: "stream",
           permissions: "r",
-          keyName: "journeyUi",
+          keyName: that.appname!,
           expiration: 1000,
         }
         return generateSasToken(tapeArgs)
@@ -128,14 +131,18 @@ export default class CjaasTimelineWidget extends LitElement {
   updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
 
-    if (
-      this.tapeReadToken &&
-      (changedProperties.has("tapeReadToken") ||
-        changedProperties.has("filter") ||
-        changedProperties.has("personId"))
-    ) {
-      this.lifecycleTasks();
-    }
+    /**
+     * If we hide tokens, they will not change from within, and this reload will occur in another fashion.
+     * Would this scenario occur in real usage?
+     */
+    // if (
+    //   this.tapeReadToken &&
+    //   (changedProperties.has("tapeReadToken") ||
+    //     changedProperties.has("filter") ||
+    //     changedProperties.has("personId"))
+    // ) {
+    //   this.lifecycleTasks();
+    // }
   }
 
   baseUrlCheck() {
@@ -154,7 +161,6 @@ export default class CjaasTimelineWidget extends LitElement {
     this.showSpinner = true;
     this.baseUrlCheck();
     const {getTToken} = this.getTokens()
-    console.log(getTToken())
     return fetch(
       `${this.baseURL}/v1/journey/streams/historic/${this.personId}`,
       {
@@ -185,7 +191,6 @@ export default class CjaasTimelineWidget extends LitElement {
     }
 
     this.baseUrlCheck();
-    if (this.streamReadToken) {
       const {getSToken} = this.getTokens()
       const header: EventSourceInitDict = {
         headers: {
@@ -198,7 +203,6 @@ export default class CjaasTimelineWidget extends LitElement {
         `${this.baseURL}/v1/journey/streams/${this.personId}?${getSToken()}`,
         header
       );
-    }
 
     if (this.eventSource) {
       this.eventSource!.onmessage = (event: ServerSentEvent) => {
