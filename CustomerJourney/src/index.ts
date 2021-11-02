@@ -137,6 +137,10 @@ export default class CustomerJourneyWidget extends LitElement {
    */
   @internalProperty() defaultTemplate = defaultTemplate;
   /**
+   * Memoize pollingstatus so that there are not multiple intervals
+   */
+  @internalProperty() pollingActive = false;
+  /**
    * Hook to HTML element <div class="container">
    * @query container
    */
@@ -148,8 +152,10 @@ export default class CustomerJourneyWidget extends LitElement {
   @query("#customerInput") customerInput!: HTMLInputElement;
   @query(".profile") widget!: Element;
 
-  connectedCallback() {
+  async connectedCallback() {
     super.connectedCallback();
+    await this.lifecycleTasks();
+    // debugger;
     if (this.interactionData) {
       this.customer = this.interactionData["ani"];
     }
@@ -158,13 +164,13 @@ export default class CustomerJourneyWidget extends LitElement {
   async lifecycleTasks() {
     this.events = await this.getExistingEvents();
     this.loading = false;
-    this.getProfile();
+    await this.getProfile();
     this.subscribeToStream();
+    this.requestUpdate()
   }
 
-  async firstUpdated(changedProperties: PropertyValues) {
+  firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
-    await this.lifecycleTasks();
     // @ts-ignore
     const resizeObserver = new ResizeObserver(
       (entries: ResizeObserverEntry[]) => {
@@ -179,9 +185,9 @@ export default class CustomerJourneyWidget extends LitElement {
     resizeObserver.observe(this.widget);
   }
 
-  async updated(changedProperties: PropertyValues) {
+  updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
-
+    console.log(changedProperties)
     if (changedProperties.has("interactionData")) {
       if (this.interactionData) {
         this.customer = this.interactionData["ani"];
@@ -192,7 +198,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
     if (changedProperties.has("customer")) {
       this.newestEvents = [];
-      await this.lifecycleTasks();
+      this.lifecycleTasks();
     }
   }
 
@@ -277,6 +283,7 @@ export default class CustomerJourneyWidget extends LitElement {
     const url = `${this.baseURL}/v1/journey/views:build?templateId=${this.templateId}&personId=${this.customer}`;
     // this.showSpinner = true;
 
+
     const options: AxiosRequestConfig = {
       url,
       method: "POST",
@@ -299,6 +306,8 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   setOffProfileLongPolling(url: string) {
+    if (this.pollingActive) return;
+    this.pollingActive = true;
     const intervalId = setInterval(() => {
       console.log("polling . . .")
       axios({
@@ -313,6 +322,7 @@ export default class CustomerJourneyWidget extends LitElement {
       .then((response: any) => {
         if (response.data.runtimeStatus === "Completed") {
             clearInterval(intervalId);
+            this.pollingActive = false;
             // this.profile = this.getProfileFromPolledResponse(response);
             // this.showSpinner = false;
             this.profile = response.data.output.attributeView.map(
@@ -349,50 +359,50 @@ export default class CustomerJourneyWidget extends LitElement {
     }, 5000);
   }
 
-  getTimelineItemFromMessage(message: any) {
-    const item: any = {};
+  // getTimelineItemFromMessage(message: any) {
+  //   const item: any = {};
 
-    item.title = message.type;
-    item.timestamp = DateTime.fromISO(message.time);
-    item.id = message.id;
-    if (message.person && message.person.indexOf("anon") === -1) {
-      item.person = message.person;
-    }
+  //   item.title = message.type;
+  //   item.timestamp = DateTime.fromISO(message.time);
+  //   item.id = message.id;
+  //   if (message.person && message.person.indexOf("anon") === -1) {
+  //     item.person = message.person;
+  //   }
 
-    if (message.data) {
-      item.data = message.data;
-    }
+  //   if (message.data) {
+  //     item.data = message.data;
+  //   }
 
-    return item;
-  }
+  //   return item;
+  // }
 
   // parses the response from polled API to a valid Profile
-  getProfileFromPolledResponse(response: any): Profile {
-    debugger;
-    return response?.output?.ProfileView?.AttributeView.$values.map(
-      (attribute: any) => {
-        const query = {
-          ...attribute.QueryTemplate,
-          widgetAttributes: {
-            type: attribute.QueryTemplate?.WidgetAttributes.type,
-            tag: attribute.QueryTemplate?.WidgetAttributes.tag
-          },
-          // temp fix for backward compatibility
-          attributes: {
-            type: attribute.QueryTemplate?.WidgetAttributes.type,
-            tag: attribute.QueryTemplate?.WidgetAttributes.tag
-          }
-        };
-        return {
-          query: query,
-          journeyEvents: attribute.JourneyEvents?.$values.map(
-            (value: string) => value && JSON.parse(value)
-          ),
-          result: [attribute.Result]
-        };
-      }
-    );
-  }
+  // getProfileFromPolledResponse(response: any): Profile {
+  //   return response?.output?.ProfileView?.AttributeView.$values.map(
+  //     (attribute: any) => {
+  //       const query = {
+  //         ...attribute.QueryTemplate,
+  //         widgetAttributes: {
+  //           type: attribute.QueryTemplate?.WidgetAttributes.type,
+  //           tag: attribute.QueryTemplate?.WidgetAttributes.tag
+  //         },
+  //         // temp fix for backward compatibility
+  //         attributes: {
+  //           type: attribute.QueryTemplate?.WidgetAttributes.type,
+  //           tag: attribute.QueryTemplate?.WidgetAttributes.tag
+  //         }
+  //       };
+  //       debugger;
+  //       return {
+  //         query: query,
+  //         journeyEvents: attribute.JourneyEvents?.$values.map(
+  //           (value: string) => value && JSON.parse(value)
+  //         ),
+  //         result: [attribute.Result]
+  //       };
+  //     }
+  //   );
+  // }
 
   async getExistingEvents() {
     this.loading = true;
