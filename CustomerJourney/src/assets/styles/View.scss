@@ -119,6 +119,19 @@ div.profile {
     border-radius: 0.25rem;
   }
 
+  input.header {
+    text-align: center;
+    font-size: 1.5rem;
+    font-family: 'CiscoSansTT Medium';
+    font-weight: 200;
+    color: var(--md-primary-text-color);
+    background-color: var(--md-tertiary-bg-color);
+    display: block;
+    border: none;
+    border-radius: 0.25rem;
+    width: 100%;
+  }
+
   &.expanded {
     display: grid;
     grid-template-areas:

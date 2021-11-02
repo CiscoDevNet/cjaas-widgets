@@ -26,7 +26,6 @@ import "@cjaas/common-components/dist/comp/cjaas-timeline";
 import "@cjaas/common-components/dist/comp/cjaas-profile";
 import { Timeline } from "@cjaas/common-components/dist/types/components/timeline/Timeline";
 import ResizeObserver from "resize-observer-polyfill";
-import { DateTime } from "luxon";
 
 @customElementWithCheck("customer-journey-widget")
 export default class CustomerJourneyWidget extends LitElement {
@@ -155,7 +154,6 @@ export default class CustomerJourneyWidget extends LitElement {
   async connectedCallback() {
     super.connectedCallback();
     await this.lifecycleTasks();
-    // debugger;
     if (this.interactionData) {
       this.customer = this.interactionData["ani"];
     }
@@ -169,8 +167,9 @@ export default class CustomerJourneyWidget extends LitElement {
     this.requestUpdate()
   }
 
-  firstUpdated(changedProperties: PropertyValues) {
+  async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
+    await this.lifecycleTasks();
     // @ts-ignore
     const resizeObserver = new ResizeObserver(
       (entries: ResizeObserverEntry[]) => {
@@ -185,9 +184,9 @@ export default class CustomerJourneyWidget extends LitElement {
     resizeObserver.observe(this.widget);
   }
 
-  updated(changedProperties: PropertyValues) {
-    super.updated(changedProperties);
-    console.log(changedProperties)
+  async update(changedProperties: PropertyValues) {
+    super.update(changedProperties);
+
     if (changedProperties.has("interactionData")) {
       if (this.interactionData) {
         this.customer = this.interactionData["ani"];
@@ -197,8 +196,9 @@ export default class CustomerJourneyWidget extends LitElement {
     }
 
     if (changedProperties.has("customer")) {
+      debugger;
       this.newestEvents = [];
-      this.lifecycleTasks();
+      await this.lifecycleTasks();
     }
   }
 
@@ -212,8 +212,8 @@ export default class CustomerJourneyWidget extends LitElement {
   getProfile() {
     if (this.templateId) {
       this.getProfileFromTemplateId();
-      return;
-    }
+    } else {
+
 
     // Rest of the flow is soon to be deprecated
     this.baseUrlCheck();
@@ -242,6 +242,7 @@ export default class CustomerJourneyWidget extends LitElement {
     return axios(url, options)
       .then((x: AxiosResponse) => x.data)
       .then((_profile: ProfileFromSyncAPI) => {
+        console.log("does it ever hit?")
         this.profile = this.defaultTemplate.Attributes.map(
           (attribute: any, i: number) => {
             // if attribute is of tab type
@@ -277,12 +278,12 @@ export default class CustomerJourneyWidget extends LitElement {
         // this.showSpinner = false;
         this.requestUpdate();
       });
+    }
   }
 
   getProfileFromTemplateId() {
     const url = `${this.baseURL}/v1/journey/views:build?templateId=${this.templateId}&personId=${this.customer}`;
     // this.showSpinner = true;
-
 
     const options: AxiosRequestConfig = {
       url,
@@ -321,88 +322,39 @@ export default class CustomerJourneyWidget extends LitElement {
       .then(x => x.data)
       .then((response: any) => {
         if (response.data.runtimeStatus === "Completed") {
+
+          // TO DO: Break into reusable function to use for the non-template ID version
+
             clearInterval(intervalId);
             this.pollingActive = false;
-            // this.profile = this.getProfileFromPolledResponse(response);
-            // this.showSpinner = false;
             this.profile = response.data.output.attributeView.map(
               (attribute: any) => {
-                try {
-                  console.log(attribute.queryTemplate)
-                  const query = {
-                    ...attribute.queryTemplate,
-                    widgetAttributes: {
-                      type: attribute.queryTemplate?.widgetAttributes.type,
+                console.log(attribute)
+                const query = {
+                  ...attribute.queryTemplate,
+                  widgetAttributes: {
+                    type: attribute.queryTemplate?.widgetAttributes.type,
+                  tag: attribute.queryTemplate?.widgetAttributes.tag
+                  },
+                  // temp fix for backward compatibility
+                  attributes: {
+                    type: attribute.queryTemplate?.widgetAttributes.type,
                     tag: attribute.queryTemplate?.widgetAttributes.tag
-                    },
-                    // temp fix for backward compatibility
-                    attributes: {
-                      type: attribute.queryTemplate?.widgetAttributes.type,
-                      tag: attribute.queryTemplate?.widgetAttributes.tag
-                    }
-                  };
-                  return {
-                    query: query,
-                    journeyEvents: attribute.journeyEvents?.map(
-                      (value: string) => value && JSON.parse(value)
-                      ),
-                    result: [attribute.Result]
+                  }
+                };
+                return {
+                  query: query,
+                  journeyEvents: attribute.journeyEvents?.map(
+                    (value: string) => value && JSON.parse(value)
+                    ),
+                    result: [attribute.result]
                   };
                 }
-                  catch(err) {
-                    console.error(err)
-                  }
-              }
-            );
+              );
           }
         });
     }, 5000);
   }
-
-  // getTimelineItemFromMessage(message: any) {
-  //   const item: any = {};
-
-  //   item.title = message.type;
-  //   item.timestamp = DateTime.fromISO(message.time);
-  //   item.id = message.id;
-  //   if (message.person && message.person.indexOf("anon") === -1) {
-  //     item.person = message.person;
-  //   }
-
-  //   if (message.data) {
-  //     item.data = message.data;
-  //   }
-
-  //   return item;
-  // }
-
-  // parses the response from polled API to a valid Profile
-  // getProfileFromPolledResponse(response: any): Profile {
-  //   return response?.output?.ProfileView?.AttributeView.$values.map(
-  //     (attribute: any) => {
-  //       const query = {
-  //         ...attribute.QueryTemplate,
-  //         widgetAttributes: {
-  //           type: attribute.QueryTemplate?.WidgetAttributes.type,
-  //           tag: attribute.QueryTemplate?.WidgetAttributes.tag
-  //         },
-  //         // temp fix for backward compatibility
-  //         attributes: {
-  //           type: attribute.QueryTemplate?.WidgetAttributes.type,
-  //           tag: attribute.QueryTemplate?.WidgetAttributes.tag
-  //         }
-  //       };
-  //       debugger;
-  //       return {
-  //         query: query,
-  //         journeyEvents: attribute.JourneyEvents?.$values.map(
-  //           (value: string) => value && JSON.parse(value)
-  //         ),
-  //         result: [attribute.Result]
-  //       };
-  //     }
-  //   );
-  // }
 
   async getExistingEvents() {
     this.loading = true;
@@ -524,15 +476,9 @@ export default class CustomerJourneyWidget extends LitElement {
           message="Click to search new journey"
           ?disabled=${!this.userSearch}
         >
-          <header
-            contenteditable=${this.userSearch ? "true" : "false"}
-            @blur=${(e: Event) => {
-              this.customer = e.composedPath()[0].innerText;
-            }}
-            @keydown=${(e: KeyboardEvent) => this.handleKey(e)}
-          >
-            ${this.customer?.trim() || "Customer Journey"}
-          </header>
+          <input class="header" value=${this.customer || "Customer Journey"}
+          @keydown=${(e: KeyboardEvent) => this.handleKey(e)}
+          @blur=${(e:FocusEvent)=> {this.customer = e.composedPath()[0].value}} />
         </md-tooltip>
         <details class="grid-profile" ?open=${this.profile !== undefined}>
           <summary
