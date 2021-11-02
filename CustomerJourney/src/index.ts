@@ -159,7 +159,6 @@ export default class CustomerJourneyWidget extends LitElement {
     this.events = await this.getExistingEvents();
     this.loading = false;
     this.getProfile();
-    this.requestUpdate();
     this.subscribeToStream();
   }
 
@@ -171,10 +170,8 @@ export default class CustomerJourneyWidget extends LitElement {
       (entries: ResizeObserverEntry[]) => {
         if (entries[0].contentRect.width > 780) {
           this.expanded = true;
-          console.log(this.expanded);
         } else {
           this.expanded = false;
-          console.log(this.expanded);
         }
       }
     );
@@ -182,8 +179,8 @@ export default class CustomerJourneyWidget extends LitElement {
     resizeObserver.observe(this.widget);
   }
 
-  async update(changedProperties: PropertyValues) {
-    super.update(changedProperties);
+  async updated(changedProperties: PropertyValues) {
+    super.updated(changedProperties);
 
     if (changedProperties.has("interactionData")) {
       if (this.interactionData) {
@@ -197,10 +194,6 @@ export default class CustomerJourneyWidget extends LitElement {
       this.newestEvents = [];
       await this.lifecycleTasks();
     }
-  }
-
-  changeCustomer() {
-    this.customer = this.customerInput.value;
   }
 
   baseUrlCheck() {
@@ -282,8 +275,6 @@ export default class CustomerJourneyWidget extends LitElement {
 
   getProfileFromTemplateId() {
     const url = `${this.baseURL}/v1/journey/views:build?templateId=${this.templateId}&personId=${this.customer}`;
-    // const url = `http://cjaas-indev2.azurewebsites.net/v1/journey/views:build?templateId=User Logins&personId=XYZ123@example.com`;
-
     // this.showSpinner = true;
 
     const options: AxiosRequestConfig = {
@@ -322,7 +313,6 @@ export default class CustomerJourneyWidget extends LitElement {
       .then((response: any) => {
         if (response.data.runtimeStatus === "Completed") {
             clearInterval(intervalId);
-
             // this.profile = this.getProfileFromPolledResponse(response);
             // this.showSpinner = false;
             this.profile = response.data.output.attributeView.map(

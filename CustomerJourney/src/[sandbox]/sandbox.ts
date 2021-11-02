@@ -13,15 +13,28 @@ import styles from "./sandbox.scss";
 import * as iconData from "@/assets/icons.json";
 import "..";
 
-
+/**
+ * indev2
+ */
+// const tapeRead =
+//   "so=demoassure&sn=sandbox&ss=tape&sp=rw&se=2021-11-26T16:19:25Z&sk=sandbox&sig=Lg7pzrX0N4%2BZRe01jBtaXAilhGKo11NDyE2htctV3hQ%3D";
+// const profileWrite =
+//   "so=demoassure&sn=sandbox&ss=profile&sp=rw&se=2021-11-26T16:19:25Z&sk=sandbox&sig=L7Q0owQYwg7b7amsHNCSOXd25xi6oRvtnD0Vk%2BH8GM8%3D";
+// const stream =
+//   "so=demoassure&sn=sandbox&ss=stream&sp=rw&se=2021-11-26T16:19:25Z&sk=sandbox&sig=0SfXq7AQv%2B%2Fm2G6BpQwQgX5ma4VIrFRGsK7avjwj60I%3D";
+// const baseURL =
+//   "http://cjaas-indev2.azurewebsites.net";
+/**
+ * devus2
+ */
 const tapeRead =
-  "so=demoassure&sn=sandbox&ss=tape&sp=rw&se=2021-11-26T16:19:25Z&sk=sandbox&sig=Lg7pzrX0N4%2BZRe01jBtaXAilhGKo11NDyE2htctV3hQ%3D";
+  "so=demoassure&sn=sandbox&ss=tape&sp=rw&se=2024-07-24T21:12:36.247Z&sk=journeyUi&sig=6wEgigImeS7ARyMOQpEtfnwNRD6HudtrpWolSSqomZ0%3D";
 const profileWrite =
-  "so=demoassure&sn=sandbox&ss=profile&sp=rw&se=2021-11-26T16:19:25Z&sk=sandbox&sig=L7Q0owQYwg7b7amsHNCSOXd25xi6oRvtnD0Vk%2BH8GM8%3D";
+  "so=demoassure&sn=sandbox&ss=profile&sp=rw&se=2024-07-24T21:12:46.413Z&sk=journeyUi&sig=nU5fAZt%2FhxD%2BOS0Lwihj8tbfNMw3Qo8fjQH%2F5uP3Q0M%3D";
 const stream =
-  "so=demoassure&sn=sandbox&ss=stream&sp=rw&se=2021-11-26T16:19:25Z&sk=sandbox&sig=0SfXq7AQv%2B%2Fm2G6BpQwQgX5ma4VIrFRGsK7avjwj60I%3D";
+  "so=demoassure&sn=sandbox&ss=stream&sp=r&se=2024-07-24T21:11:22.995Z&sk=journeyUi&sig=TsOE%2BleLlocOYTU09oCp0zBdiXZDjsM79S1ajlwwoKA%3D";
 const baseURL =
-  "http://cjaas-indev2.azurewebsites.net";
+  "https://cjaas-devus2.azurewebsites.net";
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
   @internalProperty() darkTheme = false;
@@ -102,9 +115,9 @@ export class Sandbox extends LitElement {
             <!-- CHANGE TO PRODUCTION SERVER WHEN SHIPPING TO WXCC DESKTOP -->
             <customer-journey-widget
               id="timeline-widget"
-              customer="XYZ123@example.com"
+              customer="30313-Carl"
               user-search
-              template-id="User Logins"
+              template-id="second-template"
               .eventIconTemplate=${iconData}
               profile-token=${profileWrite}
               tape-token=${tapeRead}
