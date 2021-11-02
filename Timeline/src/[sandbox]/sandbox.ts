@@ -90,8 +90,8 @@ export class Sandbox extends LitElement {
             <cjaas-timeline-widget
               id="timeline-widget"
               person-id=""
-              tape-read-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2049-02-22T16:44:19.899Z&sk=sandbox&sig=zfaMLDT15AoCvrWle0HSezBwgETtXs5JMTMQDaIkWkQ%3D"
-              stream-read-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2049-02-22T16:45:54.572Z&sk=sandbox&sig=Ao2mLkSfBmnQH%2B87LvkIrulx61Bpb5fxFch6lwOLu78%3D"
+              tape-read-token="YOUR_TOKEN_GOES_HERE"
+              stream-read-token="YOUR_TOKEN_GOES_HERE"
               limit="15"
               base-url="https://cjaas-devus1-edge.azurewebsites.net"
             ></cjaas-timeline-widget>
@@ -103,8 +103,8 @@ export class Sandbox extends LitElement {
             <cjaas-timeline-widget
               id="timeline-widget"
               type="journey-and-stream"
-              stream-read-token="missing"
-              tape-read-token="missing"
+              stream-read-token="missing_token"
+              tape-read-token="missing_token"
               limit="15"
               show-filters
               base-url="https://cjaas-devus1-edge.azurewebsites.net"
