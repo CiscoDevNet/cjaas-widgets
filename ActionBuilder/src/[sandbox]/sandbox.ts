@@ -78,11 +78,11 @@ export class Sandbox extends LitElement {
 
   render() {
     const actionWriteToken =
-      "so=demoassure&sn=sandbox&ss=action&sp=w&se=2024-07-03T17:17:35.610410800Z&sk=sandbox&sig=rXoWdbOyo5cKoPnHUuAlP0VpzdWSNT06OsDd7k04oPI%3D";
+      "YOUR_TOKEN_GOES_HERE";
     const actionReadToken =
-      "so=demoassure&sn=sandbox&ss=action&sp=r&se=2024-07-03T17:17:25.117902200Z&sk=sandbox&sig=0jY19ahi5oiFjpXKCvNO8B8eyBna0tlIPeBEWg2Q0bg%3D";
+      "YOUR_TOKEN_GOES_HERE";
     const profileReadToken =
-      "so=demoassure&sn=sandbox&ss=profile&sp=r&se=2024-07-03T17:12:28.082618200Z&sk=sandbox&sig=NiOhZ13iRNK6h1wkdNXfHSZ6abo%2FKhvVj7LE60a%2F7Lg%3D";
+      "YOUR_TOKEN_GOES_HERE";
     return html`
       <div class="toggle">
         ${this.themeToggle()}
