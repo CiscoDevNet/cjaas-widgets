@@ -301,7 +301,6 @@ export default class CustomerJourneyWidget extends LitElement {
         if (response.data.runtimeStatus === "Completed") {
           clearInterval(intervalId);
           this.pollingActive = false;
-          // this.profileData = this.parseResponse(response)
           this.profileData = this.parseResponse(response.data.output.attributeView)
         }
       });

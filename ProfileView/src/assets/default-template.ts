@@ -1,36 +1,35 @@
 export const defaultTemplate = {
-  Name: "Default Template",
-  DatapointCount: 1000,
-  Attributes: [
+  name: "Default Template",
+  attributes: [
     {
-      Version: "0.1",
-      Event: "Quote",
-      Metadata: "email",
-      DisplayName: "Email",
-      AggregationMode: "Value",
-      type: "tab",
-      tag: "email",
-      Limit: 1
+        "version": "0.1",
+        "event": "Quote",
+        "metadataType": "string",
+        "metadata": "email",
+        "limit": 1,
+        "displayName": "Email",
+        "lookbackDurationType": "days",
+        "lookbackPeriod": 50,
+        "aggregationMode": "Value",
+        "verbose": false,
+        "widgetAttributes": {
+            "type": "table",
+        }
     },
     {
-      Version: "0.1",
-      Event: "Quote",
-      Metadata: "firstName",
-      DisplayName: "First Name",
-      Limit: 1,
-      AggregationMode: "Value",
-      tag: "name",
-      type: "inline"
-    },
-    {
-      Version: "0.1",
-      Limit: 1,
-      Event: "Quote",
-      Metadata: "lastName",
-      DisplayName: "Last Name",
-      AggregationMode: "Value",
-      tag: "name",
-      type: "inline"
+        "version": "0.1",
+        "event": "Quote",
+        "metadataType": "string",
+        "metadata": "firstName",
+        "limit": 1,
+        "displayName": "First Name",
+        "lookbackDurationType": "days",
+        "lookbackPeriod": 50,
+        "aggregationMode": "Value",
+        "verbose": false,
+        "widgetAttributes": {
+            "type": "table",
+        }
     }
-  ]
+]
 };

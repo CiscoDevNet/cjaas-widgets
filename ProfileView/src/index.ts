@@ -48,49 +48,123 @@ export interface CustomerEvent {
 }
 @customElementWithCheck("cjaas-profile-view-widget")
 export default class CjaasProfileWidget extends LitElement {
+  /**
+   * Current customer ID to show
+   * @attr customer
+   */
   @property() customer: string | undefined;
+  /**
+   * ID of profile view template to retrieve from API
+   * @attr template-id
+   */
   @property({ type: String, attribute: "template-id" }) templateId:
     | string
     | undefined;
-  @property({ type: String, attribute: "stream-read-token" }) streamReadToken:
+  /**
+   * SAS Token for reading stream API
+   * @attr stream-read-token
+   */
+    @property({ type: String, attribute: "stream-read-token" }) streamReadToken:
     | string
     | null = null;
-  @property({ type: String, attribute: "tape-read-token" }) tapeReadToken:
+  /**
+   * SAS Token for reading tape API
+   * @attr tape-read-token
+   */
+    @property({ type: String, attribute: "tape-read-token" }) tapeReadToken:
     | string
     | null = null;
-  @property({ type: String, attribute: "profile-write-token" })
+  /**
+   * SAS Token for POST operations on Profile endpoint
+   * @attr profile-write-token
+   */
+    @property({ type: String, attribute: "profile-token" })
+  profileToken: string | null = null;
+  /**
+   * SAS Token for POST operations on Profile endpoint (SHOULD DEPRECATE)
+   * @attr profile-write-token
+   */
+    @property({ type: String, attribute: "profile-write-token" })
   profileWriteToken: string | null = null;
+  /**
+   * SAS Token for reading profile API (SHOULD DEPRECATE)
+   * @attr profile-read-token
+   */
   @property({ type: String, attribute: "profile-read-token" })
   profileReadToken: string | null = null;
+  /**
+   * Base URL for API calls
+   * @attr base-url
+   */
   @property({ type: String, attribute: "base-url" }) baseURL:
     | string
     | undefined = undefined;
-  @property({ type: String, attribute: "base-stream-url" }) baseStreamURL:
-    | string
-    | undefined = undefined;
-
-  // timeline properties
+  // Timeline properties
+  /**
+   * Set max number of timeline items to render by default
+   * @attr limit
+   */
   @property({ type: Number }) limit = 5;
+  /**
+   * Populate live events as they happen
+   * @prop liveStream
+   */
   @internalProperty() liveStream = false;
+  /**
+   * Store of fetched Timeline events
+   * @prop events
+   */
   @internalProperty() events: CustomerEvent[] = [];
+  /**
+   * Cache of newest incoming live events prior to updating rendered events list view
+   * @prop newestEvents
+   */
   @internalProperty() newestEvents: Array<CustomerEvent> = [];
+  /**
+   * Store of Stream event source
+   * @prop eventSource
+   */
   @internalProperty() eventSource: EventSource | null = null;
-  @internalProperty() showTimelineSpinner = false;
-  @internalProperty() showSpinner = false;
+  /**
+   * Toggle loading state
+   * @prop timelineLoading
+   */
+  @internalProperty() timelineLoading = false;
+  /**
+   * Toggle loading state
+   * @prop profileLoading
+   */
+  @internalProperty() profileLoading = false;
+  /**
+   * Error message text
+   * @prop errorMessage
+   */
   @internalProperty() errorMessage = "";
-  @internalProperty() profile: Profile | undefined;
+  /**
+   * Store of fetched profile Data
+   * @prop profile
+   */
+  @internalProperty() profileData: Profile | undefined;
+  /**
+   * Memoize pollingstatus so that there are not multiple intervals
+   */
+   @internalProperty() pollingActive = false;
+  /**
+   * Fallback template structure if templateId is not provided (deprecating soon)
+   * @prop defaultTemplate
+   */
   @internalProperty() defaultTemplate = defaultTemplate;
-  @internalProperty() templateFromServer: any;
 
   async lifecycleTasks() {
-    const data = await this.getExistingEvents();
-    this.events = data.events;
+    this.events = await this.getExistingEvents();
+    this.timelineLoading = false;
+    await this.getProfile();
     this.requestUpdate();
     this.subscribeToStream();
   }
 
-  async firstUpdated(changedProperties: PropertyValues) {
-    super.firstUpdated(changedProperties);
+  async connectedCallback() {
+    super.connectedCallback();
     await this.lifecycleTasks();
   }
 
@@ -104,20 +178,6 @@ export default class CjaasProfileWidget extends LitElement {
         changedProperties.has("customer") ||
         changedProperties.has("templateId"))
     ) {
-      this.getProfile();
-    }
-
-    if (
-      changedProperties.has("profileWriteToken") ||
-      changedProperties.has("filter")
-    ) {
-      this.lifecycleTasks();
-    }
-
-    if (
-      changedProperties.has("streamToken") ||
-      changedProperties.has("customer")
-    ) {
       this.lifecycleTasks();
     }
   }
@@ -129,19 +189,19 @@ export default class CjaasProfileWidget extends LitElement {
   }
 
   getProfile() {
+    this.profileLoading = true
     if (this.templateId) {
       this.getProfileFromTemplateId();
       return;
     }
 
-    // Rest of the flow is soon to be deprecated
+    // TODO: What is the new fallback for undefined template IDs?
+    // SHOULD the new defaults be set on server and retrievable??
     this.baseUrlCheck();
-    const url = `${this.baseURL}/v1/journey/profileview?personid=${this.customer}`;
-    this.showSpinner = true;
+    const url = `${this.baseURL}/v1/journey/views/templates=${this.customer}`;
 
-    // set verbose as true for tabbed attributes
     const template = Object.assign({}, this.defaultTemplate);
-    template.Attributes = template.Attributes.map((x: any) => {
+    template.attributes = template.attributes.map((x: any) => {
       if (x.type === "tab" || x?.widgetAttributes?.type === "tab") {
         x.Verbose = true;
       }
@@ -154,120 +214,69 @@ export default class CjaasProfileWidget extends LitElement {
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.profileWriteToken
+        Authorization: "SharedAccessSignature " + this.profileToken
       },
       data
     };
     return axios(url, options)
       .then((x: AxiosResponse) => x.data)
       .then((_profile: ProfileFromSyncAPI) => {
-        this.profile = this.defaultTemplate.Attributes.map(
-          (attribute: any, i: number) => {
-            // if attribute is of tab type
-            // save journey events as well
-            let journeyEvents = null;
-            if (
-              attribute.type === "tab" ||
-              attribute.widgetAttributes?.type === "tab"
-            ) {
-              try {
-                journeyEvents = JSON.parse(
-                  _profile.attributeView[i].journeyEvents || "null"
-                );
-              } catch {
-                console.error("Error while parsing Journey Event");
-              }
-            }
-
-            return {
-              query: attribute,
-              result: _profile.attributeView[i].result.split(","),
-              journeyEvents
-            };
-          }
-        ) as Profile;
-
-        this.showSpinner = false;
+        this.profileData = this.parseResponse(this.defaultTemplate.attributes)
         this.requestUpdate();
       })
       .catch((err: Error) => {
         console.error("Could not load the Profile Data. ", err);
-        this.profile = undefined;
-        this.showSpinner = false;
+        this.profileData = undefined;
         this.requestUpdate();
       });
-  }
+    }
+
 
   getProfileFromTemplateId() {
-    const url = `${this.baseURL}/v1/journey/views?viewId=${this.templateId}&personId=${this.customer}`;
-
-    this.showSpinner = true;
+    const url = `${this.baseURL}/v1/journey/views:build?templateId=${this.templateId}&personId=${this.customer}`;
 
     const options: AxiosRequestConfig = {
       url,
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.profileReadToken,
+        Authorization: "SharedAccessSignature " + this.profileToken,
         "X-CACHE-MAXAGE-HOUR": 5
       }
     };
 
     axios(options)
       .then(x => x.data)
-      .then((response: { getUriStatusQuery: string; id: string }) => {
-        this.setOffProfileLongPolling(response.getUriStatusQuery);
+      .then((response) => {
+        this.setOffProfileLongPolling(response.data.getUriStatusQuery);
       })
       .catch(err => {
         console.error("Unable to fetch the Profile", err);
-        this.showSpinner = false;
       });
   }
 
   setOffProfileLongPolling(url: string) {
+    if (this.pollingActive) return;
+    this.pollingActive = true;
     const intervalId = setInterval(() => {
+      console.log("Fetching Profile")
       axios({
         url,
         method: "GET",
         headers: {
           "Content-type": "application/json",
-          Authorization: "SharedAccessSignature " + this.profileReadToken
+          Authorization: "SharedAccessSignature " + this.profileToken
         }
       })
-        .then(x => x.data)
-        .then((response: any) => {
-          if (response.runtimeStatus === "Completed") {
-            clearInterval(intervalId);
-
-            this.profile = this.getProfileFromPolledResponse(response);
-
-            this.showSpinner = false;
-            this.profile = response?.output?.ProfileView?.AttributeView.$values.map(
-              (attribute: any) => {
-                const query = {
-                  ...attribute.QueryTemplate,
-                  widgetAttributes: {
-                    type: attribute.QueryTemplate?.WidgetAttributes.type,
-                    tag: attribute.QueryTemplate?.WidgetAttributes.tag
-                  },
-                  // temp fix for backward compatibility
-                  attributes: {
-                    type: attribute.QueryTemplate?.WidgetAttributes.type,
-                    tag: attribute.QueryTemplate?.WidgetAttributes.tag
-                  }
-                };
-                return {
-                  query: query,
-                  journeyEvents: attribute.JourneyEvents?.$values.map(
-                    (value: string) => value && JSON.parse(value)
-                  ),
-                  result: [attribute.Result]
-                };
-              }
-            );
-          }
-        });
-    }, 5000);
+      .then(x => x.data)
+      .then((response: any) => {
+        if (response.data.runtimeStatus === "Completed") {
+          clearInterval(intervalId);
+          this.pollingActive = false;
+          this.profileData = this.parseResponse(response.data.output.attributeView)
+        }
+      });
+    }, 1500);
   }
 
   getTimelineItemFromMessage(message: any) {
@@ -287,8 +296,30 @@ export default class CjaasProfileWidget extends LitElement {
     return item;
   }
 
+  parseResponse(attributes: any) {
+    return attributes.map(
+      (attribute: any) => {
+        const query = {
+          ...attribute.queryTemplate,
+          widgetAttributes: {
+            type: attribute.queryTemplate?.widgetAttributes.type,
+          tag: attribute.queryTemplate?.widgetAttributes.tag
+          },
+        };
+        this.profileLoading = false;
+        return {
+          query: query,
+          journeyEvents: attribute.journeyEvents?.map(
+            (value: string) => value && JSON.parse(value)
+            ),
+            result: [attribute.result]
+          };
+        }
+      );
+    }
+
   async getExistingEvents() {
-    this.showTimelineSpinner = true;
+    this.timelineLoading = true;
     this.baseUrlCheck();
     return fetch(
       `${this.baseURL}/v1/journey/streams/historic/${this.customer}`,
@@ -305,10 +336,10 @@ export default class CjaasProfileWidget extends LitElement {
         return x.json();
       })
       .then(data => {
-        return data;
+        return data.events;
       })
       .catch((err: any) => {
-        this.showTimelineSpinner = false;
+        this.timelineLoading = false;
         console.error("Could not fetch Customer Journey events. ", err);
         this.errorMessage = `Failure to fetch Journey for ${this.customer}. ${err}`;
       });
@@ -346,7 +377,7 @@ export default class CjaasProfileWidget extends LitElement {
       };
 
       this.eventSource!.onerror = () => {
-        this.showTimelineSpinner = false;
+        this.timelineLoading = false;
       };
     } else {
       console.error(`No event source is active for ${this.customer}`);
@@ -371,6 +402,7 @@ export default class CjaasProfileWidget extends LitElement {
         ></cjaas-timeline>
       `;
     } else {
+      debugger;
       return this.getEmptyStateTemplate();
     }
   }
@@ -378,7 +410,7 @@ export default class CjaasProfileWidget extends LitElement {
   getEmptyStateTemplate() {
     return html`
       <div class="empty-state">
-        ${this.showTimelineSpinner
+        ${this.timelineLoading
           ? this.getSpinner()
           : this.getTimelineEmptyStateMessage()}
       </div>
@@ -409,7 +441,7 @@ export default class CjaasProfileWidget extends LitElement {
   getFormattedProfile() {
     return html`
       <div class="profile-bound default-template">
-        <cjaas-profile .profileData=${this.profile}></cjaas-profile>
+        <cjaas-profile .profileData=${this.profileData}></cjaas-profile>
         <section class="customer-journey" title="Customer Journey">
           <div class="header inner-header">
             <slot name="l10n-header-text">
@@ -424,13 +456,12 @@ export default class CjaasProfileWidget extends LitElement {
 
   getTabs() {
     // tab data should return the event as such.. Should be rendered by stream component.
-    const tabs = this.profile?.filter(
+    const tabs = this.profileData?.filter(
       (x: any) =>
         x.query.type === "tab" || x.query?.widgetAttributes?.type === "tab"
     );
-
     // TODO: Track the selected tab to apply a class to the badge for color synching, making blue when selected
-    const activityTab = this.profileWriteToken
+    const activityTab = this.profileToken
       ? html`
           <md-tab slot="tab">
             <span>All</span>
@@ -446,42 +477,11 @@ export default class CjaasProfileWidget extends LitElement {
             </slot>
           </div>
         `;
-    if (tabs && tabs.length > 0) {
       return html`
         <md-tabs>
-          ${activityTab} ${tabs.map((x: any) => this.getTab(x))}
+          ${activityTab} ${tabs!.map((x: any) => this.getTab(x))}
         </md-tabs>
       `;
-    } else {
-      return activityTab;
-    }
-  }
-
-  // parses the response from polled API to a valid Profile
-  getProfileFromPolledResponse(response: any): Profile {
-    return response?.output?.ProfileView?.AttributeView.$values.map(
-      (attribute: any) => {
-        const query = {
-          ...attribute.QueryTemplate,
-          widgetAttributes: {
-            type: attribute.QueryTemplate?.WidgetAttributes.type,
-            tag: attribute.QueryTemplate?.WidgetAttributes.tag
-          },
-          // temp fix for backward compatibility
-          attributes: {
-            type: attribute.QueryTemplate?.WidgetAttributes.type,
-            tag: attribute.QueryTemplate?.WidgetAttributes.tag
-          }
-        };
-        return {
-          query: query,
-          journeyEvents: attribute.JourneyEvents?.$values.map(
-            (value: string) => value && JSON.parse(value)
-          ),
-          result: [attribute.Result]
-        };
-      }
-    );
   }
 
   getTab(tab: any) {
@@ -512,7 +512,7 @@ export default class CjaasProfileWidget extends LitElement {
   render() {
     return html`
       <div class="outer-container" part="profile-widget-outer">
-        ${this.profile
+        ${this.profileData
           ? this.getFormattedProfile()
           : this.getProfileEmptyStateTemplate()}
       </div>
@@ -522,7 +522,7 @@ export default class CjaasProfileWidget extends LitElement {
   getProfileEmptyStateTemplate() {
     return html`
       <div class="empty-state">
-        ${this.showSpinner
+        ${this.profileLoading
           ? this.getSpinner()
           : this.getProfileEmptyStateMessage()}
       </div>
