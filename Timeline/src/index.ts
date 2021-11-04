@@ -37,31 +37,66 @@ export interface CustomerEvent {
 
 @customElementWithCheck("cjaas-timeline-widget")
 export default class CjaasTimelineWidget extends LitElement {
-  @property({ type: Array }) events: CustomerEvent[] = [];
+  /**
+   * Set primary API base url
+   * @attr base-url
+   */
   @property({ type: String, attribute: "base-url" }) baseURL:
     | string
     | undefined = undefined;
-  @property({ type: String, attribute: "base-stream-url" }) baseStreamURL:
-    | string
-    | undefined = undefined;
-  @property({ type: String, attribute: "tape-read-token" }) tapeReadToken:
-    | string
-    | undefined;
-  @property({ type: String, attribute: "stream-read-token" }) streamToken:
+  /**
+   * @attr tape-read-token
+   */
+    @property({ type: String, attribute: "tape-read-token" }) tapeReadToken:
     | string
     | undefined;
+  /**
+   * @attr stream-read-token
+   */
+    @property({ type: String, attribute: "stream-read-token" }) streamToken:
+    | string
+    | undefined;
+  /**
+   * Set number of events shown by default
+   * @attr limit
+   */
   @property({ type: Number }) limit = 5;
+  /**
+   * Toggle whether new live events appear in the timeline or not
+   * @attr live-stream
+   */
+  @property({type: Boolean, attribute: "live-stream"}) liveStream = false;
+  /**
+   * Toggle visibility of the timeline filters
+   * @attr show-filters
+   */
   @property({ type: Boolean, attribute: "show-filters" }) showFilters = false;
-  @property({ reflect: true }) type:
-    | "journey"
-    | "livestream"
-    | "journey-and-stream" = "livestream";
-
+  /**
+   * Set the ID of the record being fetched
+   * @attr person-id
+   */
   @property({ attribute: "person-id" }) personId = "";
+  /**
+   * Store for the event source of incoming live events
+   * @prop eventSource
+   */
   @internalProperty() eventSource: EventSource | null = null;
-  @internalProperty() liveStream = false;
+  /**
+   * @prop showSpinner
+   */
   @internalProperty() showSpinner = false;
+  /**
+   * @prop errorMessage
+   */
   @internalProperty() errorMessage = "";
+  /**
+   * Store of fetched timeline event
+   * @prop events
+   */
+  @internalProperty() events: CustomerEvent[] = [];
+  /**
+   * @prop newestEvents
+   */
   @internalProperty() newestEvents: Array<CustomerEvent> = [];
 
   async lifecycleTasks() {

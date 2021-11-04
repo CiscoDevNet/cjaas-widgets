@@ -71,3 +71,7 @@
 .empty-state {
   height: 100%;
 }
+
+cjaas-timeline::part(stream) {
+  height: calc(100% - 2rem);
+}

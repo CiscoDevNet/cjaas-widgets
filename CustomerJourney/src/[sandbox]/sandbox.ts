@@ -8,7 +8,6 @@
 import "@momentum-ui/web-components";
 import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
-import { sampleTemplate } from "./sandbox.mock";
 import styles from "./sandbox.scss";
 import * as iconData from "@/assets/icons.json";
 import "..";
