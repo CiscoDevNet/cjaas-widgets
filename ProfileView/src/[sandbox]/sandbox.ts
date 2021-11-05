@@ -12,6 +12,13 @@ import "..";
 import styles from "./sandbox.scss";
 import { sampleTemplate } from "./sandbox.mock";
 
+/**
+ * devus2
+ */
+ const tapeRead = "SET SAS TOKEN HERE"
+const profileWrite = "SET SAS TOKEN HERE"
+const stream = "SET SAS TOKEN HERE"
+const baseURL = "https://cjaas-devus2.azurewebsites.net";
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
   @internalProperty() darkTheme = false;
@@ -91,14 +98,12 @@ export class Sandbox extends LitElement {
             <!-- ONLY TEST USING THE EDGE SERVER, NEVER PRODUCTION SERVER, IT WILL MESS UP THE WALKING -->
             <cjaas-profile-view-widget
               id="view"
-              template-id="my-new-template"
-              customer="560021-Venki"
-              profile-read-token="so=demoassure&sn=sandbox&ss=profile&sp=r&se=2024-07-03T17:12:28.082618200Z&sk=sandbox&sig=NiOhZ13iRNK6h1wkdNXfHSZ6abo%2FKhvVj7LE60a%2F7Lg%3D"
-              profile-write-token="so=demoassure&sn=sandbox&ss=profile&sp=w&se=2049-02-22T16:45:11.988Z&sk=sandbox&sig=KLtI6vyZXMvvymFjqSR2EOJzeULzm43T6y3HTf63qus%3D"
-              tape-read-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2049-02-22T16:44:19.899Z&sk=sandbox&sig=zfaMLDT15AoCvrWle0HSezBwgETtXs5JMTMQDaIkWkQ%3D"
-              stream-read-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2049-02-22T16:45:54.572Z&sk=sandbox&sig=Ao2mLkSfBmnQH%2B87LvkIrulx61Bpb5fxFch6lwOLu78%3D"
-              timelineType="journey-and-stream"
-              base-url="https://cjaas-devus1-edge.azurewebsites.net"
+              template-id="second-template"
+              customer="30313-Carl"
+              profile-token=${profileWrite}
+              tape-read-token=${tapeRead}
+              stream-read-token=${stream}
+              base-url=${baseURL}
             ></cjaas-profile-view-widget>
           </div>
           <!-- <div

@@ -9,6 +9,8 @@
 
 import { CleanWebpackPlugin } from "clean-webpack-plugin";
 import CopyWebpackPlugin from "copy-webpack-plugin";
+import WebpackBundleAnalyzer from 'webpack-bundle-analyzer'
+
 
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import * as path from "path";
@@ -163,7 +165,7 @@ const commonDist = merge(common, {
         ]
       }
     }) as any,
-    copyFontsAndIcons
+    new WebpackBundleAnalyzer.BundleAnalyzerPlugin()
   ]
 });
 
