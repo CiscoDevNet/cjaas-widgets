@@ -164,6 +164,10 @@ cjaas-profile::part(profile) {
   border-radius: 0.5rem;
 }
 
+cjaas-timeline::part(stream) {
+  height: calc(100% - 2rem);
+}
+
 details:last-child {
   flex-grow: 1;
   overflow-y: hidden;

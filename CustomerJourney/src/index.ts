@@ -90,7 +90,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * @prop eventIconTemplate
    */
   @property({ attribute: false })
-  eventIconTemplate: any = iconData;
+  eventIconTemplate: Timeline.TimelineCustomizations = iconData;
   /**
    * Data pulled from Journey Profile retrieval (will match shape of provided Template)
    * @prop profileData
@@ -226,7 +226,7 @@ export default class CustomerJourneyWidget extends LitElement {
     // TODO: What is the new fallback for undefined template IDs?
     // SHOULD the new defaults be set on server and retrievable??
     this.baseUrlCheck();
-    const url = `${this.baseURL}/v1/journey/views/templates=${this.customer}`;
+    const url = `${this.baseURL}/v1/journey/views&personId=${this.customer}`;
 
     const template = Object.assign({}, this.defaultTemplate);
     template.attributes = template.attributes.map((x: any) => {
@@ -239,16 +239,16 @@ export default class CustomerJourneyWidget extends LitElement {
     const data = JSON.stringify(template);
     const options: AxiosRequestConfig = {
       url,
-      method: "POST",
+      method: "GET",
       headers: {
         "Content-type": "application/json",
         Authorization: "SharedAccessSignature " + this.profileToken
-      },
-      data
+      }
     };
     return axios(url, options)
       .then((x: AxiosResponse) => x.data)
       .then((_profile: ProfileFromSyncAPI) => {
+        debugger;
         this.profileData = this.parseResponse(this.defaultTemplate.attributes)
         this.requestUpdate();
       })

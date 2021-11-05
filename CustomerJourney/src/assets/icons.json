@@ -1,7 +1,7 @@
 {
   "Page Visit": {
-    "src": "https://www.svgrepo.com/show/79781/pointer.svg",
-    "color": "red"
+    "name": "icon-mouse-cursor_16",
+    "color": "grey"
   },
   "Entered ZipCode": {
     "name": "icon-location_16",
