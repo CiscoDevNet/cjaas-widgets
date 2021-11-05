@@ -91,10 +91,14 @@ export class Sandbox extends LitElement {
             <!-- CHANGE TO PRODUCTION SERVER WHEN SHIPPING TO WXCC DESKTOP -->
             <customer-journey-widget
               id="timeline-widget"
-              customer="98126-Kevin"
-              tape-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2049-02-22T16:44:19.899Z&sk=sandbox&sig=zfaMLDT15AoCvrWle0HSezBwgETtXs5JMTMQDaIkWkQ%3D"
-              stream-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2049-02-22T16:45:54.572Z&sk=sandbox&sig=Ao2mLkSfBmnQH%2B87LvkIrulx61Bpb5fxFch6lwOLu78%3D"
-              base-url="https://cjaas-devus1-edge.azurewebsites.net"
+              customer="30313-Carl"
+              user-search
+              .eventIconTemplate=${iconData}
+              profile-token=${profileWrite}
+              tape-token=${tapeRead}
+              stream-token=${stream}
+              base-url=${baseURL}
+              limit="20"
             ></customer-journey-widget>
           </div>
         </div>
