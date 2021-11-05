@@ -82,9 +82,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * Property to set the data template to retrieve customer Profile in desired format
    * @attr template-id
    */
-   @property({ type: String, attribute: "template-id" }) templateId:
-   | string
-   | undefined;
+   @property({ type: String, attribute: "template-id" }) templateId: string = "journey-default-template";
   /**
    * Property to pass in JSON template to set color and icon settings
    * @prop eventIconTemplate
