@@ -9,8 +9,14 @@ import "@momentum-ui/web-components";
 import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
 import styles from "./sandbox.scss";
+import * as iconData from "@/assets/icons.json";
 import "..";
 
+
+const tapeRead = "SET SAS TOKEN HERE"
+const profileWrite = "SET SAS TOKEN HERE"
+const stream = "SET SAS TOKEN HERE"
+const baseURL = "https://cjaas-devus2.azurewebsites.net";
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
   @internalProperty() darkTheme = false;
@@ -82,19 +88,24 @@ export class Sandbox extends LitElement {
       </div>
       <md-theme ?darkTheme=${this.darkTheme} lumos>
         <div class="container">
-          <h2 class="sandbox-header">Timeline</h2>
+          <h2 class="sandbox-header">Customer Journey Widget</h2>
           <div
-            style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
+            style=${`width: ${this.containerWidth}; height: ${this.containerHeight};`}
             class="widget-container"
           >
             <!-- ONLY TEST USING THE EDGE SERVER, NEVER PRODUCTION SERVER, IT WILL MESS UP THE WALKIN -->
             <!-- CHANGE TO PRODUCTION SERVER WHEN SHIPPING TO WXCC DESKTOP -->
             <customer-journey-widget
               id="timeline-widget"
-              customer="98126-Kevin"
-              tape-token="PLACE_YOUR_SAS_TOKEN_HERE"
-              stream-token="PLACE_YOUR_SAS_TOKEN_HERE"
-              base-url="https://cjaas-devus1-edge.azurewebsites.net"
+              customer="30313-Carl"
+              user-search
+              template-id="second-template"
+              .eventIconTemplate=${iconData}
+              profile-token=${profileWrite}
+              tape-token=${tapeRead}
+              stream-token=${stream}
+              base-url=${baseURL}
+              limit="20"
             ></customer-journey-widget>
           </div>
         </div>

@@ -12,6 +12,13 @@ import "..";
 import styles from "./sandbox.scss";
 import { sampleTemplate } from "./sandbox.mock";
 
+/**
+ * devus2
+ */
+ const tapeRead = "SET SAS TOKEN HERE"
+const profileWrite = "SET SAS TOKEN HERE"
+const stream = "SET SAS TOKEN HERE"
+const baseURL = "https://cjaas-devus2.azurewebsites.net";
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
   @internalProperty() darkTheme = false;
@@ -91,14 +98,12 @@ export class Sandbox extends LitElement {
             <!-- ONLY TEST USING THE EDGE SERVER, NEVER PRODUCTION SERVER, IT WILL MESS UP THE WALKING -->
             <cjaas-profile-view-widget
               id="view"
-              template-id="my-new-template"
-              customer="560021-Venki"
-              profile-read-token="YOUR_TOKEN_GOES_HERE"
-              profile-write-token="YOUR_TOKEN_GOES_HERE"
-              tape-read-token="YOUR_TOKEN_GOES_HERE"
-              stream-read-token="YOUR_TOKEN_GOES_HERE"
-              timelineType="journey-and-stream"
-              base-url="https://cjaas-devus1-edge.azurewebsites.net"
+              template-id="second-template"
+              customer="30313-Carl"
+              profile-token=${profileWrite}
+              tape-read-token=${tapeRead}
+              stream-read-token=${stream}
+              base-url=${baseURL}
             ></cjaas-profile-view-widget>
           </div>
           <!-- <div

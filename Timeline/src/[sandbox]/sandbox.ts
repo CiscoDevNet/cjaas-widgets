@@ -89,11 +89,11 @@ export class Sandbox extends LitElement {
           >
             <cjaas-timeline-widget
               id="timeline-widget"
-              person-id=""
-              tape-read-token="YOUR_TOKEN_GOES_HERE"
-              stream-read-token="YOUR_TOKEN_GOES_HERE"
+              person-id="30313-Carl"
+              tape-read-token=${tapeRead}
+              stream-read-token=${stream}
               limit="15"
-              base-url="https://cjaas-devus1-edge.azurewebsites.net"
+              base-url=${baseURL}
             ></cjaas-timeline-widget>
           </div>
           <div
