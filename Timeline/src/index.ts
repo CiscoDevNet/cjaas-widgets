@@ -22,7 +22,6 @@ import { EventSourceInitDict } from "eventsource";
 import { ServerSentEvent } from "./types/cjaas";
 import {generateSasToken, TokenArgs} from "./generatesastoken";
 
-
 export interface CustomerEvent {
   data: Record<string, any>;
   firstName: string;
@@ -39,30 +38,40 @@ export interface CustomerEvent {
 
 @customElementWithCheck("cjaas-timeline-widget")
 export default class CjaasTimelineWidget extends LitElement {
+  /**
+   * Your org secret key to generate SAS tokens from
+   * @attr secret
+   */
   @property({ type: String}) secret:
     | string
     | undefined = undefined;
-  @property({ type: String}) org:
+  /**
+   * Your project's ORG
+   * @attr org
+   */
+    @property({ type: String}) org:
     | string
     | undefined = undefined;
-  @property({ type: String}) namespace:
+  /**
+   * Your project's Namespace
+   * @attr namespace
+   */
+    @property({ type: String}) namespace:
     | string
     | undefined = undefined;
-  @property({ type: String, attribute: "app-name"}) appname:
+  /**
+   * Your Project's App Name
+   * @attr app-name
+   */
+    @property({ type: String, attribute: "app-name"}) appname:
     | string
     | undefined = undefined;
-  @property({ type: String, attribute: "base-url" }) baseURL:
+  /**
+   * @attr base-url
+   */
+    @property({ type: String, attribute: "base-url" }) baseURL:
     | string
     | undefined = undefined;
-    /**
-     * Potentially deprecated
-     */
-  // @property({ type: String, attribute: "tape-read-token" }) tapeReadToken:
-  //   | string
-  //   | undefined;
-  // @property({ type: String, attribute: "stream-read-token" }) streamReadToken:
-  //   | string
-  //   | undefined;
   /**
    * Set number of events shown by default
    * @attr limit
@@ -153,23 +162,6 @@ export default class CjaasTimelineWidget extends LitElement {
   async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     await this.lifecycleTasks();
-  }
-
-  updated(changedProperties: PropertyValues) {
-    super.updated(changedProperties);
-
-    /**
-     * If we hide tokens, they will not change from within, and this reload will occur in another fashion.
-     * Would this scenario occur in real usage?
-     */
-    // if (
-    //   this.tapeReadToken &&
-    //   (changedProperties.has("tapeReadToken") ||
-    //     changedProperties.has("filter") ||
-    //     changedProperties.has("personId"))
-    // ) {
-    //   this.lifecycleTasks();
-    // }
   }
 
   baseUrlCheck() {
