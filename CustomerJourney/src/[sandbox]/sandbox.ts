@@ -16,11 +16,11 @@ import "..";
  * devus2
  */
  const tapeRead =
- "so=demoassure&sn=sandbox&ss=tape&sp=rw&se=2024-07-24T21:12:36.247Z&sk=journeyUi&sig=6wEgigImeS7ARyMOQpEtfnwNRD6HudtrpWolSSqomZ0%3D";
+ "YOUR_TOKEN_HERE"
 const profileWrite =
- "so=demoassure&sn=sandbox&ss=profile&sp=rw&se=2024-07-24T21:12:46.413Z&sk=journeyUi&sig=nU5fAZt%2FhxD%2BOS0Lwihj8tbfNMw3Qo8fjQH%2F5uP3Q0M%3D";
+ "YOUR_TOKEN_HERE"
 const stream =
- "so=demoassure&sn=sandbox&ss=stream&sp=r&se=2024-07-24T21:11:22.995Z&sk=journeyUi&sig=TsOE%2BleLlocOYTU09oCp0zBdiXZDjsM79S1ajlwwoKA%3D";
+ "YOUR_TOKEN_HERE"
 const baseURL =
  "https://cjaas-devus2.azurewebsites.net";
 @customElement("cjaas-component-sandbox")

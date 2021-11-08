@@ -12,8 +12,10 @@ import styles from "./sandbox.scss";
 import "..";
 
 //@ts-ignore
-const envVariables = process.env.DOTENV.PRIVATE_KEY;
-const privateKey = envVariables
+const privateKey = process.env.DOTENV.PRIVATE_KEY;
+const org = "demoassure"
+const namespace = "sandbox"
+const appName = "journeyUi"
 
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
@@ -93,9 +95,9 @@ export class Sandbox extends LitElement {
           >
             <cjaas-timeline-widget
               secret=${privateKey}
-              org="demoassure"
-              namespace="sandbox"
-              app-name="journeyUi"
+              org=${org}
+              namespace=${namespace}
+              app-name=${appName}
               limit="15"
               person-id="30313-Carl"
               show-filters
