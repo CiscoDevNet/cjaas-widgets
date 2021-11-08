@@ -9,14 +9,12 @@
 
 import { CleanWebpackPlugin } from "clean-webpack-plugin";
 import CopyWebpackPlugin from "copy-webpack-plugin";
-
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import * as path from "path";
 import RemovePlugin from "remove-files-webpack-plugin";
 import * as webpack from "webpack";
 import merge from "webpack-merge";
-// import dotenv from "dotenv";
-import dotenv from "dotenv-webpack";
+import dotenv from "dotenv";
 const pSrc = path.resolve("src");
 const pDist = path.resolve("dist");
 export const pBuild = path.resolve("build");
@@ -25,9 +23,9 @@ const pCss = path.resolve("src/assets/styles");
 const pImg = path.resolve("src/assets/images");
 const pModules = path.resolve("node_modules");
 
-// const envSetup = dotenv.config({
-//   path: path.join(__dirname, '.env')
-// })
+const envSetup = dotenv.config({
+  path: path.join(__dirname, '.env')
+})
 
 const common: webpack.Configuration = {
   output: {
@@ -39,8 +37,7 @@ const common: webpack.Configuration = {
       "@": pSrc,
       "@css": pCss,
       "@img": pImg
-    },
-    fallback: { "crypto": require.resolve("crypto-browserify"), "buffer": require.resolve("buffer/"), "stream": require.resolve("stream-browserify") },
+    }
   },
   module: {
     rules: [
@@ -58,7 +55,9 @@ const common: webpack.Configuration = {
     ]
   },
   plugins: [
-    new dotenv({ path: "../.env" })
+    new webpack.DefinePlugin({
+      "process.env.DOTENV": JSON.stringify(envSetup.parsed),
+    })
   ]
 };
 
@@ -115,8 +114,8 @@ const copyFontsAndIcons = new CopyWebpackPlugin([
   {
     from: `${pModules}/@momentum-ui/icons/css/momentum-ui-icons.min.css`,
     to: "css"
-  }]
-);
+  }
+]);
 
 // DEV
 // ----------
