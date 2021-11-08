@@ -10,6 +10,12 @@ import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
 import styles from "./sandbox.scss";
 import "..";
+debugger;
+const envVariables = process.env;
+const {PRIVATE_KEY} = envVariables;
+console.log(PRIVATE_KEY);
+
+const privateKey = "8UZowtVLwUiL5iLmz3E49spgNzikMhXgbT36Z9f2xdvOvVfDI3yKNRzLcKiiTz8mch351G6Sx7jbL6Z1b5urgUhcGcjscEdJmMI2ZmcnTqqL5W3Ws8m7BGa0n1ec/r8OmwL2gAEXKNdoDandr6gV3uD0/trfNfPa2ZmVmihOUk5zrEFeA1T7/JT/PJXOptZeyF4XCWKv464lxcV3dToeayT5TiWuclX+b4Yv1ZDsM8E/YnkTzekOtUOQEHYMMFT0rNog0o546aS4NFz68GiZ0sHDbFhTzLXrD4wz7AOK8ZFZ8/zi6Wm9so52DUwg8RL8JTuJR8GXw7/LrcNPkBJn0Q=="
 
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
@@ -83,25 +89,12 @@ export class Sandbox extends LitElement {
       <md-theme ?darkTheme=${this.darkTheme}>
         <div class="container">
           <h2 class="sandbox-header">Timeline</h2>
-          <!-- <div
-            style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
-            class="widget-container"
-          >
-            <cjaas-timeline-widget
-              id="timeline-widget"
-              person-id="30313-Carl"
-              tape-read-token=${tapeRead}
-              stream-read-token=${stream}
-              limit="15"
-              base-url=${baseURL}
-            ></cjaas-timeline-widget>
-          </div> -->
           <div
             style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
             class="widget-container"
           >
             <cjaas-timeline-widget
-              secret="8UZowtVLwUiL5iLmz3E49spgNzikMhXgbT36Z9f2xdvOvVfDI3yKNRzLcKiiTz8mch351G6Sx7jbL6Z1b5urgUhcGcjscEdJmMI2ZmcnTqqL5W3Ws8m7BGa0n1ec/r8OmwL2gAEXKNdoDandr6gV3uD0/trfNfPa2ZmVmihOUk5zrEFeA1T7/JT/PJXOptZeyF4XCWKv464lxcV3dToeayT5TiWuclX+b4Yv1ZDsM8E/YnkTzekOtUOQEHYMMFT0rNog0o546aS4NFz68GiZ0sHDbFhTzLXrD4wz7AOK8ZFZ8/zi6Wm9so52DUwg8RL8JTuJR8GXw7/LrcNPkBJn0Q=="
+              secret=${privateKey}
               org="demoassure"
               namespace="sandbox"
               app-name="journeyUi"
@@ -112,25 +105,6 @@ export class Sandbox extends LitElement {
               >
             </cjaas-timeline-widget>
           </div>
-          <!-- <div
-          style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
-          class="widget-container"
-          >
-          <cjaas-timeline-widget
-              secret="8UZowtVLwUiL5iLmz3E49spgNzikMhXgbT36Z9f2xdvOvVfDI3yKNRzLcKiiTz8mch351G6Sx7jbL6Z1b5urgUhcGcjscEdJmMI2ZmcnTqqL5W3Ws8m7BGa0n1ec/r8OmwL2gAEXKNdoDandr6gV3uD0/trfNfPa2ZmVmihOUk5zrEFeA1T7/JT/PJXOptZeyF4XCWKv464lxcV3dToeayT5TiWuclX+b4Yv1ZDsM8E/YnkTzekOtUOQEHYMMFT0rNog0o546aS4NFz68GiZ0sHDbFhTzLXrD4wz7AOK8ZFZ8/zi6Wm9so52DUwg8RL8JTuJR8GXw7/LrcNPkBJn0Q=="
-              org="demoassure"
-              namespace="sandbox"
-              app-name="journeyUi"
-              type="journey-and-stream"
-              limit="15"
-              show-filters
-              base-url="https://cjaas-devus2.azurewebsites.net"
-            >
-              <h3 slot="ll10n-no-timeline-message">
-                No hay línea de tiempo disponible
-              </h3>
-            </cjaas-timeline-widget>
-          </div> -->
         </div>
       </md-theme>
     `;

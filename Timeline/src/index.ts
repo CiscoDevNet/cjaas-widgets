@@ -194,7 +194,7 @@ export default class CjaasTimelineWidget extends LitElement {
         headers: {
           "content-type": "application/json; charset=UTF-8",
           accept: "application/json",
-          Authorization: `${getTToken()}`
+          Authorization: `SharedAccessSignature ${getTToken()}`
         },
         method: "GET"
       }
@@ -223,7 +223,7 @@ export default class CjaasTimelineWidget extends LitElement {
         headers: {
           "content-type": "application/json; charset=UTF-8",
           accept: "application/json",
-          Authorization: `${getSToken()}`
+          Authorization: `SharedAccessSignature ${getSToken()}`
         }
       };
       this.eventSource = new EventSource(

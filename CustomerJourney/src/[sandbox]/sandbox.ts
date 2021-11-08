@@ -12,11 +12,17 @@ import styles from "./sandbox.scss";
 import * as iconData from "@/assets/icons.json";
 import "..";
 
-
-const tapeRead = "SET SAS TOKEN HERE"
-const profileWrite = "SET SAS TOKEN HERE"
-const stream = "SET SAS TOKEN HERE"
-const baseURL = "https://cjaas-devus2.azurewebsites.net";
+/**
+ * devus2
+ */
+ const tapeRead =
+ "so=demoassure&sn=sandbox&ss=tape&sp=rw&se=2024-07-24T21:12:36.247Z&sk=journeyUi&sig=6wEgigImeS7ARyMOQpEtfnwNRD6HudtrpWolSSqomZ0%3D";
+const profileWrite =
+ "so=demoassure&sn=sandbox&ss=profile&sp=rw&se=2024-07-24T21:12:46.413Z&sk=journeyUi&sig=nU5fAZt%2FhxD%2BOS0Lwihj8tbfNMw3Qo8fjQH%2F5uP3Q0M%3D";
+const stream =
+ "so=demoassure&sn=sandbox&ss=stream&sp=r&se=2024-07-24T21:11:22.995Z&sk=journeyUi&sig=TsOE%2BleLlocOYTU09oCp0zBdiXZDjsM79S1ajlwwoKA%3D";
+const baseURL =
+ "https://cjaas-devus2.azurewebsites.net";
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
   @internalProperty() darkTheme = false;
@@ -99,7 +105,6 @@ export class Sandbox extends LitElement {
               id="timeline-widget"
               customer="30313-Carl"
               user-search
-              template-id="second-template"
               .eventIconTemplate=${iconData}
               profile-token=${profileWrite}
               tape-token=${tapeRead}

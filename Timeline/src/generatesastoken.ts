@@ -69,7 +69,7 @@ export function generateSasToken(args: TokenArgs) {
   var calculatedExpiration = new Date(generateExpiration(expiration)).toISOString();
   var sasTokenPrefix = `so=${organization}&sn=${namespace}&ss=${service}&sp=${permissions}&se=${calculatedExpiration}&sk=${keyName}`;
   var signature = encodeURIComponent(crypto.createHmac('sha256', secret).update(sasTokenPrefix).digest('base64'));
-  return `SharedAccessSignature ${sasTokenPrefix}&sig=${signature}`;
+  return `${sasTokenPrefix}&sig=${signature}`;
 }
 
 /* Begin */
