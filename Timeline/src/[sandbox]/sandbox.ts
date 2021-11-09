@@ -5,17 +5,22 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
+
+/**
+ * ATTENTION: Apps using this widget must provide the following values from the application configuration.
+ * These details allow easy and discreet generation of SAS tokens with correct permissions needed to access the API.
+ */
+//@ts-ignore
+const PRIVATE_KEY = process.env.DOTENV.PRIVATE_KEY;
+const ORGANIZATION = "demoassure";
+const NAMESPACE = "sandbox";
+const APP_NAME = "journeyUi";
+
 import "@momentum-ui/web-components";
 import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
 import styles from "./sandbox.scss";
 import "..";
-
-//@ts-ignore
-const privateKey = process.env.DOTENV.PRIVATE_KEY;
-const org = "demoassure"
-const namespace = "sandbox"
-const appName = "journeyUi"
 
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
@@ -94,15 +99,15 @@ export class Sandbox extends LitElement {
             class="widget-container"
           >
             <cjaas-timeline-widget
-              secret=${privateKey}
-              org=${org}
-              namespace=${namespace}
-              app-name=${appName}
+              secret=${PRIVATE_KEY}
+              org=${ORGANIZATION}
+              namespace=${NAMESPACE}
+              app-name=${APP_NAME}
               limit="15"
               person-id="30313-Carl"
               show-filters
               base-url="https://cjaas-devus2.azurewebsites.net"
-              >
+            >
             </cjaas-timeline-widget>
           </div>
         </div>

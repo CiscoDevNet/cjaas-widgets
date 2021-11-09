@@ -20,7 +20,7 @@ import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
 import { EventSourceInitDict } from "eventsource";
 import { ServerSentEvent } from "./types/cjaas";
-import {generateSasToken, TokenArgs} from "./generatesastoken";
+import { generateSasToken, TokenArgs } from "./generatesastoken";
 
 export interface CustomerEvent {
   data: Record<string, any>;
@@ -42,34 +42,28 @@ export default class CjaasTimelineWidget extends LitElement {
    * Your org secret key to generate SAS tokens from
    * @attr secret
    */
-  @property({ type: String}) secret:
-    | string
-    | undefined = undefined;
+  @property({ type: String }) secret: string | undefined = undefined;
   /**
    * Your project's ORG
    * @attr org
    */
-    @property({ type: String}) org:
-    | string
-    | undefined = undefined;
+  @property({ type: String }) org: string | undefined = undefined;
   /**
    * Your project's Namespace
    * @attr namespace
    */
-    @property({ type: String}) namespace:
-    | string
-    | undefined = undefined;
+  @property({ type: String }) namespace: string | undefined = undefined;
   /**
    * Your Project's App Name
    * @attr app-name
    */
-    @property({ type: String, attribute: "app-name"}) appname:
+  @property({ type: String, attribute: "app-name" }) appname:
     | string
     | undefined = undefined;
   /**
    * @attr base-url
    */
-    @property({ type: String, attribute: "base-url" }) baseURL:
+  @property({ type: String, attribute: "base-url" }) baseURL:
     | string
     | undefined = undefined;
   /**
@@ -81,7 +75,7 @@ export default class CjaasTimelineWidget extends LitElement {
    * Toggle whether new live events appear in the timeline or not
    * @attr live-stream
    */
-  @property({type: Boolean, attribute: "live-stream"}) liveStream = false;
+  @property({ type: Boolean, attribute: "live-stream" }) liveStream = false;
   /**
    * Toggle visibility of the timeline filters
    * @attr show-filters
@@ -120,35 +114,34 @@ export default class CjaasTimelineWidget extends LitElement {
    */
 
   private getTokens() {
-    const that = this;
+    const instance = this;
     return {
       getTToken: function() {
         const tapeArgs: TokenArgs = {
-          secret: that.secret!,
-          organization: that.org!,
-          namespace: that.namespace!,
+          secret: instance.secret!,
+          organization: instance.org!,
+          namespace: instance.namespace!,
           service: "tape",
           permissions: "r",
-          keyName: that.appname!,
-          expiration: 1000,
-        }
-        return generateSasToken(tapeArgs)
+          keyName: instance.appname!,
+          expiration: 1000
+        };
+        return generateSasToken(tapeArgs);
       },
 
       getSToken: function() {
         const tapeArgs: TokenArgs = {
-          secret: that.secret!,
-          organization: that.org!,
-          namespace: that.namespace!,
+          secret: instance.secret!,
+          organization: instance.org!,
+          namespace: instance.namespace!,
           service: "stream",
           permissions: "r",
-          keyName: that.appname!,
-          expiration: 1000,
-        }
-        return generateSasToken(tapeArgs)
+          keyName: instance.appname!,
+          expiration: 1000
+        };
+        return generateSasToken(tapeArgs);
       }
-    }
-
+    };
   }
 
   async lifecycleTasks() {
@@ -179,7 +172,7 @@ export default class CjaasTimelineWidget extends LitElement {
   async getExistingEvents() {
     this.showSpinner = true;
     this.baseUrlCheck();
-    const {getTToken} = this.getTokens()
+    const { getTToken } = this.getTokens();
     return fetch(
       `${this.baseURL}/v1/journey/streams/historic/${this.personId}`,
       {
@@ -210,18 +203,18 @@ export default class CjaasTimelineWidget extends LitElement {
     }
 
     this.baseUrlCheck();
-      const {getSToken} = this.getTokens()
-      const header: EventSourceInitDict = {
-        headers: {
-          "content-type": "application/json; charset=UTF-8",
-          accept: "application/json",
-          Authorization: `SharedAccessSignature ${getSToken()}`
-        }
-      };
-      this.eventSource = new EventSource(
-        `${this.baseURL}/v1/journey/streams/${this.personId}?${getSToken()}`,
-        header
-      );
+    const { getSToken } = this.getTokens();
+    const header: EventSourceInitDict = {
+      headers: {
+        "content-type": "application/json; charset=UTF-8",
+        accept: "application/json",
+        Authorization: `SharedAccessSignature ${getSToken()}`
+      }
+    };
+    this.eventSource = new EventSource(
+      `${this.baseURL}/v1/journey/streams/${this.personId}?${getSToken()}`,
+      header
+    );
 
     if (this.eventSource) {
       this.eventSource!.onmessage = (event: ServerSentEvent) => {

@@ -5,6 +5,17 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
+
+/**
+ * ATTENTION: Apps using this widget must provide the following values from the application configuration.
+ * These details allow easy and discreet generation of SAS tokens with correct permissions needed to access the API.
+ */
+//@ts-ignore
+const PRIVATE_KEY = process.env.DOTENV.PRIVATE_KEY;
+const ORGANIZATION = "demoassure";
+const NAMESPACE = "sandbox";
+const APP_NAME = "journeyUi";
+
 import "@momentum-ui/web-components";
 import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
@@ -12,17 +23,6 @@ import styles from "./sandbox.scss";
 import * as iconData from "@/assets/icons.json";
 import "..";
 
-/**
- * devus2
- */
- const tapeRead =
- "YOUR_TOKEN_HERE"
-const profileWrite =
- "YOUR_TOKEN_HERE"
-const stream =
- "YOUR_TOKEN_HERE"
-const baseURL =
- "https://cjaas-devus2.azurewebsites.net";
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
   @internalProperty() darkTheme = false;
@@ -102,15 +102,15 @@ export class Sandbox extends LitElement {
             <!-- ONLY TEST USING THE EDGE SERVER, NEVER PRODUCTION SERVER, IT WILL MESS UP THE WALKIN -->
             <!-- CHANGE TO PRODUCTION SERVER WHEN SHIPPING TO WXCC DESKTOP -->
             <customer-journey-widget
-              id="timeline-widget"
+              secret=${PRIVATE_KEY}
+              org=${ORGANIZATION}
+              namespace=${NAMESPACE}
+              app-name=${APP_NAME}
+              base-url="https://cjaas-devus2.azurewebsites.net"
+              limit="20"
               customer="30313-Carl"
               user-search
               .eventIconTemplate=${iconData}
-              profile-token=${profileWrite}
-              tape-token=${tapeRead}
-              stream-token=${stream}
-              base-url=${baseURL}
-              limit="20"
             ></customer-journey-widget>
           </div>
         </div>

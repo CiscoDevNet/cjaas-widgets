@@ -26,9 +26,32 @@ import "@cjaas/common-components/dist/comp/cjaas-timeline";
 import "@cjaas/common-components/dist/comp/cjaas-profile";
 import { Timeline } from "@cjaas/common-components/dist/types/components/timeline/Timeline";
 import ResizeObserver from "resize-observer-polyfill";
+import { generateSasToken, TokenArgs } from "./generatesastoken";
 
 @customElementWithCheck("customer-journey-widget")
 export default class CustomerJourneyWidget extends LitElement {
+  /**
+   * Your org secret key to generate SAS tokens from
+   * @attr secret
+   */
+  @property({ type: String }) secret: string | undefined = undefined;
+  /**
+  * Your project's ORG
+  * @attr org
+  */
+  @property({ type: String }) org: string | undefined = undefined;
+  /**
+  * Your project's Namespace
+  * @attr namespace
+  */
+  @property({ type: String }) namespace: string | undefined = undefined;
+  /**
+  * Your Project's App Name
+  * @attr app-name
+  */
+  @property({ type: String, attribute: "app-name" }) appname:
+    | string
+    | undefined = undefined;
   /**
    * Path to the proper Customer Journey API deployment
    * @attr base-url
@@ -41,27 +64,6 @@ export default class CustomerJourneyWidget extends LitElement {
    * @attr customer
    */
   @property({ type: String, reflect: true }) customer: string | null = null;
-  /**
-   * SAS Token that provides write permissions to Journey API (used for POST data template in Profile retrieval)
-   * @attr write-token
-   */
-  @property({ type: String, attribute: "profile-token" }) profileToken:
-    | string
-    | null = null;
-  /**
-   * SAS Token that provides read permissions for Historical Journey
-   * @attr tape-token
-   */
-  @property({ type: String, attribute: "tape-token" }) tapeToken:
-    | string
-    | null = null;
-  /**
-   * SAS Token that provides read permissions for Journey Stream
-   * @attr stream-token
-   */
-  @property({ type: String, attribute: "stream-token" }) streamToken:
-    | string
-    | null = null;
   /**
    * Toggles display of field to find new Journey profiles
    * @attr user-search
@@ -82,7 +84,8 @@ export default class CustomerJourneyWidget extends LitElement {
    * Property to set the data template to retrieve customer Profile in desired format
    * @attr template-id
    */
-   @property({ type: String, attribute: "template-id" }) templateId: string = "journey-default-template";
+  @property({ type: String, attribute: "template-id" }) templateId =
+    "journey-basic-template";
   /**
    * Property to pass in JSON template to set color and icon settings
    * @prop eventIconTemplate
@@ -93,7 +96,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * Data pulled from Journey Profile retrieval (will match shape of provided Template)
    * @prop profileData
    */
-   @internalProperty() profileData: Profile | undefined;
+  @internalProperty() profileData: Profile | undefined;
   /**
    * Timeline data fetched from journey history
    * @prop events
@@ -155,12 +158,60 @@ export default class CustomerJourneyWidget extends LitElement {
   @query("#customerInput") customerInput!: HTMLInputElement;
   @query(".profile") widget!: Element;
 
+  /**
+   * Private SAS Tokens generated and stored in component instance
+   */
+
+  private getTokens() {
+    const instance = this;
+    return {
+      getTToken: function() {
+        const tapeArgs: TokenArgs = {
+          secret: instance.secret!,
+          organization: instance.org!,
+          namespace: instance.namespace!,
+          service: "tape",
+          permissions: "r",
+          keyName: instance.appname!,
+          expiration: 1000
+        };
+        return generateSasToken(tapeArgs);
+      },
+
+      getSToken: function() {
+        const tapeArgs: TokenArgs = {
+          secret: instance.secret!,
+          organization: instance.org!,
+          namespace: instance.namespace!,
+          service: "stream",
+          permissions: "r",
+          keyName: instance.appname!,
+          expiration: 1000
+        };
+        return generateSasToken(tapeArgs);
+      },
+
+      getPToken: function() {
+        const tapeArgs: TokenArgs = {
+          secret: instance.secret!,
+          organization: instance.org!,
+          namespace: instance.namespace!,
+          service: "profile",
+          permissions: "rw",
+          keyName: instance.appname!,
+          expiration: 1000
+        };
+        return generateSasToken(tapeArgs);
+      }
+    };
+  }
+
   async lifecycleTasks() {
     this.events = await this.getExistingEvents();
     this.timelineLoading = false;
     await this.getProfile();
     this.subscribeToStream();
-    this.requestUpdate()
+    this.requestUpdate();
   }
 
   async connectedCallback() {
@@ -220,60 +271,61 @@ export default class CustomerJourneyWidget extends LitElement {
     if (this.templateId) {
       this.getProfileFromTemplateId();
     } else {
+      // TODO: What is the new fallback for undefined template IDs?
+      // SHOULD the new defaults be set on server and retrievable??
+      this.baseUrlCheck();
+      const url = `${this.baseURL}/v1/journey/views&personId=${this.customer}`;
 
-    // TODO: What is the new fallback for undefined template IDs?
-    // SHOULD the new defaults be set on server and retrievable??
-    this.baseUrlCheck();
-    const url = `${this.baseURL}/v1/journey/views&personId=${this.customer}`;
-
-    const template = Object.assign({}, this.defaultTemplate);
-    template.attributes = template.attributes.map((x: any) => {
-      if (x.type === "tab" || x?.widgetAttributes?.type === "tab") {
-        x.Verbose = true;
-      }
-      return x;
-    });
-
-    const data = JSON.stringify(template);
-    const options: AxiosRequestConfig = {
-      url,
-      method: "GET",
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.profileToken
-      }
-    };
-    return axios(url, options)
-      .then((x: AxiosResponse) => x.data)
-      .then((_profile: ProfileFromSyncAPI) => {
-        debugger;
-        this.profileData = this.parseResponse(this.defaultTemplate.attributes)
-        this.requestUpdate();
-      })
-      .catch((err: Error) => {
-        console.error("Could not load the Profile Data. ", err);
-        this.profileData = undefined;
-        this.requestUpdate();
+      const template = Object.assign({}, this.defaultTemplate);
+      template.attributes = template.attributes.map((x: any) => {
+        if (x.type === "tab" || x?.widgetAttributes?.type === "tab") {
+          x.Verbose = true;
+        }
+        return x;
       });
+
+      const data = JSON.stringify(template);
+      const { getPToken } = this.getTokens();
+      const options: AxiosRequestConfig = {
+        url,
+        method: "GET",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `SharedAccessSignature ${getPToken()}`
+        }
+      };
+      return axios(url, options)
+        .then((x: AxiosResponse) => x.data)
+        .then((_profile: ProfileFromSyncAPI) => {
+          this.profileData = this.parseResponse(
+            this.defaultTemplate.attributes
+          );
+          this.requestUpdate();
+        })
+        .catch((err: Error) => {
+          console.error("Could not load the Profile Data. ", err);
+          this.profileData = undefined;
+          this.requestUpdate();
+        });
     }
   }
 
   getProfileFromTemplateId() {
     const url = `${this.baseURL}/v1/journey/views:build?templateId=${this.templateId}&personId=${this.customer}`;
-
+    const { getPToken } = this.getTokens();
     const options: AxiosRequestConfig = {
       url,
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.profileToken,
+        Authorization: `SharedAccessSignature ${getPToken()}`,
         "X-CACHE-MAXAGE-HOUR": 5
       }
     };
 
     axios(options)
       .then(x => x.data)
-      .then((response) => {
+      .then(response => {
         this.setOffProfileLongPolling(response.data.getUriStatusQuery);
       })
       .catch(err => {
@@ -284,59 +336,61 @@ export default class CustomerJourneyWidget extends LitElement {
   setOffProfileLongPolling(url: string) {
     if (this.pollingActive) return;
     this.pollingActive = true;
+    const { getPToken } = this.getTokens();
     const intervalId = setInterval(() => {
-      console.log("Fetching Profile")
+      console.log("Fetching Profile");
       axios({
         url,
         method: "GET",
         headers: {
           "Content-type": "application/json",
-          Authorization: "SharedAccessSignature " + this.profileToken
+          Authorization: `SharedAccessSignature ${getPToken()}`
         }
       })
-      .then(x => x.data)
-      .then((response: any) => {
-        if (response.data.runtimeStatus === "Completed") {
-          clearInterval(intervalId);
-          this.pollingActive = false;
-          this.profileData = this.parseResponse(response.data.output.attributeView)
-        }
-      });
+        .then(x => x.data)
+        .then((response: any) => {
+          if (response.data.runtimeStatus === "Completed") {
+            clearInterval(intervalId);
+            this.pollingActive = false;
+            this.profileData = this.parseResponse(
+              response.data.output.attributeView
+            );
+          }
+        });
     }, 1500);
   }
 
   parseResponse(attributes: any) {
-    return attributes.map(
-      (attribute: any) => {
-        const query = {
-          ...attribute.queryTemplate,
-          widgetAttributes: {
-            type: attribute.queryTemplate?.widgetAttributes.type,
+    return attributes.map((attribute: any) => {
+      const query = {
+        ...attribute.queryTemplate,
+        widgetAttributes: {
+          type: attribute.queryTemplate?.widgetAttributes.type,
           tag: attribute.queryTemplate?.widgetAttributes.tag
-          },
-        };
-        this.profileLoading = false;
-        return {
-          query: query,
-          journeyEvents: attribute.journeyEvents?.map(
-            (value: string) => value && JSON.parse(value)
-            ),
-            result: [attribute.result]
-          };
         }
-      );
-    }
+      };
+      this.profileLoading = false;
+      return {
+        query: query,
+        journeyEvents: attribute.journeyEvents?.map(
+          (value: string) => value && JSON.parse(value)
+        ),
+        result: [attribute.result]
+      };
+    });
+  }
 
   async getExistingEvents() {
     this.timelineLoading = true;
     this.baseUrlCheck();
+    const { getTToken } = this.getTokens();
     return fetch(
       `${this.baseURL}/v1/journey/streams/historic/${this.customer}`,
       {
         headers: {
           "content-type": "application/json; charset=UTF-8",
           accept: "application/json",
-          Authorization: `SharedAccessSignature ${this.tapeToken}`
+          Authorization: `SharedAccessSignature ${getTToken()}`
         },
         method: "GET"
       }
@@ -351,7 +405,7 @@ export default class CustomerJourneyWidget extends LitElement {
         console.error("Could not fetch Customer Journey events. ", err);
         this.errorMessage = `Failure to fetch Journey for ${this.customer}. ${err}`;
       });
-    }
+  }
 
   subscribeToStream() {
     if (this.eventSource) {
@@ -359,12 +413,13 @@ export default class CustomerJourneyWidget extends LitElement {
     }
 
     this.baseUrlCheck();
+    const { getSToken } = this.getTokens();
     if (this.streamToken) {
       const header: EventSourceInitDict = {
         headers: {
           "content-type": "application/json; charset=UTF-8",
           accept: "application/json",
-          Authorization: `SharedAccessSignature ${this.streamToken}`
+          Authorization: `SharedAccessSignature ${getSToken()}`
         }
       };
       this.eventSource = new EventSource(
@@ -446,18 +501,24 @@ export default class CustomerJourneyWidget extends LitElement {
           message="Click to search new journey"
           ?disabled=${!this.userSearch}
         >
-          <input class="header" value=${this.customer || "Customer Journey"}
-          @keydown=${(e: KeyboardEvent) => this.handleKey(e)}
-          @blur=${(e:FocusEvent)=> {this.customer = e.composedPath()[0].value}} />
+          <input
+            class="header"
+            value=${this.customer || "Customer Journey"}
+            @keydown=${(e: KeyboardEvent) => this.handleKey(e)}
+            @blur=${(e: FocusEvent) => {
+              this.customer = e.composedPath()[0].value;
+            }}
+          />
         </md-tooltip>
         <details class="grid-profile" ?open=${this.profileData !== undefined}>
           <summary
             >Profile<md-icon name="icon-arrow-down_12"></md-icon>
           </summary>
-          ${this.profileLoading ?
-            this.renderLoader() :
-            html`<cjaas-profile .profileData=${this.profileData}></cjaas-profile>`
-            }
+          ${this.profileLoading
+            ? this.renderLoader()
+            : html`
+                <cjaas-profile .profileData=${this.profileData}></cjaas-profile>
+              `}
         </details>
         <details class="grid-timeline" open>
           <summary
@@ -465,7 +526,9 @@ export default class CustomerJourneyWidget extends LitElement {
             <md-icon name="icon-arrow-down_12"></md-icon>
           </summary>
           <div class="container">
-            ${this.timelineLoading ? this.renderLoader() : this.renderEventList()}
+            ${this.timelineLoading
+              ? this.renderLoader()
+              : this.renderEventList()}
           </div>
         </details>
       </div>
