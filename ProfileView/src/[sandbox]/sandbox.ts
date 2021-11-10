@@ -5,20 +5,23 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
+
+/**
+ * ATTENTION: Apps using this widget must provide the following values from the application configuration.
+ * These details allow easy and discreet generation of SAS tokens with correct permissions needed to access the API.
+ */
+//@ts-ignore
+const PRIVATE_KEY = process.env.DOTENV.PRIVATE_KEY;
+const ORGANIZATION = "demoassure";
+const NAMESPACE = "sandbox";
+const APP_NAME = "journeyUi";
+
 import "@momentum-ui/web-components";
 import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
 import "..";
 import styles from "./sandbox.scss";
-import { sampleTemplate } from "./sandbox.mock";
 
-/**
- * devus2
- */
- const tapeRead = "SET SAS TOKEN HERE"
-const profileWrite = "SET SAS TOKEN HERE"
-const stream = "SET SAS TOKEN HERE"
-const baseURL = "https://cjaas-devus2.azurewebsites.net";
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
   @internalProperty() darkTheme = false;
@@ -95,33 +98,16 @@ export class Sandbox extends LitElement {
             style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
             class="widget-container"
           >
-            <!-- ONLY TEST USING THE EDGE SERVER, NEVER PRODUCTION SERVER, IT WILL MESS UP THE WALKING -->
             <cjaas-profile-view-widget
-              id="view"
+              secret=${PRIVATE_KEY}
+              org=${ORGANIZATION}
+              namespace=${NAMESPACE}
+              app-name=${APP_NAME}
               template-id="second-template"
               customer="30313-Carl"
-              profile-token=${profileWrite}
-              tape-read-token=${tapeRead}
-              stream-read-token=${stream}
-              base-url=${baseURL}
+              base-url="https://cjaas-devus2.azurewebsites.net"
             ></cjaas-profile-view-widget>
           </div>
-          <!-- <div
-            style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
-            class="widget-container"
-          >
-            <cjaas-profile-view-widget
-              id="view"
-              customer="560021-Venki"
-              .template=${sampleTemplate}
-              timelineType="journey-and-stream"
-              base-url="https://cjaas-devus1-edge.azurewebsites.net"
-            >
-              <h3 slot="l10n-header-text">Texto de encabezado personalizado</h3>
-              <h4 slot="l10n-no-data-message">No hay datos para mostrar</h4>
-              <h4 slot="l10n-no-profile-message">No hay perfil disponible</h4>
-            </cjaas-profile-view-widget>
-          </div> -->
         </div>
       </md-theme>
     `;

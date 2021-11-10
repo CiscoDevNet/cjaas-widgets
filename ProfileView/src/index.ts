@@ -33,6 +33,7 @@ import "@cjaas/common-components/dist/comp/cjaas-timeline";
 import "@cjaas/common-components/dist/comp/cjaas-profile";
 import { EventSourceInitDict } from "eventsource";
 import { ServerSentEvent } from "./types/cjaas";
+import { generateSasToken, TokenArgs } from "./generatesastoken";
 export interface CustomerEvent {
   data: Record<string, any>;
   firstName: string;
@@ -49,6 +50,28 @@ export interface CustomerEvent {
 @customElementWithCheck("cjaas-profile-view-widget")
 export default class CjaasProfileWidget extends LitElement {
   /**
+   * Your org secret key to generate SAS tokens from
+   * @attr secret
+   */
+  @property({ type: String }) secret: string | undefined = undefined;
+  /**
+  * Your project's ORG
+  * @attr org
+  */
+  @property({ type: String }) org: string | undefined = undefined;
+  /**
+  * Your project's Namespace
+  * @attr namespace
+  */
+  @property({ type: String }) namespace: string | undefined = undefined;
+  /**
+  * Your Project's App Name
+  * @attr app-name
+  */
+  @property({ type: String, attribute: "app-name" }) appname:
+    | string
+    | undefined = undefined;
+  /**
    * Current customer ID to show
    * @attr customer
    */
@@ -60,38 +83,6 @@ export default class CjaasProfileWidget extends LitElement {
   @property({ type: String, attribute: "template-id" }) templateId:
     | string
     | undefined;
-  /**
-   * SAS Token for reading stream API
-   * @attr stream-read-token
-   */
-    @property({ type: String, attribute: "stream-read-token" }) streamReadToken:
-    | string
-    | null = null;
-  /**
-   * SAS Token for reading tape API
-   * @attr tape-read-token
-   */
-    @property({ type: String, attribute: "tape-read-token" }) tapeReadToken:
-    | string
-    | null = null;
-  /**
-   * SAS Token for POST operations on Profile endpoint
-   * @attr profile-write-token
-   */
-    @property({ type: String, attribute: "profile-token" })
-  profileToken: string | null = null;
-  /**
-   * SAS Token for POST operations on Profile endpoint (SHOULD DEPRECATE)
-   * @attr profile-write-token
-   */
-    @property({ type: String, attribute: "profile-write-token" })
-  profileWriteToken: string | null = null;
-  /**
-   * SAS Token for reading profile API (SHOULD DEPRECATE)
-   * @attr profile-read-token
-   */
-  @property({ type: String, attribute: "profile-read-token" })
-  profileReadToken: string | null = null;
   /**
    * Base URL for API calls
    * @attr base-url
@@ -155,6 +146,55 @@ export default class CjaasProfileWidget extends LitElement {
    */
   @internalProperty() defaultTemplate = defaultTemplate;
 
+    /**
+   * Private SAS Tokens generated and stored in component instance
+   */
+
+     private getTokens() {
+      const instance = this;
+      return {
+        getTToken: function() {
+          const tapeArgs: TokenArgs = {
+            secret: instance.secret!,
+            organization: instance.org!,
+            namespace: instance.namespace!,
+            service: "tape",
+            permissions: "r",
+            keyName: instance.appname!,
+            expiration: 1000
+          };
+          return generateSasToken(tapeArgs);
+        },
+
+        getPToken: function() {
+          const tapeArgs: TokenArgs = {
+            secret: instance.secret!,
+            organization: instance.org!,
+            namespace: instance.namespace!,
+            service: "profile",
+            permissions: "rw",
+            keyName: instance.appname!,
+            expiration: 1000
+          };
+          return generateSasToken(tapeArgs);
+        },
+
+        getSToken: function() {
+          const tapeArgs: TokenArgs = {
+            secret: instance.secret!,
+            organization: instance.org!,
+            namespace: instance.namespace!,
+            service: "stream",
+            permissions: "r",
+            keyName: instance.appname!,
+            expiration: 1000
+          };
+          return generateSasToken(tapeArgs);
+        }
+      };
+    }
+
+
   async lifecycleTasks() {
     this.events = await this.getExistingEvents();
     this.timelineLoading = false;
@@ -198,6 +238,7 @@ export default class CjaasProfileWidget extends LitElement {
     // TODO: What is the new fallback for undefined template IDs?
     // SHOULD the new defaults be set on server and retrievable??
     this.baseUrlCheck();
+    const { getPToken } = this.getTokens();
     const url = `${this.baseURL}/v1/journey/views/templates=${this.customer}`;
 
     const template = Object.assign({}, this.defaultTemplate);
@@ -214,7 +255,7 @@ export default class CjaasProfileWidget extends LitElement {
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.profileToken
+        Authorization: `SharedAccessSignature ${getPToken()}`
       },
       data
     };
@@ -234,13 +275,13 @@ export default class CjaasProfileWidget extends LitElement {
 
   getProfileFromTemplateId() {
     const url = `${this.baseURL}/v1/journey/views:build?templateId=${this.templateId}&personId=${this.customer}`;
-
+    const { getPToken } = this.getTokens();
     const options: AxiosRequestConfig = {
       url,
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.profileToken,
+        Authorization: `SharedAccessSignature ${getPToken()}`,
         "X-CACHE-MAXAGE-HOUR": 5
       }
     };
@@ -258,6 +299,7 @@ export default class CjaasProfileWidget extends LitElement {
   setOffProfileLongPolling(url: string) {
     if (this.pollingActive) return;
     this.pollingActive = true;
+    const { getPToken } = this.getTokens();
     const intervalId = setInterval(() => {
       console.log("Fetching Profile")
       axios({
@@ -265,7 +307,7 @@ export default class CjaasProfileWidget extends LitElement {
         method: "GET",
         headers: {
           "Content-type": "application/json",
-          Authorization: "SharedAccessSignature " + this.profileToken
+          Authorization: `SharedAccessSignature ${getPToken()}`
         }
       })
       .then(x => x.data)
@@ -321,13 +363,14 @@ export default class CjaasProfileWidget extends LitElement {
   async getExistingEvents() {
     this.timelineLoading = true;
     this.baseUrlCheck();
+    const { getTToken } = this.getTokens();
     return fetch(
       `${this.baseURL}/v1/journey/streams/historic/${this.customer}`,
       {
         headers: {
           "content-type": "application/json; charset=UTF-8",
           accept: "application/json",
-          Authorization: `SharedAccessSignature ${this.tapeReadToken}`
+          Authorization: `SharedAccessSignature ${getTToken()}`
         },
         method: "GET"
       }
@@ -349,21 +392,19 @@ export default class CjaasProfileWidget extends LitElement {
     if (this.eventSource) {
       this.eventSource.close();
     }
-
+    const { getSToken } = this.getTokens();
     this.baseUrlCheck();
-    if (this.streamReadToken) {
       const header: EventSourceInitDict = {
         headers: {
           "content-type": "application/json; charset=UTF-8",
           accept: "application/json",
-          Authorization: `SharedAccessSignature ${this.streamReadToken}`
+          Authorization: `SharedAccessSignature ${getSToken()}`
         }
       };
       this.eventSource = new EventSource(
-        `${this.baseURL}/v1/journey/streams/${this.customer}?${this.streamReadToken}`,
+        `${this.baseURL}/v1/journey/streams/${this.customer}?${getSToken()}`,
         header
       );
-    }
 
     if (this.eventSource) {
       this.eventSource!.onmessage = (event: ServerSentEvent) => {
@@ -461,7 +502,7 @@ export default class CjaasProfileWidget extends LitElement {
         x.query.type === "tab" || x.query?.widgetAttributes?.type === "tab"
     );
     // TODO: Track the selected tab to apply a class to the badge for color synching, making blue when selected
-    const activityTab = this.profileToken
+    const activityTab = this.profileData
       ? html`
           <md-tab slot="tab">
             <span>All</span>

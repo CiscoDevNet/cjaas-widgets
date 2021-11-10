@@ -85,7 +85,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * @attr template-id
    */
   @property({ type: String, attribute: "template-id" }) templateId =
-    "journey-basic-template";
+    "journey-default-template";
   /**
    * Property to pass in JSON template to set color and icon settings
    * @prop eventIconTemplate
@@ -414,7 +414,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
     this.baseUrlCheck();
     const { getSToken } = this.getTokens();
-    if (this.streamToken) {
+    if (this.liveStream) {
       const header: EventSourceInitDict = {
         headers: {
           "content-type": "application/json; charset=UTF-8",
@@ -423,7 +423,7 @@ export default class CustomerJourneyWidget extends LitElement {
         }
       };
       this.eventSource = new EventSource(
-        `${this.baseURL}/v1/journey/streams/${this.customer}?${this.streamToken}`,
+        `${this.baseURL}/v1/journey/streams/${this.customer}?${getSToken()}`,
         header
       );
     }
