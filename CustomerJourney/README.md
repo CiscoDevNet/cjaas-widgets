@@ -1,39 +1,51 @@
 # CJaaS Customer Journey Widget
 
-This widget uses the CJaaS API to display an individual customer's journey as a history of events. It first retrieves the complete event history from the tape endpoint and compiles toggles for all event types, and then subscribes to a live stream of new events so they appear in real time.
+This widget uses the CJaaS API to display an individual customer's journey as a history of events. It first retrieves the complete event history from the tape endpoint and compiles toggles for all event types, and then subscribes to a live stream of new events so they appear in real time. This code can be used as is, or be starter code for your own Custom Widget.
 
 ## Customer Journey Widget Properties
 
 The CJaaS Profile Widget accepts specific properties to interact with the CJaaS API
 
-- `customer: string` - an identifier of the customer, i.e. "560000-John"
-- `tape-token: string` - SAS token for CJaaS tape GET operations
-- `stream-token: string` - SAS token for stream endpoint subscription
-- `base-url: string` - Base URL for all typical CJaaS endpoints
-- `base-stream-url: string` - Temp stream URL differs from Base URL
+`@attr secret` : Your org secret key to generate SAS tokens from
+`@attr org` : Your project's ORG
+`@attr namespace` : Your project's Namespace
+`@attr app-name` : Your Project's App Name
+`@attr base-url` : Path to the proper Customer Journey API deployment
+`@attr customer` : Customer ID used for Journey lookup
+`@attr user-search` : Toggles display of field to find new Journey profiles
+`@attr limit` : Set the number of Timeline Events to display
+`@attr template-id` : Property to set the data template to retrieve customer Profile in desired format
+`@prop eventIconTemplate` : Property to pass in JSON template to set color and icon settings
+
 
 ```html
- <customer-journey-widget
-      customer="98126-Kevin"
-      tape-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=etc"
-      stream-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-06-21T18:15:15.804Z&sk=sandbox&sig=etc"
-      base-url="https://uswest-nonprod.cjaas.cisco.com"
-      base-stream-url="https://cjaas-devus1.azurewebsites.net"
+<customer-journey-widget
+   secret=${PRIVATE_KEY}
+   org=${ORGANIZATION}
+   namespace=${NAMESPACE}
+   app-name=${APP_NAME}
+   base-url="https://cjaas-devus2.azurewebsites.net"
+   limit="20"
+   customer="30313-Carl"
+   user-search
+   .eventIconTemplate=${iconData}
 ></customer-journey-widget>
 ```
 
-## Getting started
+## Dev Environment: Getting Started
+- Create a `.env` file that contains `PRIVATE_KEY="key from your admin portal when app created"`
+- in `sandbox.ts`, pass the correct ORGANIZATION, NAMESPACE, and APP_NAME values from your admin portal
+- run `yarn install`
+- run `yarn start`
+- navigate browser to `localhost:8888`
 
-**NOTE:** _Use Node version 12_
-
-To run your widget on `localhost`, please navigate to widget's root directory in Terminal (Command line tool) and run the following commands (Assuming you have [`yarn`](https://classic.yarnpkg.com/en/docs/install/#mac-stable) installed globally on your machine):
-
-1. Clone this repo.
-2. Navigate to the widget folder.
-3. Run `yarn install`
-4. Run `yarn start` to start the sandbox app.
+## Using in Deployment
+- Create a `.env` file that contains `PRIVATE_KEY="key from your admin portal when app created"`
+- Where used in your app, pass the correct ORGANIZATION, NAMESPACE, and APP_NAME values from your admin portal
 
 ## Build and Deploy Modules
+If you are using this widget as a starter for your own custom needs, follow these steps to publish it for your use.
+
 Once your widget is complete, it must be exported as a JS module that can be delivered via CDN. The build is configured to export a Web Component that can be used in your project.
 - run `yarn dist` to create a compiled, minified JS module
 - rename and upload the bundled module to your hosting service
