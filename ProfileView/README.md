@@ -6,10 +6,9 @@ This widget uses CJaaS Common Components to output a combined customer profile v
 
 The CJaaS Profile Widget accepts specific properties to interact with the CJaaS API
 
-`@prop secret` : Your org secret key to generate SAS tokens from
-`@attr org` : Your project's ORG
-`@attr namespace` : Your project's Namespace
-`@attr app-name` : Your Project's App Name
+`@attr stream-read-token`: SAS Token for reading stream API
+`@attr tape-read-token`: SAS Token for reading tape API
+`@attr profile-token`: SAS Token for POST operations on Profile endpoint
 `@attr customer` : Current customer ID to show
 `@attr template-id` : ID of profile view template to retrieve from API
 `@attr base-url` : Base URL for API calls
@@ -17,13 +16,12 @@ The CJaaS Profile Widget accepts specific properties to interact with the CJaaS 
 
 ```html
 <cjaas-profile-view-widget
-  .secret=${PRIVATE_KEY}
-  org=${ORGANIZATION}
-  namespace=${NAMESPACE}
-  app-name=${APP_NAME}
   template-id="second-template"
   customer="30313-Carl"
   base-url="https://cjaas-devus2.azurewebsites.net"
+  profile-token=${your-token}
+  tape-read-token=${your-token}
+  stream-read-token=${your-token}
 ></cjaas-profile-view-widget>
 ```
 

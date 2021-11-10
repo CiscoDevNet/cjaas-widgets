@@ -76,7 +76,7 @@ export default class CjaasProfileWidget extends LitElement {
     | null = null;
   /**
    * SAS Token for POST operations on Profile endpoint
-   * @attr profile-write-token
+   * @attr profile-token
    */
     @property({ type: String, attribute: "profile-token" })
   profileToken: string | null = null;
