@@ -20,7 +20,6 @@ import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
 import { EventSourceInitDict } from "eventsource";
 import { ServerSentEvent } from "./types/cjaas";
-import { generateSasToken, TokenArgs } from "./generatesastoken";
 
 export interface CustomerEvent {
   data: Record<string, any>;
@@ -39,33 +38,24 @@ export interface CustomerEvent {
 @customElementWithCheck("cjaas-timeline-widget")
 export default class CjaasTimelineWidget extends LitElement {
   /**
-   * Your org secret key to generate SAS tokens from
-   * @prop secret
-   */
-  @property({ type: String, attribute: false }) secret: string | undefined = undefined;
-  /**
-   * Your project's ORG
-   * @attr org
-   */
-  @property({ type: String }) org: string | undefined = undefined;
-  /**
-   * Your project's Namespace
-   * @attr namespace
-   */
-  @property({ type: String }) namespace: string | undefined = undefined;
-  /**
-   * Your Project's App Name
-   * @attr app-name
-   */
-  @property({ type: String, attribute: "app-name" }) appname:
-    | string
-    | undefined = undefined;
-  /**
+   * Set primary API base url
    * @attr base-url
    */
   @property({ type: String, attribute: "base-url" }) baseURL:
     | string
     | undefined = undefined;
+  /**
+   * @attr tape-read-token
+   */
+    @property({ type: String, attribute: "tape-read-token" }) tapeReadToken:
+    | string
+    | undefined;
+  /**
+   * @attr stream-read-token
+   */
+    @property({ type: String, attribute: "stream-read-token" }) streamToken:
+    | string
+    | undefined;
   /**
    * Set number of events shown by default
    * @attr limit
@@ -75,7 +65,7 @@ export default class CjaasTimelineWidget extends LitElement {
    * Toggle whether new live events appear in the timeline or not
    * @attr live-stream
    */
-  @property({ type: Boolean, attribute: "live-stream" }) liveStream = false;
+  @property({type: Boolean, attribute: "live-stream"}) liveStream = false;
   /**
    * Toggle visibility of the timeline filters
    * @attr show-filters
@@ -109,41 +99,6 @@ export default class CjaasTimelineWidget extends LitElement {
    */
   @internalProperty() newestEvents: Array<CustomerEvent> = [];
 
-  /**
-   * Private SAS Tokens generated and stored in component instance
-   */
-
-  private getTokens() {
-    const instance = this;
-    return {
-      getTToken: function() {
-        const tapeArgs: TokenArgs = {
-          secret: instance.secret!,
-          organization: instance.org!,
-          namespace: instance.namespace!,
-          service: "tape",
-          permissions: "r",
-          keyName: instance.appname!,
-          expiration: 1000
-        };
-        return generateSasToken(tapeArgs);
-      },
-
-      getSToken: function() {
-        const tapeArgs: TokenArgs = {
-          secret: instance.secret!,
-          organization: instance.org!,
-          namespace: instance.namespace!,
-          service: "stream",
-          permissions: "r",
-          keyName: instance.appname!,
-          expiration: 1000
-        };
-        return generateSasToken(tapeArgs);
-      }
-    };
-  }
-
   async lifecycleTasks() {
     const data = await this.getExistingEvents();
     this.events = data.events;
@@ -155,6 +110,18 @@ export default class CjaasTimelineWidget extends LitElement {
   async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     await this.lifecycleTasks();
+  }
+
+  updated(changedProperties: PropertyValues) {
+    super.updated(changedProperties);
+
+    if (
+      this.tapeReadToken &&
+      (changedProperties.has("tapeReadToken") ||
+        changedProperties.has("personId"))
+    ) {
+      this.lifecycleTasks();
+    }
   }
 
   baseUrlCheck() {
@@ -172,14 +139,13 @@ export default class CjaasTimelineWidget extends LitElement {
   async getExistingEvents() {
     this.showSpinner = true;
     this.baseUrlCheck();
-    const { getTToken } = this.getTokens();
     return fetch(
       `${this.baseURL}/v1/journey/streams/historic/${this.personId}`,
       {
         headers: {
           "content-type": "application/json; charset=UTF-8",
           accept: "application/json",
-          Authorization: `SharedAccessSignature ${getTToken()}`
+          Authorization: `SharedAccessSignature ${this.tapeReadToken}`
         },
         method: "GET"
       }
@@ -203,18 +169,19 @@ export default class CjaasTimelineWidget extends LitElement {
     }
 
     this.baseUrlCheck();
-    const { getSToken } = this.getTokens();
-    const header: EventSourceInitDict = {
-      headers: {
-        "content-type": "application/json; charset=UTF-8",
-        accept: "application/json",
-        Authorization: `SharedAccessSignature ${getSToken()}`
-      }
-    };
-    this.eventSource = new EventSource(
-      `${this.baseURL}/v1/journey/streams/${this.personId}?${getSToken()}`,
-      header
-    );
+    if (this.streamToken) {
+      const header: EventSourceInitDict = {
+        headers: {
+          "content-type": "application/json; charset=UTF-8",
+          accept: "application/json",
+          Authorization: `SharedAccessSignature ${this.streamToken}`
+        }
+      };
+      this.eventSource = new EventSource(
+        `${this.baseURL}/v1/journey/streams/${this.personId}?${this.streamToken}`,
+        header
+      );
+    }
 
     if (this.eventSource) {
       this.eventSource!.onmessage = (event: ServerSentEvent) => {

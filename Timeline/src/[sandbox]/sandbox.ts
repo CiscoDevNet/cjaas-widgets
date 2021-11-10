@@ -6,6 +6,14 @@
  *
  */
 
+
+import "@momentum-ui/web-components";
+import "@cjaas/common-components";
+import { customElement, html, internalProperty, LitElement } from "lit-element";
+import styles from "./sandbox.scss";
+import "..";
+import { generateSasToken, TokenArgs } from "../generatesastoken";
+
 /**
  * ATTENTION: Apps using this widget must provide the following values from the application configuration.
  * These details allow easy and discreet generation of SAS tokens with correct permissions needed to access the API.
@@ -16,11 +24,39 @@ const ORGANIZATION = "demoassure";
 const NAMESPACE = "sandbox";
 const APP_NAME = "journeyUi";
 
-import "@momentum-ui/web-components";
-import "@cjaas/common-components";
-import { customElement, html, internalProperty, LitElement } from "lit-element";
-import styles from "./sandbox.scss";
-import "..";
+/**
+ * Private SAS Tokens generated and stored in component instance
+ */
+
+ function getTokens() {
+  return {
+    getTToken: function() {
+      const tapeArgs: TokenArgs = {
+        secret: PRIVATE_KEY!,
+        organization: ORGANIZATION!,
+        namespace: NAMESPACE!,
+        service: "tape",
+        permissions: "r",
+        keyName: APP_NAME!,
+        expiration: 1000
+      };
+      return generateSasToken(tapeArgs);
+    },
+
+    getSToken: function() {
+      const tapeArgs: TokenArgs = {
+        secret: PRIVATE_KEY!,
+        organization: ORGANIZATION!,
+        namespace: NAMESPACE!,
+        service: "stream",
+        permissions: "r",
+        keyName: APP_NAME!,
+        expiration: 1000
+      };
+      return generateSasToken(tapeArgs);
+    }
+  };
+}
 
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
@@ -87,6 +123,7 @@ export class Sandbox extends LitElement {
   }
 
   render() {
+    const {getTToken, getSToken} = getTokens();
     return html`
       <div class="toggle">
         ${this.themeToggle()}
@@ -99,14 +136,12 @@ export class Sandbox extends LitElement {
             class="widget-container"
           >
             <cjaas-timeline-widget
-              .secret=${PRIVATE_KEY}
-              org=${ORGANIZATION}
-              namespace=${NAMESPACE}
-              app-name=${APP_NAME}
               limit="15"
               person-id="30313-Carl"
               show-filters
               base-url="https://cjaas-devus2.azurewebsites.net"
+              .stream-read-token=${getSToken()}
+              .tape-read-token=${getTToken()}
             >
             </cjaas-timeline-widget>
           </div>
