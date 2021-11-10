@@ -6,7 +6,7 @@ This widget uses CJaaS Common Components to output a combined customer Timeline 
 
 The CJaaS Timeline Widget accepts specific properties to interact with the CJaaS API
 
-`@attr secret` : Your org secret key to generate SAS tokens from
+`@prop secret` : Your org secret key to generate SAS tokens from
 `@attr org` : Your project's ORG
 `@attr namespace` : Your project's Namespace
 `@attr app-name` : Your Project's App Name
@@ -19,7 +19,7 @@ The CJaaS Timeline Widget accepts specific properties to interact with the CJaaS
 Example:
 ```html
  <cjaas-timeline-widget
-    secret=${PRIVATE_KEY}
+    .secret=${PRIVATE_KEY}
     org=${ORGANIZATION}
     namespace=${NAMESPACE}
     app-name=${APP_NAME}

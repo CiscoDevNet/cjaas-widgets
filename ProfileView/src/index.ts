@@ -51,9 +51,9 @@ export interface CustomerEvent {
 export default class CjaasProfileWidget extends LitElement {
   /**
    * Your org secret key to generate SAS tokens from
-   * @attr secret
+   * @prop secret
    */
-  @property({ type: String }) secret: string | undefined = undefined;
+  @property({ type: String, attribute: false }) secret: string | undefined = undefined;
   /**
   * Your project's ORG
   * @attr org

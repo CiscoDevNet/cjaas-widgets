@@ -99,7 +99,7 @@ export class Sandbox extends LitElement {
             class="widget-container"
           >
             <cjaas-timeline-widget
-              secret=${PRIVATE_KEY}
+              .secret=${PRIVATE_KEY}
               org=${ORGANIZATION}
               namespace=${NAMESPACE}
               app-name=${APP_NAME}

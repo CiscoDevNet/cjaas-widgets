@@ -102,7 +102,7 @@ export class Sandbox extends LitElement {
             <!-- ONLY TEST USING THE EDGE SERVER, NEVER PRODUCTION SERVER, IT WILL MESS UP THE WALKIN -->
             <!-- CHANGE TO PRODUCTION SERVER WHEN SHIPPING TO WXCC DESKTOP -->
             <customer-journey-widget
-              secret=${PRIVATE_KEY}
+              .secret=${PRIVATE_KEY}
               org=${ORGANIZATION}
               namespace=${NAMESPACE}
               app-name=${APP_NAME}

@@ -6,7 +6,7 @@ This widget uses CJaaS Common Components to output a combined customer profile v
 
 The CJaaS Profile Widget accepts specific properties to interact with the CJaaS API
 
-`@attr secret` : Your org secret key to generate SAS tokens from
+`@prop secret` : Your org secret key to generate SAS tokens from
 `@attr org` : Your project's ORG
 `@attr namespace` : Your project's Namespace
 `@attr app-name` : Your Project's App Name
@@ -17,7 +17,7 @@ The CJaaS Profile Widget accepts specific properties to interact with the CJaaS 
 
 ```html
 <cjaas-profile-view-widget
-  secret=${PRIVATE_KEY}
+  .secret=${PRIVATE_KEY}
   org=${ORGANIZATION}
   namespace=${NAMESPACE}
   app-name=${APP_NAME}
