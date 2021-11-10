@@ -22,6 +22,55 @@ import { customElement, html, internalProperty, LitElement } from "lit-element";
 import styles from "./sandbox.scss";
 import * as iconData from "@/assets/icons.json";
 import "..";
+import { generateSasToken, TokenArgs } from "../generatesastoken";
+
+/**
+ * Private SAS Tokens generated and stored in component instance
+ */
+
+ function getTokens() {
+  return {
+    getTToken: function() {
+      const tapeArgs: TokenArgs = {
+        secret: PRIVATE_KEY!,
+        organization: ORGANIZATION!,
+        namespace: NAMESPACE!,
+        service: "tape",
+        permissions: "r",
+        keyName: APP_NAME!,
+        expiration: 1000
+      };
+      return generateSasToken(tapeArgs);
+    },
+
+    getSToken: function() {
+      const tapeArgs: TokenArgs = {
+        secret: PRIVATE_KEY!,
+        organization: ORGANIZATION!,
+        namespace: NAMESPACE!,
+        service: "stream",
+        permissions: "r",
+        keyName: APP_NAME!,
+        expiration: 1000
+      };
+      return generateSasToken(tapeArgs);
+    },
+
+    getPToken: function() {
+      const tapeArgs: TokenArgs = {
+        secret: PRIVATE_KEY!,
+        organization: ORGANIZATION!,
+        namespace: NAMESPACE!,
+        service: "profile",
+        permissions: "rw",
+        keyName: APP_NAME!,
+        expiration: 1000
+      };
+      return generateSasToken(tapeArgs);
+    }
+  };
+}
+
 
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
@@ -88,6 +137,7 @@ export class Sandbox extends LitElement {
   }
 
   render() {
+    const {getTToken, getSToken, getPToken} = getTokens();
     return html`
       <div class="toggle">
         ${this.themeToggle()}
@@ -102,15 +152,14 @@ export class Sandbox extends LitElement {
             <!-- ONLY TEST USING THE EDGE SERVER, NEVER PRODUCTION SERVER, IT WILL MESS UP THE WALKIN -->
             <!-- CHANGE TO PRODUCTION SERVER WHEN SHIPPING TO WXCC DESKTOP -->
             <customer-journey-widget
-              .secret=${PRIVATE_KEY}
-              org=${ORGANIZATION}
-              namespace=${NAMESPACE}
-              app-name=${APP_NAME}
-              base-url="https://cjaas-devus2.azurewebsites.net"
               limit="20"
               customer="30313-Carl"
               user-search
               .eventIconTemplate=${iconData}
+              base-url="https://cjaas-devus2.azurewebsites.net"
+              tape-token=${getTToken()}
+              stream-token=${getSToken()}
+              profile-token=${getPToken()}
             ></customer-journey-widget>
           </div>
         </div>
