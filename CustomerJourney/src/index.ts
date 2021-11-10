@@ -34,21 +34,23 @@ export default class CustomerJourneyWidget extends LitElement {
    * Your org secret key to generate SAS tokens from
    * @prop secret
    */
-  @property({ type: String, attribute: false }) secret: string | undefined = undefined;
+  @property({ type: String, attribute: false }) secret:
+    | string
+    | undefined = undefined;
   /**
-  * Your project's ORG
-  * @attr org
-  */
+   * Your project's ORG
+   * @attr org
+   */
   @property({ type: String }) org: string | undefined = undefined;
   /**
-  * Your project's Namespace
-  * @attr namespace
-  */
+   * Your project's Namespace
+   * @attr namespace
+   */
   @property({ type: String }) namespace: string | undefined = undefined;
   /**
-  * Your Project's App Name
-  * @attr app-name
-  */
+   * Your Project's App Name
+   * @attr app-name
+   */
   @property({ type: String, attribute: "app-name" }) appname:
     | string
     | undefined = undefined;
@@ -414,19 +416,17 @@ export default class CustomerJourneyWidget extends LitElement {
 
     this.baseUrlCheck();
     const { getSToken } = this.getTokens();
-    if (this.liveStream) {
-      const header: EventSourceInitDict = {
-        headers: {
-          "content-type": "application/json; charset=UTF-8",
-          accept: "application/json",
-          Authorization: `SharedAccessSignature ${getSToken()}`
-        }
-      };
-      this.eventSource = new EventSource(
-        `${this.baseURL}/v1/journey/streams/${this.customer}?${getSToken()}`,
-        header
-      );
-    }
+    const header: EventSourceInitDict = {
+      headers: {
+        "content-type": "application/json; charset=UTF-8",
+        accept: "application/json",
+        Authorization: `SharedAccessSignature ${getSToken()}`
+      }
+    };
+    this.eventSource = new EventSource(
+      `${this.baseURL}/v1/journey/streams/${this.customer}?${getSToken()}`,
+      header
+    );
 
     if (this.eventSource) {
       this.eventSource!.onmessage = (event: ServerSentEvent) => {
