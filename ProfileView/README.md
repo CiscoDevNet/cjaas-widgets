@@ -6,9 +6,9 @@ This widget uses CJaaS Common Components to output a combined customer profile v
 
 The CJaaS Profile Widget accepts specific properties to interact with the CJaaS API
 
-`@attr stream-read-token`: SAS Token for reading stream API
-`@attr tape-read-token`: SAS Token for reading tape API
-`@attr profile-token`: SAS Token for POST operations on Profile endpoint
+`@prop stream-read-token`: SAS Token for reading stream API
+`@prop tape-read-token`: SAS Token for reading tape API
+`@prop profile-token`: SAS Token for POST operations on Profile endpoint
 `@attr customer` : Current customer ID to show
 `@attr template-id` : ID of profile view template to retrieve from API
 `@attr base-url` : Base URL for API calls

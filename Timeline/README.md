@@ -6,10 +6,8 @@ This widget uses CJaaS Common Components to output a combined customer Timeline 
 
 The CJaaS Timeline Widget accepts specific properties to interact with the CJaaS API
 
-`@prop secret` : Your org secret key to generate SAS tokens from
-`@attr org` : Your project's ORG
-`@attr namespace` : Your project's Namespace
-`@attr app-name` : Your Project's App Name
+`@prop stream-read-token`: SAS Token for reading stream API
+`@prop tape-read-token`: SAS Token for reading tape API
 `@attr base-url ` : Your Customer Journey server
 `@attr limit` : Set number of events shown by default
 `@attr live-stream` : Toggle whether new live events appear in the timeline or not
@@ -19,16 +17,14 @@ The CJaaS Timeline Widget accepts specific properties to interact with the CJaaS
 Example:
 ```html
  <cjaas-timeline-widget
-    .secret=${PRIVATE_KEY}
-    org=${ORGANIZATION}
-    namespace=${NAMESPACE}
-    app-name=${APP_NAME}
     limit="15"
     person-id="30313-Carl"
     show-filters
     base-url="https://cjaas-devus2.azurewebsites.net"
+    .stream-read-token=${your-token}
+    .tape-read-token=${your-token}
   >
-</cjaas-timeline-widget>
+  </cjaas-timeline-widget>
 ```
 
 ## Dev Environment: Getting Started

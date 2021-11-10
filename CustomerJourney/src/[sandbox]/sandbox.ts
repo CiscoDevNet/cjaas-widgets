@@ -149,7 +149,6 @@ export class Sandbox extends LitElement {
             style=${`width: ${this.containerWidth}; height: ${this.containerHeight};`}
             class="widget-container"
           >
-            <!-- ONLY TEST USING THE EDGE SERVER, NEVER PRODUCTION SERVER, IT WILL MESS UP THE WALKIN -->
             <!-- CHANGE TO PRODUCTION SERVER WHEN SHIPPING TO WXCC DESKTOP -->
             <customer-journey-widget
               limit="20"
@@ -157,9 +156,9 @@ export class Sandbox extends LitElement {
               user-search
               .eventIconTemplate=${iconData}
               base-url="https://cjaas-devus2.azurewebsites.net"
-              tape-token=${getTToken()}
-              stream-token=${getSToken()}
-              profile-token=${getPToken()}
+              .tape-token=${getTToken()}
+              .stream-token=${getSToken()}
+              .profile-token=${getPToken()}
             ></customer-journey-widget>
           </div>
         </div>

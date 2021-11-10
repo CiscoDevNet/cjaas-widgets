@@ -6,10 +6,9 @@ This widget uses the CJaaS API to display an individual customer's journey as a 
 
 The CJaaS Profile Widget accepts specific properties to interact with the CJaaS API
 
-`@prop secret` : Your org secret key to generate SAS tokens from
-`@attr org` : Your project's ORG
-`@attr namespace` : Your project's Namespace
-`@attr app-name` : Your Project's App Name
+`@prop stream-read-token`: SAS Token for reading stream API
+`@prop tape-read-token`: SAS Token for reading tape API
+`@prop profile-token`: SAS Token for POST operations on Profile endpoint
 `@attr base-url` : Path to the proper Customer Journey API deployment
 `@attr customer` : Customer ID used for Journey lookup
 `@attr user-search` : Toggles display of field to find new Journey profiles
@@ -20,15 +19,14 @@ The CJaaS Profile Widget accepts specific properties to interact with the CJaaS 
 
 ```html
 <customer-journey-widget
-   .secret=${PRIVATE_KEY}
-   org=${ORGANIZATION}
-   namespace=${NAMESPACE}
-   app-name=${APP_NAME}
-   base-url="https://cjaas-devus2.azurewebsites.net"
    limit="20"
    customer="30313-Carl"
    user-search
    .eventIconTemplate=${iconData}
+   base-url="https://cjaas-devus2.azurewebsites.net"
+   tape-token=${your-token}
+   stream-token=${your-token}
+   profile-token=${your-token}
 ></customer-journey-widget>
 ```
 

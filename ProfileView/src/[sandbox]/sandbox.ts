@@ -152,9 +152,9 @@ export class Sandbox extends LitElement {
               template-id="second-template"
               customer="30313-Carl"
               base-url="https://cjaas-devus2.azurewebsites.net"
-              profile-token=${getPToken()}
-              tape-read-token=${getTToken()}
-              stream-read-token=${getSToken()}
+              .profile-token=${getPToken()}
+              .tape-read-token=${getTToken()}
+              .stream-read-token=${getSToken()}
             ></cjaas-profile-view-widget>
           </div>
         </div>
