@@ -1,35 +1,46 @@
 # CJaaS Timeline Widget
 
-This widget uses CJaaS Common Components to output a combined customer Timeline that includes Timeline information.
+This widget uses CJaaS Common Components to output a combined customer Timeline that includes Timeline information. This code can be used as is, or be starter code for your own Custom Widget.
 
 ## Timeline Widget Properties
 
 The CJaaS Timeline Widget accepts specific properties to interact with the CJaaS API
 
-- `type: string` - setting for stream style
-- `template: any | JSON | Object` - for data-shape template.
-- `tape-token: string` - SAS Token for tape GET operations
-- `stream-token: string` - SAS Token for tape stream subscription operations
-- `limit: number` - set how many events to display
-- `base-url: string` - defaults to undefined
+`@prop stream-read-token`: SAS Token for reading stream API
+`@prop tape-read-token`: SAS Token for reading tape API
+`@attr base-url ` : Your Customer Journey server
+`@attr limit` : Set number of events shown by default
+`@attr live-stream` : Toggle whether new live events appear in the timeline or not
+`@attr show-filters` : Toggle visibility of the timeline filters
+`@attr person-id` : Set the ID of the record being fetched
+
+Example:
 ```html
  <cjaas-timeline-widget
-    id="timeline-widget"
-    type="journey-and-stream"
-    tape-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=7G8UdEipQHnWOV3hRbTqkNxxjQNHkkQYGDlCrgEhK0k="
-    stream-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-06-17T19:18:05.538Z&sk=sandbox&sig=nJOri1M66leDMnfL93UlufHegDf3hAwoQ/Mj37ReQBs="
-    limit=15
-    base-url="https://uswest-nonprod.cjaas.cisco.com"
-></cjaas-timeline-widget>
+    limit="15"
+    person-id="30313-Carl"
+    show-filters
+    base-url="https://cjaas-devus2.azurewebsites.net"
+    .stream-read-token=${your-token}
+    .tape-read-token=${your-token}
+  >
+  </cjaas-timeline-widget>
 ```
 
-## Getting Started
-- `cd` into the project folder
+## Dev Environment: Getting Started
+- Create a `.env` file that contains `PRIVATE_KEY="key from your admin portal when app created"`
+- in `sandbox.ts`, pass the correct ORGANIZATION, NAMESPACE, and APP_NAME values from your admin portal
 - run `yarn install`
 - run `yarn start`
 - navigate browser to `localhost:8888`
 
+## Using in Deployment
+- Create a `.env` file that contains `PRIVATE_KEY="key from your admin portal when app created"`
+- Where used in your app, pass the correct ORGANIZATION, NAMESPACE, and APP_NAME values from your admin portal
+
 ## Build and Deploy Modules
+If you are using this widget as a starter for your own custom needs, follow these steps to publish it for your use.
+
 Once your widget is complete, it must be exported as a JS module that can be delivered via CDN. The build is configured to export a Web Component that can be used in your project.
 - run `yarn dist` to create a compiled, minified JS module
 - rename and upload the bundled module to your hosting service
@@ -65,10 +76,6 @@ By default, if a timeline cannot be returned the widget will print "No Timeline 
 
 ```html
 <cjaas-timeline-widget
-  id="timeline-widget"
-  type="journey-and-stream"
-  auth-token="missing"
-  limit="15"
 >
   <h3 slot="ll10n-no-timeline-message">No hay línea de tiempo disponible</h3>
 </cjaas-timeline-widget>

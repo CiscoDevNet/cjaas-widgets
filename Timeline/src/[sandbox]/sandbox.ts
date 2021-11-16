@@ -5,11 +5,58 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
+
+
 import "@momentum-ui/web-components";
 import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
 import styles from "./sandbox.scss";
 import "..";
+import { generateSasToken, TokenArgs } from "../generatesastoken";
+
+/**
+ * ATTENTION: Apps using this widget must provide the following values from the application configuration.
+ * These details allow easy and discreet generation of SAS tokens with correct permissions needed to access the API.
+ */
+//@ts-ignore
+const PRIVATE_KEY = process.env.DOTENV.PRIVATE_KEY;
+const ORGANIZATION = "demoassure";
+const NAMESPACE = "sandbox";
+const APP_NAME = "journeyUi";
+
+/**
+ * Private SAS Tokens generated and stored in component instance
+ */
+
+ function getTokens() {
+  return {
+    getTToken: function() {
+      const tapeArgs: TokenArgs = {
+        secret: PRIVATE_KEY!,
+        organization: ORGANIZATION!,
+        namespace: NAMESPACE!,
+        service: "tape",
+        permissions: "r",
+        keyName: APP_NAME!,
+        expiration: 1000
+      };
+      return generateSasToken(tapeArgs);
+    },
+
+    getSToken: function() {
+      const tapeArgs: TokenArgs = {
+        secret: PRIVATE_KEY!,
+        organization: ORGANIZATION!,
+        namespace: NAMESPACE!,
+        service: "stream",
+        permissions: "r",
+        keyName: APP_NAME!,
+        expiration: 1000
+      };
+      return generateSasToken(tapeArgs);
+    }
+  };
+}
 
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
@@ -76,6 +123,7 @@ export class Sandbox extends LitElement {
   }
 
   render() {
+    const {getTToken, getSToken} = getTokens();
     return html`
       <div class="toggle">
         ${this.themeToggle()}
@@ -88,30 +136,13 @@ export class Sandbox extends LitElement {
             class="widget-container"
           >
             <cjaas-timeline-widget
-              id="timeline-widget"
+              limit="15"
               person-id="30313-Carl"
-              tape-read-token=${tapeRead}
-              stream-read-token=${stream}
-              limit="15"
-              base-url=${baseURL}
-            ></cjaas-timeline-widget>
-          </div>
-          <div
-            style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
-            class="widget-container"
-          >
-            <cjaas-timeline-widget
-              id="timeline-widget"
-              type="journey-and-stream"
-              stream-read-token="missing_token"
-              tape-read-token="missing_token"
-              limit="15"
               show-filters
-              base-url="https://cjaas-devus1-edge.azurewebsites.net"
+              base-url="https://cjaas-devus2.azurewebsites.net"
+              .stream-read-token=${getSToken()}
+              .tape-read-token=${getTToken()}
             >
-              <h3 slot="ll10n-no-timeline-message">
-                No hay línea de tiempo disponible
-              </h3>
             </cjaas-timeline-widget>
           </div>
         </div>

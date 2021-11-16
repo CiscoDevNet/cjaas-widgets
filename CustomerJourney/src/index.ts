@@ -6,7 +6,7 @@
  *
  */
 
-import {
+ import {
   html,
   internalProperty,
   property,

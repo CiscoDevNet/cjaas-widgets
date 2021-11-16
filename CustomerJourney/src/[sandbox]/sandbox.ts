@@ -5,18 +5,73 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
+
+/**
+ * ATTENTION: Apps using this widget must provide the following values from the application configuration.
+ * These details allow easy and discreet generation of SAS tokens with correct permissions needed to access the API.
+ */
+//@ts-ignore
+const PRIVATE_KEY = process.env.DOTENV.PRIVATE_KEY;
+const ORGANIZATION = "demoassure";
+const NAMESPACE = "sandbox";
+const APP_NAME = "journeyUi";
+
 import "@momentum-ui/web-components";
 import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
 import styles from "./sandbox.scss";
 import * as iconData from "@/assets/icons.json";
 import "..";
+import { generateSasToken, TokenArgs } from "../generatesastoken";
+
+/**
+ * Private SAS Tokens generated and stored in component instance
+ */
+
+ function getTokens() {
+  return {
+    getTToken: function() {
+      const tapeArgs: TokenArgs = {
+        secret: PRIVATE_KEY!,
+        organization: ORGANIZATION!,
+        namespace: NAMESPACE!,
+        service: "tape",
+        permissions: "r",
+        keyName: APP_NAME!,
+        expiration: 1000
+      };
+      return generateSasToken(tapeArgs);
+    },
+
+    getSToken: function() {
+      const tapeArgs: TokenArgs = {
+        secret: PRIVATE_KEY!,
+        organization: ORGANIZATION!,
+        namespace: NAMESPACE!,
+        service: "stream",
+        permissions: "r",
+        keyName: APP_NAME!,
+        expiration: 1000
+      };
+      return generateSasToken(tapeArgs);
+    },
+
+    getPToken: function() {
+      const tapeArgs: TokenArgs = {
+        secret: PRIVATE_KEY!,
+        organization: ORGANIZATION!,
+        namespace: NAMESPACE!,
+        service: "profile",
+        permissions: "rw",
+        keyName: APP_NAME!,
+        expiration: 1000
+      };
+      return generateSasToken(tapeArgs);
+    }
+  };
+}
 
 
-const tapeRead = "SET SAS TOKEN HERE"
-const profileWrite = "SET SAS TOKEN HERE"
-const stream = "SET SAS TOKEN HERE"
-const baseURL = "https://cjaas-devus2.azurewebsites.net";
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
   @internalProperty() darkTheme = false;
@@ -82,6 +137,7 @@ export class Sandbox extends LitElement {
   }
 
   render() {
+    const {getTToken, getSToken, getPToken} = getTokens();
     return html`
       <div class="toggle">
         ${this.themeToggle()}
@@ -93,19 +149,16 @@ export class Sandbox extends LitElement {
             style=${`width: ${this.containerWidth}; height: ${this.containerHeight};`}
             class="widget-container"
           >
-            <!-- ONLY TEST USING THE EDGE SERVER, NEVER PRODUCTION SERVER, IT WILL MESS UP THE WALKIN -->
             <!-- CHANGE TO PRODUCTION SERVER WHEN SHIPPING TO WXCC DESKTOP -->
             <customer-journey-widget
-              id="timeline-widget"
+              limit="20"
               customer="30313-Carl"
               user-search
-              template-id="second-template"
               .eventIconTemplate=${iconData}
-              profile-token=${profileWrite}
-              tape-token=${tapeRead}
-              stream-token=${stream}
-              base-url=${baseURL}
-              limit="20"
+              base-url="https://cjaas-devus2.azurewebsites.net"
+              .tape-token=${getTToken()}
+              .stream-token=${getSToken()}
+              .profile-token=${getPToken()}
             ></customer-journey-widget>
           </div>
         </div>

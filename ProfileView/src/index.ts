@@ -76,7 +76,7 @@ export default class CjaasProfileWidget extends LitElement {
     | null = null;
   /**
    * SAS Token for POST operations on Profile endpoint
-   * @attr profile-write-token
+   * @attr profile-token
    */
     @property({ type: String, attribute: "profile-token" })
   profileToken: string | null = null;
@@ -461,7 +461,7 @@ export default class CjaasProfileWidget extends LitElement {
         x.query.type === "tab" || x.query?.widgetAttributes?.type === "tab"
     );
     // TODO: Track the selected tab to apply a class to the badge for color synching, making blue when selected
-    const activityTab = this.profileToken
+    const activityTab = this.profileData
       ? html`
           <md-tab slot="tab">
             <span>All</span>
