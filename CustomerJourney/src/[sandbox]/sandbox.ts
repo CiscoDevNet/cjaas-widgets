@@ -12,9 +12,10 @@
  */
 //@ts-ignore
 const PRIVATE_KEY = process.env.DOTENV.PRIVATE_KEY;
-const ORGANIZATION = "demoassure";
+const ORGANIZATION = "mailinator";
 const NAMESPACE = "sandbox";
-const APP_NAME = "journeyUi";
+const APP_NAME = "webexcontactcenter";
+const BASE_URL = "https://cjaas-devsrini-westus.azurewebsites.net"
 
 import "@momentum-ui/web-components";
 import "@cjaas/common-components";
@@ -155,10 +156,10 @@ export class Sandbox extends LitElement {
               customer="30313-Carl"
               user-search
               .eventIconTemplate=${iconData}
-              base-url="https://cjaas-devus2.azurewebsites.net"
-              .tape-token=${getTToken()}
-              .stream-token=${getSToken()}
-              .profile-token=${getPToken()}
+              base-url=${BASE_URL}
+              tape-token=${getTToken()}
+              stream-token=${getSToken()}
+              profile-token=${getPToken()}
             ></customer-journey-widget>
           </div>
         </div>
