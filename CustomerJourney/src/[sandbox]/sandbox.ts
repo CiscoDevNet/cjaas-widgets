@@ -137,6 +137,7 @@ export class Sandbox extends LitElement {
   }
 
   render() {
+    // TODO: Verify that the JavaScript SAS Token script is still working. Below are keys made using Java from Srini
     const {getTToken, getSToken, getPToken} = getTokens();
     return html`
       <div class="toggle">
@@ -156,9 +157,9 @@ export class Sandbox extends LitElement {
               user-search
               .eventIconTemplate=${iconData}
               base-url="https://cjaas-devus2.azurewebsites.net"
-              .tape-token=${getTToken()}
-              .stream-token=${getSToken()}
-              .profile-token=${getPToken()}
+              tape-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-11-23T20:33:44.019Z&sk=journeyUi&sig=Msa4zTsNmkeDHJcmQuXUVHTTzs1KATCQ%2FDNrVR2O7eU%3D"
+              stream-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-11-23T20:30:20.765Z&sk=journeyUi&sig=76cI1nBPkA0HdQved8YHiTQbOThPOR8W5UdwZzeUuPc%3D"
+              profile-token="so=demoassure&sn=sandbox&ss=profile&sp=rw&se=2022-11-23T20:34:23.108Z&sk=journeyUi&sig=JydFx80vys0KNr8JwwgsUSPrj3y5fnLpj5afX9h2Hxc%3D "
             ></customer-journey-widget>
           </div>
         </div>

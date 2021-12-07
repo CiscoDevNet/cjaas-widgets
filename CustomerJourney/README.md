@@ -1,14 +1,15 @@
-# CJaaS Customer Journey Widget
+# CJaaS Customer Journey Widget for devus2
 
 This widget uses the CJaaS API to display an individual customer's journey as a history of events. It first retrieves the complete event history from the tape endpoint and compiles toggles for all event types, and then subscribes to a live stream of new events so they appear in real time. This code can be used as is, or be starter code for your own Custom Widget.
 
 ## Customer Journey Widget Properties
 
 The CJaaS Profile Widget accepts specific properties to interact with the CJaaS API
+THIS version adheres to the endpoints at `https://cjaas-devus2.azurewebsites.net`
 
-`@prop stream-read-token`: SAS Token for reading stream API
-`@prop tape-read-token`: SAS Token for reading tape API
-`@prop profile-token`: SAS Token for POST operations on Profile endpoint
+`@attr stream-read-token`: SAS Token for reading stream API
+`@attr tape-read-token`: SAS Token for reading tape API
+`@attr profile-token`: SAS Token for POST operations on Profile endpoint
 `@attr base-url` : Path to the proper Customer Journey API deployment
 `@attr customer` : Customer ID used for Journey lookup
 `@attr user-search` : Toggles display of field to find new Journey profiles

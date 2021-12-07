@@ -6,8 +6,6 @@
  *
  */
 
-// This file imports all of the webcomponents from "components" folder
-
 import {
   html,
   internalProperty,
@@ -194,42 +192,7 @@ export default class CjaasProfileWidget extends LitElement {
       this.getProfileFromTemplateId();
       return;
     }
-
-    // TODO: What is the new fallback for undefined template IDs?
-    // SHOULD the new defaults be set on server and retrievable??
-    this.baseUrlCheck();
-    const url = `${this.baseURL}/v1/journey/views/templates=${this.customer}`;
-
-    const template = Object.assign({}, this.defaultTemplate);
-    template.attributes = template.attributes.map((x: any) => {
-      if (x.type === "tab" || x?.widgetAttributes?.type === "tab") {
-        x.Verbose = true;
-      }
-      return x;
-    });
-
-    const data = JSON.stringify(template);
-    const options: AxiosRequestConfig = {
-      url,
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.profileToken
-      },
-      data
-    };
-    return axios(url, options)
-      .then((x: AxiosResponse) => x.data)
-      .then((_profile: ProfileFromSyncAPI) => {
-        this.profileData = this.parseResponse(this.defaultTemplate.attributes)
-        this.requestUpdate();
-      })
-      .catch((err: Error) => {
-        console.error("Could not load the Profile Data. ", err);
-        this.profileData = undefined;
-        this.requestUpdate();
-      });
-    }
+  }
 
 
   getProfileFromTemplateId() {
@@ -402,7 +365,6 @@ export default class CjaasProfileWidget extends LitElement {
         ></cjaas-timeline>
       `;
     } else {
-      debugger;
       return this.getEmptyStateTemplate();
     }
   }
