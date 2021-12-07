@@ -6,7 +6,7 @@
  *
  */
 
- import {
+import {
   html,
   internalProperty,
   property,
@@ -43,9 +43,16 @@ export default class CustomerJourneyWidget extends LitElement {
   @property({ type: String, reflect: true }) customer: string | null = null;
   /**
    * SAS Token that provides write permissions to Journey API (used for POST data template in Profile retrieval)
-   * @attr write-token
+   * @attr profile-write-token
    */
-  @property({ type: String, attribute: "profile-token" }) profileToken:
+  @property({ type: String, attribute: "profile-write-token" }) profileWriteToken:
+    | string
+    | null = null;
+  /**
+   * SAS Token that provides write permissions to Journey API (used for POST data template in Profile retrieval)
+   * @attr profile-read-token
+   */
+  @property({ type: String, attribute: "profile-read-token" }) profileReadToken:
     | string
     | null = null;
   /**
@@ -82,7 +89,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * Property to set the data template to retrieve customer Profile in desired format
    * @attr template-id
    */
-   @property({ type: String, attribute: "template-id" }) templateId: string = "journey-default-template";
+  @property({ type: Object, attribute: false }) templateId = defaultTemplate;
   /**
    * Property to pass in JSON template to set color and icon settings
    * @prop eventIconTemplate
@@ -93,7 +100,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * Data pulled from Journey Profile retrieval (will match shape of provided Template)
    * @prop profileData
    */
-   @internalProperty() profileData: Profile | undefined;
+  @internalProperty() profileData: Profile | undefined;
   /**
    * Timeline data fetched from journey history
    * @prop events
@@ -217,93 +224,40 @@ export default class CustomerJourneyWidget extends LitElement {
 
   getProfile() {
     this.profileLoading = true;
-    if (this.templateId) {
-      this.getProfileFromTemplateId();
-    } else {
+    this.baseUrlCheck();
+    const url = `${this.baseURL}/v1/journey/profileview?personid=${this.customer}`;
 
-    // // TODO: What is the new fallback for undefined template IDs?
-    // // SHOULD the new defaults be set on server and retrievable??
-    // this.baseUrlCheck();
-    // const url = `${this.baseURL}/v1/journey/views&personId=${this.customer}`;
+    const template = Object.assign({}, this.defaultTemplate);
+    template.attributes = template.attributes.map((x: any) => {
+      if (x.type === "tab" || x?.widgetAttributes?.type === "tab") {
+        x.Verbose = true;
+      }
+      return x;
+    });
 
-    // const template = Object.assign({}, this.defaultTemplate);
-    // template.attributes = template.attributes.map((x: any) => {
-    //   if (x.type === "tab" || x?.widgetAttributes?.type === "tab") {
-    //     x.Verbose = true;
-    //   }
-    //   return x;
-    // });
-
-    // const data = JSON.stringify(template);
-    // const options: AxiosRequestConfig = {
-    //   url,
-    //   method: "GET",
-    //   headers: {
-    //     "Content-type": "application/json",
-    //     Authorization: "SharedAccessSignature " + this.profileToken
-    //   }
-    // };
-    // return axios(url, options)
-    //   .then((x: AxiosResponse) => x.data)
-    //   .then((_profile: ProfileFromSyncAPI) => {
-    //     debugger;
-    //     this.profileData = this.parseResponse(this.defaultTemplate.attributes)
-    //     this.requestUpdate();
-    //   })
-    //   .catch((err: Error) => {
-    //     console.error("Could not load the Profile Data. ", err);
-    //     this.profileData = undefined;
-    //     this.requestUpdate();
-    //   });
-    }
-  }
-
-  getProfileFromTemplateId() {
-    const url = `${this.baseURL}/v1/journey/views:build?templateId=${this.templateId}&personId=${this.customer}`;
-
+    const data = JSON.stringify(template);
     const options: AxiosRequestConfig = {
       url,
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.profileToken,
-        "X-CACHE-MAXAGE-HOUR": 5
+        Authorization: "SharedAccessSignature " + this.profileWriteToken,
+        data
       }
     };
-
-    axios(options)
-      .then(x => x.data)
-      .then((response) => {
-        this.setOffProfileLongPolling(response.data.getUriStatusQuery);
+    return axios(url, options)
+      .then((x: AxiosResponse) => x.data)
+      .then((_profile: ProfileFromSyncAPI) => {
+        this.profileData = this.parseResponse(this.defaultTemplate.attributes)
+        this.requestUpdate();
       })
-      .catch(err => {
-        console.error("Unable to fetch the Profile", err);
+      .catch((err: Error) => {
+        console.error("Could not load the Profile Data. ", err);
+        this.profileData = undefined;
+        this.requestUpdate();
       });
   }
 
-  setOffProfileLongPolling(url: string) {
-    if (this.pollingActive) return;
-    this.pollingActive = true;
-    const intervalId = setInterval(() => {
-      console.log("Fetching Profile")
-      axios({
-        url,
-        method: "GET",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: "SharedAccessSignature " + this.profileToken
-        }
-      })
-      .then(x => x.data)
-      .then((response: any) => {
-        if (response.data.runtimeStatus === "Completed") {
-          clearInterval(intervalId);
-          this.pollingActive = false;
-          this.profileData = this.parseResponse(response.data.output.attributeView)
-        }
-      });
-    }, 1500);
-  }
 
   parseResponse(attributes: any) {
     return attributes.map(
@@ -312,7 +266,7 @@ export default class CustomerJourneyWidget extends LitElement {
           ...attribute.queryTemplate,
           widgetAttributes: {
             type: attribute.queryTemplate?.widgetAttributes.type,
-          tag: attribute.queryTemplate?.widgetAttributes.tag
+            tag: attribute.queryTemplate?.widgetAttributes.tag
           },
         };
         this.profileLoading = false;
@@ -320,12 +274,12 @@ export default class CustomerJourneyWidget extends LitElement {
           query: query,
           journeyEvents: attribute.journeyEvents?.map(
             (value: string) => value && JSON.parse(value)
-            ),
-            result: [attribute.result]
-          };
-        }
-      );
-    }
+          ),
+          result: [attribute.result]
+        };
+      }
+    );
+  }
 
   async getExistingEvents() {
     this.timelineLoading = true;
@@ -351,7 +305,7 @@ export default class CustomerJourneyWidget extends LitElement {
         console.error("Could not fetch Customer Journey events. ", err);
         this.errorMessage = `Failure to fetch Journey for ${this.customer}. ${err}`;
       });
-    }
+  }
 
   subscribeToStream() {
     if (this.eventSource) {
@@ -405,15 +359,9 @@ export default class CustomerJourneyWidget extends LitElement {
 
   renderEvents() {
     return html`
-      <cjaas-timeline
-        .timelineItems=${this.events}
-        .newestEvents=${this.newestEvents}
-        .eventIconTemplate=${this.eventIconTemplate}
-        @new-event-queue-cleared=${this.updateComprehensiveEventList}
-        limit=${this.limit}
-        event-filters
-        ?live-stream=${this.liveStream}
-      ></cjaas-timeline>
+      <cjaas-timeline .timelineItems=${this.events} .newestEvents=${this.newestEvents}
+        .eventIconTemplate=${this.eventIconTemplate} @new-event-queue-cleared=${this.updateComprehensiveEventList}
+        limit=${this.limit} event-filters ?live-stream=${this.liveStream}></cjaas-timeline>
     `;
   }
 
@@ -442,17 +390,13 @@ export default class CustomerJourneyWidget extends LitElement {
   render() {
     return html`
       <div class="profile${classMap(this.classes)}">
-        <md-tooltip
-          message="Click to search new journey"
-          ?disabled=${!this.userSearch}
-        >
-          <input class="header" value=${this.customer || "Customer Journey"}
-          @keydown=${(e: KeyboardEvent) => this.handleKey(e)}
-          @blur=${(e:FocusEvent)=> {this.customer = e.composedPath()[0].value}} />
+        <md-tooltip message="Click to search new journey" ?disabled=${!this.userSearch}>
+          <input class="header" value=${this.customer || "Customer Journey"} @keydown=${(e: KeyboardEvent) =>
+        this.handleKey(e)}
+          @blur=${(e: FocusEvent) => { this.customer = e.composedPath()[0].value }} />
         </md-tooltip>
         <details class="grid-profile" ?open=${this.profileData !== undefined}>
-          <summary
-            >Profile<md-icon name="icon-arrow-down_12"></md-icon>
+          <summary>Profile<md-icon name="icon-arrow-down_12"></md-icon>
           </summary>
           ${this.profileLoading ?
             this.renderLoader() :
@@ -460,8 +404,7 @@ export default class CustomerJourneyWidget extends LitElement {
             }
         </details>
         <details class="grid-timeline" open>
-          <summary
-            >Journey
+          <summary>Journey
             <md-icon name="icon-arrow-down_12"></md-icon>
           </summary>
           <div class="container">
