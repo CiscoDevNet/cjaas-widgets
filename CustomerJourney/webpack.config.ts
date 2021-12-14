@@ -9,13 +9,12 @@
 
 import { CleanWebpackPlugin } from "clean-webpack-plugin";
 import CopyWebpackPlugin from "copy-webpack-plugin";
-
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import * as path from "path";
 import RemovePlugin from "remove-files-webpack-plugin";
 import * as webpack from "webpack";
 import merge from "webpack-merge";
-
+import dotenv from "dotenv";
 const pSrc = path.resolve("src");
 const pDist = path.resolve("dist");
 export const pBuild = path.resolve("build");
@@ -23,6 +22,10 @@ const pAssets = path.resolve("src/assets");
 const pCss = path.resolve("src/assets/styles");
 const pImg = path.resolve("src/assets/images");
 const pModules = path.resolve("node_modules");
+
+const envSetup = dotenv.config({
+  path: path.join(__dirname, '.env')
+})
 
 const common: webpack.Configuration = {
   output: {
@@ -50,7 +53,12 @@ const common: webpack.Configuration = {
         include: pSrc
       }
     ]
-  }
+  },
+  plugins: [
+    new webpack.DefinePlugin({
+      "process.env.DOTENV": JSON.stringify(envSetup.parsed),
+    })
+  ]
 };
 
 function ruleTS({ isDev }: { isDev: boolean }) {
@@ -162,8 +170,7 @@ const commonDist = merge(common, {
           }
         ]
       }
-    }) as any,
-    copyFontsAndIcons
+    }) as any
   ]
 });
 

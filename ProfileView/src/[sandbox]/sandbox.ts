@@ -5,12 +5,71 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
+
 import "@momentum-ui/web-components";
 import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
 import "..";
 import styles from "./sandbox.scss";
-import { sampleTemplate } from "./sandbox.mock";
+import { generateSasToken, TokenArgs } from "../generatesastoken";
+
+/**
+ * ATTENTION: Apps using this widget must provide the following values from the application configuration.
+ * These details allow easy and discreet generation of SAS tokens with correct permissions needed to access the API.
+ */
+//@ts-ignore
+const PRIVATE_KEY = process.env.DOTENV.PRIVATE_KEY;
+const ORGANIZATION = "demoassure";
+const NAMESPACE = "sandbox";
+const APP_NAME = "journeyUi";
+
+/**
+ * Private SAS Tokens generated and stored in component instance
+ */
+
+ function getTokens() {
+  return {
+    getTToken: function() {
+      const tapeArgs: TokenArgs = {
+        secret: PRIVATE_KEY!,
+        organization: ORGANIZATION!,
+        namespace: NAMESPACE!,
+        service: "tape",
+        permissions: "r",
+        keyName: APP_NAME!,
+        expiration: 1000
+      };
+      return generateSasToken(tapeArgs);
+    },
+
+    getSToken: function() {
+      const tapeArgs: TokenArgs = {
+        secret: PRIVATE_KEY!,
+        organization: ORGANIZATION!,
+        namespace: NAMESPACE!,
+        service: "stream",
+        permissions: "r",
+        keyName: APP_NAME!,
+        expiration: 1000
+      };
+      return generateSasToken(tapeArgs);
+    },
+
+    getPToken: function() {
+      const tapeArgs: TokenArgs = {
+        secret: PRIVATE_KEY!,
+        organization: ORGANIZATION!,
+        namespace: NAMESPACE!,
+        service: "profile",
+        permissions: "rw",
+        keyName: APP_NAME!,
+        expiration: 1000
+      };
+      return generateSasToken(tapeArgs);
+    }
+  };
+}
+
 
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
@@ -77,6 +136,8 @@ export class Sandbox extends LitElement {
   }
 
   render() {
+    // TODO: Verify that the JavaScript SAS Token script is still working. Below are keys made using Java from Srini.
+    const {getTToken, getSToken, getPToken} = getTokens();
     return html`
       <div class="toggle">
         ${this.themeToggle()}
@@ -88,34 +149,14 @@ export class Sandbox extends LitElement {
             style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
             class="widget-container"
           >
-            <!-- We might need this read token very soon -->
-            <!-- profile-read-token="so=demoassure&sn=sandbox&ss=profile&sp=r&se=2022-06-17T23:47:34.409Z&sk=sandbox&sig=61BLCJ5+vZtOOvut/7khUQyg0N9KlvbPrJWrYa9lf28=" -->
             <cjaas-profile-view-widget
-              id="view"
-              customer="560021-Venki"
-              .template=${sampleTemplate}
-              profile-write-token="so=demoassure&sn=sandbox&ss=profile&sp=w&se=2022-06-17T21:36:08.050Z&sk=sandbox&sig=gm%2FXQ%2Bjtu8uWPrUtpRfR6P4DHwrJV2CJokIH3BcgzdE%3D"
-              tape-read-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=7G8UdEipQHnWOV3hRbTqkNxxjQNHkkQYGDlCrgEhK0k%3D"
-              stream-read-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-06-17T19:18:05.538Z&sk=sandbox&sig=nJOri1M66leDMnfL93UlufHegDf3hAwoQ%2FMj37ReQBs%3D"
-              timelineType="journey-and-stream"
-              base-url="https://uswest-nonprod.cjaas.cisco.com"
+              template-id="second-template"
+              customer="30313-Carl"
+              base-url="https://cjaas-devus2.azurewebsites.net"
+              tape-read-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-11-23T20:33:44.019Z&sk=journeyUi&sig=Msa4zTsNmkeDHJcmQuXUVHTTzs1KATCQ%2FDNrVR2O7eU%3D"
+              stream-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-11-23T20:30:20.765Z&sk=journeyUi&sig=76cI1nBPkA0HdQved8YHiTQbOThPOR8W5UdwZzeUuPc%3D"
+              profile-token="so=demoassure&sn=sandbox&ss=profile&sp=rw&se=2022-11-23T20:34:23.108Z&sk=journeyUi&sig=JydFx80vys0KNr8JwwgsUSPrj3y5fnLpj5afX9h2Hxc%3D"
             ></cjaas-profile-view-widget>
-          </div>
-          <div
-            style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
-            class="widget-container"
-          >
-            <cjaas-profile-view-widget
-              id="view"
-              customer="560021-Venki"
-              .template=${sampleTemplate}
-              timelineType="journey-and-stream"
-              base-url="https://uswest-nonprod.cjaas.cisco.com"
-            >
-              <h3 slot="l10n-header-text">Texto de encabezado personalizado</h3>
-              <h4 slot="l10n-no-data-message">No hay datos para mostrar</h4>
-              <h4 slot="l10n-no-profile-message">No hay perfil disponible</h4>
-            </cjaas-profile-view-widget>
           </div>
         </div>
       </md-theme>

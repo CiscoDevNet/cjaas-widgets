@@ -5,16 +5,63 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
+
+
 import "@momentum-ui/web-components";
 import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
 import styles from "./sandbox.scss";
 import "..";
+import { generateSasToken, TokenArgs } from "../generatesastoken";
+
+/**
+ * ATTENTION: Apps using this widget must provide the following values from the application configuration.
+ * These details allow easy and discreet generation of SAS tokens with correct permissions needed to access the API.
+ */
+//@ts-ignore
+const PRIVATE_KEY = process.env.DOTENV.PRIVATE_KEY;
+const ORGANIZATION = "demoassure";
+const NAMESPACE = "sandbox";
+const APP_NAME = "journeyUi";
+
+/**
+ * Private SAS Tokens generated and stored in component instance
+ */
+
+ function getTokens() {
+  return {
+    getTToken: function() {
+      const tapeArgs: TokenArgs = {
+        secret: PRIVATE_KEY!,
+        organization: ORGANIZATION!,
+        namespace: NAMESPACE!,
+        service: "tape",
+        permissions: "r",
+        keyName: APP_NAME!,
+        expiration: 1000
+      };
+      return generateSasToken(tapeArgs);
+    },
+
+    getSToken: function() {
+      const tapeArgs: TokenArgs = {
+        secret: PRIVATE_KEY!,
+        organization: ORGANIZATION!,
+        namespace: NAMESPACE!,
+        service: "stream",
+        permissions: "r",
+        keyName: APP_NAME!,
+        expiration: 1000
+      };
+      return generateSasToken(tapeArgs);
+    }
+  };
+}
 
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
   @internalProperty() darkTheme = false;
-  @internalProperty() containerWidth = "1000px";
+  @internalProperty() containerWidth = "600px";
   @internalProperty() containerHeight = "80vh";
   @internalProperty() selectedComponent = "Activity Item";
   static get styles() {
@@ -76,6 +123,7 @@ export class Sandbox extends LitElement {
   }
 
   render() {
+    const {getTToken, getSToken} = getTokens();
     return html`
       <div class="toggle">
         ${this.themeToggle()}
@@ -88,30 +136,13 @@ export class Sandbox extends LitElement {
             class="widget-container"
           >
             <cjaas-timeline-widget
-              id="timeline-widget"
-              type="journey-and-stream"
-              filter="person eq 'v3nki@cisco.com'"
-              tape-read-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=7G8UdEipQHnWOV3hRbTqkNxxjQNHkkQYGDlCrgEhK0k%3D"
-              stream-read-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-06-17T19:18:05.538Z&sk=sandbox&sig=nJOri1M66leDMnfL93UlufHegDf3hAwoQ%2FMj37ReQBs%3D"
               limit="15"
-              base-url="https://uswest-nonprod.cjaas.cisco.com"
-            ></cjaas-timeline-widget>
-          </div>
-          <div
-            style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
-            class="widget-container"
-          >
-            <cjaas-timeline-widget
-              id="timeline-widget"
-              type="journey-and-stream"
-              stream-read-token="missing"
-              tape-read-token="missing"
-              limit="15"
-              base-url="https://uswest-nonprod.cjaas.cisco.com"
+              person-id="30313-Carl"
+              show-filters
+              base-url="https://cjaas-devus2.azurewebsites.net"
+              .stream-read-token=${getSToken()}
+              .tape-read-token=${getTToken()}
             >
-              <h3 slot="ll10n-no-timeline-message">
-                No hay línea de tiempo disponible
-              </h3>
             </cjaas-timeline-widget>
           </div>
         </div>

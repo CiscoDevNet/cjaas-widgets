@@ -74,6 +74,10 @@ cjaas-profile {
     --tab-list-border: 1px solid var(--color-gray-30);
   }
 
+  md-tabs::part(tabs-content) {
+    overflow: inherit;
+  }
+
   md-tab {
     --tabs-default-active-border: #007aa3;
     --tabs-default-border-color: var(--color-gray-30);

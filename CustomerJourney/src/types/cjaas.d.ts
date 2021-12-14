@@ -22,21 +22,30 @@ export interface ProfileConfig {
   }>;
 }
 
-export interface Profile {
+export interface ProfileFromSyncAPI {
   name: string;
   customerId: string;
   generatedAt: string;
-  attributeView: Array<{
-    queryTemplate: {
-      version: string;
-      event: string;
-      metadata: string;
-      limit: number;
-      displayName: string;
-      aggregationType: number;
-      aggregationMode: string;
-    };
-    result: string;
-    journeyEvents?: string;
-  }>;
+  attributeView: Array<AttributeView>;
 }
+
+export interface AttributeView {
+  queryTemplate: {
+    version: string;
+    event: string;
+    metadata: string;
+    limit: number;
+    displayName: string;
+    aggregationType: number;
+    aggregationMode: string;
+  };
+  result: string;
+  journeyEvents?: string;
+}
+
+export type Profile = Array<{
+  query: AttributeView["queryTemplate"];
+  // result string is split into array
+  result: Array<string>;
+  journeyEvents: AttributeView["journeyEvents"];
+}>;

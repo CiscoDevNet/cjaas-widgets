@@ -5,11 +5,72 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
+
+/**
+ * ATTENTION: Apps using this widget must provide the following values from the application configuration.
+ * These details allow easy and discreet generation of SAS tokens with correct permissions needed to access the API.
+ */
+//@ts-ignore
+const PRIVATE_KEY = process.env.DOTENV.PRIVATE_KEY;
+const ORGANIZATION = "demoassure";
+const NAMESPACE = "sandbox";
+const APP_NAME = "journeyUi";
+
 import "@momentum-ui/web-components";
 import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
 import styles from "./sandbox.scss";
+import * as iconData from "@/assets/icons.json";
 import "..";
+import { generateSasToken, TokenArgs } from "../generatesastoken";
+
+/**
+ * Private SAS Tokens generated and stored in component instance
+ */
+
+ function getTokens() {
+  return {
+    getTToken: function() {
+      const tapeArgs: TokenArgs = {
+        secret: PRIVATE_KEY!,
+        organization: ORGANIZATION!,
+        namespace: NAMESPACE!,
+        service: "tape",
+        permissions: "r",
+        keyName: APP_NAME!,
+        expiration: 1000
+      };
+      return generateSasToken(tapeArgs);
+    },
+
+    getSToken: function() {
+      const tapeArgs: TokenArgs = {
+        secret: PRIVATE_KEY!,
+        organization: ORGANIZATION!,
+        namespace: NAMESPACE!,
+        service: "stream",
+        permissions: "r",
+        keyName: APP_NAME!,
+        expiration: 1000
+      };
+      return generateSasToken(tapeArgs);
+    },
+
+    getPToken: function() {
+      const tapeArgs: TokenArgs = {
+        secret: PRIVATE_KEY!,
+        organization: ORGANIZATION!,
+        namespace: NAMESPACE!,
+        service: "profile",
+        permissions: "rw",
+        keyName: APP_NAME!,
+        expiration: 1000
+      };
+      return generateSasToken(tapeArgs);
+    }
+  };
+}
+
 
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
@@ -76,23 +137,29 @@ export class Sandbox extends LitElement {
   }
 
   render() {
+    // TODO: Verify that the JavaScript SAS Token script is still working. Below are keys made using Java from Srini
+    const {getTToken, getSToken, getPToken} = getTokens();
     return html`
       <div class="toggle">
         ${this.themeToggle()}
       </div>
       <md-theme ?darkTheme=${this.darkTheme} lumos>
         <div class="container">
-          <h2 class="sandbox-header">Timeline</h2>
+          <h2 class="sandbox-header">Customer Journey Widget</h2>
           <div
-            style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
+            style=${`width: ${this.containerWidth}; height: ${this.containerHeight};`}
             class="widget-container"
           >
+            <!-- CHANGE TO PRODUCTION SERVER WHEN SHIPPING TO WXCC DESKTOP -->
             <customer-journey-widget
-              id="timeline-widget"
-              customer="98126-Kevin"
-              tape-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-06-16T19:11:33.176Z&sk=sandbox&sig=7G8UdEipQHnWOV3hRbTqkNxxjQNHkkQYGDlCrgEhK0k%3D"
-              stream-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-06-21T18:15:15.804Z&sk=sandbox&sig=e4E8GTO8EBYnR4ZVC9ksM0PUWTABW0pEWb3PjuVlv7w%3D"
-              base-url="https://uswest-nonprod.cjaas.cisco.com"
+              limit="20"
+              customer="30313-Carl"
+              user-search
+              .eventIconTemplate=${iconData}
+              base-url="https://cjaas-devus2.azurewebsites.net"
+              tape-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-11-23T20:33:44.019Z&sk=journeyUi&sig=Msa4zTsNmkeDHJcmQuXUVHTTzs1KATCQ%2FDNrVR2O7eU%3D"
+              stream-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-11-23T20:30:20.765Z&sk=journeyUi&sig=76cI1nBPkA0HdQved8YHiTQbOThPOR8W5UdwZzeUuPc%3D"
+              profile-token="so=demoassure&sn=sandbox&ss=profile&sp=rw&se=2022-11-23T20:34:23.108Z&sk=journeyUi&sig=JydFx80vys0KNr8JwwgsUSPrj3y5fnLpj5afX9h2Hxc%3D "
             ></customer-journey-widget>
           </div>
         </div>
