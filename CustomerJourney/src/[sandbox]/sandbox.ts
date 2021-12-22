@@ -28,7 +28,7 @@ import { generateSasToken, TokenArgs } from "../generatesastoken";
  * Private SAS Tokens generated and stored in component instance
  */
 
- function getTokens() {
+function getTokens() {
   return {
     getTToken: function() {
       const tapeArgs: TokenArgs = {
@@ -38,7 +38,7 @@ import { generateSasToken, TokenArgs } from "../generatesastoken";
         service: "tape",
         permissions: "r",
         keyName: APP_NAME!,
-        expiration: 1000
+        expiration: 1000,
       };
       return generateSasToken(tapeArgs);
     },
@@ -51,7 +51,7 @@ import { generateSasToken, TokenArgs } from "../generatesastoken";
         service: "stream",
         permissions: "r",
         keyName: APP_NAME!,
-        expiration: 1000
+        expiration: 1000,
       };
       return generateSasToken(tapeArgs);
     },
@@ -64,13 +64,12 @@ import { generateSasToken, TokenArgs } from "../generatesastoken";
         service: "profile",
         permissions: "rw",
         keyName: APP_NAME!,
-        expiration: 1000
+        expiration: 1000,
       };
       return generateSasToken(tapeArgs);
-    }
+    },
   };
 }
-
 
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
@@ -138,7 +137,7 @@ export class Sandbox extends LitElement {
 
   render() {
     // TODO: Verify that the JavaScript SAS Token script is still working. Below are keys made using Java from Srini
-    const {getTToken, getSToken, getPToken} = getTokens();
+    const { getTToken, getSToken, getPToken } = getTokens();
     return html`
       <div class="toggle">
         ${this.themeToggle()}
@@ -153,13 +152,16 @@ export class Sandbox extends LitElement {
             <!-- CHANGE TO PRODUCTION SERVER WHEN SHIPPING TO WXCC DESKTOP -->
             <customer-journey-widget
               limit="20"
-              customer="30313-Carl"
+              customer="sample"
               user-search
               .eventIconTemplate=${iconData}
               base-url="https://cjaas-devus2.azurewebsites.net"
+              base-url-admin="http://cjaas-devus2-admin.azurewebsites.net"
               tape-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-11-23T20:33:44.019Z&sk=journeyUi&sig=Msa4zTsNmkeDHJcmQuXUVHTTzs1KATCQ%2FDNrVR2O7eU%3D"
               stream-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-11-23T20:30:20.765Z&sk=journeyUi&sig=76cI1nBPkA0HdQved8YHiTQbOThPOR8W5UdwZzeUuPc%3D"
-              profile-token="so=demoassure&sn=sandbox&ss=profile&sp=rw&se=2022-11-23T20:34:23.108Z&sk=journeyUi&sig=JydFx80vys0KNr8JwwgsUSPrj3y5fnLpj5afX9h2Hxc%3D "
+              profile-read-token="so=demoassure&sn=sandbox&ss=profile&sp=rw&se=2022-11-23T20:34:23.108Z&sk=journeyUi&sig=JydFx80vys0KNr8JwwgsUSPrj3y5fnLpj5afX9h2Hxc%3D"
+              identity-read-sas-token="so=demoassure&sn=sandbox&ss=idmt&sp=r&se=2024-09-09T16:11:06.254855600Z&sk=venkitest&sig=CTlbxZuc2FeWSlzT38SUYlEYqBz0UROqCAXQPDPaoiQ%3D"
+              identity-write-sas-token="so=demoassure&sn=sandbox&ss=idmt&sp=w&se=2024-09-09T18:29:51.574147700Z&sk=venkitest&sig=%2BPRGATu1qEvll6N1I3PdIHCKcyRlFwjJQ3aTf32Vl6o%3D"
             ></customer-journey-widget>
           </div>
         </div>
