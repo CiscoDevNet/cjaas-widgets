@@ -53,6 +53,10 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
+
+  &.small {
+    height: 120px;
+  }
 }
 
 .header .spinner-container {
@@ -103,7 +107,9 @@ div.profile {
   padding: 0.5rem;
   width: inherit;
   min-width: var(--default-width);
-  height: 100%;
+  min-height: 100%;
+
+  overflow-y: auto;
 
   md-tooltip {
     display: block;
@@ -122,7 +128,7 @@ div.profile {
   input.header {
     text-align: center;
     font-size: 1.5rem;
-    font-family: 'CiscoSansTT Medium';
+    font-family: "CiscoSansTT Medium";
     font-weight: 200;
     color: var(--md-primary-text-color);
     background-color: var(--md-tertiary-bg-color);
@@ -136,8 +142,8 @@ div.profile {
   &.expanded {
     display: grid;
     grid-template-areas:
-    "profile header"
-    "profile timeline";
+      "profile header"
+      "profile timeline";
     justify-content: space-around;
     grid-template-rows: auto 1fr;
 
@@ -151,33 +157,54 @@ div.profile {
     .grid-timeline {
       grid-area: timeline;
       width: 26rem;
-
+      margin-top: 0;
+    }
+    .grid-identity {
+      grid-area: profile;
+      width: 26rem;
     }
   }
-
-
-
 }
 
 cjaas-profile::part(profile) {
-  border: 1px solid var(--md-quaternary-bg-color, #dedede);
+  // border: 1px solid var(--md-quaternary-bg-color, #dedede);
   border-radius: 0.5rem;
+  background-color: var(--md-secondary-bg-color);
 }
 
 cjaas-timeline::part(stream) {
   height: calc(100% - 2rem);
 }
 
+cjaas-identity {
+  display: block;
+  padding: 12px;
+  border-radius: 0.5rem;
+}
+
+.grid-identity,
+.grid-timeline {
+  margin-top: 0.5rem;
+}
+
 details:last-child {
   flex-grow: 1;
   overflow-y: hidden;
+  flex-shrink: 0;
 }
 
 details summary {
   display: flex;
   justify-content: space-between;
   padding: 0.25rem;
-  font-size: .75rem;
+  font-size: 1.25rem;
+  font-size: bold;
+  cursor: pointer;
+}
+
+.overflow-container {
+  height: 100%;
+  overflow: auto;
 }
 
 details summary md-icon {
@@ -245,4 +272,17 @@ md-input.profile {
 
 #events-list {
   height: 100%;
+}
+
+.flex-inline {
+  display: flex;
+  align-items: center;
+  .input {
+    width: calc(100% - 2.5rem);
+  }
+
+  .reload-icon {
+    margin-left: 0.5rem;
+    width: 2rem;
+  }
 }
