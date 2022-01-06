@@ -16,7 +16,7 @@
     "dist": "npm run check && webpack --config-name=distProd",
     "dist:dev": "npm run check && webpack --config-name=distDev",
     "dist:watch": "npm run check && webpack --config-name=distDevWatch",
-    "check": " ",
+    "check": "check-peer-dependencies --yarn",
     "test": "jest"
   },
   "resolutions": {
