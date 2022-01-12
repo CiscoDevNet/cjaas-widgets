@@ -159,8 +159,7 @@ export class Sandbox extends LitElement {
               base-url-admin="http://cjaas-devus2-admin.azurewebsites.net"
               tape-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-11-23T20:33:44.019Z&sk=journeyUi&sig=Msa4zTsNmkeDHJcmQuXUVHTTzs1KATCQ%2FDNrVR2O7eU%3D"
               stream-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-11-23T20:30:20.765Z&sk=journeyUi&sig=76cI1nBPkA0HdQved8YHiTQbOThPOR8W5UdwZzeUuPc%3D"
-              profile-read-token="so=carehybrid&sn=sandbox&ss=profile&sp=r&se=2024-06-03T22:49:10.229Z&sk=King&sig=vDZ%2FeQH1VlzBpp55nuXmzkytkeVHdBIpwtMlZxaZPEQ%3D"
-              profile-write-token="so=carehybrid&sn=sandbox&ss=profile&sp=w&se=2024-06-03T22:24:31.472Z&sk=King&sig=oqSAjr7qgUAybqJS5X%2FjJ8ph5g32qeop68okDMSho%2FU%3D"
+              profile-read-token="so=demoassure&sn=sandbox&ss=profile&sp=rw&se=2022-11-23T20:34:23.108Z&sk=journeyUi&sig=JydFx80vys0KNr8JwwgsUSPrj3y5fnLpj5afX9h2Hxc%3D"
               identity-read-sas-token="so=demoassure&sn=sandbox&ss=idmt&sp=r&se=2024-09-09T16:11:06.254855600Z&sk=venkitest&sig=CTlbxZuc2FeWSlzT38SUYlEYqBz0UROqCAXQPDPaoiQ%3D"
               identity-write-sas-token="so=demoassure&sn=sandbox&ss=idmt&sp=w&se=2024-09-09T18:29:51.574147700Z&sk=venkitest&sig=%2BPRGATu1qEvll6N1I3PdIHCKcyRlFwjJQ3aTf32Vl6o%3D"
             ></customer-journey-widget>
