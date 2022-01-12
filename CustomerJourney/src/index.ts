@@ -203,8 +203,11 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   reloadOtherWidgets() {
-    this.getExistingEvents().then((events) => (this.events = events));
-    this.timelineLoading = false;
+    this.getExistingEvents().then((events) => {
+      this.events = events;
+      this.timelineLoading = false;
+    });
+
     this.getProfile();
     this.subscribeToStream();
   }
@@ -273,8 +276,9 @@ export default class CustomerJourneyWidget extends LitElement {
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.profileReadToken,
-        "X-CACHE-MAXAGE-HOUR": "5",
+        Authorization: "SharedAccessSignature " + this.profileWriteToken,
+        "X-CACHE-MAXAGE-HOUR": "0",
+        "X-CACHE-MAXAGE-MINUTE": "10",
       },
     };
 
