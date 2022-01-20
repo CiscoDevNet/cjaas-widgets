@@ -6,7 +6,6 @@
  *
  */
 
-
 import "@momentum-ui/web-components";
 import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
@@ -28,7 +27,7 @@ const APP_NAME = "journeyUi";
  * Private SAS Tokens generated and stored in component instance
  */
 
- function getTokens() {
+function getTokens() {
   return {
     getTToken: function() {
       const tapeArgs: TokenArgs = {
@@ -38,7 +37,7 @@ const APP_NAME = "journeyUi";
         service: "tape",
         permissions: "r",
         keyName: APP_NAME!,
-        expiration: 1000
+        expiration: 1000,
       };
       return generateSasToken(tapeArgs);
     },
@@ -51,10 +50,10 @@ const APP_NAME = "journeyUi";
         service: "stream",
         permissions: "r",
         keyName: APP_NAME!,
-        expiration: 1000
+        expiration: 1000,
       };
       return generateSasToken(tapeArgs);
-    }
+    },
   };
 }
 
@@ -123,7 +122,7 @@ export class Sandbox extends LitElement {
   }
 
   render() {
-    const {getTToken, getSToken} = getTokens();
+    const { getTToken, getSToken } = getTokens();
     return html`
       <div class="toggle">
         ${this.themeToggle()}
@@ -140,8 +139,8 @@ export class Sandbox extends LitElement {
               person-id="30313-Carl"
               show-filters
               base-url="https://cjaas-devus2.azurewebsites.net"
-              .stream-read-token=${getSToken()}
-              .tape-read-token=${getTToken()}
+              tape-read-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-11-23T20:33:44.019Z&sk=journeyUi&sig=Msa4zTsNmkeDHJcmQuXUVHTTzs1KATCQ%2FDNrVR2O7eU%3D"
+              stream-read-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-11-23T20:30:20.765Z&sk=journeyUi&sig=76cI1nBPkA0HdQved8YHiTQbOThPOR8W5UdwZzeUuPc%3D"
             >
             </cjaas-timeline-widget>
           </div>
