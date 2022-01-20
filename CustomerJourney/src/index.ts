@@ -6,26 +6,13 @@
  *
  */
 
-import {
-  html,
-  internalProperty,
-  property,
-  LitElement,
-  PropertyValues,
-  query,
-} from "lit-element";
+import { html, internalProperty, property, LitElement, PropertyValues, query } from "lit-element";
 import { classMap } from "lit-html/directives/class-map.js";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
 import { defaultTemplate } from "./assets/default-template";
 import * as iconData from "@/assets/icons.json";
-import {
-  Profile,
-  ServerSentEvent,
-  IdentityResponse,
-  JourneyEvent,
-  IdentityErrorResponse,
-} from "./types/cjaas";
+import { Profile, ServerSentEvent, IdentityResponse, JourneyEvent, IdentityErrorResponse } from "./types/cjaas";
 import { EventSourceInitDict } from "eventsource";
 import "@cjaas/common-components/dist/comp/cjaas-timeline";
 import "@cjaas/common-components/dist/comp/cjaas-profile";
@@ -54,16 +41,12 @@ export default class CustomerJourneyWidget extends LitElement {
    * Path to the proper Customer Journey API deployment
    * @attr base-url
    */
-  @property({ type: String, attribute: "base-url" }) baseURL:
-    | string
-    | undefined = undefined;
+  @property({ type: String, attribute: "base-url" }) baseURL: string | undefined = undefined;
   /**
    * Path to the proper Customer Journey API deployment
    * @attr base-url
    */
-  @property({ type: String, attribute: "base-url-admin" }) baseURLAdmin:
-    | string
-    | undefined = undefined;
+  @property({ type: String, attribute: "base-url-admin" }) baseURLAdmin: string | undefined = undefined;
   /**
    * Customer ID used for Journey lookup
    * @attr customer
@@ -97,16 +80,12 @@ export default class CustomerJourneyWidget extends LitElement {
    * SAS Token that provides read permissions for Historical Journey
    * @attr tape-token
    */
-  @property({ type: String, attribute: "tape-token" }) tapeToken:
-    | string
-    | null = null;
+  @property({ type: String, attribute: "tape-token" }) tapeToken: string | null = null;
   /**
    * SAS Token that provides read permissions for Journey Stream
    * @attr stream-token
    */
-  @property({ type: String, attribute: "stream-token" }) streamToken:
-    | string
-    | null = null;
+  @property({ type: String, attribute: "stream-token" }) streamToken: string | null = null;
   /**
    * Toggles display of field to find new Journey profiles
    * @attr user-search
@@ -127,8 +106,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * Property to set the data template to retrieve customer Profile in desired format
    * @attr template-id
    */
-  @property({ type: String, attribute: "template-id" }) templateId =
-    "journey-default-template";
+  @property({ type: String, attribute: "template-id" }) templateId = "journey-default-template";
   /**
    * Property to pass in JSON template to set color and icon settings
    * @prop eventIconTemplate
@@ -224,6 +202,7 @@ export default class CustomerJourneyWidget extends LitElement {
       // sort events
       this.events = sortEventsbyDate(events);
     });
+
     this.getProfile();
     this.subscribeToStream();
   }
@@ -238,15 +217,13 @@ export default class CustomerJourneyWidget extends LitElement {
   async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
 
-    const resizeObserver = new ResizeObserver(
-      (entries: ResizeObserverEntry[]) => {
-        if (entries[0].contentRect.width > 780) {
-          this.expanded = true;
-        } else {
-          this.expanded = false;
-        }
-      },
-    );
+    const resizeObserver = new ResizeObserver((entries: ResizeObserverEntry[]) => {
+      if (entries[0].contentRect.width > 780) {
+        this.expanded = true;
+      } else {
+        this.expanded = false;
+      }
+    });
 
     resizeObserver.observe(this.widget);
   }
@@ -292,20 +269,21 @@ export default class CustomerJourneyWidget extends LitElement {
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.profileReadToken,
-        "X-CACHE-MAXAGE-HOUR": "5",
+        Authorization: "SharedAccessSignature " + this.profileWriteToken,
+        "X-CACHE-MAXAGE-HOUR": "0",
+        "X-CACHE-MAXAGE-MINUTE": "10",
       },
     };
 
     fetch(url, options)
-      .then((x) => x.json())
-      .then((response) => {
+      .then(x => x.json())
+      .then(response => {
         if (response.error) {
           throw new Error(response.error.message[0]);
         }
         this.setOffProfileLongPolling(response.data.getUriStatusQuery);
       })
-      .catch((err) => {
+      .catch(err => {
         console.error("Unable to fetch the Profile", err);
       });
   }
@@ -321,17 +299,15 @@ export default class CustomerJourneyWidget extends LitElement {
           Authorization: "SharedAccessSignature " + this.profileReadToken,
         },
       })
-        .then((x) => x.json())
+        .then(x => x.json())
         .then((response: any) => {
           if (response.data.runtimeStatus === "Completed") {
             clearInterval(intervalId);
             this.pollingActive = false;
-            this.profileData = this.parseResponse(
-              response.data.output.attributeView,
-            );
+            this.profileData = this.parseResponse(response.data.output.attributeView);
           }
         })
-        .catch((err) => {
+        .catch(err => {
           console.log(err);
         });
     }, 1500);
@@ -349,9 +325,7 @@ export default class CustomerJourneyWidget extends LitElement {
       this.profileLoading = false;
       return {
         query: _query,
-        journeyEvents: attribute.journeyEvents?.map(
-          (value: string) => value && JSON.parse(value),
-        ),
+        journeyEvents: attribute.journeyEvents?.map((value: string) => value && JSON.parse(value)),
         result: [attribute.result],
       };
     });
@@ -360,17 +334,14 @@ export default class CustomerJourneyWidget extends LitElement {
   async getExistingEvents() {
     this.timelineLoading = true;
     this.baseUrlCheck();
-    return fetch(
-      `${this.baseURL}/v1/journey/streams/historic/${this.customer}`,
-      {
-        headers: {
-          "content-type": "application/json; charset=UTF-8",
-          accept: "application/json",
-          Authorization: `SharedAccessSignature ${this.tapeToken}`,
-        },
-        method: "GET",
+    return fetch(`${this.baseURL}/v1/journey/streams/historic/${this.customer}`, {
+      headers: {
+        "content-type": "application/json; charset=UTF-8",
+        accept: "application/json",
+        Authorization: `SharedAccessSignature ${this.tapeToken}`,
       },
-    )
+      method: "GET",
+    })
       .then((x: Response) => {
         return x.json();
       })
@@ -404,7 +375,7 @@ export default class CustomerJourneyWidget extends LitElement {
       };
       this.eventSource = new EventSource(
         `${this.baseURL}/v1/journey/streams/${this.customer}?${this.streamToken}`,
-        header,
+        header
       );
     }
 
@@ -511,7 +482,7 @@ export default class CustomerJourneyWidget extends LitElement {
       headers: {
         Authorization: `SharedAccessSignature ${this.identityReadSasToken}`,
       },
-    }).then((response) => {
+    }).then(response => {
       this.getAPIInProgress = false;
       return response.json();
     });
@@ -529,7 +500,7 @@ export default class CustomerJourneyWidget extends LitElement {
       body: JSON.stringify({
         aliases: [alias],
       }),
-    }).then((response) => {
+    }).then(response => {
       this.isAPIInProgress = false;
       return response.json();
     });
@@ -569,7 +540,7 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   removeAliasFromList(alias: string) {
-    const index = this.alias?.aliases.findIndex((item) => item === alias);
+    const index = this.alias?.aliases.findIndex(item => item === alias);
 
     if (this.alias && index !== undefined) {
       this.alias?.aliases.splice(index, 1);
@@ -604,10 +575,7 @@ export default class CustomerJourneyWidget extends LitElement {
     return html`
       <div class="flex-inline">
         <div class="input">
-          <md-tooltip
-            message="Click to search new journey"
-            ?disabled=${!this.userSearch}
-          >
+          <md-tooltip message="Click to search new journey" ?disabled=${!this.userSearch}>
             <input
               class="header"
               value=${this.customer || "Customer Journey"}
@@ -634,18 +602,11 @@ export default class CustomerJourneyWidget extends LitElement {
         ${this.renderHeader()}
         <div class="grid-profile">
           <details ?open=${this.profileData !== undefined}>
-            <summary
-              >Profile<md-icon name="icon-arrow-down_12"></md-icon>
-            </summary>
+            <summary>Profile<md-icon name="icon-arrow-down_12"></md-icon> </summary>
             ${this.profileLoading ? this.renderLoader() : this.renderProfile()}
           </details>
-          <details
-            class="grid-identity"
-            ?open=${this.identityAlias !== undefined}
-          >
-            <summary
-              >Identity Alias<md-icon name="icon-arrow-down_12"></md-icon
-            ></summary>
+          <details class="grid-identity" ?open=${this.identityAlias !== undefined}>
+            <summary>Identity Alias<md-icon name="icon-arrow-down_12"></md-icon></summary>
             ${this.renderIdentity()}
           </details>
         </div>
@@ -655,9 +616,7 @@ export default class CustomerJourneyWidget extends LitElement {
             <md-icon name="icon-arrow-down_12"></md-icon>
           </summary>
           <div class="container">
-            ${this.timelineLoading
-              ? this.renderLoader()
-              : this.renderEventList()}
+            ${this.timelineLoading ? this.renderLoader() : this.renderEventList()}
           </div>
         </details>
       </div>

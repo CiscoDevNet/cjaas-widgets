@@ -169,3 +169,4 @@ export class Sandbox extends LitElement {
     `;
   }
 }
+// profile-read-token="so=demoassure&sn=sandbox&ss=profile&sp=rw&se=2022-11-23T20:34:23.108Z&sk=journeyUi&sig=JydFx80vys0KNr8JwwgsUSPrj3y5fnLpj5afX9h2Hxc%3D"
