@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+    <ModulePrefs title="Customer Experience Journey"
+        description="Customer Experience Journey">
+        <Require feature="settitle" />
+        <Require feature="dynamic-height" />
+        <Require feature="pubsub-2" />
+        <Require feature="setprefs" />
+        <Require feature="loadingindicator">
+            <Param name="manual-dismiss">true</Param>
+            <Param name="loading-timeout">100</Param>
+        </Require>
+        <Optional feature="content-rewrite">
+            <Param name="exclude-url">cjaas-devus2.azurewebsites.net</Param>
+            <Param name="exclude-url">cjaas.cisco.com</Param>
+        </Optional>
+        <Optional feature="collapsible" />
+
+    </ModulePrefs>
+    <Content type="html" view="default,canvas">
+        <![CDATA[
+            <!DOCTYPE html>
+            <!-- Finesse Library -->
+            <script type="text/javascript" src="/desktop/assets/js/jquery.min.js"></script>
+            <script type="text/javascript" src="/desktop/assets/js/finesse.js"></script>
+            <script src="https://cjaas.cisco.com/widgets/finesse/customer-journey.js"></script>
+            <script src="https://cjaas.cisco.com/widgets/finesse/customer-journey-wrapper.js"></script>
+            <script src="https://cjaas.cisco.com/widgets/finesse/customer-journey-bootstrap.js"></script>
+            <link
+            rel="stylesheet"
+            href="https://cjaas.cisco.com/widgets/finesse/css/momentum-ui.min.css"
+            />
+            <link
+            rel="stylesheet"
+            href="https://cjaas.cisco.com/widgets/finesse/css/momentum-ui-icons.min.css"
+            />
+            <body>
+                 <div class="jds-customer-journey">
+                    <customer-journey-widget-wrapper>
+                        <customer-journey-widget></customer-journey-widget>
+                    </customer-journey-widget-wrapper>
+                </div> 
+            </body>
+        ]]>
+    </Content>
+</Module>

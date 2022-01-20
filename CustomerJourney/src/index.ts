@@ -412,6 +412,8 @@ export default class CustomerJourneyWidget extends LitElement {
     if (e.key === "Enter") {
       e.composedPath()[0].blur();
     }
+
+    this.handleBackspace(e);
   }
 
   renderEvents() {
@@ -574,6 +576,12 @@ export default class CustomerJourneyWidget extends LitElement {
     }
   }
 
+  handleBackspace(event: KeyboardEvent) {
+    if (event?.key === "Backspace") {
+      event.stopPropagation();
+    }
+  }
+
   renderHeader() {
     return html`
       <div class="flex-inline">
@@ -602,7 +610,8 @@ export default class CustomerJourneyWidget extends LitElement {
       </div>
     `;
   }
-  render() {
+
+  renderFunctionalWidget() {
     return html`
       <div class="profile${classMap(this.classes)}">
         ${this.renderHeader()}
@@ -636,6 +645,10 @@ export default class CustomerJourneyWidget extends LitElement {
         </details>
       </div>
     `;
+  }
+
+  render() {
+    return this.renderFunctionalWidget();
   }
 }
 

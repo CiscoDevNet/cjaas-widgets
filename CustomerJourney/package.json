@@ -16,7 +16,7 @@
     "dist": "npm run check && webpack --config-name=distProd",
     "dist:dev": "npm run check && webpack --config-name=distDev",
     "dist:watch": "npm run check && webpack --config-name=distDevWatch",
-    "check": "check-peer-dependencies --yarn",
+    "check": " ",
     "test": "jest"
   },
   "resolutions": {
@@ -26,7 +26,7 @@
     "lit-html": "1.2.1"
   },
   "peerDependencies": {
-    "@cjaas/common-components": "4.0.1",
+    "@cjaas/common-components": "4.1.1-dev1",
     "@momentum-ui/core": "19.15.4",
     "@momentum-ui/icons": "8.25.0",
     "@momentum-ui/utils": "6.2.15",
@@ -37,7 +37,7 @@
   "devDependencies": {
     "@babel/core": "^7.9.0",
     "@babel/preset-env": "^7.9.0",
-    "@cjaas/common-components": "4.0.1",
+    "@cjaas/common-components": "4.1.1-dev1",
     "@momentum-ui/core": "19.15.4",
     "@momentum-ui/icons": "8.25.0",
     "@momentum-ui/utils": "6.2.15",
@@ -50,7 +50,7 @@
     "@types/jest": "26.0.10",
     "@types/lodash": "^4.14.168",
     "@types/luxon": "^1.25.1",
-    "@types/node": "^13.7.7",
+    "@types/node": "^13.13.52",
     "@types/webpack": "^4.41.7",
     "@types/webpack-bundle-analyzer": "^4.4.1",
     "@types/webpack-dev-server": "^3.10.0",

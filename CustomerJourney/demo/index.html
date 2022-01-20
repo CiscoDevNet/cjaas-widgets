@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- <script src="../dist/finesse/customer-journey.js"></script>
+    <script src="../dist/finesse/customer-journey-wrapper.js"></script>
+    <link rel="stylesheet" href="../dist/finesse/css/momentum-ui.min.css" /> -->
+    <!-- <link
+      rel="stylesheet"
+      href="../dist/finesse/css/momentum-ui-icons.min.css"
+    /> -->
+    <script src="https://cjaas.cisco.com/widgets/finesse/customer-journey.js"></script>
+    <script src="https://cjaas.cisco.com/widgets/finesse/customer-journey-wrapper.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cjaas.cisco.com/widgets/finesse/css/momentum-ui.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cjaas.cisco.com/widgets/finesse/css/momentum-ui-icons.min.css"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      // Stubs for gadget bootstrap to work
+
+      var gadgets = {
+        HubSettings: {
+          onConnect: null,
+        },
+      };
+
+      var finesse = {
+        gadget: {
+          Config: {
+            host: null,
+            hostPort: null,
+            scheme: null,
+          },
+        },
+        cslogger: {
+          ClientLogger: {
+            init: () => {},
+          },
+        },
+        utilities: {
+          Utilities: {
+            getAuthHeaderString: null,
+          },
+          DesktopCache: {
+            saveOrUpdateData: () => {},
+            fetchData: () => {},
+          },
+        },
+        clientservices: {
+          ClientServices: {
+            init: () => {},
+            showMygadget: () => {},
+          },
+        },
+        containerservices: {
+          ContainerServices: {
+            init: () => ({ makeActiveTabReq: () => {} }),
+            enableTitle: () => {},
+          },
+        },
+      };
+    </script>
+  </head>
+
+  <body style="padding: 12px;">
+    <customer-journey-widget-wrapper>
+      <customer-journey-widget
+        limit="20"
+        customer="sample"
+        user-search
+        base-url="https://cjaas-devus2.azurewebsites.net"
+        base-url-admin="http://cjaas-devus2-admin.azurewebsites.net"
+        tape-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-11-23T20:33:44.019Z&sk=journeyUi&sig=Msa4zTsNmkeDHJcmQuXUVHTTzs1KATCQ%2FDNrVR2O7eU%3D"
+        stream-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-11-23T20:30:20.765Z&sk=journeyUi&sig=76cI1nBPkA0HdQved8YHiTQbOThPOR8W5UdwZzeUuPc%3D"
+        profile-read-token="so=demoassure&sn=sandbox&ss=profile&sp=rw&se=2022-11-23T20:34:23.108Z&sk=journeyUi&sig=JydFx80vys0KNr8JwwgsUSPrj3y5fnLpj5afX9h2Hxc%3D"
+        identity-read-sas-token="so=demoassure&sn=sandbox&ss=idmt&sp=r&se=2024-09-09T16:11:06.254855600Z&sk=venkitest&sig=CTlbxZuc2FeWSlzT38SUYlEYqBz0UROqCAXQPDPaoiQ%3D"
+        identity-write-sas-token="so=demoassure&sn=sandbox&ss=idmt&sp=w&se=2024-09-09T18:29:51.574147700Z&sk=venkitest&sig=%2BPRGATu1qEvll6N1I3PdIHCKcyRlFwjJQ3aTf32Vl6o%3D"
+      ></customer-journey-widget>
+    </customer-journey-widget-wrapper>
+    <script src="../dist/finesse/customer-journey-bootstrap.js"></script>
+  </body>
+</html>

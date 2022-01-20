@@ -10,8 +10,14 @@
  * ATTENTION: Apps using this widget must provide the following values from the application configuration.
  * These details allow easy and discreet generation of SAS tokens with correct permissions needed to access the API.
  */
-//@ts-ignore
-const PRIVATE_KEY = process.env.DOTENV.PRIVATE_KEY;
+const ENV: any = process.env.DONTENV;
+const PRIVATE_KEY = ENV.PRIVATE_KEY;
+const TAPE_TOKEN = ENV.TAPE_TOKEN;
+const STREAM_TOKEN = ENV.STREAM_TOKEN;
+const PROFILE_READ_TOKEN = ENV.PROFILE_READ_TOKEN;
+const IDENTITY_READ_SAS_TOKEN = ENV.IDENTITY_READ_SAS_TOKEN;
+const IDENTITY_WRITE_SAS_TOKEN = ENV.IDENTITY_WRITE_SAS_TOKEN;
+
 const ORGANIZATION = "demoassure";
 const NAMESPACE = "sandbox";
 const APP_NAME = "journeyUi";
@@ -23,7 +29,6 @@ import styles from "./sandbox.scss";
 import * as iconData from "@/assets/icons.json";
 import "..";
 import { generateSasToken, TokenArgs } from "../generatesastoken";
-
 /**
  * Private SAS Tokens generated and stored in component instance
  */
@@ -157,11 +162,11 @@ export class Sandbox extends LitElement {
               .eventIconTemplate=${iconData}
               base-url="https://cjaas-devus2.azurewebsites.net"
               base-url-admin="http://cjaas-devus2-admin.azurewebsites.net"
-              tape-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-11-23T20:33:44.019Z&sk=journeyUi&sig=Msa4zTsNmkeDHJcmQuXUVHTTzs1KATCQ%2FDNrVR2O7eU%3D"
-              stream-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-11-23T20:30:20.765Z&sk=journeyUi&sig=76cI1nBPkA0HdQved8YHiTQbOThPOR8W5UdwZzeUuPc%3D"
-              profile-read-token="so=demoassure&sn=sandbox&ss=profile&sp=rw&se=2022-11-23T20:34:23.108Z&sk=journeyUi&sig=JydFx80vys0KNr8JwwgsUSPrj3y5fnLpj5afX9h2Hxc%3D"
-              identity-read-sas-token="so=demoassure&sn=sandbox&ss=idmt&sp=r&se=2024-09-09T16:11:06.254855600Z&sk=venkitest&sig=CTlbxZuc2FeWSlzT38SUYlEYqBz0UROqCAXQPDPaoiQ%3D"
-              identity-write-sas-token="so=demoassure&sn=sandbox&ss=idmt&sp=w&se=2024-09-09T18:29:51.574147700Z&sk=venkitest&sig=%2BPRGATu1qEvll6N1I3PdIHCKcyRlFwjJQ3aTf32Vl6o%3D"
+              tape-token=${TAPE_TOKEN}
+              stream-token=${STREAM_TOKEN}
+              profile-read-token=${PROFILE_READ_TOKEN}
+              identity-read-sas-token=${IDENTITY_READ_SAS_TOKEN}
+              identity-write-sas-token=${IDENTITY_WRITE_SAS_TOKEN}
             ></customer-journey-widget>
           </div>
         </div>

@@ -23,21 +23,51 @@ const pCss = path.resolve("src/assets/styles");
 const pImg = path.resolve("src/assets/images");
 const pModules = path.resolve("node_modules");
 
+// Copy Fonts and Icons
+const copyFontsAndIcons = (prefix: string) =>
+  new CopyWebpackPlugin([
+    { from: `${pModules}/@momentum-ui/core/fonts`, to: prefix + "fonts" },
+    { from: `${pModules}/@momentum-ui/core/images`, to: prefix + "images" },
+    {
+      from: `${pModules}/@momentum-ui/core/css/momentum-ui.min.css`,
+      to: prefix + "css",
+    },
+    {
+      from: `${pModules}/@momentum-ui/core/css/momentum-ui.min.css.map`,
+      to: prefix + "css",
+    },
+    { from: `${pModules}/@momentum-ui/icons/fonts`, to: prefix + "fonts" },
+    {
+      from: `${pModules}/@momentum-ui/icons/fonts`,
+      to: prefix + "icons/fonts",
+    },
+    {
+      from: `${pModules}/@momentum-ui/icons/css/momentum-ui-icons.min.css`,
+      to: prefix + "css",
+    },
+  ]);
+
 const envSetup = dotenv.config({
-  path: path.join(__dirname, '.env')
-})
+  path: path.join(__dirname, ".env"),
+});
 
 const common: webpack.Configuration = {
+  entry: {
+    index: "./src/index.ts",
+    "finesse/customer-journey-bootstrap": "./src/finesse/bootstrap.ts",
+    "finesse/customer-journey": "./src/index.ts",
+    "finesse/customer-journey-wrapper": "./src/wrapper.ts",
+  },
   output: {
-    publicPath: "/"
+    publicPath: "/",
   },
   resolve: {
     extensions: [".ts", ".js", ".scss"],
     alias: {
       "@": pSrc,
       "@css": pCss,
-      "@img": pImg
-    }
+      "@img": pImg,
+    },
   },
   module: {
     rules: [
@@ -47,18 +77,19 @@ const common: webpack.Configuration = {
           loader: "file-loader",
           options: {
             name: "images-mfe-wc/[name].[hash:8].[ext]",
-            esModule: false
-          }
+            esModule: false,
+          },
         },
-        include: pSrc
-      }
-    ]
+        include: pSrc,
+      },
+    ],
   },
   plugins: [
     new webpack.DefinePlugin({
       "process.env.DOTENV": JSON.stringify(envSetup.parsed),
-    })
-  ]
+    }),
+    copyFontsAndIcons("finesse/"),
+  ],
 };
 
 function ruleTS({ isDev }: { isDev: boolean }) {
@@ -69,9 +100,9 @@ function ruleTS({ isDev }: { isDev: boolean }) {
     options: {
       compilerOptions: {
         declarationMap: isDev,
-        sourceMap: isDev
-      }
-    }
+        sourceMap: isDev,
+      },
+    },
   };
 }
 
@@ -88,34 +119,14 @@ function ruleCSS({ isDev }: { isDev: boolean }) {
         options: {
           alias: {
             "@css": pCss,
-            "@img": pImg
-          }
-        }
-      }
+            "@img": pImg,
+          },
+        },
+      },
     ],
-    include: pSrc
+    include: pSrc,
   };
 }
-
-// Copy Fonts and Icons
-const copyFontsAndIcons = new CopyWebpackPlugin([
-  { from: `${pModules}/@momentum-ui/core/fonts`, to: "fonts" },
-  { from: `${pModules}/@momentum-ui/core/images`, to: "images" },
-  {
-    from: `${pModules}/@momentum-ui/core/css/momentum-ui.min.css`,
-    to: "css"
-  },
-  {
-    from: `${pModules}/@momentum-ui/core/css/momentum-ui.min.css.map`,
-    to: "css"
-  },
-  { from: `${pModules}/@momentum-ui/icons/fonts`, to: "fonts" },
-  { from: `${pModules}/@momentum-ui/icons/fonts`, to: "icons/fonts" },
-  {
-    from: `${pModules}/@momentum-ui/icons/css/momentum-ui-icons.min.css`,
-    to: "css"
-  }
-]);
 
 // DEV
 // ----------
@@ -126,35 +137,32 @@ export const commonDev = merge(common, {
   devtool: "source-map",
   entry: "./src/[sandbox]/sandbox.ts",
   output: {
-    path: pBuild
+    path: pBuild,
   },
   module: {
-    rules: [ruleTS({ isDev: true }), ruleCSS({ isDev: true })]
+    rules: [ruleTS({ isDev: true }), ruleCSS({ isDev: true })],
   },
   plugins: [
     new HtmlWebpackPlugin({
       template: "./src/[sandbox]/index.html",
-      favicon: "./src/[sandbox]/favicon.ico"
+      favicon: "./src/[sandbox]/favicon.ico",
     }),
-    copyFontsAndIcons
-  ]
+    copyFontsAndIcons(""),
+  ],
 });
 
 const dev = merge(commonDev, {
-  plugins: [new CleanWebpackPlugin()]
+  plugins: [new CleanWebpackPlugin()],
 });
 
 // DIST
 // ----------
 
 const commonDist = merge(common, {
-  entry: {
-    index: "./src/index.ts",
-  },
   output: {
     path: pDist,
     filename: "[name].js",
-    libraryTarget: "umd"
+    libraryTarget: "umd",
   },
   plugins: [
     new CleanWebpackPlugin(),
@@ -166,12 +174,15 @@ const commonDist = merge(common, {
           {
             folder: "./dist/types",
             method: (p: string) => new RegExp(/\.test\.d\.ts(\.map)*$/).test(p),
-            recursive: true
-          }
-        ]
-      }
-    }) as any
-  ]
+            recursive: true,
+          },
+        ],
+      },
+    }) as any,
+    new webpack.DefinePlugin({
+      "process.env.DOTENV": JSON.stringify(envSetup.parsed),
+    }),
+  ],
 });
 
 const distDev = merge(commonDist, {
@@ -179,21 +190,21 @@ const distDev = merge(commonDist, {
   mode: "development",
   devtool: "source-map",
   module: {
-    rules: [ruleTS({ isDev: true }), ruleCSS({ isDev: true })]
-  }
+    rules: [ruleTS({ isDev: true }), ruleCSS({ isDev: true })],
+  },
 });
 
 const distDevWatch = merge(distDev, {
   name: "distDevWatch",
-  watch: true
+  watch: true,
 });
 
 const distProd = merge(commonDist, {
   name: "distProd",
   mode: "production",
   module: {
-    rules: [ruleTS({ isDev: false }), ruleCSS({ isDev: false })]
-  }
+    rules: [ruleTS({ isDev: false }), ruleCSS({ isDev: false })],
+  },
 });
 
 export default [dev, distDev, distDevWatch, distProd];
