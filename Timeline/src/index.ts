@@ -13,14 +13,14 @@ import {
   internalProperty,
   property,
   LitElement,
-  PropertyValues
+  PropertyValues,
 } from "lit-element";
 import { nothing } from "lit-html";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
 import { EventSourceInitDict } from "eventsource";
 import { ServerSentEvent } from "./types/cjaas";
-
+import { DateTime } from "luxon";
 export interface CustomerEvent {
   data: Record<string, any>;
   firstName: string;
@@ -31,8 +31,22 @@ export interface CustomerEvent {
   person: string;
   source: string;
   specversion: string;
-  time: string;
+  time: any;
   type: string;
+}
+
+function sortEventsbyDate(events: CustomerEvent[]) {
+  events.sort((previous, current) => {
+    if (previous.time > current.time) {
+      return -1;
+    } else if (previous.time < current.time) {
+      return 1;
+    } else {
+      return 0;
+    }
+  });
+
+  return events;
 }
 
 @customElementWithCheck("cjaas-timeline-widget")
@@ -47,13 +61,13 @@ export default class CjaasTimelineWidget extends LitElement {
   /**
    * @attr tape-read-token
    */
-    @property({ type: String, attribute: "tape-read-token" }) tapeReadToken:
+  @property({ type: String, attribute: "tape-read-token" }) tapeReadToken:
     | string
     | undefined;
   /**
    * @attr stream-read-token
    */
-    @property({ type: String, attribute: "stream-read-token" }) streamToken:
+  @property({ type: String, attribute: "stream-read-token" }) streamToken:
     | string
     | undefined;
   /**
@@ -65,7 +79,7 @@ export default class CjaasTimelineWidget extends LitElement {
    * Toggle whether new live events appear in the timeline or not
    * @attr live-stream
    */
-  @property({type: Boolean, attribute: "live-stream"}) liveStream = false;
+  @property({ type: Boolean, attribute: "live-stream" }) liveStream = false;
   /**
    * Toggle visibility of the timeline filters
    * @attr show-filters
@@ -101,7 +115,8 @@ export default class CjaasTimelineWidget extends LitElement {
 
   async lifecycleTasks() {
     const data = await this.getExistingEvents();
-    this.events = data.events;
+    // sort events by time
+    this.events = sortEventsbyDate(data.events);
     this.showSpinner = false;
     this.requestUpdate();
     this.subscribeToStream();
@@ -132,7 +147,8 @@ export default class CjaasTimelineWidget extends LitElement {
   }
 
   updateComprehensiveEventList() {
-    this.events = [...this.newestEvents, ...this.events];
+    // sort events by time
+    this.events = sortEventsbyDate([...this.newestEvents, ...this.events]);
     this.newestEvents = [];
   }
 
@@ -145,18 +161,22 @@ export default class CjaasTimelineWidget extends LitElement {
         headers: {
           "content-type": "application/json; charset=UTF-8",
           accept: "application/json",
-          Authorization: `SharedAccessSignature ${this.tapeReadToken}`
+          Authorization: `SharedAccessSignature ${this.tapeReadToken}`,
         },
-        method: "GET"
-      }
+        method: "GET",
+      },
     )
       .then((x: Response) => {
         return x.json();
       })
-      .then(data => {
+      .then((data) => {
+        data.events = data.events.map((event: CustomerEvent) => {
+          event.time = DateTime.fromISO(event.time);
+          return event;
+        });
         return data;
       })
-      .catch(err => {
+      .catch((err) => {
         this.showSpinner = false;
         console.error("Could not fetch Customer Journey events. ", err);
         this.errorMessage = `Failure to fetch Journey for ${this.personId}. ${err}`;
@@ -174,27 +194,28 @@ export default class CjaasTimelineWidget extends LitElement {
         headers: {
           "content-type": "application/json; charset=UTF-8",
           accept: "application/json",
-          Authorization: `SharedAccessSignature ${this.streamToken}`
-        }
+          Authorization: `SharedAccessSignature ${this.streamToken}`,
+        },
       };
       this.eventSource = new EventSource(
         `${this.baseURL}/v1/journey/streams/${this.personId}?${this.streamToken}`,
-        header
+        header,
       );
     }
 
     if (this.eventSource) {
-      this.eventSource!.onmessage = (event: ServerSentEvent) => {
+      this.eventSource.onmessage = (event: ServerSentEvent) => {
         let data;
         try {
           data = JSON.parse(event.data);
+          data.time = DateTime.fromISO(data.time);
           this.newestEvents = [data, ...this.newestEvents];
         } catch (err) {
           console.log("Event Source Ping");
         }
       };
 
-      this.eventSource!.onerror = () => {
+      this.eventSource.onerror = () => {
         this.showSpinner = false;
       };
     } else {
