@@ -1,0 +1,52 @@
+@import "../../assets/styles/variables";
+
+* {
+  box-sizing: border-box;
+}
+
+:host {
+  padding: 12px;
+  display: block;
+  color: var(--md-secondary-text-color, #545454);
+}
+
+.spinner-container {
+  display: flex;
+  min-height: 80px;
+  width: 240px;
+  align-items: center;
+  justify-content: center;
+}
+
+.centered-v {
+  align-items: center;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-height: 80px;
+  margin-bottom: 8px;
+
+  md-avatar {
+    margin-right: 8px;
+  }
+
+  h3 {
+    margin: 0;
+    margin-top: 4px;
+    max-height: 80px;
+    word-wrap: break-word;
+    word-break: break-all;
+  }
+}
+.aliases {
+  width: 100%;
+  min-width: 320px;
+}
+
+cjaas-timeline-item {
+  display: block;
+  margin: 0 0.25rem 0 1rem 0px;
+}

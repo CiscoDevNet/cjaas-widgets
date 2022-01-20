@@ -1,6 +1,6 @@
 # CJaaS Customer Journey Widget for devus2
 
-This widget uses the CJaaS API to display an individual customer's journey as a history of events. It first retrieves the complete event history from the tape endpoint and compiles toggles for all event types, and then subscribes to a live stream of new events so they appear in real time. This code can be used as is, or be starter code for your own Custom Widget.
+This widget uses the CJaaS API to display an individual customer's journey as a history of events. It first retrieves the complete event history from the tape endpoint and compiles toggles for all event types, and then subscribes to a live stream of new events so they appear in real time. This code can be used as is, or be starter code for your own Custom Widget. It also embodies Identity Alias management and Profile view with a tempate named 'journey-default-template' 
 
 ## Customer Journey Widget Properties
 
@@ -9,8 +9,12 @@ THIS version adheres to the endpoints at `https://cjaas-devus2.azurewebsites.net
 
 `@attr stream-read-token`: SAS Token for reading stream API
 `@attr tape-read-token`: SAS Token for reading tape API
-`@attr profile-token`: SAS Token for POST operations on Profile endpoint
+`@attr profile-read-token`: SAS Token for read operations on Profile endpoint
+`@attr profile-write-token`: SAS Token for POST operations on Profile endpoint
+`@attr identity-read-token`: SAS Token for read operations on Identity endpoint
+`@attr identity-write-token`: SAS Token for POST operations on Identity endpoint
 `@attr base-url` : Path to the proper Customer Journey API deployment
+`@attr base-url-admin` : Path to the proper Customer Journey Admin API deployment
 `@attr customer` : Customer ID used for Journey lookup
 `@attr user-search` : Toggles display of field to find new Journey profiles
 `@attr limit` : Set the number of Timeline Events to display
@@ -25,9 +29,13 @@ THIS version adheres to the endpoints at `https://cjaas-devus2.azurewebsites.net
    user-search
    .eventIconTemplate=${iconData}
    base-url="https://cjaas-devus2.azurewebsites.net"
+   base-url-admin="https://cjaas-devus2-admin.azurewebsites.net"
    tape-token=${your-token}
    stream-token=${your-token}
-   profile-token=${your-token}
+   profile-read-token=${your-token}
+   profile-write-token=${your-token}
+   identity-read-sas-token=${your-identity-token}
+   identity-write-sas-token=${your-identity-token}
 ></customer-journey-widget>
 ```
 
