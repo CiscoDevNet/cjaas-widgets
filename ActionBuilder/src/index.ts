@@ -500,7 +500,7 @@ export default class CjaasActionBuilder extends LitElement {
       <div>
         <md-input
           id="walkin_agent_id"
-          placeholder="Agent Id"
+          placeholder="Webex Teams Agent Id or SIP address"
           .value=${config?.agentId || null}
         ></md-input>
         <md-input
