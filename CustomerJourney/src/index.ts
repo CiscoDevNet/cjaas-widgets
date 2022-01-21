@@ -19,6 +19,21 @@ import "@cjaas/common-components/dist/comp/cjaas-profile";
 import "@cjaas/common-components/dist/comp/cjaas-identity";
 import { Timeline } from "@cjaas/common-components/dist/types/components/timeline/Timeline";
 import ResizeObserver from "resize-observer-polyfill";
+import { DateTime } from "luxon";
+
+function sortEventsbyDate(events: Timeline.CustomerEvent[]) {
+  events.sort((previous, current) => {
+    if (previous.time > current.time) {
+      return -1;
+    } else if (previous.time < current.time) {
+      return 1;
+    } else {
+      return 0;
+    }
+  });
+
+  return events;
+}
 
 @customElementWithCheck("customer-journey-widget")
 export default class CustomerJourneyWidget extends LitElement {
@@ -181,8 +196,13 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   reloadOtherWidgets() {
-    this.getExistingEvents().then(events => (this.events = events));
-    this.timelineLoading = false;
+    this.getExistingEvents().then((events: Timeline.CustomerEvent[]) => {
+      this.timelineLoading = false;
+
+      // sort events
+      this.events = sortEventsbyDate(events);
+    });
+
     this.getProfile();
     this.subscribeToStream();
   }
@@ -249,8 +269,9 @@ export default class CustomerJourneyWidget extends LitElement {
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.profileReadToken,
-        "X-CACHE-MAXAGE-HOUR": "5",
+        Authorization: "SharedAccessSignature " + this.profileWriteToken,
+        "X-CACHE-MAXAGE-HOUR": "0",
+        "X-CACHE-MAXAGE-MINUTE": "10",
       },
     };
 
@@ -324,10 +345,15 @@ export default class CustomerJourneyWidget extends LitElement {
       .then((x: Response) => {
         return x.json();
       })
-      .then(data => {
+      .then((data: any) => {
+        // any to be changed to Timeline.CustomerEvent
+        data.events = data.events.map((event: any) => {
+          event.time = DateTime.fromISO(event.time);
+          return event;
+        });
         return data.events;
       })
-      .catch(err => {
+      .catch((err: Error) => {
         console.error("Could not fetch Customer Journey events. ", err);
         this.errorMessage = `Failure to fetch Journey for ${this.customer}. ${err}`;
       });
@@ -358,7 +384,9 @@ export default class CustomerJourneyWidget extends LitElement {
         let data;
         try {
           data = JSON.parse(event.data);
-          this.newestEvents = [data, ...this.newestEvents];
+          data.time = DateTime.fromISO(data.time);
+          // sort events
+          this.newestEvents = sortEventsbyDate([data, ...this.newestEvents]);
         } catch (err) {
           console.error("No data fetched");
         }
@@ -373,7 +401,7 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   updateComprehensiveEventList() {
-    this.events = [...this.newestEvents, ...this.events];
+    this.events = sortEventsbyDate([...this.newestEvents, ...this.events]);
     this.newestEvents = [];
   }
 
