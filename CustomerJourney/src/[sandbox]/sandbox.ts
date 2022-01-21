@@ -10,17 +10,19 @@
  * ATTENTION: Apps using this widget must provide the following values from the application configuration.
  * These details allow easy and discreet generation of SAS tokens with correct permissions needed to access the API.
  */
-const ENV: any = process.env.DONTENV;
-const PRIVATE_KEY = ENV.PRIVATE_KEY;
-const TAPE_TOKEN = ENV.TAPE_TOKEN;
-const STREAM_TOKEN = ENV.STREAM_TOKEN;
-const PROFILE_READ_TOKEN = ENV.PROFILE_READ_TOKEN;
-const IDENTITY_READ_SAS_TOKEN = ENV.IDENTITY_READ_SAS_TOKEN;
-const IDENTITY_WRITE_SAS_TOKEN = ENV.IDENTITY_WRITE_SAS_TOKEN;
+// @ts-ignore
+const TAPE_TOKEN = process.env.DOTENV.TAPE_TOKEN;
+// @ts-ignore
+const STREAM_TOKEN = process.env.DOTENV.STREAM_TOKEN;
+// @ts-ignore
+const PROFILE_READ_TOKEN = process.env.DOTENV.PROFILE_READ_TOKEN;
+// @ts-ignore
+const PROFILE_WRITE_TOKEN = process.env.DOTENV.PROFILE_WRITE_TOKEN;
+// @ts-ignore
+const IDENTITY_READ_SAS_TOKEN = process.env.DOTENV.IDENTITY_READ_SAS_TOKEN;
 
-const ORGANIZATION = "demoassure";
-const NAMESPACE = "sandbox";
-const APP_NAME = "journeyUi";
+// @ts-ignore
+const IDENTITY_WRITE_SAS_TOKEN = process.env.DOTENV.IDENTITY_WRITE_SAS_TOKEN;
 
 import "@momentum-ui/web-components";
 import "@cjaas/common-components";
@@ -28,53 +30,6 @@ import { customElement, html, internalProperty, LitElement } from "lit-element";
 import styles from "./sandbox.scss";
 import * as iconData from "@/assets/icons.json";
 import "..";
-import { generateSasToken, TokenArgs } from "../generatesastoken";
-/**
- * Private SAS Tokens generated and stored in component instance
- */
-
-function getTokens() {
-  return {
-    getTToken: function() {
-      const tapeArgs: TokenArgs = {
-        secret: PRIVATE_KEY!,
-        organization: ORGANIZATION!,
-        namespace: NAMESPACE!,
-        service: "tape",
-        permissions: "r",
-        keyName: APP_NAME!,
-        expiration: 1000,
-      };
-      return generateSasToken(tapeArgs);
-    },
-
-    getSToken: function() {
-      const tapeArgs: TokenArgs = {
-        secret: PRIVATE_KEY!,
-        organization: ORGANIZATION!,
-        namespace: NAMESPACE!,
-        service: "stream",
-        permissions: "r",
-        keyName: APP_NAME!,
-        expiration: 1000,
-      };
-      return generateSasToken(tapeArgs);
-    },
-
-    getPToken: function() {
-      const tapeArgs: TokenArgs = {
-        secret: PRIVATE_KEY!,
-        organization: ORGANIZATION!,
-        namespace: NAMESPACE!,
-        service: "profile",
-        permissions: "rw",
-        keyName: APP_NAME!,
-        expiration: 1000,
-      };
-      return generateSasToken(tapeArgs);
-    },
-  };
-}
 
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
@@ -142,7 +97,6 @@ export class Sandbox extends LitElement {
 
   render() {
     // TODO: Verify that the JavaScript SAS Token script is still working. Below are keys made using Java from Srini
-    const { getTToken, getSToken, getPToken } = getTokens();
     return html`
       <div class="toggle">
         ${this.themeToggle()}
@@ -150,10 +104,7 @@ export class Sandbox extends LitElement {
       <md-theme ?darkTheme=${this.darkTheme} lumos>
         <div class="container">
           <h2 class="sandbox-header">Customer Journey Widget</h2>
-          <div
-            style=${`width: ${this.containerWidth}; height: ${this.containerHeight};`}
-            class="widget-container"
-          >
+          <div style=${`width: ${this.containerWidth}; height: ${this.containerHeight};`} class="widget-container">
             <!-- CHANGE TO PRODUCTION SERVER WHEN SHIPPING TO WXCC DESKTOP -->
             <customer-journey-widget
               limit="20"
@@ -162,11 +113,12 @@ export class Sandbox extends LitElement {
               .eventIconTemplate=${iconData}
               base-url="https://cjaas-devus2.azurewebsites.net"
               base-url-admin="http://cjaas-devus2-admin.azurewebsites.net"
-              tape-token=${TAPE_TOKEN}
-              stream-token=${STREAM_TOKEN}
-              profile-read-token=${PROFILE_READ_TOKEN}
-              identity-read-sas-token=${IDENTITY_READ_SAS_TOKEN}
-              identity-write-sas-token=${IDENTITY_WRITE_SAS_TOKEN}
+              .tapeToken=${TAPE_TOKEN}
+              .streamToken=${STREAM_TOKEN}
+              .profileReadToken=${PROFILE_READ_TOKEN}
+              .profileWriteToken=${PROFILE_WRITE_TOKEN}
+              .identityReadSasToken=${IDENTITY_READ_SAS_TOKEN}
+              .identityWriteSasToken=${IDENTITY_WRITE_SAS_TOKEN}
             ></customer-journey-widget>
           </div>
         </div>

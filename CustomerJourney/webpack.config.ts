@@ -48,7 +48,7 @@ const copyFontsAndIcons = (prefix: string) =>
   ]);
 
 const envSetup = dotenv.config({
-  path: path.join(__dirname, ".env"),
+  path: path.join(__dirname, ".env.carehybrid"),
 });
 
 const common: webpack.Configuration = {

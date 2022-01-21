@@ -40,14 +40,29 @@ THIS version adheres to the endpoints at `https://cjaas-devus2.azurewebsites.net
 ```
 
 ## Dev Environment: Getting Started
-- Create a `.env` file that contains `PRIVATE_KEY="key from your admin portal when app created"`
-- in `sandbox.ts`, pass the correct ORGANIZATION, NAMESPACE, and APP_NAME values from your admin portal
+- Create a `.env` file that contains the following secrets
+```
+TAPE_TOKEN="tape read sas token"
+STREAM_TOKEN="stream read sas token"
+PROFILE_READ_TOKEN="profile read sas token"
+PROFILE_WRITE_TOKEN="profile write sas token"
+IDENTITY_READ_SAS_TOKEN="identity read sas token"
+IDENTITY_WRITE_SAS_TOKEN="identity write sas token"
+```
 - run `yarn install`
 - run `yarn start`
 - navigate browser to `localhost:8888`
 
 ## Using in Deployment
-- Create a `.env` file that contains `PRIVATE_KEY="key from your admin portal when app created"`
+- Create a `.env` file that contains below secrets for production
+```
+TAPE_TOKEN="tape read sas token"
+STREAM_TOKEN="stream read sas token"
+PROFILE_READ_TOKEN="profile read sas token"
+PROFILE_WRITE_TOKEN="profile write sas token"
+IDENTITY_READ_SAS_TOKEN="identity read sas token"
+IDENTITY_WRITE_SAS_TOKEN="identity write sas token"
+```
 - Where used in your app, pass the correct ORGANIZATION, NAMESPACE, and APP_NAME values from your admin portal
 
 ## Build and Deploy Modules
