@@ -96,6 +96,7 @@ export class Sandbox extends LitElement {
   }
 
   render() {
+    const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
     // TODO: Verify that the JavaScript SAS Token script is still working. Below are keys made using Java from Srini
     return html`
       <div class="toggle">
@@ -104,7 +105,7 @@ export class Sandbox extends LitElement {
       <md-theme ?darkTheme=${this.darkTheme} lumos>
         <div class="container">
           <h2 class="sandbox-header">Customer Journey Widget</h2>
-          <div style=${`width: ${this.containerWidth}; height: ${this.containerHeight};`} class="widget-container">
+          <div style=${containerStyle} class="widget-container">
             <!-- CHANGE TO PRODUCTION SERVER WHEN SHIPPING TO WXCC DESKTOP -->
             <customer-journey-widget
               limit="20"
@@ -126,4 +127,3 @@ export class Sandbox extends LitElement {
     `;
   }
 }
-// profile-read-token="so=demoassure&sn=sandbox&ss=profile&sp=rw&se=2022-11-23T20:34:23.108Z&sk=journeyUi&sig=JydFx80vys0KNr8JwwgsUSPrj3y5fnLpj5afX9h2Hxc%3D"

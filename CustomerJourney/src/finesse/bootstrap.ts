@@ -1,58 +1,17 @@
 import * as helper from "./helper";
-import {
-  ParsedFilterTags,
-  QueryParams,
-  SASTokens,
-  UserData,
-} from "./interface";
+import { SASTokens, UserData } from "./interface";
 
 declare const finesse: any;
 declare const gadgets: any;
 
-let agentId: any;
 let containerServices: any;
 let user: any;
 let dialogs: any;
 let queryParamsValues: any;
 let agentNumber: string;
+let mediaList: any;
 
-export const getFilterTags = (filterTagsParam: string) => {
-  const filterTags: ParsedFilterTags = {
-    isAgentIdRequired: false,
-    isTeamIdRequired: false,
-  };
-  if (!filterTagsParam) {
-    return filterTags;
-  }
-  const parsedTags = filterTagsParam.split(",");
-  filterTags.isAgentIdRequired = parsedTags.indexOf(QueryParams.agentId) !== -1;
-  filterTags.isTeamIdRequired = parsedTags.indexOf(QueryParams.teamId) !== -1;
-  return filterTags;
-};
-
-export const getAgentId = (config: any, filterTags: ParsedFilterTags) => {
-  if (filterTags.isAgentIdRequired && config.cceSkillTargetId) {
-    return config.cceSkillTargetId;
-  } else if (filterTags.isAgentIdRequired) {
-    return config.id;
-  } else {
-    return null;
-  }
-};
-
-const getAgentAndTeamId = (
-  filterTagsParam: string,
-  config: any,
-  callback: Function,
-) => {
-  const parsedFilterTags = getFilterTags(filterTagsParam);
-  agentId = getAgentId(config, parsedFilterTags);
-  agentNumber = config.extension;
-
-  callback();
-};
-
-const setCustomerIdToGadget = (dialogData: UserData, channelType: "Voice") => {
+const setCustomerIdToGadget = (dialogData: UserData) => {
   const customerValues = helper.getCustomerValues(dialogData);
   const customerId = customerValues?.cc_CustomerId;
   const emailId = customerValues?.emailId;
@@ -84,10 +43,7 @@ const handleNewDialog = (dialog: { _data?: any }) => {
     return;
   }
 
-  // activeCalls.push(dialogData);
-  setCustomerIdToGadget(dialogData, "Voice");
-
-  helper.log("handling new dialog");
+  setCustomerIdToGadget(dialogData);
 };
 
 const handleEndDialog = () => {
@@ -98,12 +54,48 @@ const handleLoadDialog = () => {
   helper.log("handling load dialog");
 };
 
+const handleMediaDialogsLoad = (type: string) => (...args: any) => {
+  console.log("JDS", args, type);
+};
+
+const attachMediaDialog = (media: any) => {
+  media.getMediaDialogs({
+    onLoad: handleMediaDialogsLoad("Load"),
+    onAdd: handleMediaDialogsLoad("Add"),
+    onChange: handleMediaDialogsLoad("Change"),
+    onDelete: handleMediaDialogsLoad("Delete"),
+    onError: handleMediaDialogsLoad("Error"),
+    onNotify: handleMediaDialogsLoad("Notify"),
+  });
+};
+
+const handleMediaListLoad = () => {
+  helper.log("New media loaded");
+  const _mediaCollection = mediaList.getCollection();
+  for (var mediaId in _mediaCollection) {
+    if (_mediaCollection.hasOwnProperty(mediaId)) {
+      const media = _mediaCollection[mediaId];
+      helper.log(`Media ID ${mediaId}`);
+      attachMediaDialog(media);
+    }
+  }
+};
+
 const handleUserLoad = () => {
   dialogs = user.getDialogs({
     onCollectionAdd: handleNewDialog,
     onCollectionDelete: handleEndDialog,
     onLoad: handleLoadDialog,
   });
+
+  // for Chat and Email interactions
+  try {
+    mediaList = user.getMediaList({
+      onLoad: handleMediaListLoad,
+    });
+  } catch (err) {
+    helper.log("Error while handling media list");
+  }
 };
 
 const subscribeUser = () => {
@@ -113,38 +105,45 @@ const subscribeUser = () => {
     id: config.id,
     onLoad: handleUserLoad,
   });
-  return config;
 };
 
 // gadget ready
 const gadgetReady = () => {
   queryParamsValues = helper.readQueryParams();
-  const gadgetConfig = subscribeUser();
-  const filterTagsParam = queryParamsValues[QueryParams.filterTags];
 
-  getAgentAndTeamId(filterTagsParam, gadgetConfig, () => {
-    helper.getAuthToken((sasTokens: SASTokens) => {
-      helper.cacheAuthToken(sasTokens);
-      helper.setTokensToWidget(sasTokens);
-    });
-  });
+  const tokens: SASTokens = helper.getTokensFromQueryParams(queryParamsValues);
+
+  helper.setTokensToWidget(tokens);
+
+  subscribeUser();
 };
 
-// connect hook
-gadgets.HubSettings.onConnect = function() {
-  // helper.loadExternalResources(EXTERNAL_SCRIPTS);
-  helper.initLog();
-
+// not required
+const initiateContainerService = () => {
   // enable container services
   containerServices = finesse.containerservices.ContainerServices.init();
 
   finesse.containerservices.ContainerServices.enableTitleBar?.();
 
+  finesse.containerServices.ContainerServices.addHandler(
+    finesse.containerServices.Topics.ACTIVE_CALL_STATUS_EVENT,
+    (event: { status: boolean; type: string }) => {
+      if (event.status) {
+        // answered a new call
+        helper.log(event.type + " " + `${event.status}`);
+      }
+    }
+  );
+
   containerServices.makeActiveTabReq();
+};
+
+// connect hook
+gadgets.HubSettings.onConnect = function() {
+  finesse && helper.initLog();
 
   gadgetReady();
+
   gadgets.loadingindicator.dismiss();
-  // subscribeTabChange();
-  // attachListenersForGadgets();
-  // handleTask();
+  gadgets.window.adjustHeight();
 };

@@ -24,8 +24,8 @@ const pImg = path.resolve("src/assets/images");
 const pModules = path.resolve("node_modules");
 
 // Copy Fonts and Icons
-const copyFontsAndIcons = (prefix: string) =>
-  new CopyWebpackPlugin([
+const copyFontsAndIcons = (prefix: string) => {
+  const instructions = [
     { from: `${pModules}/@momentum-ui/core/fonts`, to: prefix + "fonts" },
     { from: `${pModules}/@momentum-ui/core/images`, to: prefix + "images" },
     {
@@ -45,10 +45,19 @@ const copyFontsAndIcons = (prefix: string) =>
       from: `${pModules}/@momentum-ui/icons/css/momentum-ui-icons.min.css`,
       to: prefix + "css",
     },
-  ]);
+  ];
+  if (prefix === "finesse/") {
+    instructions.push({
+      from: `${pSrc}/finesse/CiscoJDSCustomerJourneyGadget.xml`,
+      to: prefix,
+    });
+  }
+
+  return new CopyWebpackPlugin(instructions);
+};
 
 const envSetup = dotenv.config({
-  path: path.join(__dirname, ".env.carehybrid"),
+  path: path.join(__dirname, ".env"),
 });
 
 const common: webpack.Configuration = {
@@ -88,6 +97,7 @@ const common: webpack.Configuration = {
     new webpack.DefinePlugin({
       "process.env.DOTENV": JSON.stringify(envSetup.parsed),
     }),
+    copyFontsAndIcons(""),
     copyFontsAndIcons("finesse/"),
   ],
 };

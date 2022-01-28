@@ -7,23 +7,13 @@ export interface SASTokens {
   identityWriteSASToken: string;
 }
 
-export enum ConstantKeys {
-  authTokenKey = "cjdsSASTokenKey",
-}
-
-export interface ParsedFilterTags {
-  isAgentIdRequired: boolean;
-  isTeamIdRequired: boolean;
-}
-
 export enum QueryParams {
-  agentId = "cc_AgentId",
-  teamId = "cc_TeamId",
-  queueId = "cc_QueueId",
-  customerId = "cc_CustomerId",
-  filterTags = "filterTags",
-  spaceId = "spaceId",
-  metricId = "metricId",
+  tapeToken = "tapeToken",
+  streamToken = "streamToken",
+  profileReadToken = "profileReadToken",
+  profileWriteToken = "profileWriteToken",
+  identityReadSasToken = "identityReadToken",
+  identityWriteSASToken = "identityWriteToken",
 }
 
 export interface UserData {

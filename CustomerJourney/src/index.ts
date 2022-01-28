@@ -185,7 +185,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * Hook to HTML element <md-input id="customerInput">
    * @query customerInput
    */
-  @query("#customerInput") customerInput!: HTMLInputElement;
+  @query("#customer-input") customerInput!: HTMLInputElement;
 
   @query(".profile") widget!: Element;
 
@@ -586,6 +586,7 @@ export default class CustomerJourneyWidget extends LitElement {
           <md-tooltip message="Click to search new journey" ?disabled=${!this.userSearch}>
             <input
               class="header"
+              id="customer-input"
               value=${this.customer || "Customer Journey"}
               @keydown=${(e: KeyboardEvent) => this.handleKey(e)}
               @blur=${(e: FocusEvent) => {

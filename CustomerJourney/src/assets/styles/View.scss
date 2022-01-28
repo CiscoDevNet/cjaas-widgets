@@ -24,10 +24,6 @@
   padding: 0 12px 12px 12px;
   overflow: auto;
 
-  .inner-header {
-    border-bottom: 0;
-  }
-
   .header {
     height: 3rem;
     padding: 0 1rem;
@@ -146,22 +142,24 @@ div.profile {
       "profile timeline";
     justify-content: space-around;
     grid-template-rows: auto 1fr;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 1rem;
 
-    header {
+    .flex-inline {
       grid-area: header;
     }
     .grid-profile {
       grid-area: profile;
-      width: 26rem;
+      min-width: 26rem;
     }
     .grid-timeline {
       grid-area: timeline;
-      width: 26rem;
+      min-width: 26rem;
       margin-top: 0;
     }
     .grid-identity {
       grid-area: profile;
-      width: 26rem;
+      min-width: 26rem;
     }
   }
 }
@@ -266,7 +264,6 @@ md-input.profile {
   width: 100%;
   height: calc(100% - 2rem);
   overflow: hidden;
-  max-width: 40rem;
   margin: 0 auto;
 }
 
