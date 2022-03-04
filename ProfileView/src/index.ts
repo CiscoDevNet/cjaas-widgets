@@ -197,7 +197,15 @@ export default class CjaasProfileWidget extends LitElement {
     axios(options)
       .then(x => x.data)
       .then(response => {
-        this.setOffProfileLongPolling(response.data.getUriStatusQuery);
+        if (response.error) {
+          throw new Error(response.error.message[0]);
+        }
+
+        if (response.data?.runtimeStatus === "Completed") {
+          this.profileData = this.parseResponse(response.data.output.attributeView);
+        } else {
+          this.setOffProfileLongPolling(response.data.getUriStatusQuery);
+        }
       })
       .catch(err => {
         console.error("Unable to fetch the Profile", err);
