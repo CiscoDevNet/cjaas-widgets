@@ -405,8 +405,9 @@ export default class CustomerJourneyWidget extends LitElement {
     this.newestEvents = [];
   }
 
-  handleKey(e: KeyboardEvent) {
-    if (e.key === "Enter") {
+  handleKey(e: CustomEvent) {
+    const { srcEvent } = e?.detail;
+    if (srcEvent.key === "Enter") {
       e.composedPath()[0].blur();
     }
   }
@@ -571,25 +572,27 @@ export default class CustomerJourneyWidget extends LitElement {
     }
   }
 
-  renderHeader() {
+  renderMainInputSearch() {
     return html`
       <div class="flex-inline">
         <div class="input">
           <md-tooltip message="Click to search new journey" ?disabled=${!this.userSearch}>
-            <input
-              class="header"
+            <md-input
+              searchable
+              label="Enter user to display Journey"
+              class="customer-journey-search-input"
+              placeholder="Enter an user's email"
               value=${this.customer || "Customer Journey"}
-              @keydown=${(e: KeyboardEvent) => this.handleKey(e)}
-              @blur=${(e: FocusEvent) => {
-                this.customer = e.composedPath()[0].value;
-              }}
-            />
+              shape="pill"
+              @input-keydown=${(event: CustomEvent) => this.handleKey(event)}
+              @input-blur=${(event: CustomEvent) => {this.customer = event.composedPath()[0].value;}}>
+            </md-input>
           </md-tooltip>
         </div>
         <div class="reload-icon">
           <md-tooltip message="Reload Widget">
             <md-button circle @click="${() => this.lifecycleTasks()}">
-              <md-icon name="icon-refresh_16"></md-icon>
+              <md-icon name="icon-refresh_12"></md-icon>
             </md-button>
           </md-tooltip>
         </div>
@@ -598,21 +601,23 @@ export default class CustomerJourneyWidget extends LitElement {
   }
   render() {
     return html`
+      <div class="top-header-row">
+        ${this.renderMainInputSearch()}
+      </div>
       <div class="profile${classMap(this.classes)}">
-        ${this.renderHeader()}
         <div class="grid-profile">
           <details ?open=${this.profileData !== undefined}>
-            <summary>Profile<md-icon name="icon-arrow-down_12"></md-icon> </summary>
+            <summary><span class="sub-widget-header">Profile</span><md-icon name="icon-arrow-down_12"></md-icon> </summary>
             ${this.profileLoading ? this.renderLoader() : this.renderProfile()}
           </details>
           <details class="grid-identity" ?open=${this.identityAlias !== undefined}>
-            <summary>Identity Alias<md-icon name="icon-arrow-down_12"></md-icon></summary>
+            <summary><span class="sub-widget-header">Identity Alias</span><md-icon name="icon-arrow-down_12"></md-icon></summary>
             ${this.renderIdentity()}
           </details>
         </div>
         <details class="grid-timeline" open>
-          <summary
-            >Journey
+          <summary>
+            <span class="sub-widget-header">Journey</span>
             <md-icon name="icon-arrow-down_12"></md-icon>
           </summary>
           <div class="container">

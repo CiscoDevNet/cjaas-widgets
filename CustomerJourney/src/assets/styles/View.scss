@@ -11,12 +11,34 @@
   height: calc(100% - 1.5rem);
   margin: 12px;
   display: block;
-  border-radius: 0.5rem;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.16), 0px 0px 1px rgba(0, 0, 0, 0.18);
+  // border-radius: 0.5rem;
+  // box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.16), 0px 0px 1px rgba(0, 0, 0, 0.18);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   overflow: hidden;
+}
+
+.top-header-row {
+
+  .flex-inline {
+    display: flex;
+    padding: 1rem 1rem 0 1rem;
+
+    .customer-journey-search-input::part(input) {
+      width: 18rem;
+    }
+
+    .filter-buttons > md-button {
+      display: inline-block;
+      margin-bottom: 0.5rem;
+    }
+
+    .reload-icon {
+      margin-left: 0.5rem;
+      width: 2rem;
+    }
+  }
 }
 
 .outer-container {
@@ -28,15 +50,8 @@
     border-bottom: 0;
   }
 
-  .header {
-    height: 3rem;
-    padding: 0 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--color-gray-30);
-    font-size: 1rem;
-    font-weight: bold;
+  .customer-journey-search-input {
+    font-size: 14px;
   }
 
   h2 {
@@ -125,20 +140,6 @@ div.profile {
     border-radius: 0.25rem;
   }
 
-  input.header {
-    text-align: center;
-    font-size: 1.5rem;
-    font-family: "CiscoSansTT Medium";
-    font-weight: 200;
-    color: var(--md-primary-text-color);
-    background-color: var(--md-tertiary-bg-color);
-    display: block;
-    border: none;
-    border-radius: 0.25rem;
-    width: 100%;
-    height: 2.5rem;
-  }
-
   &.expanded {
     display: grid;
     grid-template-areas:
@@ -224,13 +225,6 @@ details[open] summary md-icon {
   gap: 1rem;
 }
 
-md-input.profile {
-  width: 14rem;
-}
-.filter-buttons > md-button {
-  display: inline-block;
-  margin-bottom: 0.5rem;
-}
 .timeline-item {
   margin: 0 0.5rem 0.5rem 0.5rem;
 }
@@ -274,15 +268,13 @@ md-input.profile {
   height: 100%;
 }
 
-.flex-inline {
-  display: flex;
-  align-items: center;
-  .input {
-    width: calc(100% - 2.5rem);
-  }
-
-  .reload-icon {
-    margin-left: 0.5rem;
-    width: 2rem;
-  }
+.sub-widget-header {
+  color: var(--md-primary-text-color, #171b1f);
+  display: block;
+  font-family: "CiscoSansTT Regular", sans-serif;
+  font-size: 16px;
+  // font-weight: 800;
+  line-height: 24px;
+  margin: 0px;
+  // text-align: center;
 }
