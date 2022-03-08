@@ -1,0 +1,62 @@
+.spinner-container {
+  height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:host {
+  display: block;
+  padding: 0.75rem;
+  overflow-x: auto;
+  min-width: 1368px;
+  color: var(--md-textColor-secondary);
+}
+
+tr {
+  th {
+    text-align: left;
+  }
+  .delete-cell {
+    vertical-align: top;
+    width: 32px;
+    text-align: center;
+  }
+  td {
+    vertical-align: middle;
+
+    md-dropdown {
+      margin-bottom: 16px;
+      display: block;
+    }
+  }
+}
+
+.footer {
+  color: var(--md-textColor-secondary);
+}
+
+.success-msg {
+  border-color: #027702;
+  background-color: #0277025b;
+}
+
+.error-msg {
+  border-color: #ee380a;
+  background-color: #ee380a5b;
+}
+
+.error-msg,
+.success-msg {
+  border: 1px solid;
+  padding: 8px;
+  color: #fff;
+  margin: 12px 0;
+}
+
+.name-container {
+  font-weight: 700;
+  font-size: 19px;
+  margin-right: 1rem;
+  margin-bottom: 0.5rem;
+}
