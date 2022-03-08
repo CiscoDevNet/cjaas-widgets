@@ -579,9 +579,9 @@ export default class CustomerJourneyWidget extends LitElement {
           <md-tooltip message="Click to search new journey" ?disabled=${!this.userSearch}>
             <md-input
               searchable
-              label="Enter user to display Journey"
+              label="Enter User to View Journey Data"
               class="customer-journey-search-input"
-              placeholder="Enter an user's email"
+              placeholder="Search for a user"
               value=${this.customer || "Customer Journey"}
               shape="pill"
               @input-keydown=${(event: CustomEvent) => this.handleKey(event)}
@@ -604,8 +604,8 @@ export default class CustomerJourneyWidget extends LitElement {
       <div class="top-header-row">
         ${this.renderMainInputSearch()}
       </div>
-      <div class="profile${classMap(this.classes)}">
-        <div class="grid-profile">
+      <div class="sub-widget-flex-container${classMap(this.classes)}">
+        <div class="column left-column">
           <details ?open=${this.profileData !== undefined}>
             <summary><span class="sub-widget-header">Profile</span><md-icon name="icon-arrow-down_12"></md-icon> </summary>
             ${this.profileLoading ? this.renderLoader() : this.renderProfile()}
@@ -615,15 +615,17 @@ export default class CustomerJourneyWidget extends LitElement {
             ${this.renderIdentity()}
           </details>
         </div>
-        <details class="grid-timeline" open>
-          <summary>
-            <span class="sub-widget-header">Journey</span>
-            <md-icon name="icon-arrow-down_12"></md-icon>
-          </summary>
-          <div class="container">
-            ${this.timelineLoading ? this.renderLoader() : this.renderEventList()}
-          </div>
-        </details>
+        <div class="column right-column">
+          <details class="grid-timeline" open>
+            <summary>
+              <span class="sub-widget-header">Journey</span>
+              <md-icon name="icon-arrow-down_12"></md-icon>
+            </summary>
+            <div class="container">
+              ${this.timelineLoading ? this.renderLoader() : this.renderEventList()}
+            </div>
+          </details>
+        </div>
       </div>
     `;
   }

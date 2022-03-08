@@ -36,6 +36,7 @@
 
     .reload-icon {
       margin-left: 0.5rem;
+      margin-top: 1.9rem;
       width: 2rem;
     }
   }
@@ -179,7 +180,6 @@ cjaas-timeline::part(stream) {
 
 cjaas-identity {
   display: block;
-  padding: 12px;
   border-radius: 0.5rem;
 }
 
@@ -260,12 +260,11 @@ details[open] summary md-icon {
   width: 100%;
   height: calc(100% - 1.5rem);
   overflow: hidden;
-  max-width: 40rem;
-  margin: 0 auto;
 }
 
 #events-list {
   height: 100%;
+  // margin: 0.3rem 0.3rem 0 0;
 }
 
 .sub-widget-header {
@@ -273,8 +272,17 @@ details[open] summary md-icon {
   display: block;
   font-family: "CiscoSansTT Regular", sans-serif;
   font-size: 16px;
-  // font-weight: 800;
   line-height: 24px;
   margin: 0px;
-  // text-align: center;
+}
+
+.sub-widget-flex-container {
+  padding: 0 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 2rem;
+
+  .column {
+    flex: 1 1 350px;
+  }
 }
