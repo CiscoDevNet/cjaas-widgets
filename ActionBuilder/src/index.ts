@@ -490,7 +490,7 @@ export default class CjaasActionBuilder extends LitElement {
 
   getWebhookTemplate(config: any, index: number) {
     return html`
-      <div class=${`target-index-${index}`}>
+      <div class=${`webhook-target target-index-${index}`}>
         <md-input id="webhook_url" .value=${config?.webhookURL || null} placeholder="URL"></md-input>
 
         <md-dropdown
