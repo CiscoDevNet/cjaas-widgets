@@ -66,7 +66,7 @@ md-icon {
 
 .summary {
   font-size: 12px;
-  color: var(--md-primary-text-color);
+  color: var(--md-primary-text-color, #121212);
   margin: 12px 0;
   .static {
     font-style: italic;
@@ -76,10 +76,10 @@ md-icon {
     font-weight: 700;
   }
   .operator {
-    color: var(--md-secondary-text-color);
+    color: var(--md-secondary-text-color, #545454);
   }
   .field {
     font-weight: 500;
-    color: var(--md-hyperlink-text-color);
+    color: var(--md-hyperlink-text-color, #005e7d);
   }
 }

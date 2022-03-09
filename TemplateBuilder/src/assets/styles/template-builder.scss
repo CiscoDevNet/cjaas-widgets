@@ -10,7 +10,7 @@
   padding: 0.75rem;
   overflow-x: auto;
   min-width: 1368px;
-  color: var(--md-textColor-secondary);
+  color: var(--md-secondary-text-color, #545454);
 }
 
 tr {
@@ -33,7 +33,7 @@ tr {
 }
 
 .footer {
-  color: var(--md-textColor-secondary);
+  color: var(--md-secondary-text-color, #545454);
 }
 
 .success-msg {
