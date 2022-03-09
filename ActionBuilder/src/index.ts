@@ -190,7 +190,7 @@ export default class CjaasActionBuilder extends LitElement {
     }
 
     return html`
-      <div><md-icon name="icon-location_32" size="24"></md-icon><span>Journey</span></div>
+      <div class="header-row"><md-icon name="icon-location_32" size="24"></md-icon><span>Journey</span></div>
       ${this.renderRootConditionBlock(relation)}
       <div class="targets">
         ${this.getTargets()}
