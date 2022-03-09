@@ -32,7 +32,7 @@ md-icon {
 .targets {
   margin-top: 24px;
   padding-left: 12px;
-  & > md-dropdown {
+  md-dropdown {
     margin: 0 12px;
   }
 }
