@@ -19,15 +19,11 @@
 }
 
 .top-header-row {
-  margin-bottom: 1rem;
-
   .flex-inline {
     display: flex;
-    padding: 0.5rem 1rem 0 1rem;
+    padding: 1rem 2rem 0;
     row-gap: 0.75rem;
-    // flex-wrap: wrap;
-    // max-width: 25rem;
-    // flex-direction: column;
+    flex-wrap: wrap;
 
     .custom-input-label {
       margin-right: 1rem;
@@ -50,6 +46,7 @@
 
     .customer-journey-search-input::part(input) {
       max-width: 100rem;
+      min-width: 12rem;
     }
 
     .filter-buttons > md-button {
@@ -201,10 +198,21 @@ cjaas-identity {
   border-radius: 0.5rem;
 }
 
-// .grid-identity,
-// .grid-timeline {
-//   margin-top: 0.5rem;
-// }
+cjaas-identity::part(alias-header-container) {
+  display: none;
+}
+
+cjaas-profile::part(top-content) {
+  margin: 0;
+}
+
+cjaas-profile::part(separator) {
+  display: none;
+}
+
+.grid-timeline {
+  height: 100%;
+}
 
 details:last-child {
   flex-grow: 1;
@@ -213,6 +221,7 @@ details:last-child {
 }
 
 details summary {
+  border-bottom: 1px solid var(--md-quaternary-bg-color, #DEDEDE);
   display: flex;
   justify-content: space-between;
   padding: 0.25rem;
@@ -276,7 +285,7 @@ details[open] summary md-icon {
 
 .container {
   width: 100%;
-  height: calc(100% - 1.5rem);
+  height: calc(100% - 2.75rem);
   overflow: hidden;
 }
 
@@ -292,6 +301,7 @@ details[open] summary md-icon {
   margin: 0px;
   height: 24px;
   margin-top: 0.4rem;
+  margin-right: 0.5rem;
 }
 
 .sub-widget-flex-container {
@@ -299,6 +309,7 @@ details[open] summary md-icon {
   display: flex;
   flex-wrap: wrap;
   column-gap: 2rem;
+  height: 100%;
 
   .column {
     flex: 1 1 350px;
@@ -306,5 +317,18 @@ details[open] summary md-icon {
 }
 
 .sub-widget-section {
-  margin-bottom: 1rem;
+  padding: 1rem 0;
+}
+
+.sub-widget-detail-container {
+  padding: 1rem;
+}
+
+.alias-info-tooltip {
+  height: 2rem;
+  margin-top: 0.1rem;
+}
+
+.alias-expand-icon {
+  margin-left: auto;
 }

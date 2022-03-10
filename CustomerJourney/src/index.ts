@@ -581,12 +581,12 @@ export default class CustomerJourneyWidget extends LitElement {
   renderMainInputSearch() {
     return html`
       <div class="flex-inline">
-        <span class="custom-input-label">Enter User to View Journey Data</span>
+        <span class="custom-input-label">Lookup User</span>
         <div class="input-wrapper">
             <md-input
               searchable
               class="customer-journey-search-input"
-              placeholder="Search for a user"
+              placeholder="examples: Jon Doe, (808) 645-4562, jon@gmail.com"
               value=${this.customer || "Customer Journey"}
               shape="pill"
               @input-keydown=${(event: CustomEvent) => this.handleKey(event)}
@@ -603,24 +603,33 @@ export default class CustomerJourneyWidget extends LitElement {
       </div>
     `;
   }
+
   render() {
+    const tooltipMessage = `Aliases are alternate ways to identify a customer. Adding aliases can help you form more complete profile of your customer.`;
+
     return html`
       <div class="top-header-row">
         ${this.renderMainInputSearch()}
       </div>
       <div class="sub-widget-flex-container${classMap(this.classes)}">
         <div class="column left-column">
-          <details ?open=${this.profileData !== undefined}>
+          <details class="sub-widget-detail-container" ?open=${this.profileData !== undefined}>
             <summary><span class="sub-widget-header">Profile</span><md-icon name="icon-arrow-down_12"></md-icon> </summary>
             ${this.profileLoading ? this.renderLoader() : this.renderProfile()}
           </details>
-          <details class="grid-identity" ?open=${this.identityAlias !== undefined}>
-            <summary><span class="sub-widget-header">Identity Alias</span><md-icon name="icon-arrow-down_12"></md-icon></summary>
+          <details class="grid-identity sub-widget-detail-container" ?open=${this.identityAlias !== undefined}>
+            <summary>
+              <span class="sub-widget-header">Aliases</span>
+              <md-tooltip class="alias-info-tooltip" .message=${tooltipMessage}>
+                <md-icon name="info_14"></md-icon>
+              </md-tooltip>
+              <md-icon class="alias-expand-icon" name="icon-arrow-down_12"></md-icon>
+            </summary>
             ${this.renderIdentity()}
           </details>
         </div>
         <div class="column right-column">
-          <details class="grid-timeline" open>
+          <details class="grid-timeline sub-widget-detail-container" open>
             <summary>
               <span class="sub-widget-header">Journey</span>
               <md-icon name="icon-arrow-down_12"></md-icon>
