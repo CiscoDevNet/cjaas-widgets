@@ -281,7 +281,11 @@ export default class CustomerJourneyWidget extends LitElement {
         if (response.error) {
           throw new Error(response.error.message[0]);
         }
-        this.setOffProfileLongPolling(response.data.getUriStatusQuery);
+        if (response.data?.runtimeStatus === "Completed") {
+          this.profileData = this.parseResponse(response.data.output.attributeView);
+        } else {
+          this.setOffProfileLongPolling(response.data.getUriStatusQuery);
+        }
       })
       .catch(err => {
         console.error("Unable to fetch the Profile", err);
@@ -437,7 +441,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
   renderEventList() {
     return html`
-      <section id="events-list">
+      <section class="sub-widget-section" id="events-list">
         ${this.renderEvents()}
       </section>
     `;
@@ -445,13 +449,15 @@ export default class CustomerJourneyWidget extends LitElement {
 
   renderProfile() {
     return html`
-      <cjaas-profile .profileData=${this.profileData}></cjaas-profile>
+      <section class="sub-widget-section">
+        <cjaas-profile .profileData=${this.profileData}></cjaas-profile>
+      </section>
     `;
   }
 
   renderIdentity() {
     return html`
-      <section>
+      <section class="sub-widget-section">
         <cjaas-identity
           .customer=${this.customer}
           .alias=${this.alias}
@@ -575,11 +581,10 @@ export default class CustomerJourneyWidget extends LitElement {
   renderMainInputSearch() {
     return html`
       <div class="flex-inline">
-        <div class="input">
-          <md-tooltip message="Click to search new journey" ?disabled=${!this.userSearch}>
+        <span class="custom-input-label">Enter User to View Journey Data</span>
+        <div class="input-wrapper">
             <md-input
               searchable
-              label="Enter User to View Journey Data"
               class="customer-journey-search-input"
               placeholder="Search for a user"
               value=${this.customer || "Customer Journey"}
@@ -587,14 +592,13 @@ export default class CustomerJourneyWidget extends LitElement {
               @input-keydown=${(event: CustomEvent) => this.handleKey(event)}
               @input-blur=${(event: CustomEvent) => {this.customer = event.composedPath()[0].value;}}>
             </md-input>
-          </md-tooltip>
-        </div>
-        <div class="reload-icon">
-          <md-tooltip message="Reload Widget">
-            <md-button circle @click="${() => this.lifecycleTasks()}">
-              <md-icon name="icon-refresh_12"></md-icon>
-            </md-button>
-          </md-tooltip>
+            <div class="reload-icon">
+              <md-tooltip message="Reload Widget">
+                <md-button circle @click="${() => this.lifecycleTasks()}">
+                  <md-icon name="icon-refresh_12"></md-icon>
+                </md-button>
+              </md-tooltip>
+            </div>
         </div>
       </div>
     `;

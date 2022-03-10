@@ -7,12 +7,11 @@
 
 :host {
   color: var(--md-primary-text-color, var(--color-gray-100));
+  font-family: "CiscoSansTT Regular", "Helvetica Neue", Helvetica, Arial, sans-serif;
   width: calc(100% - 1.5rem);
   height: calc(100% - 1.5rem);
   margin: 12px;
   display: block;
-  // border-radius: 0.5rem;
-  // box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.16), 0px 0px 1px rgba(0, 0, 0, 0.18);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -20,13 +19,37 @@
 }
 
 .top-header-row {
+  margin-bottom: 1rem;
 
   .flex-inline {
     display: flex;
-    padding: 1rem 1rem 0 1rem;
+    padding: 0.5rem 1rem 0 1rem;
+    row-gap: 0.75rem;
+    // flex-wrap: wrap;
+    // max-width: 25rem;
+    // flex-direction: column;
+
+    .custom-input-label {
+      margin-right: 1rem;
+      align-items: center;
+      font-size: 1rem;
+      margin-top: 0.2rem;
+      display: inline-block;
+    }
+
+    .input-wrapper {
+      display: flex;
+      flex: 1;
+
+      .customer-journey-search-input {
+        flex: 1;
+        min-width: 10rem;
+        color: var(--md-primary-text-color, #171b1f);
+      }
+    }
 
     .customer-journey-search-input::part(input) {
-      width: 18rem;
+      max-width: 100rem;
     }
 
     .filter-buttons > md-button {
@@ -36,8 +59,8 @@
 
     .reload-icon {
       margin-left: 0.5rem;
-      margin-top: 1.9rem;
       width: 2rem;
+      height: 2rem;
     }
   }
 }
@@ -160,18 +183,13 @@ div.profile {
       grid-area: timeline;
       width: 26rem;
       margin-top: 0;
+      height: 100%;
     }
     .grid-identity {
       grid-area: profile;
       width: 26rem;
     }
   }
-}
-
-cjaas-profile::part(profile) {
-  // border: 1px solid var(--md-quaternary-bg-color, #dedede);
-  border-radius: 0.5rem;
-  background-color: var(--md-secondary-bg-color);
 }
 
 cjaas-timeline::part(stream) {
@@ -183,10 +201,10 @@ cjaas-identity {
   border-radius: 0.5rem;
 }
 
-.grid-identity,
-.grid-timeline {
-  margin-top: 0.5rem;
-}
+// .grid-identity,
+// .grid-timeline {
+//   margin-top: 0.5rem;
+// }
 
 details:last-child {
   flex-grow: 1;
@@ -264,16 +282,16 @@ details[open] summary md-icon {
 
 #events-list {
   height: 100%;
-  // margin: 0.3rem 0.3rem 0 0;
 }
 
 .sub-widget-header {
   color: var(--md-primary-text-color, #171b1f);
   display: block;
-  font-family: "CiscoSansTT Regular", sans-serif;
   font-size: 16px;
   line-height: 24px;
   margin: 0px;
+  height: 24px;
+  margin-top: 0.4rem;
 }
 
 .sub-widget-flex-container {
@@ -285,4 +303,8 @@ details[open] summary md-icon {
   .column {
     flex: 1 1 350px;
   }
+}
+
+.sub-widget-section {
+  margin-bottom: 1rem;
 }
