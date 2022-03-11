@@ -10,12 +10,11 @@ import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
 import styles from "./sandbox.scss";
 import "..";
-import { mockAction, mockTemplate } from "./sandbox.mock";
 
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
   @internalProperty() darkTheme = false;
-  @internalProperty() containerWidth = "1000px";
+  @internalProperty() containerWidth = "1400px";
   @internalProperty() containerHeight = "80vh";
   @internalProperty() selectedComponent = "Activity Item";
   static get styles() {
@@ -77,46 +76,32 @@ export class Sandbox extends LitElement {
   }
 
   render() {
-    const actionWriteToken =
-      "so=demoassure&sn=sandbox&ss=action&sp=w&se=2022-05-11T13:22:08.805233600Z&sk=journeyUi&sig=hJdP4WxKLF1fb49mX1%2BRYGjDvgRiv0dOaBbjR48PVj8%3D";
-    const actionReadToken =
-      "so=demoassure&sn=sandbox&ss=action&sp=r&se=2022-05-11T13:22:08.806142200Z&sk=journeyUi&sig=4Bq8ZMkj9qXZDkiiVLOWwD29KoXZBAHU7HawFyW8J1M%3D";
+    const profileWriteToken =
+      "so=demoassure&sn=sandbox&ss=profile&sp=w&se=2022-05-11T13:22:08.801601300Z&sk=journeyUi&sig=J4K%2FuJqzGG%2F0RJhMc%2B7jhmKBLXhdnpMkz1RoaTOIKds%3D";
     const profileReadToken =
       "so=demoassure&sn=sandbox&ss=profile&sp=r&se=2022-05-11T13:22:08.799987400Z&sk=journeyUi&sig=6TrHnhzW74AZFqXDAV9DZHC1CcV7cn2rAF3Q4tCkIOs%3D";
+
     return html`
       <div class="toggle">
         ${this.themeToggle()}
       </div>
       <md-theme ?darkTheme=${this.darkTheme}>
         <div class="container">
-          <h2 class="sandbox-header">Action Builder</h2>
+          <h2 class="sandbox-header">Template Builder</h2>
           <div
             style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
             class="widget-container"
           >
-            <cjaas-action-builder
-              .mockTemplate=${mockTemplate}
-              template-id="first-template"
-              .viewSasToken=${profileReadToken}
-              .actionReadSasToken=${actionReadToken}
-              .actionWriteSasToken=${actionWriteToken}
+            <cjaas-template-builder
+              template-id="second-template"
+              .profileReadSasToken=${profileReadToken}
+              .profileWriteSasToken=${profileWriteToken}
+              organization="demoassure"
+              namespace="sandbox"
               base-url="https://uswest-nonprod.cjaas.cisco.com"
-            ></cjaas-action-builder>
+            ></cjaas-template-builder>
           </div>
           <hr />
-          <div
-            style=${`width: ${this.containerWidth}; height: ${this.containerHeight}; overflow: auto;`}
-            class="widget-container"
-          >
-            <cjaas-action-builder
-              action-name="test Nested"
-              template-id="first-template"
-              .viewSasToken=${profileReadToken}
-              .actionReadSasToken=${actionReadToken}
-              .actionWriteSasToken=${actionWriteToken}
-              base-url="https://cjaas-devus1-edge.azurewebsites.net"
-            ></cjaas-action-builder>
-          </div>
         </div>
       </md-theme>
     `;

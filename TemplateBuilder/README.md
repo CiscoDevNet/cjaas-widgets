@@ -1,46 +1,31 @@
-# CJaaS Action Builder Widget
+# CJaaS Template Builder Widget
 
-This widget allows CJaaS admin to configure actions to a given template. The actions are saved in CJaaS and evaluated every time a profile view is cached/generated for the said template. It uses Condition component and Condition Block Component from CJaaS common Components.
+Create Templates for Journey Profile Views. 
 
 ## Component Usage
 
 ```html
-<cjaas-action-builder
-  .mockTemplate=${mockTemplate}
-  .actionName=${actionNameToEdit}
-  template-id="first-template"
-  action-read-sas-token="st=demoassure&so=sandbox&ss=action&sp=r&se=2021-04-06T07:38:17Z&sk=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztXXXXXXXXXXXX="
-  action-write-sas-token="st=demoassure&so=sandbox&ss=action&sp=w&se=2021-04-06T07:38:17Z&sk=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztXXXXXXXXXXXX="
-  view-sas-token="st=demoassure&so=sandbox&ss=views&sp=r&se=2021-04-06T07:38:17Z&sk=sandbox&sig=qnKHkG1aAZryxbBfgTLG1XR8jLFbztXXXXXXXXXXXX="
-  base-url="https://uswest-nonprod.cjaas.cisco.com"
-></cjaas-action-builder>
+<cjaas-template-builder
+    template-id="second-template"
+    .profileReadSasToken=${profileReadToken}
+    .profileWriteSasToken=${profileWriteToken}
+    base-url="https://uswest-nonprod.cjaas.cisco.com"
+></cjaas-template-builder>
 ```
 
 ## Properties
 
 ### `template-id string`
-id of template that needs to be used to evaluate the action config against
+id of template for edit
 
-### `view-sas-token string`
-Shared Access Signature with read permisson to access template config. The component builds the fields for conditions from the attributes of this template.
+### `profile-read-sas-token string`
+Shared Access Signature with read permisson to access template config.
 
-### `action-write-sas-token string`
-Shared Access Signature with write permission to create or update an Action
-
-### `action-id string`
-ID of action to edit/update
-
-### `action-read-sas-token string`
-Shared Access Signature with read permission to access the action while editing
+### `profile-write-sas-token string`
+Shared Access Signature with write permission to create or update a template
 
 ### `base-url string`
 API Host to use while making REST calls to server
-
-### `mockAction Object`
-Mock Action Object for demostration
-
-### `mockTemplate Object`
-Mock Template object for demostration
 
 ## Setup
 

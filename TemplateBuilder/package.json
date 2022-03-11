@@ -1,6 +1,6 @@
 {
-  "name": "@cjaas/cjaas-action-builder",
-  "version": "2.1.0",
+  "name": "@cjaas/cjaas-template-builder",
+  "version": "1.0.0",
   "author": {
     "name": "Kevin Hyde",
     "email": "kehyde@cisco.com"
@@ -41,13 +41,14 @@
     "@momentum-ui/core": "19.15.12",
     "@momentum-ui/icons": "8.25.0",
     "@momentum-ui/utils": "6.2.15",
-    "@momentum-ui/web-components": "2.4.11-dev1",
     "@open-wc/testing-helpers": "1.8.9",
     "@types/axios": "^0.14.0",
     "@types/copy-webpack-plugin": "^5.0.0",
     "@types/html-webpack-plugin": "^3.2.2",
     "@types/jest": "26.0.10",
     "@types/lodash": "^4.14.168",
+    "@momentum-ui/tokens": "1.7.1",
+    "@momentum-ui/web-components": "2.4.11-dev1",
     "@types/luxon": "^1.25.1",
     "@types/node": "^13.7.7",
     "@types/webpack": "^4.41.7",
