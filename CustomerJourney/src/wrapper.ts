@@ -4,8 +4,8 @@ import "@momentum-ui/web-components/dist/comp/md-theme";
 import "@cjaas/common-components";
 import styles from "./assets/styles/wrapper.scss";
 
-@customElementWithCheck("customer-journey-widget-wrapper")
-export default class CustomerJourneyWidgetWrapper extends LitElement {
+@customElementWithCheck("widget-theme-wrapper")
+export default class WidgetThemeWrapper extends LitElement {
   static get styles() {
     return styles;
   }
@@ -20,6 +20,6 @@ export default class CustomerJourneyWidgetWrapper extends LitElement {
 }
 declare global {
   interface HTMLElementTagNameMap {
-    "customer-journey-widget-wrapper": CustomerJourneyWidgetWrapper;
+    "widget-theme-wrapper": WidgetThemeWrapper;
   }
 }

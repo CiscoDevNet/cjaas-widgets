@@ -78,8 +78,8 @@ export const setTokensToWidget = (sasTokens: SASTokens) => {
     return;
   }
 
-  widget.baseURL = "https://cjaas-devus2.azurewebsites.net";
-  widget.baseURLAdmin = "https://cjaas-devus2-admin.azurewebsites.net";
+  widget.baseURL = "https://uswest-nonprod.cjaas.cisco.com";
+  widget.baseURLAdmin = "https://uswest-nonprod.cjaas.cisco.com/admin";
 
   widget.tapeToken = sasTokens.tapeToken;
   widget.streamToken = sasTokens.streamToken;
@@ -108,9 +108,9 @@ export const getCustomerValues = (dialogData: UserData): any => {
   }
 };
 
-export const getTokensFromQueryParams = (queryParamsValues: any): SASTokens => {
-  const sanitize = (value: string) => decodeURIComponent(value);
+const sanitize = (value: string) => decodeURIComponent(value);
 
+export const getTokensFromQueryParams = (queryParamsValues: any): SASTokens => {
   return {
     tapeToken: sanitize(queryParamsValues[QueryParams.tapeToken]),
     streamToken: sanitize(queryParamsValues[QueryParams.streamToken]),
@@ -119,4 +119,24 @@ export const getTokensFromQueryParams = (queryParamsValues: any): SASTokens => {
     identityReadSASToken: sanitize(queryParamsValues[QueryParams.identityReadSasToken]),
     identityWriteSASToken: sanitize(queryParamsValues[QueryParams.identityWriteSASToken]),
   };
+};
+
+export const setMinHeight = (queryParamsValue: any) => {
+  const minHeightParam = queryParamsValue[QueryParams.minHeight];
+
+  if (minHeightParam) {
+    const minHeight = sanitize(minHeightParam);
+    document.body.style.minHeight = minHeight;
+  }
+};
+
+export const setTemplate = (queryParamsValue: any) => {
+  const templateId = sanitize(queryParamsValue[QueryParams.templateId]);
+
+  if (templateId) {
+    const widget = document.querySelector("customer-journey-widget");
+    if (widget) {
+      widget.templateId = templateId;
+    }
+  }
 };

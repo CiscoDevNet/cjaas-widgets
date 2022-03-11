@@ -19,8 +19,8 @@
 
     </ModulePrefs>
     <UserPref name="scheme" display_name="scheme" default_value="" datatype ="hidden"/>
-<UserPref name="host" display_name="host" default_value="" datatype ="hidden"/>
-<UserPref name="hostPort" display_name="hostPort" default_value="" datatype ="hidden"/>
+    <UserPref name="host" display_name="host" default_value="" datatype ="hidden"/>
+    <UserPref name="hostPort" display_name="hostPort" default_value="" datatype ="hidden"/>
     <Content type="html" view="default,canvas">
         <![CDATA[
             <!DOCTYPE html>
@@ -44,9 +44,9 @@
             />
             <body style="min-height: 320px;">
                  <div class="jds-customer-journey">
-                    <customer-journey-widget-wrapper>
+                    <widget-theme-wrapper>
                         <customer-journey-widget></customer-journey-widget>
-                    </customer-journey-widget-wrapper>
+                    </widget-theme-wrapper>
                 </div> 
             </body>
         ]]>

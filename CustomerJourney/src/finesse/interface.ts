@@ -14,6 +14,8 @@ export enum QueryParams {
   profileWriteToken = "profileWriteToken",
   identityReadSasToken = "identityReadToken",
   identityWriteSASToken = "identityWriteToken",
+  minHeight = "minHeight",
+  templateId = "profileTemplate",
 }
 
 export interface UserData {

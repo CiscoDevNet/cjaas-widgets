@@ -115,6 +115,10 @@ const gadgetReady = () => {
 
   helper.setTokensToWidget(tokens);
 
+  helper.setMinHeight(queryParamsValues);
+
+  helper.setTemplate(queryParamsValues);
+
   subscribeUser();
 };
 
