@@ -1,4 +1,32 @@
 {
+  "SMS": {
+    "name": "icon-sms_16",
+    "color": "mint"
+  },
+  "Voice": {
+    "name": "icon-handset-active_16",
+    "color": "green"
+  },
+  "Chat": {
+    "name": "icon-chat-active_16",
+    "color": "cobalt"
+  },
+  "Email": {
+    "name": "icon-email-active_16",
+    "color": "violet"
+  },
+  "Messenger": {
+    "name": "icon-messenger_16",
+    "color": "cobalt"
+  },
+  "task": {
+    "name": "icon-tasks_16",
+    "color": "yellow"
+  },
+  "Login": {
+      "name": "icon-sign-in_24",
+      "color": "gold"
+  },
   "Page Visit": {
     "name": "icon-mouse-cursor_16",
     "color": "grey"

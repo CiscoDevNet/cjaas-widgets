@@ -605,7 +605,7 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   render() {
-    const tooltipMessage = `Aliases are alternate ways to identify a customer. Adding aliases can help you form more complete profile of your customer.`;
+    const tooltipMessage = `Aliases are alternate ways to identify a customer. Adding aliases can help you form a more complete profile of your customer.`;
 
     return html`
       <div class="top-header-row">
@@ -614,7 +614,7 @@ export default class CustomerJourneyWidget extends LitElement {
       <div class="sub-widget-flex-container${classMap(this.classes)}">
         <div class="column left-column">
           <details class="sub-widget-detail-container" ?open=${this.profileData !== undefined}>
-            <summary><span class="sub-widget-header">Profile</span><md-icon name="icon-arrow-down_12"></md-icon> </summary>
+            <summary><span class="sub-widget-header">Profile</span><md-icon name="icon-arrow-up_12"></md-icon> </summary>
             ${this.profileLoading ? this.renderLoader() : this.renderProfile()}
           </details>
           <details class="grid-identity sub-widget-detail-container" ?open=${this.identityAlias !== undefined}>
@@ -623,7 +623,7 @@ export default class CustomerJourneyWidget extends LitElement {
               <md-tooltip class="alias-info-tooltip" .message=${tooltipMessage}>
                 <md-icon name="info_14"></md-icon>
               </md-tooltip>
-              <md-icon class="alias-expand-icon" name="icon-arrow-down_12"></md-icon>
+              <md-icon class="alias-expand-icon" name="icon-arrow-up_12"></md-icon>
             </summary>
             ${this.renderIdentity()}
           </details>
@@ -632,7 +632,7 @@ export default class CustomerJourneyWidget extends LitElement {
           <details class="grid-timeline sub-widget-detail-container" open>
             <summary>
               <span class="sub-widget-header">Journey</span>
-              <md-icon name="icon-arrow-down_12"></md-icon>
+              <md-icon name="icon-arrow-up_12"></md-icon>
             </summary>
             <div class="container">
               ${this.timelineLoading ? this.renderLoader() : this.renderEventList()}
