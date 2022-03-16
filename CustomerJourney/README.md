@@ -91,3 +91,17 @@ To be able to place your custom widget within Agent/Supervisor Desktop, Contact 
 In case you are an administrator for Contact Center Agent Desktop or are working with an administrator, you might be trying to place this component in a JSON layout specification file to test in your Contact Center environment.
 
 This specific Widget Starter is designed to be places in a ["panel"](https://www.cisco.com/c/en/us/td/docs/voice_ip_comm/cust_contact/contact_center/CJP/SetupandAdministrationGuide_2/b_mp-release-2/b_cc-release-2_chapter_011.html#topic_BF0EBDF65DCB0A552164D6306657C892__AuxPane) area of JSON layout specification. This is due to this widget relying on a task-specific information with the reference derived from the current location/address bar value.
+
+# Adding Widget to CCE/CCX
+Customer Journey widget can be added to CCE and CCX agent dashboards as gadgets. It needs a wrapper component that sets the theme for the widget. 
+
+## Generate Query String for Gadget
+Use any of cjaas-sdk tools from https://github.com/CiscoDevNet/cjaas-sdk to generate sas-tokens.
+
+## Add gadget to admin config
+1. In the admin portal of CCE/CCX dashboard, edit desktop layout xml.
+2. Add gadget config with supported queryStrings to agent desktop config in appropriate place.
+
+``` xml
+<gadget>{Cloud hosted location}/finesse/CiscoJDSCustomerJourneyGadget.xml?profileReadToken=so%3Ddemoassure%26sn%3Dsandbox%26ss%3Dprofile%26sp%3Dr%26se%3D2022-05-05T09%3A13%3A31.505017500Z%26sk%3DjourneyUi%26sig%3DoX7V4ajfaknNJ3tcnOTNpFJQ4uwTztbomVp%252BWmJb4%253D&profileWriteToken=so%3Ddemoassure%26sn%3Dsandbox%26ss%3Dprofile%26sp%3Dw%26se%3D2022-05-05T09%3A13%3A31.506625800Z%26sk%3DjourneyUi%26sig%3DSD%252Fc7pmz%252Buc5qXB44%252FfXDeSd4C9dq8Ub%252F2TieK%252FOM%253D&streamToken=so%3Ddemoassure%26sn%3Dsandbox%26ss%3Dstream%26sp%3Dr%26se%3D2022-05-05T09%3A13%3A31.507991400Z%26sk%3DjourneyUi%26sig%3DUjo16g0oPXyOUc25JXe5NqMNIRSJpgCmz7DT3OZC6%252BM%253D&tapeToken=so%3Ddemoassure%26sn%3Dsandbox%26ss%3Dtape%26sp%3Dr%26se%3D2022-05-05T09%3A13%3A31.509055200Z%26sk%3DjourneyUi%26sig%3DPAM7q9A8R1C10YW8wIvScG6yAoGtW97nnwE60BqRI%253D&identityReadToken=so%3Ddemoassure%26sn%3Dsandbox%26ss%3Didmt%26sp%3Dr%26se%3D2022-05-05T09%3A13%3A31.510959300Z%26sk%3DjourneyUi%26sig%3Dp9wWUjp%252Bde965kRL05iI%252FFDEAAL2f0g7COrtFVZiU%253D&identityWriteToken=so%3Ddemoassure%26sn%3Dsandbox%26ss%3Didmt%26sp%3Dw%26se%3D2022-05-05T09%3A13%3A31.511875Z%26sk%3DjourneyUi%26sig%3DbQGGM%252FYAqHrCQRbVTKfX3dZA%252BlGVQfjcxO2JMrdY8%253D&minHeight=480px&profileTemplate=new-template</gadget>
+```
