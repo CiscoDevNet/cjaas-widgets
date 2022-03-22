@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <script src="../dist/finesse/customer-journey.js"></script>
+    <script src="../dist/finesse/customer-journey-wrapper.js"></script>
+    <link rel="stylesheet" href="../dist/finesse/css/momentum-ui.min.css" />
+    <link rel="stylesheet" href="../dist/finesse/css/momentum-ui-icons.min.css" />
+    <!-- <script src="https://cjaas.cisco.com/widgets/finesse/customer-journey.js"></script>
+    <script src="https://cjaas.cisco.com/widgets/finesse/customer-journey-wrapper.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cjaas.cisco.com/widgets/finesse/css/momentum-ui.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cjaas.cisco.com/widgets/finesse/css/momentum-ui-icons.min.css"
+    /> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      // Stubs for gadget bootstrap to work
+
+      var gadgets = {
+        HubSettings: {
+          onConnect: null,
+        },
+      };
+
+      var finesse = {
+        gadget: {
+          Config: {
+            host: null,
+            hostPort: null,
+            scheme: null,
+          },
+        },
+        cslogger: {
+          ClientLogger: {
+            init: () => {},
+          },
+        },
+        utilities: {
+          Utilities: {
+            getAuthHeaderString: null,
+          },
+          DesktopCache: {
+            saveOrUpdateData: () => {},
+            fetchData: () => {},
+          },
+        },
+        clientservices: {
+          ClientServices: {
+            init: () => {},
+            showMygadget: () => {},
+          },
+        },
+        containerservices: {
+          ContainerServices: {
+            init: () => ({ makeActiveTabReq: () => {} }),
+            enableTitle: () => {},
+          },
+        },
+      };
+    </script>
+  </head>
+
+  <body style="padding: 12px;">
+    <widget-theme-wrapper>
+      <customer-journey-widget
+        limit="20"
+        customer="sample"
+        user-search
+        base-url="https://cjaas-devus2.azurewebsites.net"
+        base-url-admin="http://cjaas-devus2-admin.azurewebsites.net"
+      ></customer-journey-widget>
+    </widget-theme-wrapper>
+    <script src="../dist/finesse/customer-journey-bootstrap.js"></script>
+  </body>
+</html>
