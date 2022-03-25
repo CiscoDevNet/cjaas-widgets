@@ -617,7 +617,7 @@ export default class CustomerJourneyWidget extends LitElement {
             <summary><span class="sub-widget-header">Profile</span><md-icon name="icon-arrow-up_12"></md-icon> </summary>
             ${this.profileLoading ? this.renderLoader() : this.renderProfile()}
           </details>
-          <details class="grid-identity sub-widget-detail-container" ?open=${this.identityAlias !== undefined}>
+          <details class="grid-identity sub-widget-detail-container">
             <summary>
               <span class="sub-widget-header">Aliases</span>
               <md-tooltip class="alias-info-tooltip" .message=${tooltipMessage}>
