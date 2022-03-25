@@ -1,6 +1,6 @@
 {
   "name": "@cjaas/cjaas-action-builder",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "author": {
     "name": "Kevin Hyde",
     "email": "kehyde@cisco.com"
@@ -26,21 +26,22 @@
     "lit-html": "1.2.1"
   },
   "peerDependencies": {
-    "@momentum-ui/core": "19.15.4",
-    "@momentum-ui/icons": "8.21.0",
+    "@momentum-ui/core": "19.15.12",
+    "@momentum-ui/icons": "8.25.0",
+    "@momentum-ui/tokens": "1.7.1",
     "@momentum-ui/utils": "6.2.15",
-    "@momentum-ui/web-components": "2.4.7",
+    "@momentum-ui/web-components": "2.4.11-dev1",
     "lit-element": "2.3.1",
     "lit-html": "1.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
     "@babel/preset-env": "^7.9.0",
-    "@cjaas/common-components": "3.0.0",
-    "@momentum-ui/core": "19.15.4",
-    "@momentum-ui/icons": "8.21.0",
+    "@cjaas/common-components": "4.2.3",
+    "@momentum-ui/core": "19.15.12",
+    "@momentum-ui/icons": "8.25.0",
     "@momentum-ui/utils": "6.2.15",
-    "@momentum-ui/web-components": "2.4.7",
+    "@momentum-ui/web-components": "2.4.11-dev1",
     "@open-wc/testing-helpers": "1.8.9",
     "@types/axios": "^0.14.0",
     "@types/copy-webpack-plugin": "^5.0.0",

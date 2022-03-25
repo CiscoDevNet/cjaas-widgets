@@ -168,23 +168,25 @@ div.profile {
       "profile timeline";
     justify-content: space-around;
     grid-template-rows: auto 1fr;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 1rem;
 
-    header {
+    .flex-inline {
       grid-area: header;
     }
     .grid-profile {
       grid-area: profile;
-      width: 26rem;
+      min-width: 26rem;
     }
     .grid-timeline {
       grid-area: timeline;
-      width: 26rem;
+      min-width: 26rem;
       margin-top: 0;
       height: 100%;
     }
     .grid-identity {
       grid-area: profile;
-      width: 26rem;
+      min-width: 26rem;
     }
   }
 }

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+    <ModulePrefs title="Customer Experience Journey"
+        description="Customer Experience Journey">
+        <Require feature="settitle" />
+        <Require feature="dynamic-height" />
+        <Require feature="pubsub-2" />
+        <Require feature="setprefs" />
+        
+        <Require feature="loadingindicator">
+            <Param name="manual-dismiss">true</Param>
+            <Param name="loading-timeout">100</Param>
+        </Require>
+        <Optional feature="content-rewrite">
+            <Param name="exclude-url">cjaas-devus2.azurewebsites.net</Param>
+            <Param name="exclude-url">cjaas.cisco.com</Param>
+        </Optional>
+        <Optional feature="collapsible" />
+
+    </ModulePrefs>
+    <UserPref name="scheme" display_name="scheme" default_value="" datatype ="hidden"/>
+    <UserPref name="host" display_name="host" default_value="" datatype ="hidden"/>
+    <UserPref name="hostPort" display_name="hostPort" default_value="" datatype ="hidden"/>
+    <Content type="html" view="default,canvas">
+        <![CDATA[
+            <!DOCTYPE html>
+            <!-- Finesse Library -->
+            <script type="text/javascript" 
+                src="__UP_scheme__://__UP_host__:__UP_hostPort__/desktop/assets/js/jquery.min.js">
+            </script>
+            <script type="text/javascript" 
+                src="__UP_scheme__://__UP_host__:__UP_hostPort__/desktop/assets/js/finesse.min.js">
+            </script>
+            <script src="https://cjaas.cisco.com/widgets/finesse/customer-journey.js"></script>
+            <script src="https://cjaas.cisco.com/widgets/finesse/customer-journey-wrapper.js"></script>
+            <script src="https://cjaas.cisco.com/widgets/finesse/customer-journey-bootstrap.js"></script>
+            <link
+            rel="stylesheet"
+            href="https://cjaas.cisco.com/widgets/finesse/css/momentum-ui.min.css"
+            />
+            <link
+            rel="stylesheet"
+            href="https://cjaas.cisco.com/widgets/finesse/css/momentum-ui-icons.min.css"
+            />
+            <body style="min-height: 320px;">
+                 <div class="jds-customer-journey">
+                    <widget-theme-wrapper>
+                        <customer-journey-widget></customer-journey-widget>
+                    </widget-theme-wrapper>
+                </div> 
+            </body>
+        ]]>
+    </Content>
+</Module>

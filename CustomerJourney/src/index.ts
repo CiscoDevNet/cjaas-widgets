@@ -185,7 +185,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * Hook to HTML element <md-input id="customerInput">
    * @query customerInput
    */
-  @query("#customerInput") customerInput!: HTMLInputElement;
+  @query("#customer-input") customerInput!: HTMLInputElement;
 
   @query(".profile") widget!: Element;
 
@@ -414,6 +414,8 @@ export default class CustomerJourneyWidget extends LitElement {
     if (srcEvent.key === "Enter") {
       e.composedPath()[0].blur();
     }
+
+    this.handleBackspace(srcEvent);
   }
 
   renderEvents() {
@@ -578,6 +580,37 @@ export default class CustomerJourneyWidget extends LitElement {
     }
   }
 
+  handleBackspace(event: KeyboardEvent) {
+    if (event?.key === "Backspace") {
+      event.stopPropagation();
+    }
+  }
+
+  // renderHeader() {
+  //   return html`
+  //     <div class="flex-inline">
+  //       <div class="input">
+  //         <md-tooltip message="Click to search new journey" ?disabled=${!this.userSearch}>
+  //           <input
+  //             class="header"
+  //             id="customer-input"
+  //             value=${this.customer || "Customer Journey"}
+  //             shape="pill"
+  //             @input-keydown=${(event: CustomEvent) => this.handleKey(event)}
+  //             @input-blur=${(event: CustomEvent) => {this.customer = event.composedPath()[0].value;}}>
+  //           </md-input>
+  //           <div class="reload-icon">
+  //             <md-tooltip message="Reload Widget">
+  //               <md-button circle @click="${() => this.lifecycleTasks()}">
+  //                 <md-icon name="icon-refresh_12"></md-icon>
+  //               </md-button>
+  //             </md-tooltip>
+  //           </div>
+  //       </div>
+  //     </div>
+  //   `;
+  // }
+
   renderMainInputSearch() {
     return html`
       <div class="flex-inline">
@@ -604,7 +637,7 @@ export default class CustomerJourneyWidget extends LitElement {
     `;
   }
 
-  render() {
+  renderFunctionalWidget() {
     const tooltipMessage = `Aliases are alternate ways to identify a customer. Adding aliases can help you form a more complete profile of your customer.`;
 
     return html`
@@ -641,6 +674,10 @@ export default class CustomerJourneyWidget extends LitElement {
         </div>
       </div>
     `;
+  }
+
+  render() {
+    return this.renderFunctionalWidget();
   }
 }
 
