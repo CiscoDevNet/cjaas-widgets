@@ -7,16 +7,59 @@
 
 :host {
   color: var(--md-primary-text-color, var(--color-gray-100));
+  font-family: "CiscoSansTT Regular", "Helvetica Neue", Helvetica, Arial, sans-serif;
   width: calc(100% - 1.5rem);
   height: calc(100% - 1.5rem);
   margin: 12px;
   display: block;
-  border-radius: 0.5rem;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.16), 0px 0px 1px rgba(0, 0, 0, 0.18);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  overflow: hidden;
+  overflow-y: auto;
+}
+
+.top-header-row {
+  .flex-inline {
+    display: flex;
+    padding: 1rem 2rem 0;
+    row-gap: 0.75rem;
+    flex-wrap: wrap;
+
+    .custom-input-label {
+      margin-right: 1rem;
+      align-items: center;
+      font-size: 1rem;
+      margin-top: 0.2rem;
+      display: inline-block;
+    }
+
+    .input-wrapper {
+      display: flex;
+      flex: 1;
+
+      .customer-journey-search-input {
+        flex: 1;
+        min-width: 10rem;
+        color: var(--md-primary-text-color, #171b1f);
+      }
+    }
+
+    .customer-journey-search-input::part(input) {
+      max-width: 100rem;
+      min-width: 12rem;
+    }
+
+    .filter-buttons > md-button {
+      display: inline-block;
+      margin-bottom: 0.5rem;
+    }
+
+    .reload-icon {
+      margin-left: 0.5rem;
+      width: 2rem;
+      height: 2rem;
+    }
+  }
 }
 
 .outer-container {
@@ -24,15 +67,12 @@
   padding: 0 12px 12px 12px;
   overflow: auto;
 
-  .header {
-    height: 3rem;
-    padding: 0 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--color-gray-30);
-    font-size: 1rem;
-    font-weight: bold;
+  .inner-header {
+    border-bottom: 0;
+  }
+
+  .customer-journey-search-input {
+    font-size: 14px;
   }
 
   h2 {
@@ -121,20 +161,6 @@ div.profile {
     border-radius: 0.25rem;
   }
 
-  input.header {
-    text-align: center;
-    font-size: 1.5rem;
-    font-family: "CiscoSansTT Medium";
-    font-weight: 200;
-    color: var(--md-primary-text-color);
-    background-color: var(--md-tertiary-bg-color);
-    display: block;
-    border: none;
-    border-radius: 0.25rem;
-    width: 100%;
-    height: 2.5rem;
-  }
-
   &.expanded {
     display: grid;
     grid-template-areas:
@@ -156,6 +182,7 @@ div.profile {
       grid-area: timeline;
       min-width: 26rem;
       margin-top: 0;
+      height: 100%;
     }
     .grid-identity {
       grid-area: profile;
@@ -164,25 +191,29 @@ div.profile {
   }
 }
 
-cjaas-profile::part(profile) {
-  // border: 1px solid var(--md-quaternary-bg-color, #dedede);
-  border-radius: 0.5rem;
-  background-color: var(--md-secondary-bg-color);
-}
-
 cjaas-timeline::part(stream) {
   height: calc(100% - 2rem);
 }
 
 cjaas-identity {
   display: block;
-  padding: 12px;
   border-radius: 0.5rem;
 }
 
-.grid-identity,
+cjaas-identity::part(alias-header-container) {
+  display: none;
+}
+
+cjaas-profile::part(top-content) {
+  margin: 0;
+}
+
+cjaas-profile::part(separator) {
+  display: none;
+}
+
 .grid-timeline {
-  margin-top: 0.5rem;
+  height: 100%;
 }
 
 details:last-child {
@@ -192,6 +223,7 @@ details:last-child {
 }
 
 details summary {
+  border-bottom: 1px solid var(--md-quaternary-bg-color, #DEDEDE);
   display: flex;
   justify-content: space-between;
   padding: 0.25rem;
@@ -222,13 +254,6 @@ details[open] summary md-icon {
   gap: 1rem;
 }
 
-md-input.profile {
-  width: 14rem;
-}
-.filter-buttons > md-button {
-  display: inline-block;
-  margin-bottom: 0.5rem;
-}
 .timeline-item {
   margin: 0 0.5rem 0.5rem 0.5rem;
 }
@@ -262,24 +287,49 @@ md-input.profile {
 
 .container {
   width: 100%;
-  height: calc(100% - 2rem);
+  height: calc(100% - 2.75rem);
   overflow: hidden;
-  margin: 0 auto;
 }
 
 #events-list {
   height: 100%;
 }
 
-.flex-inline {
-  display: flex;
-  align-items: center;
-  .input {
-    width: calc(100% - 2.5rem);
-  }
+.sub-widget-header {
+  color: var(--md-primary-text-color, #171b1f);
+  display: block;
+  font-size: 16px;
+  line-height: 24px;
+  margin: 0px;
+  height: 24px;
+  margin-top: 0.4rem;
+  margin-right: 0.5rem;
+}
 
-  .reload-icon {
-    margin-left: 0.5rem;
-    width: 2rem;
+.sub-widget-flex-container {
+  padding: 0 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 2rem;
+
+  .column {
+    flex: 1 1 350px;
   }
+}
+
+.sub-widget-section {
+  padding: 1rem 0;
+}
+
+.sub-widget-detail-container {
+  padding: 1rem;
+}
+
+.alias-info-tooltip {
+  height: 2rem;
+  margin-top: 0.1rem;
+}
+
+.alias-expand-icon {
+  margin-left: auto;
 }

@@ -409,12 +409,13 @@ export default class CustomerJourneyWidget extends LitElement {
     this.newestEvents = [];
   }
 
-  handleKey(e: KeyboardEvent) {
-    if (e.key === "Enter") {
+  handleKey(e: CustomEvent) {
+    const { srcEvent } = e?.detail;
+    if (srcEvent.key === "Enter") {
       e.composedPath()[0].blur();
     }
 
-    this.handleBackspace(e);
+    this.handleBackspace(srcEvent);
   }
 
   renderEvents() {
@@ -442,7 +443,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
   renderEventList() {
     return html`
-      <section id="events-list">
+      <section class="sub-widget-section" id="events-list">
         ${this.renderEvents()}
       </section>
     `;
@@ -450,13 +451,15 @@ export default class CustomerJourneyWidget extends LitElement {
 
   renderProfile() {
     return html`
-      <cjaas-profile .profileData=${this.profileData}></cjaas-profile>
+      <section class="sub-widget-section">
+        <cjaas-profile .profileData=${this.profileData}></cjaas-profile>
+      </section>
     `;
   }
 
   renderIdentity() {
     return html`
-      <section>
+      <section class="sub-widget-section">
         <cjaas-identity
           .customer=${this.customer}
           .alias=${this.alias}
@@ -583,56 +586,67 @@ export default class CustomerJourneyWidget extends LitElement {
     }
   }
 
-  renderHeader() {
+  renderMainInputSearch() {
     return html`
       <div class="flex-inline">
-        <div class="input">
-          <md-tooltip message="Click to search new journey" ?disabled=${!this.userSearch}>
-            <input
-              class="header"
-              id="customer-input"
+        <span class="custom-input-label">Lookup User</span>
+        <div class="input-wrapper">
+            <md-input
+              searchable
+              class="customer-journey-search-input"
+              placeholder="examples: Jon Doe, (808) 645-4562, jon@gmail.com"
               value=${this.customer || "Customer Journey"}
-              @keydown=${(e: KeyboardEvent) => this.handleKey(e)}
-              @blur=${(e: FocusEvent) => {
-                this.customer = e.composedPath()[0].value;
-              }}
-            />
-          </md-tooltip>
-        </div>
-        <div class="reload-icon">
-          <md-tooltip message="Reload Widget">
-            <md-button circle @click="${() => this.lifecycleTasks()}">
-              <md-icon name="icon-refresh_16"></md-icon>
-            </md-button>
-          </md-tooltip>
+              shape="pill"
+              @input-keydown=${(event: CustomEvent) => this.handleKey(event)}
+              @input-blur=${(event: CustomEvent) => {this.customer = event.composedPath()[0].value;}}>
+            </md-input>
+            <div class="reload-icon">
+              <md-tooltip message="Reload Widget">
+                <md-button circle @click="${() => this.lifecycleTasks()}">
+                  <md-icon name="icon-refresh_12"></md-icon>
+                </md-button>
+              </md-tooltip>
+            </div>
         </div>
       </div>
     `;
   }
 
   renderFunctionalWidget() {
+    const tooltipMessage = `Aliases are alternate ways to identify a customer. Adding aliases can help you form a more complete profile of your customer.`;
+
     return html`
-      <div class="profile${classMap(this.classes)}">
-        ${this.renderHeader()}
-        <div class="grid-profile">
-          <details ?open=${this.profileData !== undefined}>
-            <summary>Profile<md-icon name="icon-arrow-down_12"></md-icon> </summary>
+      <div class="top-header-row">
+        ${this.renderMainInputSearch()}
+      </div>
+      <div class="sub-widget-flex-container${classMap(this.classes)}">
+        <div class="column left-column">
+          <details class="sub-widget-detail-container" ?open=${this.profileData !== undefined}>
+            <summary><span class="sub-widget-header">Profile</span><md-icon name="icon-arrow-up_12"></md-icon> </summary>
             ${this.profileLoading ? this.renderLoader() : this.renderProfile()}
           </details>
-          <details class="grid-identity" ?open=${this.identityAlias !== undefined}>
-            <summary>Identity Alias<md-icon name="icon-arrow-down_12"></md-icon></summary>
+          <details class="grid-identity sub-widget-detail-container">
+            <summary>
+              <span class="sub-widget-header">Aliases</span>
+              <md-tooltip class="alias-info-tooltip" .message=${tooltipMessage}>
+                <md-icon name="info_14"></md-icon>
+              </md-tooltip>
+              <md-icon class="alias-expand-icon" name="icon-arrow-up_12"></md-icon>
+            </summary>
             ${this.renderIdentity()}
           </details>
         </div>
-        <details class="grid-timeline" open>
-          <summary
-            >Journey
-            <md-icon name="icon-arrow-down_12"></md-icon>
-          </summary>
-          <div class="container">
-            ${this.timelineLoading ? this.renderLoader() : this.renderEventList()}
-          </div>
-        </details>
+        <div class="column right-column">
+          <details class="grid-timeline sub-widget-detail-container" open>
+            <summary>
+              <span class="sub-widget-header">Journey</span>
+              <md-icon name="icon-arrow-up_12"></md-icon>
+            </summary>
+            <div class="container">
+              ${this.timelineLoading ? this.renderLoader() : this.renderEventList()}
+            </div>
+          </details>
+        </div>
       </div>
     `;
   }
