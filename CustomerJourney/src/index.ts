@@ -594,11 +594,14 @@ export default class CustomerJourneyWidget extends LitElement {
             <md-input
               searchable
               class="customer-journey-search-input"
+              id="customer-input"
               placeholder="examples: Jon Doe, (808) 645-4562, jon@gmail.com"
               value=${this.customer || "Customer Journey"}
               shape="pill"
               @input-keydown=${(event: CustomEvent) => this.handleKey(event)}
-              @input-blur=${(event: CustomEvent) => {this.customer = event.composedPath()[0].value;}}>
+              @blur=${(e: FocusEvent) => {
+                this.customer = e.composedPath()[0].value;
+              }}>
             </md-input>
             <div class="reload-icon">
               <md-tooltip message="Reload Widget">
