@@ -3,6 +3,10 @@
     "name": "icon-sms_16",
     "color": "mint"
   },
+  "Telephony": {
+    "name": "icon-handset-active_16",
+    "color": "green"
+  },
   "Voice": {
     "name": "icon-handset-active_16",
     "color": "green"
@@ -24,8 +28,8 @@
     "color": "yellow"
   },
   "Login": {
-      "name": "icon-sign-in_24",
-      "color": "gold"
+    "name": "icon-sign-in_24",
+    "color": "gold"
   },
   "Page Visit": {
     "name": "icon-mouse-cursor_16",
