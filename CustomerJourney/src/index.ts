@@ -111,8 +111,12 @@ export default class CustomerJourneyWidget extends LitElement {
    * Property to pass in JSON template to set color and icon settings
    * @prop eventIconTemplate
    */
-  @property({ attribute: false })
-  eventIconTemplate: Timeline.TimelineCustomizations = iconData;
+  @property({ attribute: false }) eventIconTemplate: Timeline.TimelineCustomizations = iconData;
+  /**
+   * @prop badgeKeyword
+   * set badge icon based on declared keyword from dataset
+   */
+  @property({ type: String, attribute: "badge-keyword" }) badgeKeyword = "channelType";
   /**
    * Data pulled from Journey Profile retrieval (will match shape of provided Template)
    * @prop profileData
@@ -425,6 +429,7 @@ export default class CustomerJourneyWidget extends LitElement {
         .timelineItems=${this.events}
         .newestEvents=${this.newestEvents}
         .eventIconTemplate=${this.eventIconTemplate}
+        .badgeKeyword=${this.badgeKeyword}
         @new-event-queue-cleared=${this.updateComprehensiveEventList}
         limit=${this.limit}
         event-filters
