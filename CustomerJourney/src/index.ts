@@ -283,6 +283,7 @@ export default class CustomerJourneyWidget extends LitElement {
       .then(x => x.json())
       .then(response => {
         if (response.error) {
+          this.profileLoading = false;
           throw new Error(response.error.message[0]);
         }
         if (response.data?.runtimeStatus === "Completed") {
@@ -292,6 +293,7 @@ export default class CustomerJourneyWidget extends LitElement {
         }
       })
       .catch(err => {
+        this.profileLoading = false;
         console.error("Unable to fetch the Profile", err);
       });
   }
@@ -316,6 +318,7 @@ export default class CustomerJourneyWidget extends LitElement {
           }
         })
         .catch(err => {
+          this.profileLoading = false;
           console.log(err);
         });
     }, 1500);
