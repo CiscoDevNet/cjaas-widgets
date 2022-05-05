@@ -146,12 +146,12 @@ export default class CustomerJourneyWidget extends LitElement {
    * Internal toggle of loading state for timeline section
    * @prop timelineLoading
    */
-  @internalProperty() timelineLoading = true;
+  @internalProperty() getEventsInProgress = false;
   /**
    * Internal toggle of loading state for profile section
    * @prop profileLoading
    */
-  @internalProperty() profileLoading = true;
+  @internalProperty() getProfileDataInProgress = false;
   /**
    * Internal store for error message
    * @prop errorMessage
@@ -175,9 +175,10 @@ export default class CustomerJourneyWidget extends LitElement {
   @internalProperty() identityAlias = false;
 
   @internalProperty() alias: IdentityResponse["data"] | undefined;
-  @internalProperty() isAPIInProgress = false;
-  @internalProperty() getAPIInProgress = false;
   @internalProperty() lastSeenEvent: JourneyEvent | null = null;
+
+  @internalProperty() aliasAddInProgress = false;
+  @internalProperty() aliasGetInProgress = false;
   @internalProperty() aliasDeleteInProgress: { [key: string]: boolean } = {};
 
   /**
@@ -190,33 +191,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * @query customerInput
    */
   @query("#customer-input") customerInput!: HTMLInputElement;
-
   @query(".profile") widget!: Element;
-
-  async lifecycleTasks() {
-    this.reloadOtherWidgets();
-    this.reloadAliasWidget();
-    this.requestUpdate();
-  }
-
-  reloadOtherWidgets() {
-    this.getExistingEvents().then((events: Timeline.CustomerEvent[]) => {
-      this.timelineLoading = false;
-
-      // sort events
-      this.events = sortEventsbyDate(events);
-    });
-
-    this.getProfile();
-    this.subscribeToStream();
-  }
-  async connectedCallback() {
-    super.connectedCallback();
-    await this.lifecycleTasks();
-    if (this.interactionData) {
-      this.customer = this.interactionData["ani"];
-    }
-  }
 
   async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
@@ -243,12 +218,15 @@ export default class CustomerJourneyWidget extends LitElement {
       }
     }
 
+    if (changedProperties.has("customer") || changedProperties.has("templateId")) {
+        this.getProfileFromTemplateId(this.customer, this.templateId);
+    }
+
     if (changedProperties.has("customer")) {
       this.newestEvents = [];
-      await this.lifecycleTasks();
-      if (this.customer && this.customerInput) {
-        this.customerInput.value = this.customer;
-      }
+        this.getExistingEvents(this.customer || null);
+        this.subscribeToStream(this.customer || null);
+        this.reloadAliasWidget(this.customer || null);
     }
   }
 
@@ -259,15 +237,11 @@ export default class CustomerJourneyWidget extends LitElement {
     }
   }
 
-  getProfile() {
-    this.profileLoading = true;
-    if (this.templateId) {
-      this.getProfileFromTemplateId();
-    }
-  }
+  getProfileFromTemplateId(customer: string | null, templateId: string) {
+    this.profileData = undefined;
 
-  getProfileFromTemplateId() {
-    const url = `${this.baseURL}/v1/journey/views:build?templateId=${this.templateId}&personId=${this.customer}`;
+    this.getProfileDataInProgress = true;
+    const url = `${this.baseURL}/v1/journey/views:build?templateId=${templateId}&personId=${customer}`;
 
     const options: RequestInit = {
       method: "POST",
@@ -283,17 +257,18 @@ export default class CustomerJourneyWidget extends LitElement {
       .then(x => x.json())
       .then(response => {
         if (response.error) {
-          this.profileLoading = false;
+          this.getProfileDataInProgress = false;
           throw new Error(response.error.message[0]);
         }
         if (response.data?.runtimeStatus === "Completed") {
-          this.profileData = this.parseResponse(response.data.output.attributeView);
+          this.profileData = this.parseResponse(response?.data?.output?.attributeView, response?.data?.output?.personId);
         } else {
           this.setOffProfileLongPolling(response.data.getUriStatusQuery);
         }
       })
       .catch(err => {
-        this.profileLoading = false;
+        this.getProfileDataInProgress = false;
+        this.profileData = undefined;
         console.error("Unable to fetch the Profile", err);
       });
   }
@@ -314,18 +289,19 @@ export default class CustomerJourneyWidget extends LitElement {
           if (response.data.runtimeStatus === "Completed") {
             clearInterval(intervalId);
             this.pollingActive = false;
-            this.profileData = this.parseResponse(response.data.output.attributeView);
+            this.profileData = this.parseResponse(response?.data?.output?.attributeView, response?.data?.output?.personId);
           }
         })
         .catch(err => {
-          this.profileLoading = false;
+          this.getProfileDataInProgress = false;
+          this.profileData = undefined;
           console.log(err);
         });
     }, 1500);
   }
 
-  parseResponse(attributes: any) {
-    return attributes.map((attribute: any) => {
+  parseResponse(attributes: any, personId: string) {
+    const profileTablePayload = attributes.map((attribute: any) => {
       const _query = {
         ...attribute.queryTemplate,
         widgetAttributes: {
@@ -333,19 +309,24 @@ export default class CustomerJourneyWidget extends LitElement {
           tag: attribute.queryTemplate?.widgetAttributes.tag,
         },
       };
-      this.profileLoading = false;
+      this.getProfileDataInProgress = false;
       return {
         query: _query,
         journeyEvents: attribute.journeyEvents?.map((value: string) => value && JSON.parse(value)),
         result: [attribute.result],
       };
     });
+
+    profileTablePayload.personId = personId;
+    return profileTablePayload;
   }
 
-  async getExistingEvents() {
-    this.timelineLoading = true;
+  async getExistingEvents(customer: string | null) {
+    this.events = [];
+
+    this.getEventsInProgress = true;
     this.baseUrlCheck();
-    return fetch(`${this.baseURL}/v1/journey/streams/historic/${this.customer}`, {
+    return fetch(`${this.baseURL}/v1/journey/streams/historic/${customer}`, {
       headers: {
         "content-type": "application/json; charset=UTF-8",
         accept: "application/json",
@@ -357,20 +338,23 @@ export default class CustomerJourneyWidget extends LitElement {
         return x.json();
       })
       .then((data: any) => {
-        // any to be changed to Timeline.CustomerEvent
+        // TODO: any type to be changed to Timeline.CustomerEvent
         data.events = data.events.map((event: any) => {
           event.time = DateTime.fromISO(event.time);
           return event;
         });
+        this.events = sortEventsbyDate(data.events);
         return data.events;
       })
       .catch((err: Error) => {
         console.error("Could not fetch Customer Journey events. ", err);
         this.errorMessage = `Failure to fetch Journey for ${this.customer}. ${err}`;
+      }).finally(() => {
+        this.getEventsInProgress = false;
       });
   }
 
-  subscribeToStream() {
+  subscribeToStream(customer: string | null) {
     if (this.eventSource) {
       this.eventSource.close();
     }
@@ -385,7 +369,7 @@ export default class CustomerJourneyWidget extends LitElement {
         },
       };
       this.eventSource = new EventSource(
-        `${this.baseURL}/v1/journey/streams/${this.customer}?${this.streamToken}`,
+        `${this.baseURL}/v1/journey/streams/${customer}?${this.streamToken}`,
         header
       );
     }
@@ -403,11 +387,9 @@ export default class CustomerJourneyWidget extends LitElement {
         }
       };
 
-      this.eventSource!.onerror = () => {
-        this.timelineLoading = false;
-      };
+      // this.eventSource!.onerror = () => {}; // TODO: handle this error case
     } else {
-      console.error(`No event source is active for ${this.customer}`);
+      console.error(`No event source is active for ${customer}`);
     }
   }
 
@@ -428,7 +410,7 @@ export default class CustomerJourneyWidget extends LitElement {
   renderEvents() {
     return html`
       <cjaas-timeline
-        .apiInProgress=${this.timelineLoading}
+        ?getEventsInProgress=${this.getEventsInProgress}
         .timelineItems=${this.events}
         .newestEvents=${this.newestEvents}
         .eventIconTemplate=${this.eventIconTemplate}
@@ -460,7 +442,7 @@ export default class CustomerJourneyWidget extends LitElement {
   renderProfile() {
     return html`
       <section class="sub-widget-section">
-        <cjaas-profile .profileData=${this.profileData}></cjaas-profile>
+        <cjaas-profile .profileData=${this.profileData} ?getProfileDataInProgress=${this.getProfileDataInProgress}></cjaas-profile>
       </section>
     `;
   }
@@ -472,10 +454,10 @@ export default class CustomerJourneyWidget extends LitElement {
           .customer=${this.customer}
           .alias=${this.alias}
           .aliasDeleteInProgress=${this.aliasDeleteInProgress}
-          .getAPIInProgress=${this.getAPIInProgress}
-          .isAPIInProgress=${this.isAPIInProgress}
-          @deleteAlias=${(ev: CustomEvent) => this.deleteAlias(ev.detail.alias)}
-          @addAlias=${(ev: CustomEvent) => this.addAlias(ev.detail.alias)}
+          ?aliasGetInProgress=${this.aliasGetInProgress}
+          ?aliasAddInProgress=${this.aliasAddInProgress}
+          @deleteAlias=${(ev: CustomEvent) => this.deleteAlias(this.customer, ev.detail.alias)}
+          @addAlias=${(ev: CustomEvent) => this.addAlias(this.customer, ev.detail.alias)}
           .minimal=${true}
         ></cjaas-identity>
       </section>
@@ -490,9 +472,9 @@ export default class CustomerJourneyWidget extends LitElement {
     return styles;
   }
 
-  async getAliases(): Promise<IdentityResponse | IdentityErrorResponse> {
-    const url = `${this.baseURLAdmin}/v1/journey/identities/${this.customer}`;
-    this.getAPIInProgress = true;
+  async getAliases(customer: string | null): Promise<IdentityResponse | IdentityErrorResponse> {
+    const url = `${this.baseURLAdmin}/v1/journey/identities/${customer}`;
+    this.aliasGetInProgress = true;
 
     return fetch(url, {
       method: "GET",
@@ -500,15 +482,18 @@ export default class CustomerJourneyWidget extends LitElement {
         Authorization: `SharedAccessSignature ${this.identityReadSasToken}`,
       },
     }).then(response => {
-      this.getAPIInProgress = false;
       return response.json();
-    });
+    }).catch((err) => {
+      // TODO: Handle fetch alias error case
+    }).finally(() => {
+      this.aliasGetInProgress = false;
+    })
   }
 
-  async postAlias(alias: string) {
-    const url = `${this.baseURLAdmin}/v1/journey/identities/${this.customer}/aliases`;
+  async postAlias(customer: string | null, alias: string) {
+    const url = `${this.baseURLAdmin}/v1/journey/identities/${customer}/aliases`;
 
-    this.isAPIInProgress = true;
+    this.aliasAddInProgress = true;
     return fetch(url, {
       method: "POST",
       headers: {
@@ -518,41 +503,37 @@ export default class CustomerJourneyWidget extends LitElement {
         aliases: [alias],
       }),
     }).then(response => {
-      this.isAPIInProgress = false;
       return response.json();
-    });
+    }).catch((err) => {
+      // TODO: handle add alias error
+    }).finally(() => {
+      this.aliasAddInProgress = false;
+    })
   }
 
-  async deleteAliasAPI(alias: string) {
-    const url = `${this.baseURLAdmin}/v1/journey/identities/${this.customer}/aliases/${alias}`;
-
+  async deleteAlias(customer: string | null, alias: string) {
     this.setAliasLoader(alias, true);
+    const url = `${this.baseURLAdmin}/v1/journey/identities/${customer}/aliases/${alias}`;
 
     return fetch(url, {
       method: "DELETE",
       headers: {
         Authorization: `SharedAccessSignature ${this.identityWriteSasToken}`,
       },
+    }).then((response) => {
+      this.removeAliasFromList(alias);
+      this.reloadAliasWidget(this.customer);
+      return response.json();
+    }).catch((err) => {
+      // TODO: handle delete alias error
+    }).finally(() => {
+      this.setAliasLoader(alias, false);
     });
-  }
-
-  async deleteAlias(alias: string) {
-    const response = await this.deleteAliasAPI(alias);
-
-    this.removeAliasFromList(alias);
-
-    this.setAliasLoader(alias, false);
-
-    this.reloadOtherWidgets();
-
-    return response.json();
   }
 
   setAliasLoader(alias: string, state: boolean) {
     const duplicate = Object.assign({}, this.aliasDeleteInProgress);
-
     duplicate[alias] = state;
-
     this.aliasDeleteInProgress = duplicate;
   }
 
@@ -565,33 +546,39 @@ export default class CustomerJourneyWidget extends LitElement {
     }
   }
 
-  async reloadAliasWidget() {
-    const response = await this.getAliases();
+  async reloadAliasWidget(customer: string | null) {
+    const response = await this.getAliases(customer);
 
     if ((response as IdentityErrorResponse).error) {
       this.alias = undefined;
-      // if ((response as IdentityErrorResponse).error?.key === 404) {
-      // }
+      // if ((response as IdentityErrorResponse).error?.key === 404) {} // TODO: Handle this error case
       return;
     }
 
     this.alias = (response as IdentityResponse).data;
   }
 
-  async addAlias(input: string) {
-    if (input?.trim()) {
-      const response = await this.postAlias(input);
+  async addAlias(customer: string | null, input: string) {
+    const addedValue = input?.trim;
 
-      if (response) {
-        this.lifecycleTasks();
-      }
+    if (!addedValue) {
+      console.error('You cannot add an empty value as a new alias');
+      return;
     }
+
+    this.postAlias(customer, input)
+    .then(() => this.reloadAliasWidget(customer));
   }
 
   handleBackspace(event: KeyboardEvent) {
     if (event?.key === "Backspace") {
       event.stopPropagation();
     }
+  }
+
+  refreshUserSearch() {
+    this.customer = null;
+    this.customer = this.customerInput.value;
   }
 
   renderMainInputSearch() {
@@ -604,7 +591,7 @@ export default class CustomerJourneyWidget extends LitElement {
               class="customer-journey-search-input"
               id="customer-input"
               placeholder="examples: Jon Doe, (808) 645-4562, jon@gmail.com"
-              value=${this.customer || "Customer Journey"}
+              value=${this.customer || ""}
               shape="pill"
               @input-keydown=${(event: CustomEvent) => this.handleKey(event)}
               @blur=${(e: FocusEvent) => {
@@ -613,7 +600,7 @@ export default class CustomerJourneyWidget extends LitElement {
             </md-input>
             <div class="reload-icon">
               <md-tooltip message="Reload Widget">
-                <md-button circle @click="${() => this.lifecycleTasks()}">
+                <md-button circle @click=${this.refreshUserSearch}>
                   <md-icon name="icon-refresh_12"></md-icon>
                 </md-button>
               </md-tooltip>
@@ -623,18 +610,26 @@ export default class CustomerJourneyWidget extends LitElement {
     `;
   }
 
-  renderFunctionalWidget() {
+
+  renderEmptyStateView() {
+    return html`
+      <div class="empty-state-container">
+        <!-- <img src="./assets/images/flashlight-search-192.svg" alt="search-illustration" /> -->
+        <!-- TODO: Add Illustrations to empty state view -->
+        <p class="empty-state-text">Enter a user to search for a Journey</p>
+      </div>
+    `;
+  }
+
+  renderSubWidgets() {
     const tooltipMessage = `Aliases are alternate ways to identify a customer. Adding aliases can help you form a more complete profile of your customer.`;
 
     return html`
-      <div class="top-header-row">
-        ${this.renderMainInputSearch()}
-      </div>
       <div class="sub-widget-flex-container${classMap(this.classes)}">
         <div class="column left-column">
-          <details class="sub-widget-detail-container" ?open=${this.profileData !== undefined}>
+          <details class="sub-widget-detail-container" open>
             <summary><span class="sub-widget-header">Profile</span><md-icon name="icon-arrow-up_12"></md-icon> </summary>
-            ${this.profileLoading ? this.renderLoader() : this.renderProfile()}
+            ${this.renderProfile()}
           </details>
           <details class="grid-identity sub-widget-detail-container">
             <summary>
@@ -654,10 +649,21 @@ export default class CustomerJourneyWidget extends LitElement {
               <md-icon name="icon-arrow-up_12"></md-icon>
             </summary>
             <div class="container">
-              ${this.timelineLoading ? this.renderLoader() : this.renderEventList()}
+              ${this.renderEventList()}
             </div>
           </details>
         </div>
+      </div>
+    `;
+  }
+
+  renderFunctionalWidget() {
+    return html`
+      <div class="customer-journey-widget-container">
+        <div class="top-header-row">
+          ${this.renderMainInputSearch()}
+        </div>
+        ${this.customer ? this.renderSubWidgets() : this.renderEmptyStateView()}
       </div>
     `;
   }
