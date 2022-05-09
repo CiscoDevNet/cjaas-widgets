@@ -18,6 +18,26 @@
   overflow-y: auto;
 }
 
+.customer-journey-widget-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.empty-state-container {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  justify-content: center;
+
+  .empty-state-text {
+    font-family: "CiscoSansTT Regular", "Helvetica Neue", Helvetica, Arial, sans-serif;;
+    font-weight: 400;
+    font-size: 14px;
+    color: var(--md-secondary-text-color, #545454);
+  }
+}
+
 .top-header-row {
   .flex-inline {
     display: flex;
@@ -318,7 +338,7 @@ details[open] summary md-icon {
 }
 
 .sub-widget-section {
-  padding: 1rem 0;
+  padding: 1rem 0 0;
 }
 
 .sub-widget-detail-container {

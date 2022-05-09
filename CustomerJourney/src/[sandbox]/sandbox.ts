@@ -20,7 +20,6 @@ const PROFILE_READ_TOKEN = process.env.DOTENV.PROFILE_READ_TOKEN;
 const PROFILE_WRITE_TOKEN = process.env.DOTENV.PROFILE_WRITE_TOKEN;
 // @ts-ignore
 const IDENTITY_READ_SAS_TOKEN = process.env.DOTENV.IDENTITY_READ_SAS_TOKEN;
-
 // @ts-ignore
 const IDENTITY_WRITE_SAS_TOKEN = process.env.DOTENV.IDENTITY_WRITE_SAS_TOKEN;
 
@@ -95,7 +94,11 @@ export class Sandbox extends LitElement {
     } else return console.error("Invalid data-aspect input");
   }
 
-  render() {
+  mockedInteractionData = {
+    ani: "egiere@cisco.com"
+  };
+
+  renderDevVersion() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
     // TODO: Verify that the JavaScript SAS Token script is still working. Below are keys made using Java from Srini
     return html`
@@ -104,9 +107,8 @@ export class Sandbox extends LitElement {
       </div>
       <md-theme ?darkTheme=${this.darkTheme} lumos>
         <div class="container">
-          <h2 class="sandbox-header">Customer Journey Widget</h2>
+          <h2 class="sandbox-header">Customer Journey Widget </br><span style="font-size: 12px; font-weight: 100">Dev Version: using dev API endpoints & sasTokens</span></h2>
           <div style=${containerStyle} class="widget-container">
-            <!-- CHANGE TO PRODUCTION SERVER WHEN SHIPPING TO WXCC DESKTOP -->
             <customer-journey-widget
               limit="20"
               customer="sample"
@@ -125,5 +127,52 @@ export class Sandbox extends LitElement {
         </div>
       </md-theme>
     `;
+  }
+
+  /** Version used within QA agent desktop environment */
+  renderProductionVersion() {
+    const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
+
+    return html`
+    <div class="toggle">
+      ${this.themeToggle()}
+    </div>
+    <md-theme ?darkTheme=${this.darkTheme} lumos>
+      <div class="container">
+        <h2 class="sandbox-header">Customer Journey Widget </br><span style="font-size: 12px; font-weight: 100">Production Version: using prod API endpoints (same as QA Agent Desktop endpoints & sasTokens)</span></h2>
+        <div style=${containerStyle} class="widget-container">
+          <customer-journey-widget
+            limit="20"
+            user-search
+            customer="v3nki@cisco.com"
+            .interactionData=${this.mockedInteractionData}
+            .eventIconTemplate=${iconData}
+            base-url="https://uswest-nonprod.cjaas.cisco.com"
+            base-url-admin="https://uswest-nonprod.cjaas.cisco.com/admin"
+            .tapeToken=${TAPE_TOKEN}
+            .streamToken=${STREAM_TOKEN}
+            .profileReadToken=${PROFILE_READ_TOKEN}
+            .profileWriteToken=${PROFILE_WRITE_TOKEN}
+            .identityReadSasToken=${IDENTITY_READ_SAS_TOKEN}
+            .identityWriteSasToken=${IDENTITY_WRITE_SAS_TOKEN}
+          ></customer-journey-widget>
+        </div>
+      </div>
+    </md-theme>
+  `;
+  }
+
+  render() {
+    /** You need to make sure you have the sasTokens appropriately defined in your .env file that are associated with dev or prod
+      TAPE_TOKEN
+      PROFILE_READ_TOKEN
+      PROFILE_WRITE_TOKEN
+      STREAM_TOKEN
+      IDENTITY_READ_SAS_TOKEN
+      IDENTITY_WRITE_SAS_TOKEN
+    */
+
+    // return this.renderDevVersion();
+    return this.renderProductionVersion();
   }
 }
