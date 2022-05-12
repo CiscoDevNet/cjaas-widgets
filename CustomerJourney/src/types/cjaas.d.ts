@@ -63,16 +63,29 @@ export interface JourneyEvent {
   type: string;
 }
 
+// OLD IdentityResponse
+// export interface IdentityResponse {
+//   meta: {
+//     orgId: string;
+//   };
+//   data: {
+//     namespace: string;
+//     id: string;
+//     aliases: string[];
+//     lastSeen: JourneyEvent;
+//   };
+// }
+
+export interface IdentityData {
+  id: string;
+  createdAt: string;
+  modifiedAt: string;
+  aliases: Array<string>;
+}
+
 export interface IdentityResponse {
-  meta: {
-    orgId: string;
-  };
-  data: {
-    namespace: string;
-    id: string;
-    aliases: string[];
-    lastSeen: JourneyEvent;
-  };
+  aliasesSearched: Array<string>,
+  data: Array<IdentityData>;
 }
 
 export interface IdentityErrorResponse {

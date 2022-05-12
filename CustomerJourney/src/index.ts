@@ -12,7 +12,7 @@ import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
 import { defaultTemplate } from "./assets/default-template";
 import * as iconData from "@/assets/icons.json";
-import { Profile, ServerSentEvent, IdentityResponse, JourneyEvent, IdentityErrorResponse } from "./types/cjaas";
+import { Profile, ServerSentEvent, IdentityResponse, JourneyEvent, IdentityErrorResponse, IdentityData } from "./types/cjaas";
 import { EventSourceInitDict } from "eventsource";
 import "@cjaas/common-components/dist/comp/cjaas-timeline";
 import "@cjaas/common-components/dist/comp/cjaas-profile";
@@ -152,34 +152,39 @@ export default class CustomerJourneyWidget extends LitElement {
    * @prop profileLoading
    */
   @internalProperty() getProfileDataInProgress = false;
+
   /**
    * Internal store for error message
    * @prop errorMessage
    */
-  @internalProperty() errorMessage = "";
+  // @internalProperty() errorMessage = "";
+
   /**
    * Internal toggle for responsive layout
    * @prop expanded
    */
   @internalProperty() expanded = false;
+
   /**
    * A fallback template in case no template ID is provided
    * Possibly deprecated by fetching default template from API
    */
-  @internalProperty() defaultTemplate = defaultTemplate;
+  // @internalProperty() defaultTemplate = defaultTemplate;
+
   /**
    * Memoize pollingstatus so that there are not multiple intervals
    */
   @internalProperty() pollingActive = false;
 
-  @internalProperty() identityAlias = false;
-
-  @internalProperty() alias: IdentityResponse["data"] | undefined;
-  @internalProperty() lastSeenEvent: JourneyEvent | null = null;
-
   @internalProperty() aliasAddInProgress = false;
+
   @internalProperty() aliasGetInProgress = false;
+
   @internalProperty() aliasDeleteInProgress: { [key: string]: boolean } = {};
+
+  @internalProperty() identityData: IdentityData | undefined;
+
+  @internalProperty() identityID: string | null = null;
 
   /**
    * Hook to HTML element <div class="container">
@@ -226,7 +231,8 @@ export default class CustomerJourneyWidget extends LitElement {
       this.newestEvents = [];
         this.getExistingEvents(this.customer || null);
         this.subscribeToStream(this.customer || null);
-        this.reloadAliasWidget(this.customer || null);
+        this.identityData = await this.getAliasesByAlias(this.customer || null);
+        this.identityID = this.identityData?.id || null;
     }
   }
 
@@ -295,7 +301,7 @@ export default class CustomerJourneyWidget extends LitElement {
         .catch(err => {
           this.getProfileDataInProgress = false;
           this.profileData = undefined;
-          console.log(err);
+          console.error(err);
         });
     }, 1500);
   }
@@ -348,7 +354,7 @@ export default class CustomerJourneyWidget extends LitElement {
       })
       .catch((err: Error) => {
         console.error("Could not fetch Customer Journey events. ", err);
-        this.errorMessage = `Failure to fetch Journey for ${this.customer}. ${err}`;
+        // this.errorMessage = `Failure to fetch Journey for ${this.customer}. ${err}`;
       }).finally(() => {
         this.getEventsInProgress = false;
       });
@@ -452,12 +458,12 @@ export default class CustomerJourneyWidget extends LitElement {
       <section class="sub-widget-section">
         <cjaas-identity
           .customer=${this.customer}
-          .alias=${this.alias}
+          .identityData=${this.identityData}
           .aliasDeleteInProgress=${this.aliasDeleteInProgress}
           ?aliasGetInProgress=${this.aliasGetInProgress}
           ?aliasAddInProgress=${this.aliasAddInProgress}
-          @deleteAlias=${(ev: CustomEvent) => this.deleteAlias(this.customer, ev.detail.alias)}
-          @addAlias=${(ev: CustomEvent) => this.addAlias(this.customer, ev.detail.alias)}
+          @deleteAlias=${(ev: CustomEvent) => this.deleteAlias(this.identityID, ev.detail.alias)}
+          @addAlias=${(ev: CustomEvent) => this.addAliasById(this.identityID, ev.detail.alias)}
           .minimal=${true}
         ></cjaas-identity>
       </section>
@@ -472,8 +478,15 @@ export default class CustomerJourneyWidget extends LitElement {
     return styles;
   }
 
-  async getAliases(customer: string | null): Promise<IdentityResponse | IdentityErrorResponse> {
-    const url = `${this.baseURLAdmin}/v1/journey/identities/${customer}`;
+  /**
+   * Search for an Identity of an individual via aliases. This will return one/more Identities.
+   * The Provided aliases belong to one/more Persons.
+   * This is where we gather the ID of the individual for future alias actions
+   * @param aliases
+   * @returns Promise<IdentityData | undefined>
+   */
+  async getAliasesByAlias(aliases: string | null): Promise<IdentityData | undefined> {
+    const url = `${this.baseURLAdmin}/v1/journey/identities?aliases=${aliases}`;
     this.aliasGetInProgress = true;
 
     return fetch(url, {
@@ -481,48 +494,97 @@ export default class CustomerJourneyWidget extends LitElement {
       headers: {
         Authorization: `SharedAccessSignature ${this.identityReadSasToken}`,
       },
-    }).then(response => {
-      return response.json();
+    }).then(response => response.json())
+    .then((response: IdentityResponse) => {
+      return response?.data?.length ? response.data[0] : undefined;
     }).catch((err) => {
-      // TODO: Handle fetch alias error case
+      // TODO: Handle fetch alias error case (err.key === 404)
+      console.error("Failed to fetch Aliases by Alias ", err);
+      return undefined;
     }).finally(() => {
       this.aliasGetInProgress = false;
-    })
+    });
   }
 
-  async postAlias(customer: string | null, alias: string) {
-    const url = `${this.baseURLAdmin}/v1/journey/identities/${customer}/aliases`;
+  /**
+   *
+   * @param identityId
+   * @returns Promise<IdentityData | undefined>
+   */
+  async getAliasesById(identityId: string | null): Promise<IdentityData | undefined> {
+    const url = `${this.baseURLAdmin}/v1/journey/identities/${identityId}`;
+    this.aliasGetInProgress = true;
+
+    return fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `SharedAccessSignature ${this.identityReadSasToken}`,
+      },
+    })
+    .then(response => response.json())
+    .then((identityData: IdentityData) => {
+      return identityData;
+    }).catch((err) => {
+      // TODO: Handle fetch alias error case (err?.key === 404)
+      return undefined;
+    }).finally(() => {
+      this.aliasGetInProgress = false;
+    });
+  }
+
+  /**
+   * Add one or more aliases to existing Individual
+   * @param customer
+   * @param alias
+   * @returns void
+   */
+  async addAliasById(identityId: string | null, alias: string) {
+    const trimmedAlias = alias.trim();
+
+    if (!trimmedAlias) {
+      console.error('You cannot add an empty value as a new alias');
+      return;
+    }
+
+    const url = `${this.baseURLAdmin}/v1/journey/identities/${identityId}/aliases`;
 
     this.aliasAddInProgress = true;
     return fetch(url, {
       method: "POST",
       headers: {
         Authorization: `SharedAccessSignature ${this.identityWriteSasToken}`,
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        aliases: [alias],
+        aliases: [trimmedAlias],
       }),
     }).then(response => {
       return response.json();
+    }).then(async () => {
+      this.identityData = await this.getAliasesById(identityId);
     }).catch((err) => {
       // TODO: handle add alias error
+      console.error("Failed to add AliasById ", err);
     }).finally(() => {
       this.aliasAddInProgress = false;
     })
   }
 
-  async deleteAlias(customer: string | null, alias: string) {
+  async deleteAlias(identityId: string | null, alias: string) {
     this.setAliasLoader(alias, true);
-    const url = `${this.baseURLAdmin}/v1/journey/identities/${customer}/aliases/${alias}`;
+    const url = `${this.baseURLAdmin}/v1/journey/identities/${identityId}/aliases`;
 
     return fetch(url, {
       method: "DELETE",
       headers: {
         Authorization: `SharedAccessSignature ${this.identityWriteSasToken}`,
+        "Content-Type": "application/json"
       },
-    }).then((response) => {
-      this.removeAliasFromList(alias);
-      this.reloadAliasWidget(this.customer);
+      body: JSON.stringify({
+        aliases: [alias],
+      }),
+    }).then(async (response) => {
+      this.identityData = await this.getAliasesById(identityId);
       return response.json();
     }).catch((err) => {
       // TODO: handle delete alias error
@@ -535,39 +597,6 @@ export default class CustomerJourneyWidget extends LitElement {
     const duplicate = Object.assign({}, this.aliasDeleteInProgress);
     duplicate[alias] = state;
     this.aliasDeleteInProgress = duplicate;
-  }
-
-  removeAliasFromList(alias: string) {
-    const index = this.alias?.aliases.findIndex(item => item === alias);
-
-    if (this.alias && index !== undefined) {
-      this.alias?.aliases.splice(index, 1);
-      this.requestUpdate();
-    }
-  }
-
-  async reloadAliasWidget(customer: string | null) {
-    const response = await this.getAliases(customer);
-
-    if ((response as IdentityErrorResponse).error) {
-      this.alias = undefined;
-      // if ((response as IdentityErrorResponse).error?.key === 404) {} // TODO: Handle this error case
-      return;
-    }
-
-    this.alias = (response as IdentityResponse).data;
-  }
-
-  async addAlias(customer: string | null, input: string) {
-    const addedValue = input?.trim;
-
-    if (!addedValue) {
-      console.error('You cannot add an empty value as a new alias');
-      return;
-    }
-
-    this.postAlias(customer, input)
-    .then(() => this.reloadAliasWidget(customer));
   }
 
   handleBackspace(event: KeyboardEvent) {

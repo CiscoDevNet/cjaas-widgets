@@ -98,6 +98,36 @@ export class Sandbox extends LitElement {
     ani: "egiere@cisco.com"
   };
 
+  renderTestVersion() {
+    const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
+    return html`
+      <div class="toggle">
+        ${this.themeToggle()}
+      </div>
+      <md-theme ?darkTheme=${this.darkTheme} lumos>
+        <div class="container">
+          <h2 class="sandbox-header">Customer Journey Widget </br><span style="font-size: 12px; font-weight: 100">Dev Version: using dev API endpoints & sasTokens</span></h2>
+          <div style=${containerStyle} class="widget-container">
+            <customer-journey-widget
+              limit="20"
+              customer="foobar"
+              user-search
+              .eventIconTemplate=${iconData}
+              base-url="https://cjaas-proddeploytest-api.azurewebsites.net"
+              base-url-admin="https://cjaas-proddeploytest-api.azurewebsites.net"
+              .tapeToken=${TAPE_TOKEN}
+              .streamToken=${STREAM_TOKEN}
+              .profileReadToken=${PROFILE_READ_TOKEN}
+              .profileWriteToken=${PROFILE_WRITE_TOKEN}
+              .identityReadSasToken=${IDENTITY_READ_SAS_TOKEN}
+              .identityWriteSasToken=${IDENTITY_WRITE_SAS_TOKEN}
+            ></customer-journey-widget>
+          </div>
+        </div>
+      </md-theme>
+    `;
+  }
+
   renderDevVersion() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
     // TODO: Verify that the JavaScript SAS Token script is still working. Below are keys made using Java from Srini
@@ -111,7 +141,7 @@ export class Sandbox extends LitElement {
           <div style=${containerStyle} class="widget-container">
             <customer-journey-widget
               limit="20"
-              customer="sample"
+              customer="foobar"
               user-search
               .eventIconTemplate=${iconData}
               base-url="https://cjaas-devus2.azurewebsites.net"
@@ -173,6 +203,7 @@ export class Sandbox extends LitElement {
     */
 
     // return this.renderDevVersion();
-    return this.renderProductionVersion();
+    // return this.renderProductionVersion();
+    return this.renderTestVersion();
   }
 }
