@@ -10,18 +10,19 @@
  * ATTENTION: Apps using this widget must provide the following values from the application configuration.
  * These details allow easy and discreet generation of SAS tokens with correct permissions needed to access the API.
  */
+
 // @ts-ignore
-const TAPE_TOKEN = process.env.DOTENV.TAPE_TOKEN;
+const TAPE_READ_TOKEN = process.env.DOTENV.TAPE_READ_TOKEN;
 // @ts-ignore
-const STREAM_TOKEN = process.env.DOTENV.STREAM_TOKEN;
+const STREAM_READ_TOKEN = process.env.DOTENV.STREAM_READ_TOKEN;
 // @ts-ignore
 const PROFILE_READ_TOKEN = process.env.DOTENV.PROFILE_READ_TOKEN;
 // @ts-ignore
 const PROFILE_WRITE_TOKEN = process.env.DOTENV.PROFILE_WRITE_TOKEN;
 // @ts-ignore
-const IDENTITY_READ_SAS_TOKEN = process.env.DOTENV.IDENTITY_READ_SAS_TOKEN;
+const IDENTITY_READ_TOKEN = process.env.DOTENV.IDENTITY_READ_TOKEN;
 // @ts-ignore
-const IDENTITY_WRITE_SAS_TOKEN = process.env.DOTENV.IDENTITY_WRITE_SAS_TOKEN;
+const IDENTITY_WRITE_TOKEN = process.env.DOTENV.IDENTITY_WRITE_TOKEN;
 
 import "@momentum-ui/web-components";
 import "@cjaas/common-components";
@@ -98,7 +99,14 @@ export class Sandbox extends LitElement {
     ani: "egiere@cisco.com"
   };
 
-  renderTestVersion() {
+  /**
+   * Using Elena's Resource Group
+   * API - https://jds-elenatst-westus-api.azurewebsites.net
+   * Data sink (Posting Events, Walk in) - https://jds-elenatst-westus-ds.azurewebsites.net
+   * Data stream (ReadStreamByPerson) - https://jds-elenatst-westus-st.azurewebsites.net
+   * example keyVault, not for this RS: https://devdeploytest-kv.vault.azure.net/
+   */
+  renderElenaResourceGroupVersion() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
     return html`
       <div class="toggle">
@@ -113,14 +121,14 @@ export class Sandbox extends LitElement {
               customer="foobar"
               user-search
               .eventIconTemplate=${iconData}
-              base-url="https://cjaas-proddeploytest-api.azurewebsites.net"
-              base-url-admin="https://cjaas-proddeploytest-api.azurewebsites.net"
-              .tapeToken=${TAPE_TOKEN}
-              .streamToken=${STREAM_TOKEN}
+              api-base-url="https://jds-elenatst-westus-api.azurewebsites.net"
+              data-stream-base-url="https://jds-elenatst-westus-st.azurewebsites.net"
+              .tapeReadToken=${TAPE_READ_TOKEN}
+              .streamReadToken=${STREAM_READ_TOKEN}
               .profileReadToken=${PROFILE_READ_TOKEN}
               .profileWriteToken=${PROFILE_WRITE_TOKEN}
-              .identityReadSasToken=${IDENTITY_READ_SAS_TOKEN}
-              .identityWriteSasToken=${IDENTITY_WRITE_SAS_TOKEN}
+              .identityReadToken=${IDENTITY_READ_TOKEN}
+              .identityWriteToken=${IDENTITY_WRITE_TOKEN}
             ></customer-journey-widget>
           </div>
         </div>
@@ -128,7 +136,108 @@ export class Sandbox extends LitElement {
     `;
   }
 
-  renderDevVersion() {
+  /**
+   * Another Prod Test environment (https://cjaas-proddeploytest-api.azurewebsites.net)
+   */
+  renderProdTestVersion() {
+    const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
+    return html`
+      <div class="toggle">
+        ${this.themeToggle()}
+      </div>
+      <md-theme ?darkTheme=${this.darkTheme} lumos>
+        <div class="container">
+          <h2 class="sandbox-header">Customer Journey Widget </br><span style="font-size: 12px; font-weight: 100">Dev Version: using dev API endpoints & sasTokens</span></h2>
+          <div style=${containerStyle} class="widget-container">
+            <customer-journey-widget
+              limit="20"
+              customer="foobar"
+              user-search
+              .eventIconTemplate=${iconData}
+              api-base-url="https://cjaas-proddeploytest-api.azurewebsites.net"
+              data-stream-base-url="https://cjaas-proddeploytest-st.azurewebsites.net"
+              .tapeReadToken=${TAPE_READ_TOKEN}
+              .streamReadToken=${STREAM_READ_TOKEN}
+              .profileReadToken=${PROFILE_READ_TOKEN}
+              .profileWriteToken=${PROFILE_WRITE_TOKEN}
+              .identityReadToken=${IDENTITY_READ_TOKEN}
+              .identityWriteToken=${IDENTITY_WRITE_TOKEN}
+            ></customer-journey-widget>
+          </div>
+        </div>
+      </md-theme>
+    `;
+  }
+
+  /**
+   * http://localhost:5192
+   * keyVault: "https://proddeploytest-kv.vault.azure.net/"
+   */
+   renderLocalProdTestVersion() {
+    const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
+    return html`
+      <div class="toggle">
+        ${this.themeToggle()}
+      </div>
+      <md-theme ?darkTheme=${this.darkTheme} lumos>
+        <div class="container">
+          <h2 class="sandbox-header">Customer Journey Widget </br><span style="font-size: 12px; font-weight: 100">Dev Version: using dev API endpoints & sasTokens</span></h2>
+          <div style=${containerStyle} class="widget-container">
+            <customer-journey-widget
+              limit="20"
+              customer="foobar"
+              user-search
+              .eventIconTemplate=${iconData}
+              api-base-url="http://localhost:5192"
+              data-stream-base-url="http://localhost:5192"
+              .tapeReadToken=${TAPE_READ_TOKEN}
+              .streamReadToken=${STREAM_READ_TOKEN}
+              .profileReadToken=${PROFILE_READ_TOKEN}
+              .profileWriteToken=${PROFILE_WRITE_TOKEN}
+              .identityReadToken=${IDENTITY_READ_TOKEN}
+              .identityWriteToken=${IDENTITY_WRITE_TOKEN}
+            ></customer-journey-widget>
+          </div>
+        </div>
+      </md-theme>
+    `;
+  }
+
+  /**
+   * http://localhost:5192
+   * keyVault: "https://devdeploytest-kv.vault.azure.net/"
+   */
+  renderLocalDevTestVersion() {
+    const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
+    return html`
+      <div class="toggle">
+        ${this.themeToggle()}
+      </div>
+      <md-theme ?darkTheme=${this.darkTheme} lumos>
+        <div class="container">
+          <h2 class="sandbox-header">Customer Journey Widget </br><span style="font-size: 12px; font-weight: 100">Dev Version: using dev API endpoints & sasTokens</span></h2>
+          <div style=${containerStyle} class="widget-container">
+            <customer-journey-widget
+              limit="20"
+              customer="foobar"
+              user-search
+              .eventIconTemplate=${iconData}
+              api-base-url="http://localhost:5192"
+              data-stream-base-url="http://localhost:5192"
+              .tapeReadToken=${TAPE_READ_TOKEN}
+              .streamReadToken=${STREAM_READ_TOKEN}
+              .profileReadToken=${PROFILE_READ_TOKEN}
+              .profileWriteToken=${PROFILE_WRITE_TOKEN}
+              .identityReadToken=${IDENTITY_READ_TOKEN}
+              .identityWriteToken=${IDENTITY_WRITE_TOKEN}
+            ></customer-journey-widget>
+          </div>
+        </div>
+      </md-theme>
+    `;
+  }
+
+  renderOldDevVersion() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
     // TODO: Verify that the JavaScript SAS Token script is still working. Below are keys made using Java from Srini
     return html`
@@ -144,14 +253,14 @@ export class Sandbox extends LitElement {
               customer="foobar"
               user-search
               .eventIconTemplate=${iconData}
-              base-url="https://cjaas-devus2.azurewebsites.net"
-              base-url-admin="http://cjaas-devus2-admin.azurewebsites.net"
-              .tapeToken=${TAPE_TOKEN}
-              .streamToken=${STREAM_TOKEN}
+              api-base-url="https://cjaas-devus2.azurewebsites.net"
+              data-stream-base-url="https://cjaas-devus2.azurewebsites.net"
+              .tapeReadToken=${TAPE_READ_TOKEN}
+              .streamReadToken=${STREAM_READ_TOKEN}
               .profileReadToken=${PROFILE_READ_TOKEN}
               .profileWriteToken=${PROFILE_WRITE_TOKEN}
-              .identityReadSasToken=${IDENTITY_READ_SAS_TOKEN}
-              .identityWriteSasToken=${IDENTITY_WRITE_SAS_TOKEN}
+              .identityReadToken=${IDENTITY_READ_TOKEN}
+              .identityWriteToken=${IDENTITY_WRITE_TOKEN}
             ></customer-journey-widget>
           </div>
         </div>
@@ -159,7 +268,47 @@ export class Sandbox extends LitElement {
     `;
   }
 
-  /** Version used within QA agent desktop environment */
+  /**
+   * Old Prod Version used within QA agent desktop environment
+   * */
+   renderOldProductionVersion() {
+    const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
+
+    return html`
+    <div class="toggle">
+      ${this.themeToggle()}
+    </div>
+    <md-theme ?darkTheme=${this.darkTheme} lumos>
+      <div class="container">
+        <h2 class="sandbox-header">Customer Journey Widget </br><span style="font-size: 12px; font-weight: 100">Production Version: using prod API endpoints (same as QA Agent Desktop endpoints & sasTokens)</span></h2>
+        <div style=${containerStyle} class="widget-container">
+          <customer-journey-widget
+            limit="20"
+            user-search
+            customer="v3nki@cisco.com"
+            .interactionData=${this.mockedInteractionData}
+            .eventIconTemplate=${iconData}
+            api-base-url="https://uswest-nonprod.cjaas.cisco.com"
+            data-stream-base-url="https://uswest-nonprod.cjaas.cisco.com"
+            .tapeReadToken=${TAPE_READ_TOKEN}
+            .streamReadToken=${STREAM_READ_TOKEN}
+            .profileReadToken=${PROFILE_READ_TOKEN}
+            .profileWriteToken=${PROFILE_WRITE_TOKEN}
+            .identityReadToken=${IDENTITY_READ_TOKEN}
+            .identityWriteToken=${IDENTITY_WRITE_TOKEN}
+          ></customer-journey-widget>
+        </div>
+      </div>
+    </md-theme>
+  `;
+  }
+
+  /**
+   * New Production Version coming soon
+   * API         https://jds-prod-pf-westus-apim.azure-api.net
+   * Data sink    https://jds-prod-pf-westus-apim.azure-api.net/events
+   * Data stream  https://jds-prod-pf-westus-apim.azure-api.net/streams
+   * */
   renderProductionVersion() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
 
@@ -177,14 +326,14 @@ export class Sandbox extends LitElement {
             customer="v3nki@cisco.com"
             .interactionData=${this.mockedInteractionData}
             .eventIconTemplate=${iconData}
-            base-url="https://uswest-nonprod.cjaas.cisco.com"
-            base-url-admin="https://uswest-nonprod.cjaas.cisco.com/admin"
-            .tapeToken=${TAPE_TOKEN}
-            .streamToken=${STREAM_TOKEN}
+            api-base-url="https://jds-prod-pf-westus-apim.azure-api.net"
+            data-stream-base-url="https://jds-prod-pf-westus-apim.azure-api.net/streams"
+            .tapeReadToken=${TAPE_READ_TOKEN}
+            .streamReadToken=${STREAM_READ_TOKEN}
             .profileReadToken=${PROFILE_READ_TOKEN}
             .profileWriteToken=${PROFILE_WRITE_TOKEN}
-            .identityReadSasToken=${IDENTITY_READ_SAS_TOKEN}
-            .identityWriteSasToken=${IDENTITY_WRITE_SAS_TOKEN}
+            .identityReadToken=${IDENTITY_READ_TOKEN}
+            .identityWriteToken=${IDENTITY_WRITE_TOKEN}
           ></customer-journey-widget>
         </div>
       </div>
@@ -204,6 +353,10 @@ export class Sandbox extends LitElement {
 
     // return this.renderDevVersion();
     // return this.renderProductionVersion();
-    return this.renderTestVersion();
+    // return this.renderProdTestVersion();
+    // return this.renderDevTestVersion();
+    // return this.renderLocalDevTestVersion();
+    // return this.renderLocalProdTestVersion();
+    return this.renderElenaResourceGroupVersion();
   }
 }

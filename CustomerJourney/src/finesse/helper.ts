@@ -78,15 +78,15 @@ export const setTokensToWidget = (sasTokens: SASTokens) => {
     return;
   }
 
-  widget.baseURL = "https://uswest-nonprod.cjaas.cisco.com";
-  widget.baseURLAdmin = "https://uswest-nonprod.cjaas.cisco.com/admin";
+  widget.apiBaseUrl = "https://uswest-nonprod.cjaas.cisco.com";
+  widget.dataStreamBaseUrl = "https://uswest-nonprod.cjaas.cisco.com";
 
-  widget.tapeToken = sasTokens.tapeToken;
-  widget.streamToken = sasTokens.streamToken;
+  widget.tapeReadToken = sasTokens.tapeToken;
+  widget.streamReadToken = sasTokens.streamToken;
   widget.profileReadToken = sasTokens.profileReadToken;
   widget.profileWriteToken = sasTokens.profileWriteToken || "";
-  widget.identityReadSasToken = sasTokens.identityReadSASToken;
-  widget.identityWriteSasToken = sasTokens.identityWriteSASToken;
+  widget.identityReadToken = sasTokens.identityReadSASToken;
+  widget.identityWriteToken = sasTokens.identityWriteSASToken;
   widget.userSearch = true;
   widget.eventIconTemplate = iconData;
 };
