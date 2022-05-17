@@ -78,8 +78,7 @@ export const setTokensToWidget = (sasTokens: SASTokens) => {
     return;
   }
 
-  widget.apiBaseUrl = "https://uswest-nonprod.cjaas.cisco.com";
-  widget.dataStreamBaseUrl = "https://uswest-nonprod.cjaas.cisco.com";
+  widget.baseUrl = "https://uswest-nonprod.cjaas.cisco.com";
 
   widget.tapeReadToken = sasTokens.tapeToken;
   widget.streamReadToken = sasTokens.streamToken;

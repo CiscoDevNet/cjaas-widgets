@@ -40,12 +40,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * Path to the proper Customer Journey API deployment
    * @attr base-url
    */
-  @property({ type: String, attribute: "api-base-url" }) apiBaseUrl: string | undefined = undefined;
-  /**
-   * Path to the proper Customer Journey API deployment
-   * @attr base-url
-   */
-  @property({ type: String, attribute: "data-stream-base-url" }) dataStreamBaseUrl: string | undefined = undefined;
+  @property({ type: String, attribute: "base-url" }) baseUrl: string | undefined = undefined;
   /**
    * Customer ID used for Journey lookup
    * @attr customer
@@ -236,7 +231,7 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   baseUrlCheck() {
-    if (this.apiBaseUrl === undefined) {
+    if (this.baseUrl === undefined) {
       console.error("You must provide a Base URL");
       throw new Error("You must provide a Base URL");
     }
@@ -251,7 +246,7 @@ export default class CustomerJourneyWidget extends LitElement {
     // const url = `${this.baseURL}/v1/journey/views:build?templateId=${templateId}&personId=${customer}`;
 
     // NEW test environment
-    const url = `${this.apiBaseUrl}/v1/journey/views?templateId=${templateId}&personId=${customer}`
+    const url = `${this.baseUrl}/v1/journey/views?templateId=${templateId}&personId=${customer}`
 
     const options: RequestInit = {
       method: "GET",
@@ -339,7 +334,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
     this.getEventsInProgress = true;
     this.baseUrlCheck();
-    return fetch(`${this.apiBaseUrl}/v1/journey/streams/historic/${customer}`, {
+    return fetch(`${this.baseUrl}/v1/journey/streams/historic/${customer}`, {
       headers: {
         "content-type": "application/json; charset=UTF-8",
         accept: "application/json",
@@ -382,7 +377,7 @@ export default class CustomerJourneyWidget extends LitElement {
         },
       };
       this.eventSource = new EventSource(
-        `${this.dataStreamBaseUrl}/v1/journey/streams/${customer}?${this.streamReadToken}`,
+        `${this.baseUrl}/streams/v1/journey/streams/${customer}?${this.streamReadToken}`,
         header
       );
     }
@@ -501,7 +496,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * @returns Promise<IdentityData | undefined>
    */
   async getAliasesByAlias(aliases: string | null): Promise<IdentityData | undefined> {
-    const url = `${this.apiBaseUrl}/v1/journey/identities?aliases=${aliases}`;
+    const url = `${this.baseUrl}/v1/journey/identities?aliases=${aliases}`;
     this.aliasGetInProgress = true;
 
     return fetch(url, {
@@ -527,7 +522,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * @returns Promise<IdentityData | undefined>
    */
   async getAliasesById(identityId: string | null): Promise<IdentityData | undefined> {
-    const url = `${this.apiBaseUrl}/v1/journey/identities/${identityId}`;
+    const url = `${this.baseUrl}/v1/journey/identities/${identityId}`;
     this.aliasGetInProgress = true;
 
     return fetch(url, {
@@ -561,7 +556,7 @@ export default class CustomerJourneyWidget extends LitElement {
       return;
     }
 
-    const url = `${this.apiBaseUrl}/v1/journey/identities/${identityId}/aliases`;
+    const url = `${this.baseUrl}/v1/journey/identities/${identityId}/aliases`;
 
     this.aliasAddInProgress = true;
     return fetch(url, {
@@ -587,7 +582,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
   async deleteAlias(identityId: string | null, alias: string) {
     this.setAliasLoader(alias, true);
-    const url = `${this.apiBaseUrl}/v1/journey/identities/${identityId}/aliases`;
+    const url = `${this.baseUrl}/v1/journey/identities/${identityId}/aliases`;
 
     return fetch(url, {
       method: "DELETE",

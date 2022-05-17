@@ -121,8 +121,7 @@ export class Sandbox extends LitElement {
               customer="foobar"
               user-search
               .eventIconTemplate=${iconData}
-              api-base-url="https://jds-elenatst-westus-api.azurewebsites.net"
-              data-stream-base-url="https://jds-elenatst-westus-st.azurewebsites.net"
+              base-url="https://jds-elenatst-westus-api.azurewebsites.net"
               .tapeReadToken=${TAPE_READ_TOKEN}
               .streamReadToken=${STREAM_READ_TOKEN}
               .profileReadToken=${PROFILE_READ_TOKEN}
@@ -154,8 +153,7 @@ export class Sandbox extends LitElement {
               customer="foobar"
               user-search
               .eventIconTemplate=${iconData}
-              api-base-url="https://cjaas-proddeploytest-api.azurewebsites.net"
-              data-stream-base-url="https://cjaas-proddeploytest-st.azurewebsites.net"
+              base-url="https://cjaas-proddeploytest-api.azurewebsites.net"
               .tapeReadToken=${TAPE_READ_TOKEN}
               .streamReadToken=${STREAM_READ_TOKEN}
               .profileReadToken=${PROFILE_READ_TOKEN}
@@ -188,8 +186,7 @@ export class Sandbox extends LitElement {
               customer="foobar"
               user-search
               .eventIconTemplate=${iconData}
-              api-base-url="http://localhost:5192"
-              data-stream-base-url="http://localhost:5192"
+              base-url="http://localhost:5192"
               .tapeReadToken=${TAPE_READ_TOKEN}
               .streamReadToken=${STREAM_READ_TOKEN}
               .profileReadToken=${PROFILE_READ_TOKEN}
@@ -222,8 +219,7 @@ export class Sandbox extends LitElement {
               customer="foobar"
               user-search
               .eventIconTemplate=${iconData}
-              api-base-url="http://localhost:5192"
-              data-stream-base-url="http://localhost:5192"
+              base-url="http://localhost:5192"
               .tapeReadToken=${TAPE_READ_TOKEN}
               .streamReadToken=${STREAM_READ_TOKEN}
               .profileReadToken=${PROFILE_READ_TOKEN}
@@ -253,8 +249,7 @@ export class Sandbox extends LitElement {
               customer="foobar"
               user-search
               .eventIconTemplate=${iconData}
-              api-base-url="https://cjaas-devus2.azurewebsites.net"
-              data-stream-base-url="https://cjaas-devus2.azurewebsites.net"
+              base-url="https://cjaas-devus2.azurewebsites.net"
               .tapeReadToken=${TAPE_READ_TOKEN}
               .streamReadToken=${STREAM_READ_TOKEN}
               .profileReadToken=${PROFILE_READ_TOKEN}
@@ -288,8 +283,7 @@ export class Sandbox extends LitElement {
             customer="v3nki@cisco.com"
             .interactionData=${this.mockedInteractionData}
             .eventIconTemplate=${iconData}
-            api-base-url="https://uswest-nonprod.cjaas.cisco.com"
-            data-stream-base-url="https://uswest-nonprod.cjaas.cisco.com"
+            base-url="https://uswest-nonprod.cjaas.cisco.com"
             .tapeReadToken=${TAPE_READ_TOKEN}
             .streamReadToken=${STREAM_READ_TOKEN}
             .profileReadToken=${PROFILE_READ_TOKEN}
@@ -305,11 +299,16 @@ export class Sandbox extends LitElement {
 
   /**
    * New Production Version coming soon
-   * API         https://jds-prod-pf-westus-apim.azure-api.net
+   * BaseUrl      https://jds-prod-pf-westus-apim.azure-api.net
    * Data sink    https://jds-prod-pf-westus-apim.azure-api.net/events
    * Data stream  https://jds-prod-pf-westus-apim.azure-api.net/streams
+   * KeyVault     https://jds-prod-pf-westus-kv.vault.azure.net/
+   *
+   * OrgName      testorg
+   * Namespace    sandbox
+   * KeyName      testorg
    * */
-  renderProductionVersion() {
+  renderOfficialProductionVersion() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
 
     return html`
@@ -326,8 +325,45 @@ export class Sandbox extends LitElement {
             customer="v3nki@cisco.com"
             .interactionData=${this.mockedInteractionData}
             .eventIconTemplate=${iconData}
-            api-base-url="https://jds-prod-pf-westus-apim.azure-api.net"
-            data-stream-base-url="https://jds-prod-pf-westus-apim.azure-api.net/streams"
+            base-url="https://jds-prod-pf-westus-apim.azure-api.net"
+            .tapeReadToken=${TAPE_READ_TOKEN}
+            .streamReadToken=${STREAM_READ_TOKEN}
+            .profileReadToken=${PROFILE_READ_TOKEN}
+            .profileWriteToken=${PROFILE_WRITE_TOKEN}
+            .identityReadToken=${IDENTITY_READ_TOKEN}
+            .identityWriteToken=${IDENTITY_WRITE_TOKEN}
+          ></customer-journey-widget>
+        </div>
+      </div>
+    </md-theme>
+  `;
+  }
+
+  /**
+   * Official Dev Environment
+   * https://jds-dev-pf-westus2-kv.vault.azure.net/
+   * wxccmailinator
+   * sandbox
+   * webexcontactcenter
+   */
+   renderOfficialDevVersion() {
+    const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
+
+    return html`
+    <div class="toggle">
+      ${this.themeToggle()}
+    </div>
+    <md-theme ?darkTheme=${this.darkTheme} lumos>
+      <div class="container">
+        <h2 class="sandbox-header">Customer Journey Widget </br><span style="font-size: 12px; font-weight: 100">Production Version: using prod API endpoints (same as QA Agent Desktop endpoints & sasTokens)</span></h2>
+        <div style=${containerStyle} class="widget-container">
+          <customer-journey-widget
+            limit="20"
+            user-search
+            customer="v3nki@cisco.com"
+            .interactionData=${this.mockedInteractionData}
+            .eventIconTemplate=${iconData}
+            base-url="https://jds-prod-pf-westus2-apim.azure-api.net"
             .tapeReadToken=${TAPE_READ_TOKEN}
             .streamReadToken=${STREAM_READ_TOKEN}
             .profileReadToken=${PROFILE_READ_TOKEN}
@@ -357,6 +393,9 @@ export class Sandbox extends LitElement {
     // return this.renderDevTestVersion();
     // return this.renderLocalDevTestVersion();
     // return this.renderLocalProdTestVersion();
-    return this.renderElenaResourceGroupVersion();
+    // return this.renderElenaResourceGroupVersion();
+
+    return this.renderOfficialDevVersion();
+    // return this.renderOfficialProductionVersion();
   }
 }
