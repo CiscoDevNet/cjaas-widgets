@@ -224,10 +224,10 @@ export default class CustomerJourneyWidget extends LitElement {
 
     if (changedProperties.has("customer")) {
       this.newestEvents = [];
-        this.getExistingEvents(this.customer || null);
-        this.subscribeToStream(this.customer || null);
-        this.identityData = await this.getAliasesByAlias(this.customer || null);
-        this.identityID = this.identityData?.id || null;
+      this.getExistingEvents(this.customer || null);
+      this.subscribeToStream(this.customer || null);
+      this.identityData = await this.getAliasesByAlias(this.customer || null);
+      this.identityID = this.identityData?.id || null;
     }
   }
 
@@ -384,15 +384,14 @@ export default class CustomerJourneyWidget extends LitElement {
           Authorization: `SharedAccessSignature ${this.streamReadToken}`
         },
       };
-
-      const url = `${this.baseUrl}/streams/v1/journey/person/${this.encodeCustomer(customer)}?${this.streamReadToken}`;
-      // old      `${this.baseUrl}/v1/journey/streams/${customer}?${this.streamReadToken}`
+      const encodedCustomer = this.encodeCustomer(customer);
+      const url = `${this.baseUrl}/streams/v1/journey/person/${encodedCustomer}?${this.streamReadToken}`;
       this.eventSource = new EventSource(url, header);
     }
 
     if (this.eventSource) {
       this.eventSource.onopen = (event) => {
-        console.log(`The Journey stream connection has been established for customer \'${customer}\'.`);
+        console.log(`[JDSwidget] The Journey stream connection has been established for customer \'${customer}\'.`);
       };
 
       this.eventSource.onmessage = (event: ServerSentEvent) => {
