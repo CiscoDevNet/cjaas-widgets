@@ -1,67 +1,75 @@
-# CJaaS Customer Journey Widget for devus2
+# JDS Customer Journey Widget
 
 This widget uses the CJaaS API to display an individual customer's journey as a history of events. It first retrieves the complete event history from the tape endpoint and compiles toggles for all event types, and then subscribes to a live stream of new events so they appear in real time. This code can be used as is, or be starter code for your own Custom Widget. It also embodies Identity Alias management and Profile view with a tempate named 'journey-default-template' 
 
 ## Customer Journey Widget Properties
 
 The CJaaS Profile Widget accepts specific properties to interact with the CJaaS API
-THIS version adheres to the endpoints at `https://cjaas-devus2.azurewebsites.net`
+<!-- THIS version adheres to the endpoints at `https://cjaas-devus2.azurewebsites.net` -->
 
 `@attr stream-read-token`: SAS Token for reading stream API
+
 `@attr tape-read-token`: SAS Token for reading tape API
+
 `@attr profile-read-token`: SAS Token for read operations on Profile endpoint
+
 `@attr profile-write-token`: SAS Token for POST operations on Profile endpoint
+
 `@attr identity-read-token`: SAS Token for read operations on Identity endpoint
+
 `@attr identity-write-token`: SAS Token for POST operations on Identity endpoint
+
 `@attr base-url` : Path to the proper Customer Journey API deployment
-`@attr base-url-admin` : Path to the proper Customer Journey Admin API deployment
+
 `@attr customer` : Customer ID used for Journey lookup
+
 `@attr user-search` : Toggles display of field to find new Journey profiles
+
 `@attr limit` : Set the number of Timeline Events to display
+
 `@attr template-id` : Property to set the data template to retrieve customer Profile in desired format
+
 `@prop eventIconTemplate` : Property to pass in JSON template to set color and icon settings
 
-
+The following example of use with the production endpoint
 ```html
-<customer-journey-widget
+ <customer-journey-widget
    limit="20"
-   customer="30313-Carl"
-   user-search
+   customer="foobar"
    .eventIconTemplate=${iconData}
-   base-url="https://cjaas-devus2.azurewebsites.net"
-   base-url-admin="https://cjaas-devus2-admin.azurewebsites.net"
-   tape-token=${your-token}
-   stream-token=${your-token}
-   profile-read-token=${your-token}
-   profile-write-token=${your-token}
-   identity-read-sas-token=${your-identity-token}
-   identity-write-sas-token=${your-identity-token}
-></customer-journey-widget>
+   base-url="https://jds-prod-pf-westus-apim.azure-api.net"
+   .tapeReadToken=${TAPE_READ_TOKEN}
+   .streamReadToken=${STREAM_READ_TOKEN}
+   .profileReadToken=${PROFILE_READ_TOKEN}
+   .profileWriteToken=${PROFILE_WRITE_TOKEN}
+   .identityReadToken=${IDENTITY_READ_TOKEN}
+   .identityWriteToken=${IDENTITY_WRITE_TOKEN}
+ ></customer-journey-widget>
 ```
 
 ## Dev Environment: Getting Started
 - Create a `.env` file that contains the following secrets
 ```
-TAPE_TOKEN="tape read sas token"
-STREAM_TOKEN="stream read sas token"
+TAPE_READ_TOKEN="tape read sas token"
+STREAM_READ_TOKEN="stream read sas token"
 PROFILE_READ_TOKEN="profile read sas token"
 PROFILE_WRITE_TOKEN="profile write sas token"
-IDENTITY_READ_SAS_TOKEN="identity read sas token"
-IDENTITY_WRITE_SAS_TOKEN="identity write sas token"
+IDENTITY_READ_TOKEN="identity read sas token"
+IDENTITY_WRITE_TOKEN="identity write sas token"
 ```
 - run `yarn install`
 - run `yarn start`
-- navigate browser to `localhost:8888`
+- navigate browser to `[localhost:8889](http://localhost:8889/)`
 
 ## Using in Deployment
 - Create a `.env` file that contains below secrets for production
 ```
-TAPE_TOKEN="tape read sas token"
-STREAM_TOKEN="stream read sas token"
+TAPE_READ_TOKEN="tape read sas token"
+STREAM_READ_TOKEN="stream read sas token"
 PROFILE_READ_TOKEN="profile read sas token"
 PROFILE_WRITE_TOKEN="profile write sas token"
-IDENTITY_READ_SAS_TOKEN="identity read sas token"
-IDENTITY_WRITE_SAS_TOKEN="identity write sas token"
+IDENTITY_READ_TOKEN="identity read sas token"
+IDENTITY_WRITE_TOKEN="identity write sas token"
 ```
 - Where used in your app, pass the correct ORGANIZATION, NAMESPACE, and APP_NAME values from your admin portal
 
@@ -70,7 +78,8 @@ If you are using this widget as a starter for your own custom needs, follow thes
 
 Once your widget is complete, it must be exported as a JS module that can be delivered via CDN. The build is configured to export a Web Component that can be used in your project.
 - run `yarn dist` to create a compiled, minified JS module
-- rename and upload the bundled module to your hosting service
+- navigate to `CustomerJourney/dist/index.js`
+- rename and upload the bundled module (index.js) to your hosting service
 - import according to your web application's config.
 
 ### Sharing widget information with Agent/Supervisor Desktop administrator
