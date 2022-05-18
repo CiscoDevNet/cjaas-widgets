@@ -10,7 +10,6 @@ import { html, internalProperty, property, LitElement, PropertyValues, query } f
 import { classMap } from "lit-html/directives/class-map.js";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
-import { defaultTemplate } from "./assets/default-template";
 import * as iconData from "@/assets/icons.json";
 import { Profile, ServerSentEvent, IdentityResponse, IdentityData } from "./types/cjaas";
 import { EventSourceInitDict } from "eventsource";
@@ -161,12 +160,6 @@ export default class CustomerJourneyWidget extends LitElement {
   @internalProperty() expanded = false;
 
   /**
-   * A fallback template in case no template ID is provided
-   * Possibly deprecated by fetching default template from API
-   */
-  // @internalProperty() defaultTemplate = defaultTemplate;
-
-  /**
    * Memoize pollingstatus so that there are not multiple intervals
    */
   @internalProperty() pollingActive = false;
@@ -233,8 +226,8 @@ export default class CustomerJourneyWidget extends LitElement {
 
   baseUrlCheck() {
     if (this.baseUrl === undefined) {
-      console.error("You must provide a Base URL");
-      throw new Error("You must provide a Base URL");
+      console.error("[JDS Widget] You must provide a Base URL");
+      throw new Error("[JDS Widget] You must provide a Base URL");
     }
   }
 
@@ -245,21 +238,14 @@ export default class CustomerJourneyWidget extends LitElement {
 
   getProfileFromTemplateId(customer: string | null, templateId: string) {
     this.profileData = undefined;
-
     this.getProfileDataInProgress = true;
-    // OLD
-    // const url = `${this.baseURL}/v1/journey/views:build?templateId=${templateId}&personId=${customer}`;
-    // const url = `${this.baseURL}/v1/journey/views:build?templateId=${templateId}&personId=${customer}`;
 
-    // NEW test environment
     const url = `${this.baseUrl}/v1/journey/views?templateId=${templateId}&personId=${this.encodeCustomer(customer)}`
 
     const options: RequestInit = {
       method: "GET",
       headers: {
         Authorization: "SharedAccessSignature " + this.profileReadToken,
-        // "X-CACHE-MAXAGE-HOUR": "0",
-        // "X-CACHE-MAXAGE-MINUTE": "10"
       },
     };
 
@@ -267,51 +253,13 @@ export default class CustomerJourneyWidget extends LitElement {
       .then(x => x.json())
       .then(response => {
         this.pollingActive = false;
-        // this.profileData = this.parseResponse(response?.data?.output?.attributeView, response?.data?.output?.personId);
         this.profileData = this.parseResponse(response?.data?.attributeView, response?.data?.personId);
-
-        // if (response.error) {
-        //   this.getProfileDataInProgress = false;
-        //   throw new Error(response.error.message[0]);
-        // }
-        // if (response.data?.runtimeStatus === "Completed") {
-        //   this.profileData = this.parseResponse(response?.data?.output?.attributeView, response?.data?.output?.personId);
-        // } else {
-        //   this.setOffProfileLongPolling(response.data.getUriStatusQuery);
-        // }
       })
       .catch(err => {
         this.getProfileDataInProgress = false;
         this.profileData = undefined;
-        console.error("Unable to fetch the Profile", err);
+        console.error("[JDS Widget] Unable to fetch the Profile", customer, templateId, err);
       });
-  }
-
-  setOffProfileLongPolling(url: string) {
-    if (this.pollingActive) return;
-    this.pollingActive = true;
-    const intervalId = setInterval(() => {
-      fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: "SharedAccessSignature " + this.profileReadToken,
-        },
-      })
-        .then(x => x.json())
-        .then((response: any) => {
-          if (response.data.runtimeStatus === "Completed") {
-            clearInterval(intervalId);
-            this.pollingActive = false;
-            this.profileData = this.parseResponse(response?.data?.output?.attributeView, response?.data?.output?.personId);
-          }
-        })
-        .catch(err => {
-          this.getProfileDataInProgress = false;
-          this.profileData = undefined;
-          console.error(err);
-        });
-    }, 1500);
   }
 
   parseResponse(attributes: any, personId: string) {
@@ -363,7 +311,7 @@ export default class CustomerJourneyWidget extends LitElement {
         return data.events;
       })
       .catch((err: Error) => {
-        console.error("Could not fetch Customer Journey events. ", err);
+        console.error(`[JDS Widget] Could not fetch Customer Journey events for customer (${customer})`, err);
         // this.errorMessage = `Failure to fetch Journey for ${this.customer}. ${err}`;
       }).finally(() => {
         this.getEventsInProgress = false;
@@ -391,7 +339,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
     if (this.eventSource) {
       this.eventSource.onopen = (event) => {
-        console.log(`[JDSwidget] The Journey stream connection has been established for customer \'${customer}\'.`);
+        console.log(`[JDS Widget] The Journey stream connection has been established for customer \'${customer}\'.`);
       };
 
       this.eventSource.onmessage = (event: ServerSentEvent) => {
@@ -404,15 +352,15 @@ export default class CustomerJourneyWidget extends LitElement {
           // sort events
           this.newestEvents = sortEventsbyDate([data, ...this.newestEvents]);
         } catch (err) {
-          console.error("journey/stream: No parsable data fetched");
+          console.error("[JDS Widget] journey/stream: No parsable data fetched");
         }
       };
 
       this.eventSource!.onerror = (error) => {
-        console.error(`There was an EventSource error: `, error);
+        console.error(`[JDS Widget] There was an EventSource error: `, error);
       }; // TODO: handle this error case
     } else {
-      console.error(`No event source is active for ${customer}`);
+      console.error(`[JDS Widget] No event source is active for ${customer}`);
     }
   }
 
@@ -516,7 +464,7 @@ export default class CustomerJourneyWidget extends LitElement {
       return response?.data?.length ? response.data[0] : undefined;
     }).catch((err) => {
       // TODO: Handle fetch alias error case (err.key === 404)
-      console.error("Failed to fetch Aliases by Alias ", err);
+      console.error("[JDS Widget] Failed to fetch Aliases by Alias ", err);
       return undefined;
     }).finally(() => {
       this.aliasGetInProgress = false;
@@ -559,7 +507,7 @@ export default class CustomerJourneyWidget extends LitElement {
     const trimmedAlias = alias.trim();
 
     if (!trimmedAlias) {
-      console.error('You cannot add an empty value as a new alias');
+      console.error('[JDS Widget] You cannot add an empty value as a new alias');
       return;
     }
 
@@ -581,7 +529,7 @@ export default class CustomerJourneyWidget extends LitElement {
       this.identityData = await this.getAliasesById(identityId);
     }).catch((err) => {
       // TODO: handle add alias error
-      console.error("Failed to add AliasById ", err);
+      console.error(`[JDS Widget] Failed to add AliasById: (${identityId})`, err);
     }).finally(() => {
       this.aliasAddInProgress = false;
     })
