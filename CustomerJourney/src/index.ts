@@ -334,7 +334,9 @@ export default class CustomerJourneyWidget extends LitElement {
 
     this.getEventsInProgress = true;
     this.baseUrlCheck();
-    return fetch(`${this.baseUrl}/v1/journey/streams/historic/${customer}`, {
+
+    const url = `${this.baseUrl}/v1/journey/streams/historic/${customer}`;
+    return fetch(url, {
       headers: {
         "content-type": "application/json; charset=UTF-8",
         accept: "application/json",
@@ -376,10 +378,10 @@ export default class CustomerJourneyWidget extends LitElement {
           Authorization: `SharedAccessSignature ${this.streamReadToken}`
         },
       };
-      this.eventSource = new EventSource(
-        `${this.baseUrl}/streams/v1/journey/streams/${customer}?${this.streamReadToken}`,
-        header
-      );
+
+      const url = `${this.baseUrl}/streams/v1/journey/person/${customer}?${this.streamReadToken}`;
+      // old      `${this.baseUrl}/v1/journey/streams/${customer}?${this.streamReadToken}`
+      this.eventSource = new EventSource(url, header);
     }
 
     if (this.eventSource) {

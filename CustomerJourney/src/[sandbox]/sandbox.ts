@@ -322,8 +322,7 @@ export class Sandbox extends LitElement {
           <customer-journey-widget
             limit="20"
             user-search
-            customer="v3nki@cisco.com"
-            .interactionData=${this.mockedInteractionData}
+            customer="foobar"
             .eventIconTemplate=${iconData}
             base-url="https://jds-prod-pf-westus-apim.azure-api.net"
             .tapeReadToken=${TAPE_READ_TOKEN}
@@ -360,8 +359,7 @@ export class Sandbox extends LitElement {
           <customer-journey-widget
             limit="20"
             user-search
-            customer="v3nki@cisco.com"
-            .interactionData=${this.mockedInteractionData}
+            customer="foobar"
             .eventIconTemplate=${iconData}
             base-url="https://jds-prod-pf-westus2-apim.azure-api.net"
             .tapeReadToken=${TAPE_READ_TOKEN}
