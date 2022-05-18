@@ -50,6 +50,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * SAS Token that provides read permissions to Journey API (used for Profile retrieval)
    * @attr write-token
    */
+
   @property({ type: String, attribute: "profile-read-token" })
   profileReadToken: string | null = null;
   /**
@@ -237,6 +238,11 @@ export default class CustomerJourneyWidget extends LitElement {
     }
   }
 
+  encodeCustomer(customer: string | null): string | null {
+    const encodedCustomer = customer ? btoa(customer) : null;
+    return encodedCustomer;
+  }
+
   getProfileFromTemplateId(customer: string | null, templateId: string) {
     this.profileData = undefined;
 
@@ -246,7 +252,7 @@ export default class CustomerJourneyWidget extends LitElement {
     // const url = `${this.baseURL}/v1/journey/views:build?templateId=${templateId}&personId=${customer}`;
 
     // NEW test environment
-    const url = `${this.baseUrl}/v1/journey/views?templateId=${templateId}&personId=${customer}`
+    const url = `${this.baseUrl}/v1/journey/views?templateId=${templateId}&personId=${this.encodeCustomer(customer)}`
 
     const options: RequestInit = {
       method: "GET",
@@ -335,7 +341,7 @@ export default class CustomerJourneyWidget extends LitElement {
     this.getEventsInProgress = true;
     this.baseUrlCheck();
 
-    const url = `${this.baseUrl}/v1/journey/streams/historic/${customer}`;
+    const url = `${this.baseUrl}/v1/journey/streams/historic/${this.encodeCustomer(customer)}`;
     return fetch(url, {
       headers: {
         "content-type": "application/json; charset=UTF-8",
@@ -379,7 +385,7 @@ export default class CustomerJourneyWidget extends LitElement {
         },
       };
 
-      const url = `${this.baseUrl}/streams/v1/journey/person/${customer}?${this.streamReadToken}`;
+      const url = `${this.baseUrl}/streams/v1/journey/person/${this.encodeCustomer(customer)}?${this.streamReadToken}`;
       // old      `${this.baseUrl}/v1/journey/streams/${customer}?${this.streamReadToken}`
       this.eventSource = new EventSource(url, header);
     }
@@ -474,7 +480,7 @@ export default class CustomerJourneyWidget extends LitElement {
           .aliasDeleteInProgress=${this.aliasDeleteInProgress}
           ?aliasGetInProgress=${this.aliasGetInProgress}
           ?aliasAddInProgress=${this.aliasAddInProgress}
-          @deleteAlias=${(ev: CustomEvent) => this.deleteAlias(this.identityID, ev.detail.alias)}
+          @deleteAlias=${(ev: CustomEvent) => this.deleteAliasById(this.identityID, ev.detail.alias)}
           @addAlias=${(ev: CustomEvent) => this.addAliasById(this.identityID, ev.detail.alias)}
           .minimal=${true}
         ></cjaas-identity>
@@ -494,11 +500,11 @@ export default class CustomerJourneyWidget extends LitElement {
    * Search for an Identity of an individual via aliases. This will return one/more Identities.
    * The Provided aliases belong to one/more Persons.
    * This is where we gather the ID of the individual for future alias actions
-   * @param aliases
+   * @param customer
    * @returns Promise<IdentityData | undefined>
    */
-  async getAliasesByAlias(aliases: string | null): Promise<IdentityData | undefined> {
-    const url = `${this.baseUrl}/v1/journey/identities?aliases=${aliases}`;
+  async getAliasesByAlias(customer: string | null): Promise<IdentityData | undefined> {
+    const url = `${this.baseUrl}/v1/journey/identities?aliases=${this.encodeCustomer(customer)}`;
     this.aliasGetInProgress = true;
 
     return fetch(url, {
@@ -582,7 +588,7 @@ export default class CustomerJourneyWidget extends LitElement {
     })
   }
 
-  async deleteAlias(identityId: string | null, alias: string) {
+  async deleteAliasById(identityId: string | null, alias: string) {
     this.setAliasLoader(alias, true);
     const url = `${this.baseUrl}/v1/journey/identities/${identityId}/aliases`;
 
