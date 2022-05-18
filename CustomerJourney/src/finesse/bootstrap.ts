@@ -55,7 +55,7 @@ const handleLoadDialog = () => {
 };
 
 const handleMediaDialogsLoad = (type: string) => (...args: any) => {
-  console.log("JDS", args, type);
+  console.log("[JDS Widget]", args, type);
 };
 
 const attachMediaDialog = (media: any) => {

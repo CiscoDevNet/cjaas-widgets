@@ -186,7 +186,7 @@ export default class CjaasIdentityAlias extends LitElement {
     const headerBlock = this.minified
       ? nothing
       : html`
-          <h2>Identity Alias</h2>
+          <!-- <h2>Identity Alias</h2> -->
           <div class="avatar">
             ${avatar}
             <div>

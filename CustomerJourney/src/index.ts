@@ -10,15 +10,13 @@ import { html, internalProperty, property, LitElement, PropertyValues, query } f
 import { classMap } from "lit-html/directives/class-map.js";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
-import { defaultTemplate } from "./assets/default-template";
 import * as iconData from "@/assets/icons.json";
-import { Profile, ServerSentEvent, IdentityResponse, JourneyEvent, IdentityErrorResponse } from "./types/cjaas";
+import { Profile, ServerSentEvent, IdentityResponse, IdentityData } from "./types/cjaas";
 import { EventSourceInitDict } from "eventsource";
 import "@cjaas/common-components/dist/comp/cjaas-timeline";
 import "@cjaas/common-components/dist/comp/cjaas-profile";
 import "@cjaas/common-components/dist/comp/cjaas-identity";
 import { Timeline } from "@cjaas/common-components/dist/types/components/timeline/Timeline";
-import ResizeObserver from "resize-observer-polyfill";
 import { DateTime } from "luxon";
 
 function sortEventsbyDate(events: Timeline.CustomerEvent[]) {
@@ -41,12 +39,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * Path to the proper Customer Journey API deployment
    * @attr base-url
    */
-  @property({ type: String, attribute: "base-url" }) baseURL: string | undefined = undefined;
-  /**
-   * Path to the proper Customer Journey API deployment
-   * @attr base-url
-   */
-  @property({ type: String, attribute: "base-url-admin" }) baseURLAdmin: string | undefined = undefined;
+  @property({ type: String, attribute: "base-url" }) baseUrl: string | undefined = undefined;
   /**
    * Customer ID used for Journey lookup
    * @attr customer
@@ -56,6 +49,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * SAS Token that provides read permissions to Journey API (used for Profile retrieval)
    * @attr write-token
    */
+
   @property({ type: String, attribute: "profile-read-token" })
   profileReadToken: string | null = null;
   /**
@@ -68,24 +62,24 @@ export default class CustomerJourneyWidget extends LitElement {
   /**
    * SAS Token to with read permission for fetching identity details
    */
-  @property({ attribute: "identity-read-sas-token" })
-  identityReadSasToken: string | null = null;
+  @property({ attribute: "identity-read-token" })
+  identityReadToken: string | null = null;
   /**
    * SAS Token to with write permission for updating alias to identity
    */
-  @property({ attribute: "identity-write-sas-token" })
-  identityWriteSasToken: string | null = null;
+  @property({ attribute: "identity-write-token" })
+  identityWriteToken: string | null = null;
 
   /**
    * SAS Token that provides read permissions for Historical Journey
    * @attr tape-token
    */
-  @property({ type: String, attribute: "tape-token" }) tapeToken: string | null = null;
+  @property({ type: String, attribute: "tape-read-token" }) tapeReadToken: string | null = null;
   /**
    * SAS Token that provides read permissions for Journey Stream
    * @attr stream-token
    */
-  @property({ type: String, attribute: "stream-token" }) streamToken: string | null = null;
+  @property({ type: String, attribute: "stream-read-token" }) streamReadToken: string | null = null;
   /**
    * Toggles display of field to find new Journey profiles
    * @attr user-search
@@ -152,34 +146,33 @@ export default class CustomerJourneyWidget extends LitElement {
    * @prop profileLoading
    */
   @internalProperty() getProfileDataInProgress = false;
+
   /**
    * Internal store for error message
    * @prop errorMessage
    */
-  @internalProperty() errorMessage = "";
+  // @internalProperty() errorMessage = "";
+
   /**
    * Internal toggle for responsive layout
    * @prop expanded
    */
   @internalProperty() expanded = false;
-  /**
-   * A fallback template in case no template ID is provided
-   * Possibly deprecated by fetching default template from API
-   */
-  @internalProperty() defaultTemplate = defaultTemplate;
+
   /**
    * Memoize pollingstatus so that there are not multiple intervals
    */
   @internalProperty() pollingActive = false;
 
-  @internalProperty() identityAlias = false;
-
-  @internalProperty() alias: IdentityResponse["data"] | undefined;
-  @internalProperty() lastSeenEvent: JourneyEvent | null = null;
-
   @internalProperty() aliasAddInProgress = false;
+
   @internalProperty() aliasGetInProgress = false;
+
   @internalProperty() aliasDeleteInProgress: { [key: string]: boolean } = {};
+
+  @internalProperty() identityData: IdentityData | undefined;
+
+  @internalProperty() identityID: string | null = null;
 
   /**
    * Hook to HTML element <div class="container">
@@ -193,19 +186,19 @@ export default class CustomerJourneyWidget extends LitElement {
   @query("#customer-input") customerInput!: HTMLInputElement;
   @query(".profile") widget!: Element;
 
-  async firstUpdated(changedProperties: PropertyValues) {
-    super.firstUpdated(changedProperties);
+  // async firstUpdated(changedProperties: PropertyValues) {
+  //   super.firstUpdated(changedProperties);
 
-    const resizeObserver = new ResizeObserver((entries: ResizeObserverEntry[]) => {
-      if (entries[0].contentRect.width > 780) {
-        this.expanded = true;
-      } else {
-        this.expanded = false;
-      }
-    });
+  //   const resizeObserver = new ResizeObserver((entries: ResizeObserverEntry[]) => {
+  //     if (entries[0].contentRect.width > 780) {
+  //       this.expanded = true;
+  //     } else {
+  //       this.expanded = false;
+  //     }
+  //   });
 
-    resizeObserver.observe(this.widget);
-  }
+  //   resizeObserver.observe(this.widget);
+  // }
 
   async update(changedProperties: PropertyValues) {
     super.update(changedProperties);
@@ -218,86 +211,55 @@ export default class CustomerJourneyWidget extends LitElement {
       }
     }
 
-    if (changedProperties.has("customer") || changedProperties.has("templateId")) {
+    if ((changedProperties.has("customer") || changedProperties.has("templateId")) && this.customer && this.templateId) {
         this.getProfileFromTemplateId(this.customer, this.templateId);
     }
 
     if (changedProperties.has("customer")) {
       this.newestEvents = [];
-        this.getExistingEvents(this.customer || null);
-        this.subscribeToStream(this.customer || null);
-        this.reloadAliasWidget(this.customer || null);
+      this.getExistingEvents(this.customer || null);
+      this.subscribeToStream(this.customer || null);
+      this.identityData = await this.getAliasesByAlias(this.customer || null);
+      this.identityID = this.identityData?.id || null;
     }
   }
 
   baseUrlCheck() {
-    if (this.baseURL === undefined) {
-      console.error("You must provide a Base URL");
-      throw new Error("You must provide a Base URL");
+    if (this.baseUrl === undefined) {
+      console.error("[JDS Widget] You must provide a Base URL");
+      throw new Error("[JDS Widget] You must provide a Base URL");
     }
+  }
+
+  encodeCustomer(customer: string | null): string | null {
+    const encodedCustomer = customer ? btoa(customer) : null;
+    return encodedCustomer;
   }
 
   getProfileFromTemplateId(customer: string | null, templateId: string) {
     this.profileData = undefined;
-
     this.getProfileDataInProgress = true;
-    const url = `${this.baseURL}/v1/journey/views:build?templateId=${templateId}&personId=${customer}`;
+
+    const url = `${this.baseUrl}/v1/journey/views?templateId=${templateId}&personId=${this.encodeCustomer(customer)}`
 
     const options: RequestInit = {
-      method: "POST",
+      method: "GET",
       headers: {
-        "Content-type": "application/json",
-        Authorization: "SharedAccessSignature " + this.profileWriteToken,
-        "X-CACHE-MAXAGE-HOUR": "0",
-        "X-CACHE-MAXAGE-MINUTE": "10",
+        Authorization: "SharedAccessSignature " + this.profileReadToken,
       },
     };
 
     fetch(url, options)
       .then(x => x.json())
       .then(response => {
-        if (response.error) {
-          this.getProfileDataInProgress = false;
-          throw new Error(response.error.message[0]);
-        }
-        if (response.data?.runtimeStatus === "Completed") {
-          this.profileData = this.parseResponse(response?.data?.output?.attributeView, response?.data?.output?.personId);
-        } else {
-          this.setOffProfileLongPolling(response.data.getUriStatusQuery);
-        }
+        this.pollingActive = false;
+        this.profileData = this.parseResponse(response?.data?.attributeView, response?.data?.personId);
       })
       .catch(err => {
         this.getProfileDataInProgress = false;
         this.profileData = undefined;
-        console.error("Unable to fetch the Profile", err);
+        console.error("[JDS Widget] Unable to fetch the Profile", customer, templateId, err);
       });
-  }
-
-  setOffProfileLongPolling(url: string) {
-    if (this.pollingActive) return;
-    this.pollingActive = true;
-    const intervalId = setInterval(() => {
-      fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: "SharedAccessSignature " + this.profileReadToken,
-        },
-      })
-        .then(x => x.json())
-        .then((response: any) => {
-          if (response.data.runtimeStatus === "Completed") {
-            clearInterval(intervalId);
-            this.pollingActive = false;
-            this.profileData = this.parseResponse(response?.data?.output?.attributeView, response?.data?.output?.personId);
-          }
-        })
-        .catch(err => {
-          this.getProfileDataInProgress = false;
-          this.profileData = undefined;
-          console.log(err);
-        });
-    }, 1500);
   }
 
   parseResponse(attributes: any, personId: string) {
@@ -326,11 +288,13 @@ export default class CustomerJourneyWidget extends LitElement {
 
     this.getEventsInProgress = true;
     this.baseUrlCheck();
-    return fetch(`${this.baseURL}/v1/journey/streams/historic/${customer}`, {
+
+    const url = `${this.baseUrl}/v1/journey/streams/historic/${this.encodeCustomer(customer)}`;
+    return fetch(url, {
       headers: {
         "content-type": "application/json; charset=UTF-8",
         accept: "application/json",
-        Authorization: `SharedAccessSignature ${this.tapeToken}`,
+        Authorization: `SharedAccessSignature ${this.tapeReadToken}`
       },
       method: "GET",
     })
@@ -347,8 +311,8 @@ export default class CustomerJourneyWidget extends LitElement {
         return data.events;
       })
       .catch((err: Error) => {
-        console.error("Could not fetch Customer Journey events. ", err);
-        this.errorMessage = `Failure to fetch Journey for ${this.customer}. ${err}`;
+        console.error(`[JDS Widget] Could not fetch Customer Journey events for customer (${customer})`, err);
+        // this.errorMessage = `Failure to fetch Journey for ${this.customer}. ${err}`;
       }).finally(() => {
         this.getEventsInProgress = false;
       });
@@ -360,36 +324,43 @@ export default class CustomerJourneyWidget extends LitElement {
     }
 
     this.baseUrlCheck();
-    if (this.streamToken) {
+    if (this.streamReadToken) {
       const header: EventSourceInitDict = {
         headers: {
           "content-type": "application/json; charset=UTF-8",
           accept: "application/json",
-          Authorization: `SharedAccessSignature ${this.streamToken}`,
+          Authorization: `SharedAccessSignature ${this.streamReadToken}`
         },
       };
-      this.eventSource = new EventSource(
-        `${this.baseURL}/v1/journey/streams/${customer}?${this.streamToken}`,
-        header
-      );
+      const encodedCustomer = this.encodeCustomer(customer);
+      const url = `${this.baseUrl}/streams/v1/journey/person/${encodedCustomer}?${this.streamReadToken}`;
+      this.eventSource = new EventSource(url, header);
     }
 
     if (this.eventSource) {
-      this.eventSource!.onmessage = (event: ServerSentEvent) => {
+      this.eventSource.onopen = (event) => {
+        console.log(`[JDS Widget] The Journey stream connection has been established for customer \'${customer}\'.`);
+      };
+
+      this.eventSource.onmessage = (event: ServerSentEvent) => {
         let data;
+
         try {
           data = JSON.parse(event.data);
           data.time = DateTime.fromISO(data.time);
+
           // sort events
           this.newestEvents = sortEventsbyDate([data, ...this.newestEvents]);
         } catch (err) {
-          console.error("No data fetched");
+          console.error("[JDS Widget] journey/stream: No parsable data fetched");
         }
       };
 
-      // this.eventSource!.onerror = () => {}; // TODO: handle this error case
+      this.eventSource!.onerror = (error) => {
+        console.error(`[JDS Widget] There was an EventSource error: `, error);
+      }; // TODO: handle this error case
     } else {
-      console.error(`No event source is active for ${customer}`);
+      console.error(`[JDS Widget] No event source is active for ${customer}`);
     }
   }
 
@@ -452,12 +423,12 @@ export default class CustomerJourneyWidget extends LitElement {
       <section class="sub-widget-section">
         <cjaas-identity
           .customer=${this.customer}
-          .alias=${this.alias}
+          .identityData=${this.identityData}
           .aliasDeleteInProgress=${this.aliasDeleteInProgress}
           ?aliasGetInProgress=${this.aliasGetInProgress}
           ?aliasAddInProgress=${this.aliasAddInProgress}
-          @deleteAlias=${(ev: CustomEvent) => this.deleteAlias(this.customer, ev.detail.alias)}
-          @addAlias=${(ev: CustomEvent) => this.addAlias(this.customer, ev.detail.alias)}
+          @deleteAlias=${(ev: CustomEvent) => this.deleteAliasById(this.identityID, ev.detail.alias)}
+          @addAlias=${(ev: CustomEvent) => this.addAliasById(this.identityID, ev.detail.alias)}
           .minimal=${true}
         ></cjaas-identity>
       </section>
@@ -472,57 +443,113 @@ export default class CustomerJourneyWidget extends LitElement {
     return styles;
   }
 
-  async getAliases(customer: string | null): Promise<IdentityResponse | IdentityErrorResponse> {
-    const url = `${this.baseURLAdmin}/v1/journey/identities/${customer}`;
+  /**
+   * Search for an Identity of an individual via aliases. This will return one/more Identities.
+   * The Provided aliases belong to one/more Persons.
+   * This is where we gather the ID of the individual for future alias actions
+   * @param customer
+   * @returns Promise<IdentityData | undefined>
+   */
+  async getAliasesByAlias(customer: string | null): Promise<IdentityData | undefined> {
+    const url = `${this.baseUrl}/v1/journey/identities?aliases=${this.encodeCustomer(customer)}`;
     this.aliasGetInProgress = true;
 
     return fetch(url, {
       method: "GET",
       headers: {
-        Authorization: `SharedAccessSignature ${this.identityReadSasToken}`,
+        Authorization: `SharedAccessSignature ${this.identityReadToken}`
       },
-    }).then(response => {
-      return response.json();
+    }).then(response => response.json())
+    .then((response: IdentityResponse) => {
+      return response?.data?.length ? response.data[0] : undefined;
     }).catch((err) => {
-      // TODO: Handle fetch alias error case
+      // TODO: Handle fetch alias error case (err.key === 404)
+      console.error("[JDS Widget] Failed to fetch Aliases by Alias ", err);
+      return undefined;
     }).finally(() => {
       this.aliasGetInProgress = false;
-    })
+    });
   }
 
-  async postAlias(customer: string | null, alias: string) {
-    const url = `${this.baseURLAdmin}/v1/journey/identities/${customer}/aliases`;
+  /**
+   *
+   * @param identityId
+   * @returns Promise<IdentityData | undefined>
+   */
+  async getAliasesById(identityId: string | null): Promise<IdentityData | undefined> {
+    const url = `${this.baseUrl}/v1/journey/identities/${identityId}`;
+    this.aliasGetInProgress = true;
+
+    return fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `SharedAccessSignature ${this.identityReadToken}`
+      },
+    })
+    .then(response => response.json())
+    .then((identityData: IdentityData) => {
+      return identityData;
+    }).catch((err) => {
+      // TODO: Handle fetch alias error case (err?.key === 404)
+      return undefined;
+    }).finally(() => {
+      this.aliasGetInProgress = false;
+    });
+  }
+
+  /**
+   * Add one or more aliases to existing Individual
+   * @param customer
+   * @param alias
+   * @returns void
+   */
+  async addAliasById(identityId: string | null, alias: string) {
+    const trimmedAlias = alias.trim();
+
+    if (!trimmedAlias) {
+      console.error('[JDS Widget] You cannot add an empty value as a new alias');
+      return;
+    }
+
+    const url = `${this.baseUrl}/v1/journey/identities/${identityId}/aliases`;
 
     this.aliasAddInProgress = true;
     return fetch(url, {
       method: "POST",
       headers: {
-        Authorization: `SharedAccessSignature ${this.identityWriteSasToken}`,
+        Authorization: `SharedAccessSignature ${this.identityWriteToken}`,
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        aliases: [alias],
+        aliases: [trimmedAlias],
       }),
     }).then(response => {
       return response.json();
+    }).then(async () => {
+      this.identityData = await this.getAliasesById(identityId);
     }).catch((err) => {
       // TODO: handle add alias error
+      console.error(`[JDS Widget] Failed to add AliasById: (${identityId})`, err);
     }).finally(() => {
       this.aliasAddInProgress = false;
     })
   }
 
-  async deleteAlias(customer: string | null, alias: string) {
+  async deleteAliasById(identityId: string | null, alias: string) {
     this.setAliasLoader(alias, true);
-    const url = `${this.baseURLAdmin}/v1/journey/identities/${customer}/aliases/${alias}`;
+    const url = `${this.baseUrl}/v1/journey/identities/${identityId}/aliases`;
 
     return fetch(url, {
       method: "DELETE",
       headers: {
-        Authorization: `SharedAccessSignature ${this.identityWriteSasToken}`,
+        Authorization: `SharedAccessSignature ${this.identityWriteToken}`,
+        "Content-Type": "application/json"
       },
-    }).then((response) => {
-      this.removeAliasFromList(alias);
-      this.reloadAliasWidget(this.customer);
+      body: JSON.stringify({
+        aliases: [alias],
+      }),
+    }).then(async (response) => {
+      this.identityData = await this.getAliasesById(identityId);
       return response.json();
     }).catch((err) => {
       // TODO: handle delete alias error
@@ -535,39 +562,6 @@ export default class CustomerJourneyWidget extends LitElement {
     const duplicate = Object.assign({}, this.aliasDeleteInProgress);
     duplicate[alias] = state;
     this.aliasDeleteInProgress = duplicate;
-  }
-
-  removeAliasFromList(alias: string) {
-    const index = this.alias?.aliases.findIndex(item => item === alias);
-
-    if (this.alias && index !== undefined) {
-      this.alias?.aliases.splice(index, 1);
-      this.requestUpdate();
-    }
-  }
-
-  async reloadAliasWidget(customer: string | null) {
-    const response = await this.getAliases(customer);
-
-    if ((response as IdentityErrorResponse).error) {
-      this.alias = undefined;
-      // if ((response as IdentityErrorResponse).error?.key === 404) {} // TODO: Handle this error case
-      return;
-    }
-
-    this.alias = (response as IdentityResponse).data;
-  }
-
-  async addAlias(customer: string | null, input: string) {
-    const addedValue = input?.trim;
-
-    if (!addedValue) {
-      console.error('You cannot add an empty value as a new alias');
-      return;
-    }
-
-    this.postAlias(customer, input)
-    .then(() => this.reloadAliasWidget(customer));
   }
 
   handleBackspace(event: KeyboardEvent) {
