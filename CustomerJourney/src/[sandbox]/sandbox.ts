@@ -303,11 +303,15 @@ export class Sandbox extends LitElement {
    * Data sink    https://jds-prod-pf-westus-apim.azure-api.net/events
    * Data stream  https://jds-prod-pf-westus-apim.azure-api.net/streams
    * KeyVault     https://jds-prod-pf-westus-kv.vault.azure.net/
+   * 
+   * https://jds-prod-pf-westus-apim.azure-api.net/
    *
    * OrgName      testorg
    * Namespace    sandbox
    * KeyName      testorg
    * */
+
+  //  https://jds-prod-pf-westus-apim.azure-api.net
   renderOfficialProductionVersion() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
 
@@ -324,7 +328,7 @@ export class Sandbox extends LitElement {
             user-search
             customer="foobar"
             .eventIconTemplate=${iconData}
-            base-url="https://jds-prod-pf-westus-apim.azure-api.net"
+            base-url="https://jds-us1.cjaas.cisco.com"
             .tapeReadToken=${TAPE_READ_TOKEN}
             .streamReadToken=${STREAM_READ_TOKEN}
             .profileReadToken=${PROFILE_READ_TOKEN}
@@ -393,7 +397,7 @@ export class Sandbox extends LitElement {
     // return this.renderLocalProdTestVersion();
     // return this.renderElenaResourceGroupVersion();
 
-    return this.renderOfficialDevVersion();
-    // return this.renderOfficialProductionVersion();
+    // return this.renderOfficialDevVersion();
+    return this.renderOfficialProductionVersion();
   }
 }

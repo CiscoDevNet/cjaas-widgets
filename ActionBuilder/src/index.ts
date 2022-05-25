@@ -38,7 +38,7 @@ export default class CjaasActionBuilder extends LitElement {
   @property() organization: any;
   @property() namespace: any;
 
-  @property({ type: String, attribute: "base-url" }) baseURL: string | undefined = undefined;
+  @property({ type: String, attribute: "base-url" }) baseUrl: string | undefined = undefined;
   @property() saveCallBack: any;
 
   @internalProperty() conditions: ConditionBlockInterface | undefined;
@@ -97,7 +97,7 @@ export default class CjaasActionBuilder extends LitElement {
 
   // fetch action from server or use mockAction
   getAction(): Promise<ACTION> {
-    let url = `${this.baseURL}/v1/journey/actions/${this.actionName}`;
+    let url = `${this.baseUrl}/v1/journey/actions/${this.actionName}`;
 
     if (this.mockAction) {
       return new Promise((resolve, reject) => {
@@ -134,7 +134,7 @@ export default class CjaasActionBuilder extends LitElement {
   }
   // fetch template from server or use mockTemplate
   getTemplates() {
-    let url = `${this.baseURL}/v1/journey/views/templates?id=${this.templateId}`;
+    let url = `${this.baseUrl}/v1/journey/views/templates?id=${this.templateId}`;
 
     if (this.mockTemplate) {
       return new Promise((resolve, reject) => {
@@ -142,7 +142,7 @@ export default class CjaasActionBuilder extends LitElement {
       });
     }
 
-    if (!this.baseURL || (!this.bearerToken && !this.viewSasToken)) {
+    if (!this.baseUrl || (!this.bearerToken && !this.viewSasToken)) {
       return null;
     }
 
@@ -667,7 +667,7 @@ export default class CjaasActionBuilder extends LitElement {
   }
 
   postResult(result: ACTION) {
-    let url = `${this.baseURL}/v1/journey/actions`;
+    let url = `${this.baseUrl}/v1/journey/actions`;
     this.disableSaveButton = true;
 
     const bearerToken = this.getBearerAuthorization();

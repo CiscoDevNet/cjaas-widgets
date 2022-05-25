@@ -47,14 +47,14 @@ export default class CustomerJourneyWidget extends LitElement {
   @property({ type: String, reflect: true }) customer: string | null = null;
   /**
    * SAS Token that provides read permissions to Journey API (used for Profile retrieval)
-   * @attr write-token
+   * @attr profile-read-token
    */
 
   @property({ type: String, attribute: "profile-read-token" })
   profileReadToken: string | null = null;
   /**
    * SAS Token that provides write permissions to Journey API (used for POST data template in Profile retrieval)
-   * @attr write-token
+   * @attr profile-write-token
    */
   @property({ type: String, attribute: "profile-write-token" })
   profileWriteToken: string | null = null;
@@ -308,6 +308,7 @@ export default class CustomerJourneyWidget extends LitElement {
           return event;
         });
         this.events = sortEventsbyDate(data.events);
+        this.getEventsInProgress = false;
         return data.events;
       })
       .catch((err: Error) => {

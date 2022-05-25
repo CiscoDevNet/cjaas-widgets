@@ -56,7 +56,7 @@ export default class CjaasTemplateBuilder extends LitElement {
   @property() organization: any = null;
   @property() namespace: any = null;
 
-  @property({ type: String, attribute: "base-url" }) baseURL: string | undefined = undefined;
+  @property({ type: String, attribute: "base-url" }) baseUrl: string | undefined = undefined;
   @property() saveCallBack: any = null;
   @internalProperty() readOnlyMode = false;
   @internalProperty() templateAPIInProgress = false;
@@ -140,7 +140,7 @@ export default class CjaasTemplateBuilder extends LitElement {
 
   // fetch action from server or use mockAction
   getTapeEvents(): Promise<Array<JourneyEvent>> {
-    let url = `${this.baseURL}/v1/journey/streams/historic`;
+    let url = `${this.baseUrl}/v1/journey/streams/historic`;
 
     if (this.mockAction) {
       return new Promise((resolve, reject) => {
@@ -165,7 +165,7 @@ export default class CjaasTemplateBuilder extends LitElement {
   }
 
   getTemplateNames() {
-    let url = `${this.baseURL}/v1/journey/views/templates`;
+    let url = `${this.baseUrl}/v1/journey/views/templates`;
 
     let bearerToken = this.getBearerAuthorization();
 
@@ -186,7 +186,7 @@ export default class CjaasTemplateBuilder extends LitElement {
 
   // fetch template from server or use mockTemplate
   getTemplate() {
-    let url = `${this.baseURL}/v1/journey/views/templates?id=${this.templateId}`;
+    let url = `${this.baseUrl}/v1/journey/views/templates?id=${this.templateId}`;
 
     if (this.mockTemplate) {
       return new Promise((resolve, reject) => {
@@ -194,7 +194,7 @@ export default class CjaasTemplateBuilder extends LitElement {
       });
     }
 
-    if ((!this.bearerToken && !this.profileReadSasToken) || !this.baseURL) {
+    if ((!this.bearerToken && !this.profileReadSasToken) || !this.baseUrl) {
       return null;
     }
 
@@ -390,7 +390,7 @@ export default class CjaasTemplateBuilder extends LitElement {
   }
 
   postTemplate() {
-    let url = `${this.baseURL}/v1/journey/views/templates`;
+    let url = `${this.baseUrl}/v1/journey/views/templates`;
 
     this.templateSaveAPIInProgress = true;
 
@@ -576,7 +576,7 @@ export default class CjaasTemplateBuilder extends LitElement {
         .profileData=${profileData}
         .tapeReadToken=${this.tapeReadSasToken}
         .events=${this.tapeEvents}
-        .baseURL=${this.baseURL}
+        .baseUrl=${this.baseUrl}
       >
       </cjaas-profile-view-widget>
     `;

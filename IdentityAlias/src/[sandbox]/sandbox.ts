@@ -5,6 +5,12 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
+
+// @ts-ignore
+const IDENTITY_READ_TOKEN = process.env.DOTENV.IDENTITY_READ_TOKEN;
+// @ts-ignore
+const IDENTITY_WRITE_TOKEN = process.env.DOTENV.IDENTITY_WRITE_TOKEN;
+
 import "@momentum-ui/web-components";
 import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
@@ -82,6 +88,8 @@ export class Sandbox extends LitElement {
     const identityWriteToken =
       "so=demoassure&sn=sandbox&ss=idmt&sp=w&se=2024-09-09T18:29:51.574147700Z&sk=venkitest&sig=%2BPRGATu1qEvll6N1I3PdIHCKcyRlFwjJQ3aTf32Vl6o%3D";
 
+      // .identityReadSasToken=${identityReadToken}
+      // .identityWriteSasToken=${identityWriteToken}
     return html`
       <div class="toggle">
         ${this.themeToggle()}
@@ -94,10 +102,10 @@ export class Sandbox extends LitElement {
             class="widget-container"
           >
             <cjaas-identity-alias
-              customer="sample"
-              .identityReadSasToken=${identityReadToken}
-              .identityWriteSasToken=${identityWriteToken}
-              base-url-admin="http://cjaas-devus2-admin.azurewebsites.net"
+              customer="+14806754084"
+              base-url="https://jds-us1.cjaas.cisco.com"
+              .identityReadToken=${IDENTITY_READ_TOKEN}
+              .identityWriteToken=${IDENTITY_WRITE_TOKEN}
             ></cjaas-identity-alias>
           </div>
           <hr />
@@ -106,11 +114,11 @@ export class Sandbox extends LitElement {
             class="widget-container"
           >
             <cjaas-identity-alias
-              customer="ninja@a.com"
+              customer="+14806754084"
               minified
-              .identityReadSasToken=${identityReadToken}
-              .identityWriteSasToken=${identityWriteToken}
-              base-url-admin="http://cjaas-devus2-admin.azurewebsites.net"
+              base-url="https://jds-us1.cjaas.cisco.com"
+              .identityReadToken=${IDENTITY_READ_TOKEN}
+              .identityWriteToken=${IDENTITY_WRITE_TOKEN}
             ></cjaas-identity-alias>
           </div>
         </div>
