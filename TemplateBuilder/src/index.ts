@@ -140,7 +140,7 @@ export default class CjaasTemplateBuilder extends LitElement {
 
   // fetch action from server or use mockAction
   getTapeEvents(): Promise<Array<JourneyEvent>> {
-    let url = `${this.baseURL}/v1/journey/streams/historic`;
+    let url = `${this.baseURL}/streams/v1/journey/historic`;
 
     if (this.mockAction) {
       return new Promise((resolve, reject) => {

@@ -156,7 +156,7 @@ export default class CjaasTimelineWidget extends LitElement {
     this.showSpinner = true;
     this.baseUrlCheck();
     return fetch(
-      `${this.baseURL}/v1/journey/streams/historic/${this.personId}`,
+      `${this.baseURL}/streams/v1/journey/historic/${this.personId}`,
       {
         headers: {
           "content-type": "application/json; charset=UTF-8",
@@ -198,7 +198,7 @@ export default class CjaasTimelineWidget extends LitElement {
         },
       };
       this.eventSource = new EventSource(
-        `${this.baseURL}/v1/journey/streams/${this.personId}?${this.streamToken}`,
+        `${this.baseURL}/streams/v1/journey/${this.personId}?${this.streamToken}`,
         header,
       );
     }

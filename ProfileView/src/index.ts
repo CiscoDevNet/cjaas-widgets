@@ -274,7 +274,7 @@ export default class CjaasProfileWidget extends LitElement {
   async getExistingEvents() {
     this.timelineLoading = true;
     this.baseUrlCheck();
-    return fetch(`${this.baseURL}/v1/journey/streams/historic/${this.customer}`, {
+    return fetch(`${this.baseURL}/streams/v1/journey/historic/${this.customer}`, {
       headers: {
         "content-type": "application/json; charset=UTF-8",
         accept: "application/json",
@@ -310,7 +310,7 @@ export default class CjaasProfileWidget extends LitElement {
         },
       };
       this.eventSource = new EventSource(
-        `${this.baseURL}/v1/journey/streams/${this.customer}?${this.streamReadToken}`,
+        `${this.baseURL}/streams/v1/journey/${this.customer}?${this.streamReadToken}`,
         header
       );
     }

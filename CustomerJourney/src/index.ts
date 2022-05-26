@@ -289,7 +289,7 @@ export default class CustomerJourneyWidget extends LitElement {
     this.getEventsInProgress = true;
     this.baseUrlCheck();
 
-    const url = `${this.baseUrl}/v1/journey/streams/historic/${this.encodeCustomer(customer)}`;
+    const url = `${this.baseUrl}/streams/v1/journey/historic/${this.encodeCustomer(customer)}`;
     return fetch(url, {
       headers: {
         "content-type": "application/json; charset=UTF-8",
