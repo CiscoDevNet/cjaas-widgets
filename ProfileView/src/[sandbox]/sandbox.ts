@@ -169,8 +169,6 @@ export class Sandbox extends LitElement {
             .streamReadToken=${STREAM_READ_TOKEN}
             .profileReadToken=${PROFILE_READ_TOKEN}
             .profileWriteToken=${PROFILE_WRITE_TOKEN}
-            .identityReadToken=${IDENTITY_READ_TOKEN}
-            .identityWriteToken=${IDENTITY_WRITE_TOKEN}
             ></cjaas-profile-view-widget>
           </div>
         </div>
