@@ -65,10 +65,10 @@ export default class CjaasProfileWidget extends LitElement {
    @property({ type: String, reflect: true }) customer: string | null = null;
 
   /**
-   * ID of profile view template to retrieve from API
+   * Property to set the data template to retrieve customer Profile in desired format
    * @attr template-id
    */
-  @property({ type: String, attribute: "template-id" }) templateId: string | undefined;
+   @property({ type: String, attribute: "template-id" }) templateId = "journey-default-template";
 
   /**
    * Base URL for API calls
@@ -572,14 +572,9 @@ export default class CjaasProfileWidget extends LitElement {
 
   getFormattedProfile() {
     return html`
-      <div class="profile-bound default-template">
+      <div class="profile-view-container">
         <cjaas-profile .profileData=${this.profileData}></cjaas-profile>
         <section class="customer-journey" title="Customer Journey">
-          <div class="header inner-header">
-            <slot name="l10n-header-text">
-              <h4>Customer Journey</h4>
-            </slot>
-          </div>
           ${this.getTabs()}
         </section>
       </div>
@@ -610,7 +605,7 @@ export default class CjaasProfileWidget extends LitElement {
         `;
     return html`
       <md-tabs>
-        ${activityTab} ${tabs!.map((x: any) => this.getTab(x))}
+        ${activityTab} ${tabs?.map((x: any) => this.getTab(x))}
       </md-tabs>
     `;
   }
@@ -636,9 +631,9 @@ export default class CjaasProfileWidget extends LitElement {
 
   render() {
     return html`
-      <div class="outer-container" part="profile-widget-outer">
+      <!-- <div class="outer-container" part="profile-widget-outer"> -->
         ${this.getFormattedProfile()}
-      </div>
+      <!-- </div> -->
     `;
   }
 

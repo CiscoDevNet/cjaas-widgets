@@ -162,8 +162,8 @@ export class Sandbox extends LitElement {
             class="widget-container"
           >
             <cjaas-profile-view-widget
-              template-id="second-template"
-              .customer=${undefined}
+              template-id="journey-default-template"
+              customer="+14806754084"
               base-url="https://jds-us1.cjaas.cisco.com"
             .tapeReadToken=${TAPE_READ_TOKEN}
             .streamReadToken=${STREAM_READ_TOKEN}
