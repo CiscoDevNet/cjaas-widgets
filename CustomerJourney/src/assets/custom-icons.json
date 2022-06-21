@@ -1,0 +1,14 @@
+{
+    "Telephony": {
+      "name": "icon-call-activities_16",
+      "color": "green"
+    },
+    "Chat": {
+      "name": "icon-chat-group_16",
+      "color": "orange"
+    },
+    "Email": {
+      "name": "icon-email-active_16",
+      "color": "violet"
+    }
+  }

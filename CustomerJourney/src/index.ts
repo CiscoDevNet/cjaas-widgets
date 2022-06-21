@@ -33,6 +33,12 @@ function sortEventsbyDate(events: Timeline.CustomerEvent[]) {
   return events;
 }
 
+
+export enum EventType {
+  Agent = "agent",
+  Task = "task"
+}
+
 @customElementWithCheck("customer-journey-widget")
 export default class CustomerJourneyWidget extends LitElement {
   /**
@@ -283,6 +289,11 @@ export default class CustomerJourneyWidget extends LitElement {
     return profileTablePayload;
   }
 
+  filterEventTypes(typePrefix: EventType, events: Array<Timeline.CustomerEvent>) {
+    const filteredEvents = events.filter((event: Timeline.CustomerEvent) => event.type.includes(`${typePrefix}:`));
+    return filteredEvents;
+  }
+
   async getExistingEvents(customer: string | null) {
     this.events = [];
 
@@ -307,7 +318,9 @@ export default class CustomerJourneyWidget extends LitElement {
           event.time = DateTime.fromISO(event.time);
           return event;
         });
-        this.events = sortEventsbyDate(data.events);
+        // const filteredEvents = this.filterEventTypes(EventType.Task, data.events);
+        const filteredEvents = data.events;
+        this.events = sortEventsbyDate(filteredEvents);
         return data.events;
       })
       .catch((err: Error) => {
@@ -382,7 +395,7 @@ export default class CustomerJourneyWidget extends LitElement {
     return html`
       <cjaas-timeline
         ?getEventsInProgress=${this.getEventsInProgress}
-        .timelineItems=${this.events}
+        .historicEvents=${this.events}
         .newestEvents=${this.newestEvents}
         .eventIconTemplate=${this.eventIconTemplate}
         .badgeKeyword=${this.badgeKeyword}

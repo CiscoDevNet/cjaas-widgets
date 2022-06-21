@@ -29,6 +29,7 @@ import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
 import styles from "./sandbox.scss";
 import * as iconData from "@/assets/icons.json";
+import * as customIconData from "@/assets/custom-icons.json";
 import "..";
 
 @customElement("cjaas-component-sandbox")
@@ -154,6 +155,7 @@ export class Sandbox extends LitElement {
               user-search
               .eventIconTemplate=${iconData}
               base-url="https://cjaas-proddeploytest-api.azurewebsites.net"
+              template-id="journey-default-template"
               .tapeReadToken=${TAPE_READ_TOKEN}
               .streamReadToken=${STREAM_READ_TOKEN}
               .profileReadToken=${PROFILE_READ_TOKEN}
@@ -324,7 +326,7 @@ export class Sandbox extends LitElement {
             user-search
             customer="foobar"
             .eventIconTemplate=${iconData}
-            base-url="https://jds-prod-pf-westus-apim.azure-api.net"
+            base-url="https://jds-us1.cjaas.cisco.com"
             .tapeReadToken=${TAPE_READ_TOKEN}
             .streamReadToken=${STREAM_READ_TOKEN}
             .profileReadToken=${PROFILE_READ_TOKEN}
@@ -393,7 +395,7 @@ export class Sandbox extends LitElement {
     // return this.renderLocalProdTestVersion();
     // return this.renderElenaResourceGroupVersion();
 
-    return this.renderOfficialDevVersion();
-    // return this.renderOfficialProductionVersion();
+    // return this.renderOfficialDevVersion();
+    return this.renderOfficialProductionVersion();
   }
 }
