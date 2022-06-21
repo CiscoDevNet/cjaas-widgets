@@ -230,7 +230,7 @@ export default class CjaasTimelineWidget extends LitElement {
   renderTimeline() {
     return html`
       <cjaas-timeline
-        .timelineItems=${this.events}
+        .historicEvents=${this.events}
         .newestEvents=${this.newestEvents}
         @new-event-queue-cleared=${this.updateComprehensiveEventList}
         limit=${this.limit}

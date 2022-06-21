@@ -343,7 +343,7 @@ export default class CjaasProfileWidget extends LitElement {
     if (theTimelineItems?.length) {
       return html`
         <cjaas-timeline
-          .timelineItems=${this.events}
+          .historicEvents=${this.events}
           .newestEvents=${this.newestEvents}
           @new-event-queue-cleared=${this.updateComprehensiveEventList}
           limit=${this.limit}
