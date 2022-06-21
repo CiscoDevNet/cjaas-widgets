@@ -30,6 +30,7 @@ function sortEventsbyDate(events: Timeline.CustomerEvent[]) {
     }
   });
 
+  console.log('[JDS WIDGET] sorted events', events);
   return events;
 }
 
