@@ -11,6 +11,10 @@
     "name": "icon-handset-active_16",
     "color": "green"
   },
+  "Call": {
+    "name": "icon-handset-active_16",
+    "color": "green"
+  },
   "Chat": {
     "name": "icon-chat-active_16",
     "color": "cobalt"
@@ -30,6 +34,10 @@
   "Messenger": {
     "name": "icon-messenger_16",
     "color": "cobalt"
+  },
+  "social": {
+    "name": "icon-contact-group_16",
+    "color": "mint"
   },
   "task": {
     "name": "icon-tasks_16",
@@ -80,5 +88,9 @@
   "Survey Response Collected": {
     "name": "icon-report_16",
     "color": "gold"
+  },
+  "multi events single day": {
+    "name": "icon-calendar-day_12",
+    "color": "yellow"
   }
 }

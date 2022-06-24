@@ -113,6 +113,11 @@ export default class CustomerJourneyWidget extends LitElement {
    * @prop eventIconTemplate
    */
   @property({ attribute: false }) eventIconTemplate: Timeline.TimelineCustomizations = iconData;
+    /**
+   * Property to pass in url of iconData JSON template to set color and icon settings
+   * @prop iconDataPath
+   */
+     @property({ type: String, attribute: "icon-data-path" }) iconDataPath: string = "";
   /**
    * @prop badgeKeyword
    * set badge icon based on declared keyword from dataset
@@ -193,22 +198,17 @@ export default class CustomerJourneyWidget extends LitElement {
   @query("#customer-input") customerInput!: HTMLInputElement;
   @query(".profile") widget!: Element;
 
-  // async firstUpdated(changedProperties: PropertyValues) {
-  //   super.firstUpdated(changedProperties);
-
-  //   const resizeObserver = new ResizeObserver((entries: ResizeObserverEntry[]) => {
-  //     if (entries[0].contentRect.width > 780) {
-  //       this.expanded = true;
-  //     } else {
-  //       this.expanded = false;
-  //     }
-  //   });
-
-  //   resizeObserver.observe(this.widget);
-  // }
-
   async update(changedProperties: PropertyValues) {
     super.update(changedProperties);
+
+    if (changedProperties.has("iconDataPath") && this.iconDataPath) {
+      this.loadJSON(this.iconDataPath, (iconDataJson: Timeline.TimelineCustomizations) => {
+        this.eventIconTemplate = iconDataJson;
+        console.log('loadedJsonFile set eventIconTemplate: ', this.eventIconTemplate);
+      }, (error: string) => {
+        console.error('loadedJsonFile: failed to load eventIconTemplate', error);
+      });
+    }
 
     if (changedProperties.has("interactionData")) {
       if (this.interactionData) {
@@ -229,6 +229,23 @@ export default class CustomerJourneyWidget extends LitElement {
       this.identityData = await this.getAliasesByAlias(this.customer || null);
       this.identityID = this.identityData?.id || null;
     }
+  }
+
+  loadJSON(path: string, success: any, error: any) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
+          console.log('loadJsonFile:',  xhr.responseText);
+          success(JSON.parse(xhr.responseText));
+        }
+        else {
+          error(xhr);
+        }
+      }
+    };
+    xhr.open('GET', path, true);
+    xhr.send();
   }
 
   baseUrlCheck() {
@@ -402,7 +419,7 @@ export default class CustomerJourneyWidget extends LitElement {
         .badgeKeyword=${this.badgeKeyword}
         @new-event-queue-cleared=${this.updateComprehensiveEventList}
         limit=${this.limit}
-        event-filters
+        is-event-filter-visible
         ?live-stream=${this.liveStream}
       ></cjaas-timeline>
     `;
