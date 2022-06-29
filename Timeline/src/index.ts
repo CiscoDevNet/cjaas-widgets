@@ -234,7 +234,7 @@ export default class CjaasTimelineWidget extends LitElement {
         .newestEvents=${this.newestEvents}
         @new-event-queue-cleared=${this.updateComprehensiveEventList}
         limit=${this.limit}
-        ?event-filters=${this.showFilters}
+        ?is-event-filter-visible=${this.showFilters}
         ?live-stream=${this.liveStream}
       ></cjaas-timeline>
     `;

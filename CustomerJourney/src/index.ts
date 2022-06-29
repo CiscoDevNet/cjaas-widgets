@@ -19,22 +19,6 @@ import "@cjaas/common-components/dist/comp/cjaas-identity";
 import { Timeline } from "@cjaas/common-components/dist/types/components/timeline/Timeline";
 import { DateTime } from "luxon";
 
-function sortEventsbyDate(events: Timeline.CustomerEvent[]) {
-  events.sort((previous, current) => {
-    if (previous.time > current.time) {
-      return -1;
-    } else if (previous.time < current.time) {
-      return 1;
-    } else {
-      return 0;
-    }
-  });
-
-  console.log('[JDS WIDGET] sorted events', events);
-  return events;
-}
-
-
 export enum EventType {
   Agent = "agent",
   Task = "task"
@@ -42,6 +26,7 @@ export enum EventType {
 
 @customElementWithCheck("customer-journey-widget")
 export default class CustomerJourneyWidget extends LitElement {
+  @property({ type: Boolean, attribute: "logs-on"}) logsOn = false;
   /**
    * Path to the proper Customer Journey API deployment
    * @attr base-url
@@ -56,7 +41,6 @@ export default class CustomerJourneyWidget extends LitElement {
    * SAS Token that provides read permissions to Journey API (used for Profile retrieval)
    * @attr write-token
    */
-
   @property({ type: String, attribute: "profile-read-token" })
   profileReadToken: string | null = null;
   /**
@@ -113,6 +97,11 @@ export default class CustomerJourneyWidget extends LitElement {
    * @prop eventIconTemplate
    */
   @property({ attribute: false }) eventIconTemplate: Timeline.TimelineCustomizations = iconData;
+    /**
+   * Property to pass in url of iconData JSON template to set color and icon settings
+   * @prop iconDataPath
+   */
+     @property({ type: String, attribute: "icon-data-path" }) iconDataPath: string = "";
   /**
    * @prop badgeKeyword
    * set badge icon based on declared keyword from dataset
@@ -193,26 +182,22 @@ export default class CustomerJourneyWidget extends LitElement {
   @query("#customer-input") customerInput!: HTMLInputElement;
   @query(".profile") widget!: Element;
 
-  // async firstUpdated(changedProperties: PropertyValues) {
-  //   super.firstUpdated(changedProperties);
-
-  //   const resizeObserver = new ResizeObserver((entries: ResizeObserverEntry[]) => {
-  //     if (entries[0].contentRect.width > 780) {
-  //       this.expanded = true;
-  //     } else {
-  //       this.expanded = false;
-  //     }
-  //   });
-
-  //   resizeObserver.observe(this.widget);
-  // }
-
   async update(changedProperties: PropertyValues) {
     super.update(changedProperties);
 
+    if (changedProperties.has("iconDataPath") && this.iconDataPath) {
+      this.loadJSON(this.iconDataPath, (iconDataJson: Timeline.TimelineCustomizations) => {
+        this.eventIconTemplate = iconDataJson;
+        this.debugLogMessage('Icon data loaded externally', this.eventIconTemplate);
+      }, (error: string) => {
+        console.error('loadedJsonFile: failed to load eventIconTemplate', error);
+      });
+    }
+
     if (changedProperties.has("interactionData")) {
       if (this.interactionData) {
-        this.customer = this.interactionData["ani"];
+        this.debugLogMessage("interactionData", this.interactionData);
+        this.customer = this.interactionData?.["ani"] || null;
       } else {
         this.customer = null;
       }
@@ -223,13 +208,53 @@ export default class CustomerJourneyWidget extends LitElement {
     }
 
     if (changedProperties.has("customer")) {
+      this.debugLogMessage("customer", this.customer);
       this.newestEvents = [];
       this.getExistingEvents(this.customer || null);
       this.subscribeToStream(this.customer || null);
       this.identityData = await this.getAliasesByAlias(this.customer || null);
       this.identityID = this.identityData?.id || null;
+      this.debugLogMessage("identityID", this.identityID);
     }
   }
+
+  debugLogMessage(infoMessage: string, ...args: any[]) {
+    if (this.logsOn) {
+      console.log(`[JDS WIDGET][LOGS-ON] ${infoMessage}`, args);
+    }
+  }
+
+  sortEventsbyDate(events: Timeline.CustomerEvent[]) {
+    events.sort((previous, current) => {
+      if (previous.time > current.time) {
+        return -1;
+      } else if (previous.time < current.time) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+
+    this.debugLogMessage('Sorted events', events);
+    return events;
+  }
+
+  loadJSON(path: string, success: any, error: any) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
+          success(JSON.parse(xhr.responseText));
+        }
+        else {
+          error(xhr);
+        }
+      }
+    };
+    xhr.open('GET', path, true);
+    xhr.send();
+  }
+  
 
   baseUrlCheck() {
     if (this.baseUrl === undefined) {
@@ -259,18 +284,22 @@ export default class CustomerJourneyWidget extends LitElement {
     fetch(url, options)
       .then(x => x.json())
       .then(response => {
-        this.pollingActive = false;
-        this.profileData = this.parseResponse(response?.data?.attributeView, response?.data?.personId);
+        if (response?.status === 404) {
+          throw new Error(response?.title);
+        } else {
+          this.pollingActive = false;
+          this.profileData = this.parseResponse(response?.data?.attributeView, response?.data?.personId);
+        }
       })
       .catch(err => {
         this.getProfileDataInProgress = false;
         this.profileData = undefined;
-        console.error("[JDS Widget] Unable to fetch the Profile", customer, templateId, err);
+        console.error(`[JDS Widget] Unable to fetch the Profile for customer (${customer}) with templateId (${templateId})`, err);
       });
   }
 
   parseResponse(attributes: any, personId: string) {
-    const profileTablePayload = attributes.map((attribute: any) => {
+    const profileTablePayload = attributes?.map((attribute: any) => {
       const _query = {
         ...attribute.queryTemplate,
         widgetAttributes: {
@@ -321,7 +350,7 @@ export default class CustomerJourneyWidget extends LitElement {
         });
         // const filteredEvents = this.filterEventTypes(EventType.Task, data.events);
         const filteredEvents = data.events;
-        this.events = sortEventsbyDate(filteredEvents);
+        this.events = this.sortEventsbyDate(filteredEvents);
         return data.events;
       })
       .catch((err: Error) => {
@@ -364,7 +393,7 @@ export default class CustomerJourneyWidget extends LitElement {
           data.time = DateTime.fromISO(data.time);
 
           // sort events
-          this.newestEvents = sortEventsbyDate([data, ...this.newestEvents]);
+          this.newestEvents = this.sortEventsbyDate([data, ...this.newestEvents]);
         } catch (err) {
           console.error("[JDS Widget] journey/stream: No parsable data fetched");
         }
@@ -379,7 +408,7 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   updateComprehensiveEventList() {
-    this.events = sortEventsbyDate([...this.newestEvents, ...this.events]);
+    this.events = this.sortEventsbyDate([...this.newestEvents, ...this.events]);
     this.newestEvents = [];
   }
 
@@ -402,7 +431,7 @@ export default class CustomerJourneyWidget extends LitElement {
         .badgeKeyword=${this.badgeKeyword}
         @new-event-queue-cleared=${this.updateComprehensiveEventList}
         limit=${this.limit}
-        event-filters
+        is-event-filter-visible
         ?live-stream=${this.liveStream}
       ></cjaas-timeline>
     `;
