@@ -325,6 +325,7 @@ export class Sandbox extends LitElement {
             limit="20"
             user-search
             customer="foobar"
+            logs-on
             base-url="https://jds-us1.cjaas.cisco.com"
             .tapeReadToken=${TAPE_READ_TOKEN}
             .streamReadToken=${STREAM_READ_TOKEN}
@@ -338,6 +339,7 @@ export class Sandbox extends LitElement {
     </md-theme>
   `;
   }
+
   // icon-data-path="https://cjaas.cisco.com/widgets/iconMaps/custom-icons.json"
 
   /**
