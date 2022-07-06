@@ -31,6 +31,7 @@ import styles from "./sandbox.scss";
 import * as iconData from "@/assets/icons.json";
 import * as customIconData from "@/assets/custom-icons.json";
 import "..";
+import { TimeFrame } from "..";
 
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
@@ -333,6 +334,8 @@ export class Sandbox extends LitElement {
             .profileWriteToken=${PROFILE_WRITE_TOKEN}
             .identityReadToken=${IDENTITY_READ_TOKEN}
             .identityWriteToken=${IDENTITY_WRITE_TOKEN}
+            live-stream
+            time-frame="All"
           ></customer-journey-widget>
         </div>
       </div>
@@ -349,6 +352,7 @@ export class Sandbox extends LitElement {
    * sandbox
    * webexcontactcenter
    */
+  //  base-url="https://jds-prod-pf-westus2-apim.azure-api.net"
    renderOfficialDevVersion() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
 
@@ -363,21 +367,29 @@ export class Sandbox extends LitElement {
           <customer-journey-widget
             limit="20"
             user-search
-            customer="foobar"
+            customer="+1-5109024292"
+            logs-on
             .eventIconTemplate=${iconData}
-            base-url="https://jds-prod-pf-westus2-apim.azure-api.net"
+            base-url="https://uswest-nonprod.cjaas.cisco.com"
             .tapeReadToken=${TAPE_READ_TOKEN}
             .streamReadToken=${STREAM_READ_TOKEN}
             .profileReadToken=${PROFILE_READ_TOKEN}
             .profileWriteToken=${PROFILE_WRITE_TOKEN}
             .identityReadToken=${IDENTITY_READ_TOKEN}
             .identityWriteToken=${IDENTITY_WRITE_TOKEN}
+            live-stream
+            time-frame="All"
           ></customer-journey-widget>
         </div>
       </div>
     </md-theme>
   `;
   }
+
+  // collapse-alias-section
+  // collapse-profile-section
+  // collapse-timeline-section
+  // time-frame=${TimeFrame["24-Hours"]}
 
   render() {
     /** You need to make sure you have the sasTokens appropriately defined in your .env file that are associated with dev or prod
@@ -397,7 +409,7 @@ export class Sandbox extends LitElement {
     // return this.renderLocalProdTestVersion();
     // return this.renderElenaResourceGroupVersion();
 
-    // return this.renderOfficialDevVersion();
-    return this.renderOfficialProductionVersion();
+    return this.renderOfficialDevVersion();
+    // return this.renderOfficialProductionVersion();
   }
 }
