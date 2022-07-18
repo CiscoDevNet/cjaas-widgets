@@ -20,6 +20,7 @@ import { Timeline } from "@cjaas/common-components/dist/types/components/timelin
 import { DateTime } from "luxon";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { addAliasResponseBody, deleteAliasResponseBody } from "./actions";
+import { nothing } from "lit-html";
 
 export enum EventType {
   Agent = "agent",
@@ -115,7 +116,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * @prop badgeKeyword
    * set badge icon based on declared keyword from dataset
    */
-  @property({ type: String, attribute: "badge-keyword" }) badgeKeyword = "channelType";
+  @property({ type: String, attribute: "icon-keyword-lookup" }) iconKeywordLookup = "channelType";
   /**
    * @prop collapse-timeline-section
    * determines whether the timeline section is collapsed by default
@@ -477,7 +478,7 @@ export default class CustomerJourneyWidget extends LitElement {
         .historicEvents=${this.events}
         .newestEvents=${this.newestEvents}
         .eventIconTemplate=${this.eventIconTemplate}
-        .badgeKeyword=${this.badgeKeyword}
+        icon-keyword-lookup=${this.iconKeywordLookup}
         @new-event-queue-cleared=${this.updateComprehensiveEventList}
         limit=${this.limit}
         is-event-filter-visible
@@ -617,7 +618,7 @@ export default class CustomerJourneyWidget extends LitElement {
         }
         this.aliasErrorMessage = "";
       })
-      .catch((err) => {
+      .catch(err => {
         console.error(`[JDS Widget] Failed to add AliasById ${identityId}`, err?.response);
 
         let subErrorMessage = "";
@@ -690,7 +691,8 @@ export default class CustomerJourneyWidget extends LitElement {
         <span class="custom-input-label">Lookup User</span>
         <div class="input-wrapper">
           <md-input
-            searchable
+            ?searchable=${this.userSearch}
+            ?readonly=${!this.userSearch}
             class="customer-journey-search-input"
             id="customer-input"
             placeholder="examples: Jon Doe, (808) 645-4562, jon@gmail.com"

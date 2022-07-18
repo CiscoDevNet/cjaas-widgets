@@ -98,7 +98,7 @@ export class Sandbox extends LitElement {
   }
 
   mockedInteractionData = {
-    ani: "egiere@cisco.com"
+    ani: "egiere@cisco.com",
   };
 
   /**
@@ -174,7 +174,7 @@ export class Sandbox extends LitElement {
    * http://localhost:5192
    * keyVault: "https://proddeploytest-kv.vault.azure.net/"
    */
-   renderLocalProdTestVersion() {
+  renderLocalProdTestVersion() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
     return html`
       <div class="toggle">
@@ -269,7 +269,7 @@ export class Sandbox extends LitElement {
   /**
    * Old Prod Version used within QA agent desktop environment
    * */
-   renderOldProductionVersion() {
+  renderOldProductionVersion() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
 
     return html`
@@ -353,7 +353,7 @@ export class Sandbox extends LitElement {
    * webexcontactcenter
    */
   //  base-url="https://jds-prod-pf-westus2-apim.azure-api.net"
-   renderOfficialDevVersion() {
+  renderOfficialDevVersion() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
 
     return html`
@@ -366,7 +366,6 @@ export class Sandbox extends LitElement {
         <div style=${containerStyle} class="widget-container">
           <customer-journey-widget
             limit="20"
-            user-search
             customer="+1-5109024292"
             logs-on
             .eventIconTemplate=${iconData}
@@ -377,6 +376,7 @@ export class Sandbox extends LitElement {
             .profileWriteToken=${PROFILE_WRITE_TOKEN}
             .identityReadToken=${IDENTITY_READ_TOKEN}
             .identityWriteToken=${IDENTITY_WRITE_TOKEN}
+            icon-keyword-lookup="channelType"
             live-stream
             time-frame="All"
           ></customer-journey-widget>
