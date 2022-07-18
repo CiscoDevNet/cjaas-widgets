@@ -20,6 +20,7 @@ import "@momentum-ui/web-components/dist/comp/md-input";
 import { nothing, TemplateResult } from "lit-html";
 import "@cjaas/common-components/dist/comp/cjaas-condition-block";
 import "@cjaas/common-components/dist/comp/cjaas-condition";
+// import "@cjaas/common-components/dist/comp/cjaas-form-row";
 
 const SUPPORTED_TRIGGER_TYPES: triggerType[] = ["WebexWalkin", "AgentOffer", "Webhook", "IMIFlowTrigger", "ChatBot"];
 
@@ -170,16 +171,22 @@ export default class CjaasActionBuilder extends LitElement {
 
   // name input for action
   // templateid is formed from namespace-organization-actionName
+
   getNameInputTemplate() {
     return html`
-      <md-input
-        .value=${this.actionConfig?.name || ""}
-        id="action-name"
-        placeholder="Action Name"
-        .required=${true}
-        .helpText=${this.actionConfig?.name ? "" : "Action Name cannot be changed later!"}
+      <cjaas-form-row
+        label="Action Name"
+        labelDescription=${this.actionConfig?.name ? "" : "Action name cannot be changed later."}
+        isRequired
+        border-type="none"
       >
-      </md-input>
+        <md-input
+          .value=${this.actionConfig?.name || ""}
+          id="action-name"
+          placeholder="Action Name"
+          required
+        ></md-input>
+      </cjaas-form-row>
     `;
   }
 
@@ -190,13 +197,14 @@ export default class CjaasActionBuilder extends LitElement {
     }
 
     return html`
-      <div class="header-row"><md-icon name="icon-location_32" size="24"></md-icon><span>Journey</span></div>
       ${this.renderRootConditionBlock(relation)}
       <div class="targets">
         ${this.getTargets()}
       </div>
       <div class="cta">
-        <md-button color="green" .disabled=${this.disableSaveButton} @click=${() => this.saveTrigger()}>Save</md-button>
+        <md-button variant="green" ?disabled=${this.disableSaveButton} @click=${() => this.saveTrigger()}
+          >Save</md-button
+        >
       </div>
       <md-alert-banner .show=${this.showSuccessMessage} type="default" message="Trigger Saved"></md-alert-banner>
       <md-alert-banner .show=${this.showErrorMessage} type="error" .message=${this.errorMessage}></md-alert-banner>
@@ -249,11 +257,13 @@ export default class CjaasActionBuilder extends LitElement {
     }
 
     return html`
-      <div class="name-container">
-        ${this.actionConfig?.name ? this.actionConfig?.name : this.getNameInputTemplate()}
-      </div>
-      <div>
-        ${this.readOnlyMode && this.actionConfig?.name ? this.getReadOnlyTemplate() : this.getEditActionTemplate()}
+      <div part="action-builder-container" class="action-builder-container">
+        <div class="name-container">
+          ${this.actionConfig?.name ? this.actionConfig?.name : this.getNameInputTemplate()}
+        </div>
+        <div>
+          ${this.readOnlyMode && this.actionConfig?.name ? this.getReadOnlyTemplate() : this.getEditActionTemplate()}
+        </div>
       </div>
     `;
   }
@@ -378,47 +388,71 @@ export default class CjaasActionBuilder extends LitElement {
     `;
   }
 
+  renderTargetTools(index: number) {
+    return html`
+      <div class="tools-container">
+        <div class="add-below-icon">
+          <md-tooltip message="Add Target" placement="top">
+            <md-button class="add-icon" circle hasIcon @click=${() => this.addNewTarget(index)}>
+              <md-icon slot="icon" name="icon-plus_16"></md-icon>
+            </md-button>
+          </md-tooltip>
+        </div>
+        <md-tooltip message="Delete Target" placement="top">
+          <md-button
+            class="delete-icon"
+            title="Delete Condition"
+            circle
+            hasIcon
+            @click=${() => this.deleteTarget(index)}
+          >
+            <md-icon slot="icon" name="icon-minus_16"></md-icon>
+          </md-button>
+        </md-tooltip>
+      </div>
+    `;
+  }
+
   getTargets() {
     if (this.targets.length === 0) {
       return html`
         <div class="target-container">
-          <md-icon name="icon-flag_24" size="18"></md-icon>
-          then trigger
-          <md-dropdown
-            .options=${SUPPORTED_TRIGGER_TYPES}
-            placeholder="Target"
-            @dropdown-selected=${(ev: any) => {
-              this.setTargetType(ev.detail.option, 0);
-            }}
-          ></md-dropdown>
+          <div class="left-block">
+            <md-icon name="icon-flag_24" size="18"></md-icon>
+            then trigger
+          </div>
+          <div class="main-content">
+            <md-dropdown
+              .options=${SUPPORTED_TRIGGER_TYPES}
+              placeholder="Target"
+              @dropdown-selected=${(ev: any) => {
+                this.setTargetType(ev.detail.option, 0);
+              }}
+            ></md-dropdown>
+          </div>
         </div>
       `;
     } else {
       return this.targets.map((x, i) => {
         return html`
           <div class="target-container">
-            <md-icon name="icon-flag_24" size="18"></md-icon>
-            ${i === 0 ? "then" : "and"} trigger
-            <md-dropdown
-              .options=${SUPPORTED_TRIGGER_TYPES}
-              .selectedKey=${(x as any).type}
-              placeholder="Target"
-              @dropdown-selected=${(ev: any) => {
-                this.setTargetType(ev.detail.option, i);
-              }}
-            >
-            </md-dropdown>
-            ${this.getPayloadTemplate(x.type as triggerType, x, i)}
-            <md-tooltip message="Add Target" placement="top">
-              <div class="add-below-icon">
-                <md-icon name="icon-add_24" size="18" @click=${() => this.addNewTarget(i)}></md-icon>
-              </div>
-            </md-tooltip>
-            <md-tooltip message="Delete Target" placement="top">
-              <div class="delete-icon" @click=${() => this.deleteTarget(i)}>
-                <md-icon name="icon-delete_24" size="18"></md-icon>
-              </div>
-            </md-tooltip>
+            <div class="left-block">
+              <md-icon name="icon-flag_24" size="18"></md-icon>
+              ${i === 0 ? "then" : "and"} trigger
+            </div>
+            <div class="main-content">
+              <md-dropdown
+                .options=${SUPPORTED_TRIGGER_TYPES}
+                .selectedKey=${(x as any).type}
+                placeholder="Target"
+                @dropdown-selected=${(ev: any) => {
+                  this.setTargetType(ev.detail.option, i);
+                }}
+              >
+              </md-dropdown>
+              ${this.getPayloadTemplate(x.type as triggerType, x, i)}
+            </div>
+            ${this.renderTargetTools(i)}
           </div>
         `;
       });
