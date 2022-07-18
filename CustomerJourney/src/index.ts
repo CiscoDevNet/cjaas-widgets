@@ -9,9 +9,10 @@
 import { html, internalProperty, property, LitElement, PropertyValues, query } from "lit-element";
 import { classMap } from "lit-html/directives/class-map.js";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
+import axiosRetry from "axios-retry";
 import styles from "./assets/styles/View.scss";
 import * as iconData from "@/assets/icons.json";
-import { Profile, ServerSentEvent, IdentityResponse, IdentityData } from "./types/cjaas";
+import { Profile, ServerSentEvent, IdentityData } from "./types/cjaas";
 import { EventSourceInitDict } from "eventsource";
 import "@cjaas/common-components/dist/comp/cjaas-timeline";
 import "@cjaas/common-components/dist/comp/cjaas-profile";
@@ -196,11 +197,6 @@ export default class CustomerJourneyWidget extends LitElement {
    */
   @internalProperty() expanded = false;
 
-  /**
-   * Memoize pollingstatus so that there are not multiple intervals
-   */
-  @internalProperty() pollingActive = false;
-
   @internalProperty() aliasAddInProgress = false;
 
   @internalProperty() aliasGetInProgress = false;
@@ -324,15 +320,25 @@ export default class CustomerJourneyWidget extends LitElement {
 
     const config: AxiosRequestConfig = {
       method: "GET",
+      url,
       headers: {
         Authorization: `SharedAccessSignature ${this.profileReadToken}`,
       },
     };
 
-    return axios(url, config)
+    const axiosInstance = axios.create(config);
+
+    axiosRetry(axiosInstance, {
+      retries: 3,
+      retryDelay: () => 5000,
+      shouldResetTimeout: true,
+      retryCondition: _error => true,
+    });
+
+    return axiosInstance
+      .get(url)
       .then(response => {
         const { attributeView, personId } = response?.data?.data;
-        this.pollingActive = false;
         this.profileErrorMessage = "";
         this.profileData = this.parseResponse(attributeView, personId);
       })
@@ -617,7 +623,7 @@ export default class CustomerJourneyWidget extends LitElement {
         }
         this.aliasErrorMessage = "";
       })
-      .catch((err) => {
+      .catch(err => {
         console.error(`[JDS Widget] Failed to add AliasById ${identityId}`, err?.response);
 
         let subErrorMessage = "";
