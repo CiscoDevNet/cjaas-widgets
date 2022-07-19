@@ -11,8 +11,10 @@ import { classMap } from "lit-html/directives/class-map.js";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import styles from "./assets/styles/View.scss";
 import * as iconData from "@/assets/icons.json";
-import { Profile, ServerSentEvent, IdentityResponse, IdentityData } from "./types/cjaas";
+import { Profile, ServerSentEvent, IdentityData } from "./types/cjaas";
 import { EventSourceInitDict } from "eventsource";
+import * as EmailValidator from "email-validator";
+import parsePhoneNumber from "libphonenumber-js";
 import "@cjaas/common-components/dist/comp/cjaas-timeline";
 import "@cjaas/common-components/dist/comp/cjaas-profile";
 import "@cjaas/common-components/dist/comp/cjaas-identity";
@@ -20,6 +22,7 @@ import { Timeline } from "@cjaas/common-components/dist/types/components/timelin
 import { DateTime } from "luxon";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { addAliasResponseBody, deleteAliasResponseBody } from "./actions";
+import { Input } from "@momentum-ui/web-components";
 
 export enum EventType {
   Agent = "agent",
@@ -211,6 +214,10 @@ export default class CustomerJourneyWidget extends LitElement {
 
   @internalProperty() identityID: string | null = null;
 
+  @internalProperty() userSearchErrorList: Input.Message[] = [];
+
+  @internalProperty() userSearchDisplay = false;
+
   /**
    * Hook to HTML element <div class="container">
    * @query container
@@ -220,7 +227,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * Hook to HTML element <md-input id="customerInput">
    * @query customerInput
    */
-  @query("#customer-input") customerInput!: HTMLInputElement;
+  @query("#customer-input") customerInput!: Input.ELEMENT;
   @query(".profile") widget!: Element;
 
   async update(changedProperties: PropertyValues) {
@@ -257,6 +264,7 @@ export default class CustomerJourneyWidget extends LitElement {
     }
 
     if (changedProperties.has("customer")) {
+      this.userSearchDisplay = true;
       this.aliasGetInProgress = true;
       this.debugLogMessage("customer", this.customer);
       this.newestEvents = [];
@@ -456,15 +464,52 @@ export default class CustomerJourneyWidget extends LitElement {
     }
   }
 
+  addError(errorList: Array<Input.Message>, errorMessage: string) {
+    const theErrorList = errorList;
+    const newErrorObject: Input.Message = {
+      message: errorMessage,
+      type: "error",
+    };
+
+    const alreadyExists = theErrorList.find(error => error.message === errorMessage);
+
+    if (!alreadyExists) {
+      theErrorList.push(newErrorObject);
+    }
+
+    return theErrorList;
+  }
+
+  validateSearchValue(userIdentifier: string) {
+    let isValid = false;
+    if (EmailValidator.validate(userIdentifier)) {
+      isValid = true;
+    } else {
+      const phoneNumber = parsePhoneNumber(userIdentifier);
+      isValid = phoneNumber ? phoneNumber.isValid() : false;
+    }
+
+    if (!isValid) {
+      this.addError(this.userSearchErrorList, "User identifier needs to be a valid email or a phone number.");
+      this.userSearchDisplay = false;
+    } else {
+      this.customer = this.customerInput?.value;
+    }
+  }
+
   updateComprehensiveEventList() {
     this.events = this.sortEventsbyDate([...this.newestEvents, ...this.events]);
     this.newestEvents = [];
   }
 
-  handleKey(e: CustomEvent) {
+  handleKeyDown(e: CustomEvent) {
     const { srcEvent } = e?.detail;
-    if (srcEvent.key === "Enter") {
-      e.composedPath()[0].blur();
+    this.userSearchErrorList = [];
+
+    if (srcEvent?.key === "Enter" || srcEvent?.key === "Tab") {
+      this.userSearchDisplay = true;
+      this.userSearchErrorList = [];
+      this.validateSearchValue(this.customerInput?.value);
     }
 
     this.handleBackspace(srcEvent);
@@ -617,7 +662,7 @@ export default class CustomerJourneyWidget extends LitElement {
         }
         this.aliasErrorMessage = "";
       })
-      .catch((err) => {
+      .catch(err => {
         console.error(`[JDS Widget] Failed to add AliasById ${identityId}`, err?.response);
 
         let subErrorMessage = "";
@@ -681,7 +726,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
   refreshUserSearch() {
     this.customer = null;
-    this.customer = this.customerInput.value;
+    this.customer = this.customerInput?.value;
   }
 
   renderMainInputSearch() {
@@ -690,16 +735,13 @@ export default class CustomerJourneyWidget extends LitElement {
         <span class="custom-input-label">Lookup User</span>
         <div class="input-wrapper">
           <md-input
-            searchable
             class="customer-journey-search-input"
             id="customer-input"
+            shape="pill"
             placeholder="examples: Jon Doe, (808) 645-4562, jon@gmail.com"
             value=${this.customer || ""}
-            shape="pill"
-            @input-keydown=${(event: CustomEvent) => this.handleKey(event)}
-            @blur=${(e: FocusEvent) => {
-              this.customer = e.composedPath()[0].value;
-            }}
+            .messageArr=${this.userSearchErrorList}
+            @input-keydown=${this.handleKeyDown}
           >
           </md-input>
           <div class="reload-icon">
@@ -719,7 +761,7 @@ export default class CustomerJourneyWidget extends LitElement {
       <div class="empty-state-container">
         <!-- <img src="./assets/images/flashlight-search-192.svg" alt="search-illustration" /> -->
         <!-- TODO: Add Illustrations to empty state view -->
-        <p class="empty-state-text">Enter a user to search for a Journey</p>
+        <p class="empty-state-text">Enter a valid user to search for a journey.</p>
       </div>
     `;
   }
@@ -768,7 +810,7 @@ export default class CustomerJourneyWidget extends LitElement {
         <div class="top-header-row">
           ${this.renderMainInputSearch()}
         </div>
-        ${this.customer ? this.renderSubWidgets() : this.renderEmptyStateView()}
+        ${this.customer && this.userSearchDisplay ? this.renderSubWidgets() : this.renderEmptyStateView()}
       </div>
     `;
   }

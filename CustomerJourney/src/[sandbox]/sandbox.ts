@@ -98,7 +98,7 @@ export class Sandbox extends LitElement {
   }
 
   mockedInteractionData = {
-    ani: "egiere@cisco.com"
+    ani: "egiere@cisco.com",
   };
 
   /**
@@ -174,7 +174,7 @@ export class Sandbox extends LitElement {
    * http://localhost:5192
    * keyVault: "https://proddeploytest-kv.vault.azure.net/"
    */
-   renderLocalProdTestVersion() {
+  renderLocalProdTestVersion() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
     return html`
       <div class="toggle">
@@ -269,7 +269,7 @@ export class Sandbox extends LitElement {
   /**
    * Old Prod Version used within QA agent desktop environment
    * */
-   renderOldProductionVersion() {
+  renderOldProductionVersion() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
 
     return html`
@@ -353,7 +353,7 @@ export class Sandbox extends LitElement {
    * webexcontactcenter
    */
   //  base-url="https://jds-prod-pf-westus2-apim.azure-api.net"
-   renderOfficialDevVersion() {
+  renderOfficialDevVersion() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
 
     return html`

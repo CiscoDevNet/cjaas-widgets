@@ -108,7 +108,9 @@
   },
   "dependencies": {
     "@types/eventsource": "^1.1.5",
+    "email-validator": "^2.0.4",
     "eventsource": "^1.1.0",
+    "libphonenumber-js": "^1.10.8",
     "resize-observer-polyfill": "^1.5.1"
   }
 }
