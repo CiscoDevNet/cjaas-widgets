@@ -1,6 +1,6 @@
 # JDS Customer Journey Widget
 
-This widget uses the CJaaS API to display an individual customer's journey as a history of events. It first retrieves the complete event history from the tape endpoint and compiles toggles for all event channelTypes, and then subscribes to a live stream of new events so they appear in real time. This code can be used as is, or be starter code for your own Custom Widget. It also embodies Identity Alias management and Profile view with a tempate named 'journey-default-template' 
+This widget uses the JDS (Journey Data Services) APIs to display an individual customer's journey as a history of events. It first retrieves the complete event history from the tape endpoint and compiles toggles for all event channelTypes, and then subscribes to a live stream of new events so they appear in real time. This code can be used as is, or be starter code for your own Custom Widget. It also embodies Identity Alias management and Profile view with a tempate named 'journey-default-template' 
 
 ### Latest Version
 
@@ -8,7 +8,7 @@ customer-journey-8.0.5.js
 
 ### Customer Journey Widget Properties
 
-<i>The CJaaS Profile Widget accepts specific properties to interact with the CJaaS API</i>
+<i>The JDS Customer Journey Widget accepts specific properties to interact with the JDS APIs</i>
 
 * The following attributes and properties of JDS Widget are supported with the following version
 ```
@@ -49,7 +49,7 @@ https://cjaas.cisco.com/widgets/customer-journey-8.0.5.js
 
 `@attr icon-data-path`: (<i>String</i>) - URL path of JSON template to set color and icon settings.
 
-`@prop interactionData`: (<i>object</i>) - Agent Desktop Interaction Data. Needs to have an `ani` property within object.
+`@prop interactionData`: (<i>object</i>) - Agent Desktop Interaction Data. Needs to have an `ani` property within object. This allows the JDS Widget to auto-populate with the current customer that the agent is interacting with. This overrides the customer attribute.
 
 `@prop eventIconTemplate`: (<i>json object</i>) = iconData (built-in) - Property to pass in JSON template to set color and icon settings.
 
@@ -93,7 +93,6 @@ https://cjaas.cisco.com/widgets/customer-journey-8.0.5.js
     "comp": "customer-journey-widget",
     "script": "https://cjaas.cisco.com/widgets/customer-journey-8.0.4.js",
     "attributes": {	
-       "customer": "Ben Smith",
        "base-url": "https://uswest-nonprod.cjaas.cisco.com",
        "logs-on": "true",
        "tape-read-token": "<your-tape-read-token>",
