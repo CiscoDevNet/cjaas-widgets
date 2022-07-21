@@ -367,7 +367,7 @@ export class Sandbox extends LitElement {
           <customer-journey-widget
             limit="20"
             user-search
-            customer="bob"
+            customer="egiere@cisco.com"
             logs-on
             .eventIconTemplate=${iconData}
             base-url="https://uswest-nonprod.cjaas.cisco.com"

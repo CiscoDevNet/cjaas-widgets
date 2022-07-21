@@ -207,6 +207,19 @@ export default class CustomerJourneyWidget extends LitElement {
 
   @internalProperty() identityID: string | null = null;
 
+  @internalProperty() hasProfileAPIBeenCalled = false;
+
+  @internalProperty() hasIdentityAPIBeenCalled = false;
+
+  @internalProperty() hasHistoricalEventsAPIBeenCalled = false;
+
+  basicRetryConfig = {
+    retries: 5,
+    retryDelay: () => 3000,
+    shouldResetTimeout: true,
+    retryCondition: (_error: any) => true,
+  };
+
   /**
    * Hook to HTML element <div class="container">
    * @query container
@@ -328,12 +341,9 @@ export default class CustomerJourneyWidget extends LitElement {
 
     const axiosInstance = axios.create(config);
 
-    axiosRetry(axiosInstance, {
-      retries: 3,
-      retryDelay: () => 5000,
-      shouldResetTimeout: true,
-      retryCondition: _error => true,
-    });
+    if (!this.hasProfileAPIBeenCalled) {
+      axiosRetry(axiosInstance, this.basicRetryConfig);
+    }
 
     return axiosInstance
       .get(url)
@@ -343,13 +353,18 @@ export default class CustomerJourneyWidget extends LitElement {
         this.profileData = this.parseResponse(attributeView, personId);
       })
       .catch((err: Error) => {
-        this.getProfileDataInProgress = false;
         this.profileData = undefined;
         this.profileErrorMessage = `Failed to fetch the profile data.`;
         console.error(
           `[JDS Widget] Unable to fetch the Profile for customer (${customer}) with templateId (${templateId})`,
           err
         );
+      })
+      .finally(() => {
+        this.getProfileDataInProgress = false;
+        if (!this.hasProfileAPIBeenCalled) {
+          this.hasProfileAPIBeenCalled = true;
+        }
       });
   }
 
@@ -362,7 +377,6 @@ export default class CustomerJourneyWidget extends LitElement {
           tag: attribute.queryTemplate?.widgetAttributes.tag,
         },
       };
-      this.getProfileDataInProgress = false;
       return {
         query: _query,
         journeyEvents: attribute.journeyEvents?.map((value: string) => value && JSON.parse(value)),
@@ -389,12 +403,20 @@ export default class CustomerJourneyWidget extends LitElement {
 
     const config: AxiosRequestConfig = {
       method: "GET",
+      url,
       headers: {
         Authorization: `SharedAccessSignature ${this.tapeReadToken}`,
       },
     };
 
-    return axios(url, config)
+    const axiosInstance = axios.create(config);
+
+    if (!this.hasHistoricalEventsAPIBeenCalled) {
+      axiosRetry(axiosInstance, this.basicRetryConfig);
+    }
+
+    return axiosInstance
+      .get(url)
       .then((response: any) => {
         // TODO: any type to be changed to Timeline.CustomerEvent
         const myEvents = response?.data?.events?.map((event: any) => {
@@ -413,6 +435,9 @@ export default class CustomerJourneyWidget extends LitElement {
       })
       .finally(() => {
         this.getEventsInProgress = false;
+        if (!this.hasHistoricalEventsAPIBeenCalled) {
+          this.hasHistoricalEventsAPIBeenCalled = true;
+        }
       });
   }
 
@@ -562,13 +587,21 @@ export default class CustomerJourneyWidget extends LitElement {
 
     const config: AxiosRequestConfig = {
       method: "GET",
+      url,
       headers: {
         Authorization: `SharedAccessSignature ${this.identityReadToken}`,
         "Content-Type": "application/json",
       },
     };
 
-    return await axios(url, config)
+    const axiosInstance = axios.create(config);
+
+    if (!this.hasIdentityAPIBeenCalled) {
+      axiosRetry(axiosInstance, this.basicRetryConfig);
+    }
+
+    return axiosInstance
+      .get(url)
       .then(response => {
         const aliases = response?.data?.data?.length ? response?.data?.data[0] : undefined;
         this.aliasErrorMessage = "";
@@ -581,6 +614,9 @@ export default class CustomerJourneyWidget extends LitElement {
       })
       .finally(() => {
         this.aliasGetInProgress = false;
+        if (!this.hasIdentityAPIBeenCalled) {
+          this.hasIdentityAPIBeenCalled = true;
+        }
       });
   }
 
@@ -639,7 +675,7 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   deleteAliasById(identityId: string | null, alias: string) {
-    this.setAliasLoader(alias, true);
+    this.setInlineAliasLoader(alias, true);
     const url = `${this.baseUrl}/v1/journey/identities/${identityId}/aliases`;
 
     const requestData = JSON.stringify({
@@ -670,11 +706,11 @@ export default class CustomerJourneyWidget extends LitElement {
         this.aliasErrorMessage = `Failed to delete alias ${alias}.`;
       })
       .finally(() => {
-        this.setAliasLoader(alias, false);
+        this.setInlineAliasLoader(alias, false);
       });
   }
 
-  setAliasLoader(alias: string, state: boolean) {
+  setInlineAliasLoader(alias: string, state: boolean) {
     const duplicate = Object.assign({}, this.aliasDeleteInProgress);
     duplicate[alias] = state;
     this.aliasDeleteInProgress = duplicate;
