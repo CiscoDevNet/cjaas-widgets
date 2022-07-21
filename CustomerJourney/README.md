@@ -2,13 +2,17 @@
 
 This widget uses the CJaaS API to display an individual customer's journey as a history of events. It first retrieves the complete event history from the tape endpoint and compiles toggles for all event channelTypes, and then subscribes to a live stream of new events so they appear in real time. This code can be used as is, or be starter code for your own Custom Widget. It also embodies Identity Alias management and Profile view with a tempate named 'journey-default-template' 
 
+### Latest Version
+
+customer-journey-8.0.5.js
+
 ### Customer Journey Widget Properties
 
 <i>The CJaaS Profile Widget accepts specific properties to interact with the CJaaS API</i>
 
 * The following attributes and properties of JDS Widget are supported with the following version
 ```
-https://cjaas.cisco.com/widgets/customer-journey-8.0.4.js
+https://cjaas.cisco.com/widgets/customer-journey-8.0.5.js
 ```
 
 `@attr stream-read-token`: (<i>String</i>) - SAS Token for reading stream API (live stream events within Timeline)
@@ -27,15 +31,11 @@ https://cjaas.cisco.com/widgets/customer-journey-8.0.4.js
 
 `@attr customer`: (<i>String</i>) - Customer ID used for Journey lookup. (<i>PS: InteractionData always overrides customer attribute.</i>)
 
-`@attr user-search`: (<i>Boolean</i>) = false - NOT AVAIL. Will toggle view of user search input field.
-
 `@attr limit`: (<i>Number</i>) = 20 - Set the number of Timeline Events to display
 
 `@attr template-id`: (<i>String</i>) = "journey-default-template" - Sets the data template to retrieve customer Profile in desired format.
 
 `@attr logs-on`: (<i>Boolean</i>) = false - Turn on additional logging for deubgging
-
-`@attr badge-keyword`: (<i>String</i>) = "channelType" - NOT AVAIL. Lookup Keyword for icon display per event within Timeline.
 
 `@attr collapse-timeline-section`: (<i>Boolean</i>) = false - Toggle to have the Timeline Section collapsed at start up.
 

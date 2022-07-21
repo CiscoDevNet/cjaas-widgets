@@ -98,7 +98,7 @@ export class Sandbox extends LitElement {
   }
 
   mockedInteractionData = {
-    ani: "egiere@cisco.com"
+    ani: "egiere@cisco.com",
   };
 
   /**
@@ -174,7 +174,7 @@ export class Sandbox extends LitElement {
    * http://localhost:5192
    * keyVault: "https://proddeploytest-kv.vault.azure.net/"
    */
-   renderLocalProdTestVersion() {
+  renderLocalProdTestVersion() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
     return html`
       <div class="toggle">
@@ -269,7 +269,7 @@ export class Sandbox extends LitElement {
   /**
    * Old Prod Version used within QA agent desktop environment
    * */
-   renderOldProductionVersion() {
+  renderOldProductionVersion() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
 
     return html`
@@ -325,15 +325,15 @@ export class Sandbox extends LitElement {
           <customer-journey-widget
             limit="20"
             user-search
-            customer="foobar"
+            customer="ross@gmail.com"
             logs-on
             base-url="https://jds-us1.cjaas.cisco.com"
-            .tapeReadToken=${TAPE_READ_TOKEN}
-            .streamReadToken=${STREAM_READ_TOKEN}
-            .profileReadToken=${PROFILE_READ_TOKEN}
-            .profileWriteToken=${PROFILE_WRITE_TOKEN}
-            .identityReadToken=${IDENTITY_READ_TOKEN}
-            .identityWriteToken=${IDENTITY_WRITE_TOKEN}
+            tape-read-token=${TAPE_READ_TOKEN}
+            stream-read-token=${STREAM_READ_TOKEN}
+            profile-read-token=${PROFILE_READ_TOKEN}
+            profile-write-token=${PROFILE_WRITE_TOKEN}
+            identity-read-token=${IDENTITY_READ_TOKEN}
+            identity-write-token=${IDENTITY_WRITE_TOKEN}
             live-stream
             time-frame="All"
           ></customer-journey-widget>
@@ -353,7 +353,7 @@ export class Sandbox extends LitElement {
    * webexcontactcenter
    */
   //  base-url="https://jds-prod-pf-westus2-apim.azure-api.net"
-   renderOfficialDevVersion() {
+  renderOfficialDevVersion() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
 
     return html`
@@ -367,16 +367,16 @@ export class Sandbox extends LitElement {
           <customer-journey-widget
             limit="20"
             user-search
-            customer="+1-5109024292"
+            customer="egiere@cisco.com"
             logs-on
             .eventIconTemplate=${iconData}
             base-url="https://uswest-nonprod.cjaas.cisco.com"
-            .tapeReadToken=${TAPE_READ_TOKEN}
-            .streamReadToken=${STREAM_READ_TOKEN}
-            .profileReadToken=${PROFILE_READ_TOKEN}
-            .profileWriteToken=${PROFILE_WRITE_TOKEN}
-            .identityReadToken=${IDENTITY_READ_TOKEN}
-            .identityWriteToken=${IDENTITY_WRITE_TOKEN}
+            tape-read-token=${TAPE_READ_TOKEN}
+            stream-read-token=${STREAM_READ_TOKEN}
+            profile-read-token=${PROFILE_READ_TOKEN}
+            profile-write-token=${PROFILE_WRITE_TOKEN}
+            identity-read-token=${IDENTITY_READ_TOKEN}
+            identity-write-token=${IDENTITY_WRITE_TOKEN}
             live-stream
             time-frame="All"
           ></customer-journey-widget>
