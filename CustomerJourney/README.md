@@ -27,15 +27,11 @@ https://cjaas.cisco.com/widgets/customer-journey-8.0.4.js
 
 `@attr customer`: (<i>String</i>) - Customer ID used for Journey lookup. (<i>PS: InteractionData always overrides customer attribute.</i>)
 
-`@attr user-search`: (<i>Boolean</i>) = false - NOT AVAIL. Will toggle view of user search input field.
-
 `@attr limit`: (<i>Number</i>) = 20 - Set the number of Timeline Events to display
 
 `@attr template-id`: (<i>String</i>) = "journey-default-template" - Sets the data template to retrieve customer Profile in desired format.
 
 `@attr logs-on`: (<i>Boolean</i>) = false - Turn on additional logging for deubgging
-
-`@attr badge-keyword`: (<i>String</i>) = "channelType" - NOT AVAIL. Lookup Keyword for icon display per event within Timeline.
 
 `@attr collapse-timeline-section`: (<i>Boolean</i>) = false - Toggle to have the Timeline Section collapsed at start up.
 
