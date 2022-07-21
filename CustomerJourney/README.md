@@ -1,51 +1,260 @@
 # JDS Customer Journey Widget
 
-This widget uses the CJaaS API to display an individual customer's journey as a history of events. It first retrieves the complete event history from the tape endpoint and compiles toggles for all event types, and then subscribes to a live stream of new events so they appear in real time. This code can be used as is, or be starter code for your own Custom Widget. It also embodies Identity Alias management and Profile view with a tempate named 'journey-default-template' 
+This widget uses the CJaaS API to display an individual customer's journey as a history of events. It first retrieves the complete event history from the tape endpoint and compiles toggles for all event channelTypes, and then subscribes to a live stream of new events so they appear in real time. This code can be used as is, or be starter code for your own Custom Widget. It also embodies Identity Alias management and Profile view with a tempate named 'journey-default-template' 
 
-## Customer Journey Widget Properties
+### Customer Journey Widget Properties
 
-The CJaaS Profile Widget accepts specific properties to interact with the CJaaS API
-<!-- THIS version adheres to the endpoints at `https://cjaas-devus2.azurewebsites.net` -->
+<i>The CJaaS Profile Widget accepts specific properties to interact with the CJaaS API</i>
 
-`@attr stream-read-token`: SAS Token for reading stream API
-
-`@attr tape-read-token`: SAS Token for reading tape API
-
-`@attr profile-read-token`: SAS Token for read operations on Profile endpoint
-
-`@attr profile-write-token`: SAS Token for POST operations on Profile endpoint
-
-`@attr identity-read-token`: SAS Token for read operations on Identity endpoint
-
-`@attr identity-write-token`: SAS Token for POST operations on Identity endpoint
-
-`@attr base-url` : Path to the proper Customer Journey API deployment
-
-`@attr customer` : Customer ID used for Journey lookup
-
-`@attr user-search` : Toggles display of field to find new Journey profiles
-
-`@attr limit` : Set the number of Timeline Events to display
-
-`@attr template-id` : Property to set the data template to retrieve customer Profile in desired format
-
-`@prop eventIconTemplate` : Property to pass in JSON template to set color and icon settings
-
-The following example of use with the production endpoint
-```html
- <customer-journey-widget
-   limit="20"
-   customer="foobar"
-   .eventIconTemplate=${iconData}
-   base-url="https://jds-prod-pf-westus-apim.azure-api.net"
-   .tapeReadToken=${TAPE_READ_TOKEN}
-   .streamReadToken=${STREAM_READ_TOKEN}
-   .profileReadToken=${PROFILE_READ_TOKEN}
-   .profileWriteToken=${PROFILE_WRITE_TOKEN}
-   .identityReadToken=${IDENTITY_READ_TOKEN}
-   .identityWriteToken=${IDENTITY_WRITE_TOKEN}
- ></customer-journey-widget>
+* The following attributes and properties of JDS Widget are supported with the following version
 ```
+https://cjaas.cisco.com/widgets/customer-journey-8.0.4.js
+```
+
+`@attr stream-read-token`: (<i>String</i>) - SAS Token for reading stream API (live stream events within Timeline)
+
+`@attr tape-read-token`: (<i>String</i>) - SAS Token for reading tape API (historical events within Timeline)
+
+`@attr profile-read-token`: (<i>String</i>) - SAS Token for read operations on Profile endpoint
+
+`@attr profile-write-token`: (<i>String</i>) - SAS Token for POST operations on Profile endpoint
+
+`@attr identity-read-token`: (<i>String</i>) - SAS Token for read operations on Identity endpoint (Alias Section)
+
+`@attr identity-write-token`: (<i>String</i>) - SAS Token for POST operations on Identity endpoint (Alias Section)
+
+`@attr base-url`: (<i>String</i>) - Path to the proper Customer Journey API deployment
+
+`@attr customer`: (<i>String</i>) - Customer ID used for Journey lookup. (<i>PS: InteractionData always overrides customer attribute.</i>)
+
+`@attr user-search`: (<i>Boolean</i>) = false - NOT AVAIL. Will toggle view of user search input field.
+
+`@attr limit`: (<i>Number</i>) = 20 - Set the number of Timeline Events to display
+
+`@attr template-id`: (<i>String</i>) = "journey-default-template" - Sets the data template to retrieve customer Profile in desired format.
+
+`@attr logs-on`: (<i>Boolean</i>) = false - Turn on additional logging for deubgging
+
+`@attr badge-keyword`: (<i>String</i>) = "channelType" - NOT AVAIL. Lookup Keyword for icon display per event within Timeline.
+
+`@attr collapse-timeline-section`: (<i>Boolean</i>) = false - Toggle to have the Timeline Section collapsed at start up.
+
+`@attr collapse-profile-section`: (<i>Boolean</i>) = false - Toggle to have the Profile Section collapsed at start up.
+
+`@attr collapse-alias-section`: (<i>Boolean</i>) = false - Toggle to have the Alias Section collapsed at start up.
+
+`@attr time-frame`: (<i>"All" | "24-Hours" | "7-Days" | "30-Days"</i>) = "All" - Set the time frame the timeline section has selected at start up.
+
+`@attr live-stream`: (<i>Boolean</i>) = false - Toggle to set whether or not the timeline section is loading events in real time.
+
+`@attr icon-data-path`: (<i>String</i>) - URL path of JSON template to set color and icon settings.
+
+`@prop interactionData`: (<i>object</i>) - Agent Desktop Interaction Data. Needs to have an `ani` property within object.
+
+`@prop eventIconTemplate`: (<i>json object</i>) = iconData (built-in) - Property to pass in JSON template to set color and icon settings.
+
+## Examples 
+### The following example is showcasing how to embed this widget within lit-element code
+```html   
+    <customer-journey-widget
+      customer="Ben Smith"
+      base-url="https://jds-us1.cjaas.cisco.com"
+      tape-read-token=${TAPE_READ_TOKEN}
+      stream-read-token=${STREAM_READ_TOKEN}
+      profile-read-token=${PROFILE_READ_TOKEN}
+      profile-write-token=${PROFILE_WRITE_TOKEN}
+      identity-read-token=${IDENTITY_READ_TOKEN}
+      identity-write-token=${IDENTITY_WRITE_TOKEN}
+      .eventIconTemplate=${iconData}
+      limit=${20}
+      logs-on
+      live-stream
+      time-frame="30-Days"
+      collapse-profile-section
+      collapse-alias-section
+      collapse-timeline-section
+      icon-data-path="https://cjaas.cisco.com/widgets/iconMaps/defaultIcons.json"
+    ></customer-journey-widget>
+```
+
+### An example of how to upload JDS widget into DesktopLayout.json for Agent Desktop
+* In order to set the customer attribute, you must remove the interactionData property. The second example below demonstrates how to pass in customer.
+* All boolean attributes default as false. If you want them to remain false, just don't pass it in at all.
+
+```json
+{
+ "comp": "md-tab-panel",
+ "attributes": {
+  "slot": "panel",
+  "class": "widget-pane"
+ },
+ "children": [
+  {
+    "comp": "customer-journey-widget",
+    "script": "https://cjaas.cisco.com/widgets/customer-journey-8.0.4.js",
+    "attributes": {	
+       "customer": "Ben Smith",
+       "base-url": "https://uswest-nonprod.cjaas.cisco.com",
+       "logs-on": "true",
+       "tape-read-token": "<your-tape-read-token>",
+       "profile-read-token": "<your-profile-read-token>",
+       "profile-write-token": "<your-profile-write-token>",
+       "stream-read-token": "<your-stream-read-token>",
+       "identity-read-token": "<your-identity-read-token>",
+       "identity-write-token": "<your-identity-write-token>",
+       "live-stream": "true",
+       "limit": "5",
+       "time-frame": "30-Days",
+       "collapse-profile-section": "true",
+       "collapse-alias-section": "true",
+       "collapse-timeline-section": "true",
+       "icon-data-path": "https://cjaas.cisco.com/widgets/iconMaps/defaultIcons.json"
+    },
+    "properties": {
+       "interactionData": "$STORE.agentContact.taskSelected"
+    },
+    "wrapper": {
+        "title": "Customer Journey Widget",
+        "maximizeAreaName": "app-maximize-area"
+    }
+  }
+ ]
+},
+```
+
+### Example setting customer attirbute
+```json
+{
+ "comp": "md-tab-panel",
+ "attributes": {
+  "slot": "panel",
+  "class": "widget-pane"
+ },
+ "children": [
+  {
+    "comp": "customer-journey-widget",
+    "script": "https://cjaas.cisco.com/widgets/customer-journey-8.0.4.js",
+    "attributes": {	
+       "customer": "Ben Smith",
+       "base-url": "https://uswest-nonprod.cjaas.cisco.com",
+       "tape-read-token": "<your-tape-read-token>",
+       "profile-read-token": "<your-profile-read-token>",
+       "profile-write-token": "<your-profile-write-token>",
+       "stream-read-token": "<your-stream-read-token>",
+       "identity-read-token": "<your-identity-read-token>",
+       "identity-write-token": "<your-identity-write-token>",
+    },
+    "wrapper": {
+        "title": "Customer Journey Widget",
+        "maximizeAreaName": "app-maximize-area"
+    }
+  }
+ ]
+},
+```
+
+### Default Icon Mapping JSON File (Begin with this file, to modify for icon-data-path url file)
+[/src/assets/icons.json](https://github.com/CiscoDevNet/cjaas-widgets/blob/592aab211e332d8af13d4b0c830443e38a50aa09/CustomerJourney/src/assets/icons.json)
+```
+{
+  "SMS": {
+    "name": "icon-sms_16",
+    "color": "mint"
+  },
+  "Telephony": {
+    "name": "icon-handset-active_16",
+    "color": "green"
+  },
+  "Voice": {
+    "name": "icon-handset-active_16",
+    "color": "green"
+  },
+  "Call": {
+    "name": "icon-handset-active_16",
+    "color": "green"
+  },
+  "Chat": {
+    "name": "icon-chat-active_16",
+    "color": "cobalt"
+  },
+  "Email": {
+    "name": "icon-email-active_16",
+    "color": "violet"
+  },
+  "wrapup": {
+    "name": "icon-close-space_18",
+    "color": "red"
+  },
+  "agent": {
+    "name": "icon-headset_16",
+    "color": "pink"
+  },
+  "Messenger": {
+    "name": "icon-messenger_16",
+    "color": "cobalt"
+  },
+  "social": {
+    "name": "icon-contact-group_16",
+    "color": "mint"
+  },
+  "task": {
+    "name": "icon-tasks_16",
+    "color": "yellow"
+  },
+  "Login": {
+    "name": "icon-sign-in_24",
+    "color": "gold"
+  },
+  "Page Visit": {
+    "name": "icon-mouse-cursor_16",
+    "color": "grey"
+  },
+  "Entered ZipCode": {
+    "name": "icon-location_16",
+    "color": "cyan"
+  },
+  "Identify": {
+    "name": "icon-user_16",
+    "color": "blue"
+  },
+  "Quote": {
+    "name": "icon-file-spreadsheet_16",
+    "color": "cobalt",
+    "showcase": "firstName"
+  },
+  "NPS.*": {
+    "name": "icon-analysis_16",
+    "color": "red"
+  },
+  "Initiated Walk In": {
+    "name": "icon-audio-video_16",
+    "color": "orange"
+  },
+  "IMI_Inbound": {
+    "name": "icon-call-incoming_16",
+    "color": "green"
+  },
+  "IMI_Outbound": {
+    "name": "icon-call-outgoing_16",
+    "color": "darkmint"
+  },
+  "Trigger Sent to Server": {
+    "name": "icon-event_16",
+    "color": "violet",
+    "showcase": "user"
+  },
+  "Survey Response Collected": {
+    "name": "icon-report_16",
+    "color": "gold"
+  },
+  "multi events single day": {
+    "name": "icon-calendar-day_12",
+    "color": "yellow"
+  }
+}
+
+```
+
 
 ## Dev Environment: Getting Started
 - Create a `.env` file that contains the following secrets
