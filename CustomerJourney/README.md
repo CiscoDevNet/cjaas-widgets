@@ -6,6 +6,10 @@ This widget uses the JDS (Journey Data Services) APIs to display an individual c
 
 customer-journey-8.0.5.js
 
+### Latest Version
+
+customer-journey-8.0.5.js
+
 ### Customer Journey Widget Properties
 
 <i>The JDS Customer Journey Widget accepts specific properties to interact with the JDS APIs</i>
