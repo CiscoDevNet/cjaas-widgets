@@ -8,13 +8,7 @@
 
 // This file imports all of the webcomponents from "components" folder
 
-import {
-  html,
-  internalProperty,
-  property,
-  LitElement,
-  PropertyValues,
-} from "lit-element";
+import { html, internalProperty, property, LitElement, PropertyValues } from "lit-element";
 import { nothing } from "lit-html";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import * as iconData from "./assets/icons.json";
@@ -58,21 +52,15 @@ export default class CjaasTimelineWidget extends LitElement {
    * Set primary API base url
    * @attr base-url
    */
-  @property({ type: String, attribute: "base-url" }) baseUrl:
-    | string
-    | undefined = undefined;
+  @property({ type: String, attribute: "base-url" }) baseUrl: string | undefined = undefined;
   /**
    * @attr tape-read-token
    */
-  @property({ type: String, attribute: "tape-read-token" }) tapeReadToken:
-    | string
-    | undefined;
+  @property({ type: String, attribute: "tape-read-token" }) tapeReadToken: string | undefined;
   /**
    * @attr stream-read-token
    */
-  @property({ type: String, attribute: "stream-read-token" }) streamReadToken:
-    | string
-    | undefined;
+  @property({ type: String, attribute: "stream-read-token" }) streamReadToken: string | undefined;
   /**
    * Set number of events shown by default
    * @attr limit
@@ -167,7 +155,7 @@ export default class CjaasTimelineWidget extends LitElement {
     this.events = [];
 
     this.getEventsInProgress = true;
-    console.log('getEventsInProgress', this.getEventsInProgress);
+    console.log("getEventsInProgress", this.getEventsInProgress);
 
     this.baseUrlCheck();
 
@@ -176,7 +164,7 @@ export default class CjaasTimelineWidget extends LitElement {
       headers: {
         "content-type": "application/json; charset=UTF-8",
         accept: "application/json",
-        Authorization: `SharedAccessSignature ${this.tapeReadToken}`
+        Authorization: `SharedAccessSignature ${this.tapeReadToken}`,
       },
       method: "GET",
     })
@@ -191,17 +179,17 @@ export default class CjaasTimelineWidget extends LitElement {
         });
         this.events = sortEventsbyDate(data.events);
         this.getEventsInProgress = false;
-        console.log('getEventsInProgress', this.getEventsInProgress);
+        console.log("getEventsInProgress", this.getEventsInProgress);
 
         return data.events;
       })
       .catch((err: Error) => {
         console.error(`[JDS Widget] Could not fetch Customer Journey events for customer (${customer})`, err);
         // this.errorMessage = `Failure to fetch Journey for ${this.customer}. ${err}`;
-      }).finally(() => {
+      })
+      .finally(() => {
         this.getEventsInProgress = false;
-        console.log('getEventsInProgress', this.getEventsInProgress);
-
+        console.log("getEventsInProgress", this.getEventsInProgress);
       });
   }
 
@@ -216,7 +204,7 @@ export default class CjaasTimelineWidget extends LitElement {
         headers: {
           "content-type": "application/json; charset=UTF-8",
           accept: "application/json",
-          Authorization: `SharedAccessSignature ${this.streamReadToken}`
+          Authorization: `SharedAccessSignature ${this.streamReadToken}`,
         },
       };
       const encodedCustomer = this.encodeCustomer(customer);
@@ -225,7 +213,7 @@ export default class CjaasTimelineWidget extends LitElement {
     }
 
     if (this.eventSource) {
-      this.eventSource.onopen = (event) => {
+      this.eventSource.onopen = event => {
         console.log(`[JDS Widget] The Journey stream connection has been established for customer \'${customer}\'.`);
       };
 
@@ -243,7 +231,7 @@ export default class CjaasTimelineWidget extends LitElement {
         }
       };
 
-      this.eventSource!.onerror = (error) => {
+      this.eventSource!.onerror = error => {
         console.error(`[JDS Widget] There was an EventSource error: `, error);
       }; // TODO: handle this error case
     } else {
@@ -259,10 +247,9 @@ export default class CjaasTimelineWidget extends LitElement {
     return html`
       <cjaas-timeline
         ?getEventsInProgress=${this.getEventsInProgress}
-        .timelineItems=${this.events}
+        .historicEvents=${this.events}
         .newestEvents=${this.newestEvents}
         .eventIconTemplate=${this.eventIconTemplate}
-        .badgeKeyword=${this.badgeKeyword}
         @new-event-queue-cleared=${this.updateComprehensiveEventList}
         limit=${this.limit}
         event-filters
@@ -274,7 +261,7 @@ export default class CjaasTimelineWidget extends LitElement {
   render() {
     return html`
       <!-- <div class="outer-container"> -->
-        ${this.renderTimeline()}
+      ${this.renderTimeline()}
       <!-- </div> -->
     `;
   }

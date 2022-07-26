@@ -55,20 +55,19 @@ function sortEventsbyDate(events: Timeline.CustomerEvent[]) {
   return events;
 }
 
-
 @customElementWithCheck("cjaas-profile-view-widget")
 export default class CjaasProfileWidget extends LitElement {
   /**
    * Current customer ID to show
    * @attr customer
    */
-   @property({ type: String, reflect: true }) customer: string | null = null;
+  @property({ type: String, reflect: true }) customer: string | null = null;
 
   /**
    * Property to set the data template to retrieve customer Profile in desired format
    * @attr template-id
    */
-   @property({ type: String, attribute: "template-id" }) templateId = "journey-default-template";
+  @property({ type: String, attribute: "template-id" }) templateId = "journey-default-template";
 
   /**
    * Base URL for API calls
@@ -81,7 +80,7 @@ export default class CjaasProfileWidget extends LitElement {
    * @attr tape-token
    */
   @property({ type: String, attribute: "tape-read-token" }) tapeReadToken: string | null = null;
-  
+
   /**
    * SAS Token for reading stream API
    * @attr stream-read-token
@@ -98,7 +97,7 @@ export default class CjaasProfileWidget extends LitElement {
    * @attr profile-write-token
    */
   @property({ type: String, attribute: "profile-write-token" }) profileWriteToken: string | null = null;
-  
+
   // Timeline properties
   /**
    * Set max number of timeline items to render by default
@@ -114,11 +113,11 @@ export default class CjaasProfileWidget extends LitElement {
    * Store of fetched timeline event
    * @prop events
    */
-   @internalProperty() events: Array<Timeline.CustomerEvent> = [];
-   /**
-    * @prop newestEvents
-    */
-   @internalProperty() newestEvents: Array<Timeline.CustomerEvent> = [];
+  @internalProperty() events: Array<Timeline.CustomerEvent> = [];
+  /**
+   * @prop newestEvents
+   */
+  @internalProperty() newestEvents: Array<Timeline.CustomerEvent> = [];
   /**
    * Store of Stream event source
    * @prop eventSource
@@ -182,8 +181,12 @@ export default class CjaasProfileWidget extends LitElement {
   async update(changedProperties: PropertyValues) {
     super.update(changedProperties);
 
-    if ((changedProperties.has("customer") || changedProperties.has("templateId")) && this.customer && this.templateId) {
-        this.getProfileFromTemplateId(this.customer, this.templateId);
+    if (
+      (changedProperties.has("customer") || changedProperties.has("templateId")) &&
+      this.customer &&
+      this.templateId
+    ) {
+      this.getProfileFromTemplateId(this.customer, this.templateId);
     }
 
     if (changedProperties.has("customer")) {
@@ -221,7 +224,7 @@ export default class CjaasProfileWidget extends LitElement {
     this.profileData = undefined;
     this.getProfileDataInProgress = true;
 
-    const url = `${this.baseUrl}/v1/journey/views?templateId=${templateId}&personId=${this.encodeCustomer(customer)}`
+    const url = `${this.baseUrl}/v1/journey/views?templateId=${templateId}&personId=${this.encodeCustomer(customer)}`;
 
     const options: RequestInit = {
       method: "GET",
@@ -275,7 +278,7 @@ export default class CjaasProfileWidget extends LitElement {
       headers: {
         "content-type": "application/json; charset=UTF-8",
         accept: "application/json",
-        Authorization: `SharedAccessSignature ${this.tapeReadToken}`
+        Authorization: `SharedAccessSignature ${this.tapeReadToken}`,
       },
       method: "GET",
     })
@@ -294,7 +297,8 @@ export default class CjaasProfileWidget extends LitElement {
       .catch((err: Error) => {
         console.error(`[JDS Widget] Could not fetch Customer Journey events for customer (${customer})`, err);
         // this.errorMessage = `Failure to fetch Journey for ${this.customer}. ${err}`;
-      }).finally(() => {
+      })
+      .finally(() => {
         this.getEventsInProgress = false;
       });
   }
@@ -310,7 +314,7 @@ export default class CjaasProfileWidget extends LitElement {
         headers: {
           "content-type": "application/json; charset=UTF-8",
           accept: "application/json",
-          Authorization: `SharedAccessSignature ${this.streamReadToken}`
+          Authorization: `SharedAccessSignature ${this.streamReadToken}`,
         },
       };
       const encodedCustomer = this.encodeCustomer(customer);
@@ -319,7 +323,7 @@ export default class CjaasProfileWidget extends LitElement {
     }
 
     if (this.eventSource) {
-      this.eventSource.onopen = (event) => {
+      this.eventSource.onopen = event => {
         console.log(`[JDS Widget] The Journey stream connection has been established for customer \'${customer}\'.`);
       };
 
@@ -337,7 +341,7 @@ export default class CjaasProfileWidget extends LitElement {
         }
       };
 
-      this.eventSource!.onerror = (error) => {
+      this.eventSource!.onerror = error => {
         console.error(`[JDS Widget] There was an EventSource error: `, error);
       }; // TODO: handle this error case
     } else {
@@ -528,7 +532,7 @@ export default class CjaasProfileWidget extends LitElement {
     if (theTimelineItems?.length) {
       return html`
         <cjaas-timeline
-          .timelineItems=${this.events}
+          .historicEvents=${this.events}
           .newestEvents=${this.newestEvents}
           @new-event-queue-cleared=${this.updateComprehensiveEventList}
           limit=${this.limit}
@@ -632,7 +636,7 @@ export default class CjaasProfileWidget extends LitElement {
   render() {
     return html`
       <!-- <div class="outer-container" part="profile-widget-outer"> -->
-        ${this.getFormattedProfile()}
+      ${this.getFormattedProfile()}
       <!-- </div> -->
     `;
   }
