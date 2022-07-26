@@ -29,7 +29,9 @@ import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
 import styles from "./sandbox.scss";
 import * as iconData from "@/assets/icons.json";
+import * as customIconData from "@/assets/custom-icons.json";
 import "..";
+import { TimeFrame } from "..";
 
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
@@ -96,7 +98,7 @@ export class Sandbox extends LitElement {
   }
 
   mockedInteractionData = {
-    ani: "egiere@cisco.com"
+    ani: "egiere@cisco.com",
   };
 
   /**
@@ -154,6 +156,7 @@ export class Sandbox extends LitElement {
               user-search
               .eventIconTemplate=${iconData}
               base-url="https://cjaas-proddeploytest-api.azurewebsites.net"
+              template-id="journey-default-template"
               .tapeReadToken=${TAPE_READ_TOKEN}
               .streamReadToken=${STREAM_READ_TOKEN}
               .profileReadToken=${PROFILE_READ_TOKEN}
@@ -171,7 +174,7 @@ export class Sandbox extends LitElement {
    * http://localhost:5192
    * keyVault: "https://proddeploytest-kv.vault.azure.net/"
    */
-   renderLocalProdTestVersion() {
+  renderLocalProdTestVersion() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
     return html`
       <div class="toggle">
@@ -266,7 +269,7 @@ export class Sandbox extends LitElement {
   /**
    * Old Prod Version used within QA agent desktop environment
    * */
-   renderOldProductionVersion() {
+  renderOldProductionVersion() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
 
     return html`
@@ -303,7 +306,7 @@ export class Sandbox extends LitElement {
    * Data sink    https://jds-prod-pf-westus-apim.azure-api.net/events
    * Data stream  https://jds-prod-pf-westus-apim.azure-api.net/streams
    * KeyVault     https://jds-prod-pf-westus-kv.vault.azure.net/
-   * 
+   *
    * https://jds-prod-pf-westus-apim.azure-api.net/
    *
    * OrgName      testorg
@@ -326,21 +329,25 @@ export class Sandbox extends LitElement {
           <customer-journey-widget
             limit="20"
             user-search
-            customer="foobar"
-            .eventIconTemplate=${iconData}
+            customer="ross@gmail.com"
+            logs-on
             base-url="https://jds-us1.cjaas.cisco.com"
-            .tapeReadToken=${TAPE_READ_TOKEN}
-            .streamReadToken=${STREAM_READ_TOKEN}
-            .profileReadToken=${PROFILE_READ_TOKEN}
-            .profileWriteToken=${PROFILE_WRITE_TOKEN}
-            .identityReadToken=${IDENTITY_READ_TOKEN}
-            .identityWriteToken=${IDENTITY_WRITE_TOKEN}
+            tape-read-token=${TAPE_READ_TOKEN}
+            stream-read-token=${STREAM_READ_TOKEN}
+            profile-read-token=${PROFILE_READ_TOKEN}
+            profile-write-token=${PROFILE_WRITE_TOKEN}
+            identity-read-token=${IDENTITY_READ_TOKEN}
+            identity-write-token=${IDENTITY_WRITE_TOKEN}
+            live-stream
+            time-frame="All"
           ></customer-journey-widget>
         </div>
       </div>
     </md-theme>
   `;
   }
+
+  // icon-data-path="https://cjaas.cisco.com/widgets/iconMaps/custom-icons.json"
 
   /**
    * Official Dev Environment
@@ -349,7 +356,8 @@ export class Sandbox extends LitElement {
    * sandbox
    * webexcontactcenter
    */
-   renderOfficialDevVersion() {
+  //  base-url="https://jds-prod-pf-westus2-apim.azure-api.net"
+  renderOfficialDevVersion() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
 
     return html`
@@ -363,21 +371,29 @@ export class Sandbox extends LitElement {
           <customer-journey-widget
             limit="20"
             user-search
-            customer="foobar"
+            customer="egiere@cisco.com"
+            logs-on
             .eventIconTemplate=${iconData}
-            base-url="https://jds-prod-pf-westus2-apim.azure-api.net"
-            .tapeReadToken=${TAPE_READ_TOKEN}
-            .streamReadToken=${STREAM_READ_TOKEN}
-            .profileReadToken=${PROFILE_READ_TOKEN}
-            .profileWriteToken=${PROFILE_WRITE_TOKEN}
-            .identityReadToken=${IDENTITY_READ_TOKEN}
-            .identityWriteToken=${IDENTITY_WRITE_TOKEN}
+            base-url="https://uswest-nonprod.cjaas.cisco.com"
+            tape-read-token=${TAPE_READ_TOKEN}
+            stream-read-token=${STREAM_READ_TOKEN}
+            profile-read-token=${PROFILE_READ_TOKEN}
+            profile-write-token=${PROFILE_WRITE_TOKEN}
+            identity-read-token=${IDENTITY_READ_TOKEN}
+            identity-write-token=${IDENTITY_WRITE_TOKEN}
+            live-stream
+            time-frame="All"
           ></customer-journey-widget>
         </div>
       </div>
     </md-theme>
   `;
   }
+
+  // collapse-alias-section
+  // collapse-profile-section
+  // collapse-timeline-section
+  // time-frame=${TimeFrame["24-Hours"]}
 
   render() {
     /** You need to make sure you have the sasTokens appropriately defined in your .env file that are associated with dev or prod

@@ -246,13 +246,12 @@ export default class CjaasTimelineWidget extends LitElement {
   renderTimeline() {
     return html`
       <cjaas-timeline
-        ?getEventsInProgress=${this.getEventsInProgress}
         .historicEvents=${this.events}
         .newestEvents=${this.newestEvents}
         .eventIconTemplate=${this.eventIconTemplate}
         @new-event-queue-cleared=${this.updateComprehensiveEventList}
         limit=${this.limit}
-        event-filters
+        ?is-event-filter-visible=${this.showFilters}
         ?live-stream=${this.liveStream}
       ></cjaas-timeline>
     `;

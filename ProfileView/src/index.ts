@@ -536,7 +536,7 @@ export default class CjaasProfileWidget extends LitElement {
           .newestEvents=${this.newestEvents}
           @new-event-queue-cleared=${this.updateComprehensiveEventList}
           limit=${this.limit}
-          event-filters
+          is-event-filter-visible
           ?live-stream=${this.liveStream}
         ></cjaas-timeline>
       `;
