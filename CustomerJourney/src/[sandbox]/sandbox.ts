@@ -329,7 +329,7 @@ export class Sandbox extends LitElement {
           <customer-journey-widget
             limit="20"
             user-search
-            customer="ross@gmail.com"
+            customer="egiere@gmail.com"
             logs-on
             base-url="https://jds-us1.cjaas.cisco.com"
             tape-read-token=${TAPE_READ_TOKEN}

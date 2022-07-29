@@ -114,6 +114,8 @@ export default class CjaasProfileWidget extends LitElement {
    * @prop events
    */
   @internalProperty() events: Array<Timeline.CustomerEvent> = [];
+  @property() externalEvents: Array<Timeline.CustomerEvent> = [];
+
   /**
    * @prop newestEvents
    */
@@ -161,10 +163,10 @@ export default class CjaasProfileWidget extends LitElement {
   //   this.subscribeToStream();
   // }
 
-  async connectedCallback() {
-    super.connectedCallback();
-    // await this.lifecycleTasks();
-  }
+  // async connectedCallback() {
+  //   super.connectedCallback();
+  //   // await this.lifecycleTasks();
+  // }
 
   // updated(changedProperties: PropertyValues) {
   //   super.updated(changedProperties);
@@ -178,8 +180,8 @@ export default class CjaasProfileWidget extends LitElement {
   //   }
   // }
 
-  async update(changedProperties: PropertyValues) {
-    super.update(changedProperties);
+  updated(changedProperties: PropertyValues) {
+    super.updated(changedProperties);
 
     if (
       (changedProperties.has("customer") || changedProperties.has("templateId")) &&
@@ -190,11 +192,13 @@ export default class CjaasProfileWidget extends LitElement {
     }
 
     if (changedProperties.has("customer")) {
-      this.newestEvents = [];
-      this.getExistingEvents(this.customer || null);
-      this.subscribeToStream(this.customer || null);
-      // this.identityData = await this.getAliasesByAlias(this.customer || null);
-      // this.identityID = this.identityData?.id || null;
+      if (this.externalEvents.length) {
+        this.events = this.externalEvents;
+      } else {
+        this.newestEvents = [];
+        this.getExistingEvents(this.customer || null);
+        this.subscribeToStream(this.customer || null);
+      }
     }
   }
 

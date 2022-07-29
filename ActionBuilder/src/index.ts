@@ -35,7 +35,7 @@ export default class CjaasActionBuilder extends LitElement {
   actionWriteSasToken: SASTOKEN = null;
   @property({ attribute: "view-sas-token" }) viewSasToken: SASTOKEN = null;
   @property() bearerToken: any;
-  @property() organization: any;
+  @property() organizationId: any;
   @property() namespace: any;
 
   @property({ type: String, attribute: "base-url" }) baseUrl: string | undefined = undefined;
@@ -108,7 +108,7 @@ export default class CjaasActionBuilder extends LitElement {
     const bearerToken = this.getBearerAuthorization();
 
     if (bearerToken) {
-      url += `?organization=${this.organization}&namespace=${this.namespace}`;
+      url += `?organization=${this.organizationId}&namespace=${this.namespace}`;
     }
 
     this.actionAPIInProgress = true;
@@ -151,7 +151,7 @@ export default class CjaasActionBuilder extends LitElement {
     const bearerToken = this.getBearerAuthorization();
 
     if (bearerToken) {
-      url += `&organization=${this.organization}&namespace=${this.namespace}`;
+      url += `&organizationId=${this.organizationId}&namespaceName=${this.namespace}`;
     }
 
     return fetch(url, {
@@ -673,7 +673,7 @@ export default class CjaasActionBuilder extends LitElement {
     const bearerToken = this.getBearerAuthorization();
 
     if (bearerToken) {
-      url += `?organization=${this.organization}&namespace=${this.namespace}`;
+      url += `?organization=${this.organizationId}&namespace=${this.namespace}`;
     }
 
     fetch(url, {
