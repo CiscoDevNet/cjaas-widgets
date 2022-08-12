@@ -1,6 +1,6 @@
 {
-  "name": "@cjaas/cjaas-action-builder",
-  "version": "2.0.0",
+  "name": "@cjaas/cjaas-identity-alias",
+  "version": "3.0.0",
   "author": {
     "name": "Kevin Hyde",
     "email": "kehyde@cisco.com"
