@@ -108,7 +108,7 @@ export default class CjaasActionBuilder extends LitElement {
     const bearerToken = this.getBearerAuthorization();
 
     if (bearerToken) {
-      url += `?organization=${this.organizationId}&namespace=${this.namespace}`;
+      url += `?organizationId=${this.organizationId}&namespaceName=${this.namespace}`;
     }
 
     this.actionAPIInProgress = true;
@@ -172,14 +172,16 @@ export default class CjaasActionBuilder extends LitElement {
   // templateid is formed from namespace-organization-actionName
   getNameInputTemplate() {
     return html`
-      <md-input
-        .value=${this.actionConfig?.name || ""}
-        id="action-name"
-        placeholder="Action Name"
-        .required=${true}
-        .helpText=${this.actionConfig?.name ? "" : "Action Name cannot be changed later!"}
-      >
-      </md-input>
+      <div class="name-input-row">
+        <p class="name-property-name">Action Name</p>
+        <md-input
+          .value=${this.actionConfig?.name || ""}
+          id="action-name"
+          placeholder="Enter a name for this action..."
+          .required=${true}
+        >
+        </md-input>
+      </div>
     `;
   }
 
@@ -190,7 +192,7 @@ export default class CjaasActionBuilder extends LitElement {
     }
 
     return html`
-      <div class="header-row"><md-icon name="icon-location_32" size="24"></md-icon><span>Journey</span></div>
+      <!-- <div class="header-row"><md-icon name="icon-location_32" size="24"></md-icon><span>Journey</span></div> -->
       ${this.renderRootConditionBlock(relation)}
       <div class="targets">
         ${this.getTargets()}
@@ -673,7 +675,7 @@ export default class CjaasActionBuilder extends LitElement {
     const bearerToken = this.getBearerAuthorization();
 
     if (bearerToken) {
-      url += `?organization=${this.organizationId}&namespace=${this.namespace}`;
+      url += `?organizationId=${this.organizationId}&namespaceName=${this.namespace}`;
     }
 
     fetch(url, {
