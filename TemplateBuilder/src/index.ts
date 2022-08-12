@@ -42,26 +42,26 @@ const defaultAttribute: Attribute = {
 
 @customElementWithCheck("cjaas-template-builder")
 export default class CjaasTemplateBuilder extends LitElement {
-  @property() mockAction: any;
+  @property() mockedHistoricalEvents: any;
   @property() mockTemplate: any;
   @property({ attribute: "template-id" }) templateId: string | undefined;
-  @property({ attribute: "profile-read-sas-token" })
-  profileReadSasToken: SASTOKEN = null;
-  @property({ attribute: "profile-write-sas-token" })
-  profileWriteSasToken: SASTOKEN = null;
-  @property({ attribute: "tape-read-sas-token" })
-  tapeReadSasToken: SASTOKEN = null;
+  @property({ attribute: "profile-read-token" })
+  profileReadToken: SASTOKEN = null;
+  @property({ attribute: "profile-write-token" })
+  profileWriteToken: SASTOKEN = null;
+  @property({ attribute: "tape-read-token" })
+  tapeReadToken: SASTOKEN = null;
 
   @property() bearerToken: any = null;
-  @property() organization: any = null;
+  @property() organizationId: any = null;
   @property() namespace: any = null;
 
   @property({ type: String, attribute: "base-url" }) baseURL: string | undefined = undefined;
   @property() saveCallBack: any = null;
   @internalProperty() readOnlyMode = false;
-  @internalProperty() templateAPIInProgress = false;
+  @internalProperty() getTemplateAPIInProgress = false;
   @internalProperty() templateSaveAPIInProgress = false;
-  @internalProperty() streamAPIInProgress = false;
+  @internalProperty() getEventsInProgress = false;
   @internalProperty() template: any = null;
   @internalProperty() tapeEvents: Array<JourneyEvent> | null = null;
   @internalProperty() templateAttributes: Array<Attribute> = [{ ...defaultAttribute }];
@@ -79,7 +79,7 @@ export default class CjaasTemplateBuilder extends LitElement {
 
   updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
-    if (changedProperties.has("bearerToken") || changedProperties.has("profileReadSasToken")) {
+    if (changedProperties.has("bearerToken") || changedProperties.has("profileReadToken")) {
       this.getTemplateNames().then((names: string[]) => {
         this.existingTemplateNames = names.filter(x => x != this.templateId);
       });
@@ -87,15 +87,15 @@ export default class CjaasTemplateBuilder extends LitElement {
 
     if (
       (changedProperties.has("bearerToken") ||
-        changedProperties.has("profileReadSasToken") ||
+        changedProperties.has("profileReadToken") ||
         changedProperties.has("templateId")) &&
       this.templateId
     ) {
-      this.templateAPIInProgress = true;
+      this.getTemplateAPIInProgress = true;
       this.readOnlyMode = true;
       this.getTemplate()?.then(
         (template: any) => {
-          this.templateAPIInProgress = false;
+          this.getTemplateAPIInProgress = false;
           this.template = template;
           this.templateAttributes = template.attributes;
         },
@@ -105,12 +105,12 @@ export default class CjaasTemplateBuilder extends LitElement {
       );
     }
 
-    if (changedProperties.has("bearerToken") || changedProperties.has("tapeReadSasToken")) {
-      this.getTapeEvents().then((events: Array<JourneyEvent>) => {
-        this.tapeEvents = events;
-        this.requestUpdate();
-      });
-    }
+    // if (changedProperties.has("bearerToken") || changedProperties.has("tapeReadToken")) {
+    //   this.getTapeEvents().then((events: Array<JourneyEvent>) => {
+    //     this.tapeEvents = events;
+    //     this.requestUpdate();
+    //   });
+    // }
   }
 
   static get styles() {
@@ -134,35 +134,51 @@ export default class CjaasTemplateBuilder extends LitElement {
     let script = document.createElement("script");
     script.id = "profile-component";
     // script.onload = (this as any).onLoad.bind(this);
-    script.src = "https://cjaas.cisco.com/web-components/v9/profile-5.1.0.js";
+    // script.src = "https://cjaas.cisco.com/web-components/v9/profile-5.1.0.js";
+    script.src = "https://cjaas.cisco.com/widgets/profile-view-8.0.0.js";
     return script;
   }
 
-  // fetch action from server or use mockAction
-  getTapeEvents(): Promise<Array<JourneyEvent>> {
-    let url = `${this.baseURL}/v1/journey/streams/historic`;
-
-    if (this.mockAction) {
-      return new Promise((resolve, reject) => {
-        resolve(this.mockAction);
-      });
-    }
-    let bearerToken = this.getBearerAuthorization();
-
-    if (bearerToken) {
-      url += `?organization=${this.organization}&namespace=${this.namespace}`;
-    }
-
-    return fetch(url, {
-      headers: {
-        Authorization: bearerToken || `SharedAccessSignature ${this.tapeReadSasToken}`,
-        "content-type": "application/json; charset=UTF-8",
-      },
-      method: "GET",
-    })
-      .then(response => response.json())
-      .then(data => data.events);
+  encodeCustomer(customer: string | null): string | null {
+    const encodedCustomer = customer ? btoa(customer) : null;
+    return encodedCustomer;
   }
+
+  // fetch action from server or use mockAction
+  // getTapeEvents(): Promise<Array<JourneyEvent>> {
+  //   if (this.mockedHistoricalEvents) {
+  //     return new Promise(resolve => {
+  //       resolve(this.mockedHistoricalEvents);
+  //     });
+  //   } else {
+  //     return new Promise(resolve => {
+  //       resolve([]);
+  //     });
+  //   }
+
+  //   // let url = `${this.baseURL}/v1/journey/streams/historic`;
+
+  //   // if (this.mockedHistoricalEvents) {
+  //   //   return new Promise(resolve => {
+  //   //     resolve(this.mockedHistoricalEvents);
+  //   //   });
+  //   // }
+  //   // let bearerToken = this.getBearerAuthorization();
+
+  //   // if (bearerToken) {
+  //   //   url += `?organization=${this.organization}&namespace=${this.namespace}`;
+  //   // }
+
+  //   // return fetch(url, {
+  //   //   headers: {
+  //   //     Authorization: bearerToken || `SharedAccessSignature ${this.tapeReadToken}`,
+  //   //     "content-type": "application/json; charset=UTF-8",
+  //   //   },
+  //   //   method: "GET",
+  //   // })
+  //   //   .then(response => response.json())
+  //   //   .then(data => data.events);
+  // }
 
   getTemplateNames() {
     let url = `${this.baseURL}/v1/journey/views/templates`;
@@ -170,12 +186,12 @@ export default class CjaasTemplateBuilder extends LitElement {
     let bearerToken = this.getBearerAuthorization();
 
     if (bearerToken) {
-      url += `?organization=${this.organization}&namespace=${this.namespace}`;
+      url += `?organizationId=${this.organizationId}&namespaceName=${this.namespace}`;
     }
 
     return fetch(url, {
       headers: {
-        Authorization: bearerToken || `SharedAccessSignature ${this.profileReadSasToken}`,
+        Authorization: bearerToken || `SharedAccessSignature ${this.profileReadToken}`,
         "content-type": "application/json; charset=UTF-8",
       },
       method: "GET",
@@ -194,27 +210,27 @@ export default class CjaasTemplateBuilder extends LitElement {
       });
     }
 
-    if ((!this.bearerToken && !this.profileReadSasToken) || !this.baseURL) {
+    if ((!this.bearerToken && !this.profileReadToken) || !this.baseURL) {
       return null;
     }
 
     let bearerToken = this.getBearerAuthorization();
 
     if (bearerToken) {
-      url += `&organization=${this.organization}&namespace=${this.namespace}`;
+      url += `&organizationId=${this.organizationId}&namespaceName=${this.namespace}`;
     }
 
-    this.templateAPIInProgress = true;
+    this.getTemplateAPIInProgress = true;
 
     return fetch(url, {
       headers: {
-        Authorization: bearerToken || `SharedAccessSignature ${this.profileReadSasToken}`,
+        Authorization: bearerToken || `SharedAccessSignature ${this.profileReadToken}`,
         "content-type": "application/json; charset=UTF-8",
       },
       method: "GET",
     })
       .then(response => {
-        this.templateAPIInProgress = false;
+        this.getTemplateAPIInProgress = false;
         return response.json();
       })
       .then(json => {
@@ -397,12 +413,12 @@ export default class CjaasTemplateBuilder extends LitElement {
     let bearerToken = this.getBearerAuthorization();
 
     if (bearerToken) {
-      url += `?organization=${this.organization}&namespace=${this.namespace}`;
+      url += `?organizationId=${this.organizationId}&namespaceName=${this.namespace}`;
     }
 
     fetch(url, {
       headers: {
-        Authorization: bearerToken || `SharedAccessSignature ${this.profileWriteSasToken}`,
+        Authorization: bearerToken || `SharedAccessSignature ${this.profileWriteToken}`,
         "content-type": "application/json; charset=UTF-8",
       },
       method: "POST",
@@ -488,7 +504,7 @@ export default class CjaasTemplateBuilder extends LitElement {
     `;
 
     return html`
-      <table>
+      <table class="edit-table">
         <thead>
           <tr>
             <th></th>
@@ -570,13 +586,14 @@ export default class CjaasTemplateBuilder extends LitElement {
         result: [_query.metadataType === "string" ? "lorem ipsum" : 12345],
       };
     });
+
     return html`
       ${this.profileSourceScript()}
       <cjaas-profile-view-widget
         .profileData=${profileData}
-        .tapeReadToken=${this.tapeReadSasToken}
-        .events=${this.tapeEvents}
-        .baseURL=${this.baseURL}
+        .tape-read-token=${this.tapeReadToken}
+        .externalEvents=${this.mockedHistoricalEvents ? this.mockedHistoricalEvents : this.tapeEvents}
+        .baseUrl=${this.baseURL}
       >
       </cjaas-profile-view-widget>
     `;
@@ -584,7 +601,7 @@ export default class CjaasTemplateBuilder extends LitElement {
 
   // Readonly view should showup when editing an action
   render() {
-    if (this.templateAPIInProgress) {
+    if (this.getTemplateAPIInProgress) {
       return html`
         <div class="spinner-container">
           <md-spinner></md-spinner>
@@ -599,12 +616,17 @@ export default class CjaasTemplateBuilder extends LitElement {
     }
 
     const editButton = html`
-      <md-button @click=${() => (this.readOnlyMode = false)}>Edit Template</md-button>
+      <md-button class="template-edit-button" variant="primary" @click=${() => (this.readOnlyMode = false)}
+        >Edit Template</md-button
+      >
     `;
 
     return html`
       <div class="name-container">
-        ${this.template?.name ? this.template?.name : this.getNameInputTemplate()}
+        <span class="template-name-property">Template Name: </span>
+        <span class="template-name-value"
+          >${this.template?.name ? this.template?.name : this.getNameInputTemplate()}</span
+        >
         ${this.readOnlyMode ? editButton : nothing}
       </div>
       <div>

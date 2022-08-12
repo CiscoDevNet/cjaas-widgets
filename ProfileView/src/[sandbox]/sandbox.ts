@@ -19,9 +19,67 @@ import { generateSasToken, TokenArgs } from "../generatesastoken";
  */
 //@ts-ignore
 const PRIVATE_KEY = process.env.DOTENV.PRIVATE_KEY;
+// @ts-ignore
+const TAPE_READ_TOKEN = process.env.DOTENV.TAPE_READ_TOKEN;
+// @ts-ignore
+const STREAM_READ_TOKEN = process.env.DOTENV.STREAM_READ_TOKEN;
+// @ts-ignore
+const PROFILE_READ_TOKEN = process.env.DOTENV.PROFILE_READ_TOKEN;
+// @ts-ignore
+const PROFILE_WRITE_TOKEN = process.env.DOTENV.PROFILE_WRITE_TOKEN;
+// @ts-ignore
+const IDENTITY_READ_TOKEN = process.env.DOTENV.IDENTITY_READ_TOKEN;
+// @ts-ignore
+const IDENTITY_WRITE_TOKEN = process.env.DOTENV.IDENTITY_WRITE_TOKEN;
+
 const ORGANIZATION = "demoassure";
 const NAMESPACE = "sandbox";
 const APP_NAME = "sandbox";
+
+const mockedTapeEvents = [
+  {
+    data: {
+      agentId: "55de70fc-af58-40e8-b7f8-c23536a53e76",
+      createdTime: 1658437179769,
+      currentState: "wrapup",
+      origin: "egiere@cisco.com",
+      queueId: "ee472d93-7b28-483e-9cd9-6ed59db2dc9a",
+      taskId: "f484abb1-0937-11ed-994c-bf6de601ac80",
+      teamId: "9c73f123-0a33-414c-98db-b1169cccc8ce",
+    },
+    dataContentType: "string",
+    id: "cac7ec98-e119-4ad6-9d8d-909d83d3b979",
+    person: "egiere@cisco.com",
+    previously: "",
+    source: "wxcc",
+    specVersion: "1.0",
+    time: "2022-07-21T20:59:39.769Z",
+    type: "agent:state_change",
+  },
+  {
+    data: {
+      channelType: "chat",
+      createdTime: 1658437179722,
+      destination: "Chat_temp_WXC-CHAT-EP1",
+      direction: "INBOUND",
+      origin: "egiere@cisco.com",
+      outboundType: null,
+      queueId: "ee472d93-7b28-483e-9cd9-6ed59db2dc9a",
+      reason: "Agent Left",
+      taskId: "f484abb1-0937-11ed-994c-bf6de601ac80",
+      terminatingParty: "Agent",
+      workflowManager: null,
+    },
+    dataContentType: "string",
+    id: "b3828547-3b7a-40f4-8393-1058fb2d2ad6",
+    person: "egiere@cisco.com",
+    previously: "",
+    source: "wxcc",
+    specVersion: "1.0",
+    time: "2022-07-21T20:59:39.722Z",
+    type: "task:ended",
+  },
+];
 
 /**
  * Private SAS Tokens generated and stored in component instance
@@ -149,12 +207,14 @@ export class Sandbox extends LitElement {
             class="widget-container"
           >
             <cjaas-profile-view-widget
-              template-id="second-template"
-              .customer=${undefined}
-              base-url="https://cjaas-devus2.azurewebsites.net"
-              tape-read-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-11-23T20:33:44.019Z&sk=journeyUi&sig=Msa4zTsNmkeDHJcmQuXUVHTTzs1KATCQ%2FDNrVR2O7eU%3D"
-              stream-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-11-23T20:30:20.765Z&sk=journeyUi&sig=76cI1nBPkA0HdQved8YHiTQbOThPOR8W5UdwZzeUuPc%3D"
-              profile-token="so=demoassure&sn=sandbox&ss=profile&sp=rw&se=2022-11-23T20:34:23.108Z&sk=journeyUi&sig=JydFx80vys0KNr8JwwgsUSPrj3y5fnLpj5afX9h2Hxc%3D"
+              template-id="journey-default-template"
+              customer="+14806754084"
+              base-url="https://jds-us1.cjaas.cisco.com"
+              .externalEvents=${mockedTapeEvents}
+              .tapeReadToken=${TAPE_READ_TOKEN}
+              .streamReadToken=${STREAM_READ_TOKEN}
+              .profileReadToken=${PROFILE_READ_TOKEN}
+              .profileWriteToken=${PROFILE_WRITE_TOKEN}
             ></cjaas-profile-view-widget>
           </div>
         </div>

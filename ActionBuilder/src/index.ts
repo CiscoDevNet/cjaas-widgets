@@ -35,10 +35,10 @@ export default class CjaasActionBuilder extends LitElement {
   actionWriteSasToken: SASTOKEN = null;
   @property({ attribute: "view-sas-token" }) viewSasToken: SASTOKEN = null;
   @property() bearerToken: any;
-  @property() organization: any;
+  @property() organizationId: any;
   @property() namespace: any;
 
-  @property({ type: String, attribute: "base-url" }) baseURL: string | undefined = undefined;
+  @property({ type: String, attribute: "base-url" }) baseUrl: string | undefined = undefined;
   @property() saveCallBack: any;
 
   @internalProperty() conditions: ConditionBlockInterface | undefined;
@@ -97,7 +97,7 @@ export default class CjaasActionBuilder extends LitElement {
 
   // fetch action from server or use mockAction
   getAction(): Promise<ACTION> {
-    let url = `${this.baseURL}/v1/journey/actions/${this.actionName}`;
+    let url = `${this.baseUrl}/v1/journey/actions/${this.actionName}`;
 
     if (this.mockAction) {
       return new Promise((resolve, reject) => {
@@ -108,7 +108,7 @@ export default class CjaasActionBuilder extends LitElement {
     const bearerToken = this.getBearerAuthorization();
 
     if (bearerToken) {
-      url += `?organization=${this.organization}&namespace=${this.namespace}`;
+      url += `?organizationId=${this.organizationId}&namespaceName=${this.namespace}`;
     }
 
     this.actionAPIInProgress = true;
@@ -134,7 +134,7 @@ export default class CjaasActionBuilder extends LitElement {
   }
   // fetch template from server or use mockTemplate
   getTemplates() {
-    let url = `${this.baseURL}/v1/journey/views/templates?id=${this.templateId}`;
+    let url = `${this.baseUrl}/v1/journey/views/templates?id=${this.templateId}`;
 
     if (this.mockTemplate) {
       return new Promise((resolve, reject) => {
@@ -142,7 +142,7 @@ export default class CjaasActionBuilder extends LitElement {
       });
     }
 
-    if (!this.baseURL || (!this.bearerToken && !this.viewSasToken)) {
+    if (!this.baseUrl || (!this.bearerToken && !this.viewSasToken)) {
       return null;
     }
 
@@ -151,7 +151,7 @@ export default class CjaasActionBuilder extends LitElement {
     const bearerToken = this.getBearerAuthorization();
 
     if (bearerToken) {
-      url += `&organization=${this.organization}&namespace=${this.namespace}`;
+      url += `&organizationId=${this.organizationId}&namespaceName=${this.namespace}`;
     }
 
     return fetch(url, {
@@ -172,14 +172,16 @@ export default class CjaasActionBuilder extends LitElement {
   // templateid is formed from namespace-organization-actionName
   getNameInputTemplate() {
     return html`
-      <md-input
-        .value=${this.actionConfig?.name || ""}
-        id="action-name"
-        placeholder="Action Name"
-        .required=${true}
-        .helpText=${this.actionConfig?.name ? "" : "Action Name cannot be changed later!"}
-      >
-      </md-input>
+      <div class="name-input-row">
+        <p class="name-property-name">Action Name</p>
+        <md-input
+          .value=${this.actionConfig?.name || ""}
+          id="action-name"
+          placeholder="Enter a name for this action..."
+          .required=${true}
+        >
+        </md-input>
+      </div>
     `;
   }
 
@@ -190,7 +192,7 @@ export default class CjaasActionBuilder extends LitElement {
     }
 
     return html`
-      <div class="header-row"><md-icon name="icon-location_32" size="24"></md-icon><span>Journey</span></div>
+      <!-- <div class="header-row"><md-icon name="icon-location_32" size="24"></md-icon><span>Journey</span></div> -->
       ${this.renderRootConditionBlock(relation)}
       <div class="targets">
         ${this.getTargets()}
@@ -667,13 +669,13 @@ export default class CjaasActionBuilder extends LitElement {
   }
 
   postResult(result: ACTION) {
-    let url = `${this.baseURL}/v1/journey/actions`;
+    let url = `${this.baseUrl}/v1/journey/actions`;
     this.disableSaveButton = true;
 
     const bearerToken = this.getBearerAuthorization();
 
     if (bearerToken) {
-      url += `?organization=${this.organization}&namespace=${this.namespace}`;
+      url += `?organizationId=${this.organizationId}&namespaceName=${this.namespace}`;
     }
 
     fetch(url, {

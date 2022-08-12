@@ -19,6 +19,12 @@ import { generateSasToken, TokenArgs } from "../generatesastoken";
  */
 //@ts-ignore
 const PRIVATE_KEY = process.env.DOTENV.PRIVATE_KEY;
+
+// @ts-ignore
+const TAPE_READ_TOKEN = process.env.DOTENV.TAPE_READ_TOKEN;
+// @ts-ignore
+const STREAM_READ_TOKEN = process.env.DOTENV.STREAM_READ_TOKEN;
+
 const ORGANIZATION = "demoassure";
 const NAMESPACE = "sandbox";
 const APP_NAME = "journeyUi";
@@ -121,6 +127,10 @@ export class Sandbox extends LitElement {
     } else return console.error("Invalid data-aspect input");
   }
 
+  // base-url="https://cjaas-devus2.azurewebsites.net"
+
+  // tape-read-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-11-23T20:33:44.019Z&sk=journeyUi&sig=Msa4zTsNmkeDHJcmQuXUVHTTzs1KATCQ%2FDNrVR2O7eU%3D"
+  // stream-read-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-11-23T20:30:20.765Z&sk=journeyUi&sig=76cI1nBPkA0HdQved8YHiTQbOThPOR8W5UdwZzeUuPc%3D"
   render() {
     const { getTToken, getSToken } = getTokens();
     return html`
@@ -136,11 +146,11 @@ export class Sandbox extends LitElement {
           >
             <cjaas-timeline-widget
               limit="15"
-              person-id="30313-Carl"
+              customer="egiere@cisco.com"
               show-filters
-              base-url="https://cjaas-devus2.azurewebsites.net"
-              tape-read-token="so=demoassure&sn=sandbox&ss=tape&sp=r&se=2022-11-23T20:33:44.019Z&sk=journeyUi&sig=Msa4zTsNmkeDHJcmQuXUVHTTzs1KATCQ%2FDNrVR2O7eU%3D"
-              stream-read-token="so=demoassure&sn=sandbox&ss=stream&sp=r&se=2022-11-23T20:30:20.765Z&sk=journeyUi&sig=76cI1nBPkA0HdQved8YHiTQbOThPOR8W5UdwZzeUuPc%3D"
+              base-url="https://jds-us1.cjaas.cisco.com"
+              .tapeReadToken=${TAPE_READ_TOKEN}
+              .streamReadToken=${STREAM_READ_TOKEN}
             >
             </cjaas-timeline-widget>
           </div>

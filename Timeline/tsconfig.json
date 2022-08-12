@@ -8,6 +8,8 @@
     "experimentalDecorators": true,
     "declaration": true,
 
+    "resolveJsonModule": true,
+
     "baseUrl": "./",
     "paths": {
       "@/*": ["./*"],

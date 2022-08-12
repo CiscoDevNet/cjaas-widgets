@@ -6,7 +6,7 @@
 }
 
 :host {
-  padding: 12px;
+  padding: 1.5rem;
   display: block;
   color: var(--md-secondary-text-color, #545454);
 }
@@ -61,7 +61,7 @@ md-icon {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding: 0 24px;
+  // padding: 0 24px;
 }
 
 .intend {
@@ -94,4 +94,19 @@ md-icon {
 
 .header-row {
   padding-left: 12px;
+}
+
+.name-input-row {
+  display: flex;
+  gap: 1rem;
+
+  md-input {
+    flex: 1;
+  }
+
+  .name-property-name {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: normal;
+  }
 }

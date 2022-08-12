@@ -1,0 +1,76 @@
+{
+  "SMS": {
+    "name": "icon-sms_16",
+    "color": "mint"
+  },
+  "Telephony": {
+    "name": "icon-handset-active_16",
+    "color": "green"
+  },
+  "Voice": {
+    "name": "icon-handset-active_16",
+    "color": "green"
+  },
+  "Chat": {
+    "name": "icon-chat-active_16",
+    "color": "cobalt"
+  },
+  "Email": {
+    "name": "icon-email-active_16",
+    "color": "violet"
+  },
+  "Messenger": {
+    "name": "icon-messenger_16",
+    "color": "cobalt"
+  },
+  "task": {
+    "name": "icon-tasks_16",
+    "color": "yellow"
+  },
+  "Login": {
+    "name": "icon-sign-in_24",
+    "color": "gold"
+  },
+  "Page Visit": {
+    "name": "icon-mouse-cursor_16",
+    "color": "grey"
+  },
+  "Entered ZipCode": {
+    "name": "icon-location_16",
+    "color": "cyan"
+  },
+  "Identify": {
+    "name": "icon-user_16",
+    "color": "blue"
+  },
+  "Quote": {
+    "name": "icon-file-spreadsheet_16",
+    "color": "cobalt",
+    "showcase": "firstName"
+  },
+  "NPS.*": {
+    "name": "icon-analysis_16",
+    "color": "red"
+  },
+  "Initiated Walk In": {
+    "name": "icon-audio-video_16",
+    "color": "orange"
+  },
+  "IMI_Inbound": {
+    "name": "icon-call-incoming_16",
+    "color": "green"
+  },
+  "IMI_Outbound": {
+    "name": "icon-call-outgoing_16",
+    "color": "darkmint"
+  },
+  "Trigger Sent to Server": {
+    "name": "icon-event_16",
+    "color": "violet",
+    "showcase": "user"
+  },
+  "Survey Response Collected": {
+    "name": "icon-report_16",
+    "color": "gold"
+  }
+}
