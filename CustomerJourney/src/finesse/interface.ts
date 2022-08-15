@@ -4,7 +4,7 @@ export interface SASTokens {
   tapeReadToken: string;
   streamReadToken: string;
   profileReadToken: string;
-  profileWriteToken?: string;
+  profileWriteToken: string;
   identityReadToken: string;
   identityWriteToken: string;
 }
@@ -25,7 +25,7 @@ export interface QueryParameters {
   tapeReadToken: string;
   streamReadToken: string;
   profileReadToken: string;
-  profileWriteToken?: string;
+  profileWriteToken: string;
   identityReadToken: string;
   identityWriteToken: string;
 }
@@ -39,7 +39,7 @@ export enum QueryParams {
   identityReadToken = "identityReadToken",
   identityWriteToken = "identityWriteToken",
   minHeight = "minHeight",
-  templateId = "profileTemplate",
+  templateId = "templateId",
 }
 
 export interface UserData {

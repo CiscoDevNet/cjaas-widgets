@@ -71,6 +71,8 @@ export const readQueryParams = () => {
   return getUrlVars(gadgetURI);
 };
 
+const sanitize = (value: string) => decodeURIComponent(value);
+
 export const setParametersToWidget = (queryParams: QueryParameters) => {
   const widget = document.querySelector("customer-journey-widget");
 
@@ -81,7 +83,14 @@ export const setParametersToWidget = (queryParams: QueryParameters) => {
 
   console.log("[JDS Widget][setParametersToWidget] queryParams:", queryParams);
 
-  // widget.baseUrl = "https://uswest-nonprod.cjaas.cisco.com";
+  const tapeReadToken = sanitize(queryParams[QueryParams.tapeReadToken]);
+  const streamReadToken = sanitize(queryParams[QueryParams.streamReadToken]);
+  const profileReadToken = sanitize(queryParams[QueryParams.profileReadToken]);
+  const profileWriteToken = sanitize(queryParams[QueryParams.profileWriteToken]);
+  const identityReadToken = sanitize(queryParams[QueryParams.identityReadToken]);
+  const identityWriteToken = sanitize(queryParams[QueryParams.identityWriteToken]);
+
+  console.log("sasTokens have been sanitized. tapeReadToken=", tapeReadToken);
 
   widget.baseUrl = queryParams?.baseUrl;
   widget.limit = queryParams?.limit || 20;
@@ -96,16 +105,17 @@ export const setParametersToWidget = (queryParams: QueryParameters) => {
   widget.iconDataPath = queryParams?.iconDataPath || "";
   widget.templateId = queryParams?.templateId || "journey-default-template";
 
-  widget.tapeReadToken = queryParams.tapeReadToken || null;
-  widget.streamReadToken = queryParams.streamReadToken || null;
-  widget.profileReadToken = queryParams.profileReadToken || null;
-  widget.profileWriteToken = queryParams.profileWriteToken || null;
-  widget.identityReadToken = queryParams.identityReadToken || null;
-  widget.identityWriteToken = queryParams.identityWriteToken || null;
+  widget.tapeReadToken = tapeReadToken || null;
+  widget.streamReadToken = streamReadToken || null;
+  widget.profileReadToken = profileReadToken || null;
+  widget.profileWriteToken = profileWriteToken || null;
+  widget.identityReadToken = identityReadToken || null;
+  widget.identityWriteToken = identityWriteToken || null;
   widget.userSearch = true;
   widget.eventIconTemplate = iconData;
 
   console.log("[JDS Widget][setParametersToWidget] widget initialized", widget);
+  console.log("[JDS Widget][setParametersToWidget] widget's tapeReadToken", widget.tapeReadToken);
 };
 
 // export const setTokensToWidget = (sasTokens: SASTokens) => {
@@ -142,19 +152,6 @@ export const getCustomerValues = (dialogData: UserData): any => {
     return { cc_CustomerId: podIdData.value };
   }
 };
-
-const sanitize = (value: string) => decodeURIComponent(value);
-
-// export const getTokensFromQueryParams = (queryParamsValues: any): SASTokens => {
-//   return {
-//     tapeReadToken: sanitize(queryParamsValues[QueryParams.tapeReadToken]),
-//     streamReadToken: sanitize(queryParamsValues[QueryParams.streamReadToken]),
-//     profileReadToken: sanitize(queryParamsValues[QueryParams.profileReadToken]),
-//     profileWriteToken: sanitize(queryParamsValues[QueryParams.profileWriteToken]),
-//     identityReadToken: sanitize(queryParamsValues[QueryParams.identityReadToken]),
-//     identityWriteToken: sanitize(queryParamsValues[QueryParams.identityWriteToken]),
-//   };
-// };
 
 export const setMinHeight = (queryParamsValue: any) => {
   const minHeightParam = queryParamsValue[QueryParams.minHeight];
