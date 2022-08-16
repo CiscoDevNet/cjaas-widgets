@@ -107,18 +107,11 @@ const subscribeUser = () => {
   });
 };
 
-// gadget ready
 const gadgetReady = () => {
-  queryParamsValues = helper.readQueryParams(); // decoded
-
-  // const tokens: SASTokens = helper.getTokensFromQueryParams(queryParamsValues);
-  // helper.setTokensToWidget(tokens);
+  queryParamsValues = helper.readQueryParams();
 
   helper.setParametersToWidget(queryParamsValues);
-
   helper.setMinHeight(queryParamsValues);
-  // helper.setTemplate(queryParamsValues);
-
   subscribeUser();
 };
 
