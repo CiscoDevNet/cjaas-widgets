@@ -81,7 +81,7 @@ export const setParametersToWidget = (queryParams: QueryParameters) => {
     return;
   }
 
-  console.log("[JDS Widget][setParametersToWidget] queryParams:", queryParams);
+  console.log("[JDS Widget][finesse wrapper][setParametersToWidget] queryParams:", queryParams);
 
   const tapeReadToken = sanitize(queryParams[QueryParams.tapeReadToken]);
   const streamReadToken = sanitize(queryParams[QueryParams.streamReadToken]);
@@ -89,8 +89,6 @@ export const setParametersToWidget = (queryParams: QueryParameters) => {
   const profileWriteToken = sanitize(queryParams[QueryParams.profileWriteToken]);
   const identityReadToken = sanitize(queryParams[QueryParams.identityReadToken]);
   const identityWriteToken = sanitize(queryParams[QueryParams.identityWriteToken]);
-
-  console.log("sasTokens have been sanitized. tapeReadToken=", tapeReadToken);
 
   widget.baseUrl = queryParams?.baseUrl;
   widget.limit = queryParams?.limit || 20;
@@ -114,27 +112,8 @@ export const setParametersToWidget = (queryParams: QueryParameters) => {
   widget.userSearch = true;
   widget.eventIconTemplate = iconData;
 
-  console.log("[JDS Widget][setParametersToWidget] widget initialized", widget);
-  console.log("[JDS Widget][setParametersToWidget] widget's tapeReadToken", widget.tapeReadToken);
+  console.log("[JDS Widget][finesse wrapper][setParametersToWidget] widget initialized", widget);
 };
-
-// export const setTokensToWidget = (sasTokens: SASTokens) => {
-//   const widget = document.querySelector("customer-journey-widget");
-
-//   if (!widget) {
-//     log("Widget not found");
-//     return;
-//   }
-
-//   widget.tapeReadToken = sasTokens.tapeReadToken;
-//   widget.streamReadToken = sasTokens.streamReadToken;
-//   widget.profileReadToken = sasTokens.profileReadToken;
-//   widget.profileWriteToken = sasTokens.profileWriteToken || "";
-//   widget.identityReadToken = sasTokens.identityReadToken;
-//   widget.identityWriteToken = sasTokens.identityWriteToken;
-//   widget.userSearch = true;
-//   widget.eventIconTemplate = iconData;
-// };
 
 export const getCustomerValues = (dialogData: UserData): any => {
   const callVariable: any[] = dialogData.mediaProperties.callvariables.CallVariable;
