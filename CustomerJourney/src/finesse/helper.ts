@@ -1,5 +1,6 @@
-import { QueryParams, SASTokens, UserData } from "./interface";
+import { QueryParameters, QueryParams, SASTokens, UserData } from "./interface";
 import * as iconData from "@/assets/icons.json";
+import { TimeFrame } from "..";
 
 declare const finesse: any;
 declare const gadgets: any;
@@ -70,7 +71,9 @@ export const readQueryParams = () => {
   return getUrlVars(gadgetURI);
 };
 
-export const setTokensToWidget = (sasTokens: SASTokens) => {
+const sanitize = (value: string) => decodeURIComponent(value);
+
+export const setParametersToWidget = (queryParams: QueryParameters) => {
   const widget = document.querySelector("customer-journey-widget");
 
   if (!widget) {
@@ -78,16 +81,38 @@ export const setTokensToWidget = (sasTokens: SASTokens) => {
     return;
   }
 
-  widget.baseUrl = "https://uswest-nonprod.cjaas.cisco.com";
+  console.log("[JDS Widget][finesse wrapper][setParametersToWidget] queryParams:", queryParams);
 
-  widget.tapeReadToken = sasTokens.tapeToken;
-  widget.streamReadToken = sasTokens.streamToken;
-  widget.profileReadToken = sasTokens.profileReadToken;
-  widget.profileWriteToken = sasTokens.profileWriteToken || "";
-  widget.identityReadToken = sasTokens.identityReadSASToken;
-  widget.identityWriteToken = sasTokens.identityWriteSASToken;
+  const tapeReadToken = sanitize(queryParams[QueryParams.tapeReadToken]);
+  const streamReadToken = sanitize(queryParams[QueryParams.streamReadToken]);
+  const profileReadToken = sanitize(queryParams[QueryParams.profileReadToken]);
+  const profileWriteToken = sanitize(queryParams[QueryParams.profileWriteToken]);
+  const identityReadToken = sanitize(queryParams[QueryParams.identityReadToken]);
+  const identityWriteToken = sanitize(queryParams[QueryParams.identityWriteToken]);
+
+  widget.baseUrl = queryParams?.baseUrl;
+  widget.limit = queryParams?.limit || 20;
+  widget.customer = queryParams?.customer || null;
+  widget.logsOn = queryParams?.logsOn || false;
+  widget.liveStream = queryParams?.liveStream || false;
+  widget.timeFrame = queryParams?.timeFrame || TimeFrame.All;
+  widget.userSearch = queryParams?.userSearch || false;
+  widget.collapseProfileSection = queryParams?.collapseProfileSection || false;
+  widget.collapseAliasSection = queryParams?.collapseAliasSection || false;
+  widget.collapseTimelineSection = queryParams?.collapseTimelineSection || false;
+  widget.iconDataPath = queryParams?.iconDataPath || "";
+  widget.templateId = queryParams?.templateId || "journey-default-template";
+
+  widget.tapeReadToken = tapeReadToken || null;
+  widget.streamReadToken = streamReadToken || null;
+  widget.profileReadToken = profileReadToken || null;
+  widget.profileWriteToken = profileWriteToken || null;
+  widget.identityReadToken = identityReadToken || null;
+  widget.identityWriteToken = identityWriteToken || null;
   widget.userSearch = true;
   widget.eventIconTemplate = iconData;
+
+  console.log("[JDS Widget][finesse wrapper][setParametersToWidget] widget initialized", widget);
 };
 
 export const getCustomerValues = (dialogData: UserData): any => {
@@ -105,19 +130,6 @@ export const getCustomerValues = (dialogData: UserData): any => {
   } else {
     return { cc_CustomerId: podIdData.value };
   }
-};
-
-const sanitize = (value: string) => decodeURIComponent(value);
-
-export const getTokensFromQueryParams = (queryParamsValues: any): SASTokens => {
-  return {
-    tapeToken: sanitize(queryParamsValues[QueryParams.tapeToken]),
-    streamToken: sanitize(queryParamsValues[QueryParams.streamToken]),
-    profileReadToken: sanitize(queryParamsValues[QueryParams.profileReadToken]),
-    profileWriteToken: sanitize(queryParamsValues[QueryParams.profileWriteToken]),
-    identityReadSASToken: sanitize(queryParamsValues[QueryParams.identityReadSasToken]),
-    identityWriteSASToken: sanitize(queryParamsValues[QueryParams.identityWriteSASToken]),
-  };
 };
 
 export const setMinHeight = (queryParamsValue: any) => {

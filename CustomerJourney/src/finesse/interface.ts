@@ -1,21 +1,45 @@
+import { TimeFrame } from "..";
+
 export interface SASTokens {
-  tapeToken: string;
-  streamToken: string;
+  tapeReadToken: string;
+  streamReadToken: string;
   profileReadToken: string;
-  profileWriteToken?: string;
-  identityReadSASToken: string;
-  identityWriteSASToken: string;
+  profileWriteToken: string;
+  identityReadToken: string;
+  identityWriteToken: string;
+}
+
+export interface QueryParameters {
+  baseUrl: string;
+  limit?: number;
+  customer?: string;
+  logsOn?: boolean;
+  liveStream?: boolean;
+  timeFrame?: TimeFrame;
+  userSearch?: boolean;
+  collapseTimelineSection?: boolean;
+  collapseProfileSection?: boolean;
+  collapseAliasSection?: boolean;
+  iconDataPath?: string;
+  templateId: string;
+  tapeReadToken: string;
+  streamReadToken: string;
+  profileReadToken: string;
+  profileWriteToken: string;
+  identityReadToken: string;
+  identityWriteToken: string;
 }
 
 export enum QueryParams {
-  tapeToken = "tapeToken",
-  streamToken = "streamToken",
+  baseUrl = "baseUrl",
+  tapeReadToken = "tapeReadToken",
+  streamReadToken = "streamReadToken",
   profileReadToken = "profileReadToken",
   profileWriteToken = "profileWriteToken",
-  identityReadSasToken = "identityReadToken",
-  identityWriteSASToken = "identityWriteToken",
+  identityReadToken = "identityReadToken",
+  identityWriteToken = "identityWriteToken",
   minHeight = "minHeight",
-  templateId = "profileTemplate",
+  templateId = "templateId",
 }
 
 export interface UserData {

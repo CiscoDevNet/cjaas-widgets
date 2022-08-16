@@ -107,18 +107,11 @@ const subscribeUser = () => {
   });
 };
 
-// gadget ready
 const gadgetReady = () => {
   queryParamsValues = helper.readQueryParams();
 
-  const tokens: SASTokens = helper.getTokensFromQueryParams(queryParamsValues);
-
-  helper.setTokensToWidget(tokens);
-
+  helper.setParametersToWidget(queryParamsValues);
   helper.setMinHeight(queryParamsValues);
-
-  helper.setTemplate(queryParamsValues);
-
   subscribeUser();
 };
 
