@@ -461,7 +461,10 @@ export default class CustomerJourneyWidget extends LitElement {
 
     if (this.eventSource) {
       this.eventSource.onopen = event => {
-        console.log(`[JDS Widget] The Journey stream connection has been established for customer \'${customer}\'.`);
+        console.log(
+          `[JDS Widget] The Journey stream connection has been established for customer \'${customer}\'.`,
+          event
+        );
       };
 
       this.eventSource.onmessage = (event: ServerSentEvent) => {
@@ -470,9 +473,10 @@ export default class CustomerJourneyWidget extends LitElement {
         try {
           data = JSON.parse(event.data);
           data.time = DateTime.fromISO(data.time);
-          data.data = JSON.parse(data.data);
 
-          // sort events
+          if (data.data && data?.dataContentType === "string") {
+            data.data = JSON.parse(data.data);
+          }
           this.newestEvents = this.sortEventsbyDate([data, ...this.newestEvents]);
         } catch (err) {
           console.error("[JDS Widget] journey/stream: No parsable data fetched");
