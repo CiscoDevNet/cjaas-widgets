@@ -21,6 +21,8 @@ import { Timeline } from "@cjaas/common-components/dist/types/components/timelin
 import { DateTime } from "luxon";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { addAliasResponseBody, deleteAliasResponseBody } from "./actions";
+// @ts-ignore
+import { version } from "../version";
 
 export enum EventType {
   Agent = "agent",
@@ -231,6 +233,12 @@ export default class CustomerJourneyWidget extends LitElement {
    */
   @query("#customer-input") customerInput!: HTMLInputElement;
   @query(".profile") widget!: Element;
+
+  async firstUpdated(_changedProperties: PropertyValues) {
+    super.firstUpdated(_changedProperties);
+
+    console.log(`[JDS Widget][Version] customer-journey-${version}`);
+  }
 
   async update(changedProperties: PropertyValues) {
     super.update(changedProperties);
@@ -470,9 +478,10 @@ export default class CustomerJourneyWidget extends LitElement {
         try {
           data = JSON.parse(event.data);
           data.time = DateTime.fromISO(data.time);
-          data.data = JSON.parse(data.data);
 
-          // sort events
+          if (data.data && data?.dataContentType === "string") {
+            data.data = JSON.parse(data.data);
+          }
           this.newestEvents = this.sortEventsbyDate([data, ...this.newestEvents]);
         } catch (err) {
           console.error("[JDS Widget] journey/stream: No parsable data fetched");
