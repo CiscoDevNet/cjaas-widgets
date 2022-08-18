@@ -21,6 +21,8 @@ import { Timeline } from "@cjaas/common-components/dist/types/components/timelin
 import { DateTime } from "luxon";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { addAliasResponseBody, deleteAliasResponseBody } from "./actions";
+// @ts-ignore
+import { version } from "../version";
 
 export enum EventType {
   Agent = "agent",
@@ -231,6 +233,12 @@ export default class CustomerJourneyWidget extends LitElement {
    */
   @query("#customer-input") customerInput!: HTMLInputElement;
   @query(".profile") widget!: Element;
+
+  async firstUpdated(_changedProperties: PropertyValues) {
+    super.firstUpdated(_changedProperties);
+
+    console.log(`[JDS Widget][Version] customer-journey-${version}`);
+  }
 
   async update(changedProperties: PropertyValues) {
     super.update(changedProperties);
@@ -461,10 +469,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
     if (this.eventSource) {
       this.eventSource.onopen = event => {
-        console.log(
-          `[JDS Widget] The Journey stream connection has been established for customer \'${customer}\'.`,
-          event
-        );
+        console.log(`[JDS Widget] The Journey stream connection has been established for customer \'${customer}\'.`);
       };
 
       this.eventSource.onmessage = (event: ServerSentEvent) => {
