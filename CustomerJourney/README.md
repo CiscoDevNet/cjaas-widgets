@@ -4,11 +4,11 @@ This widget uses the JDS (Journey Data Services) APIs to display an individual c
 
 ### Latest Version
 
-customer-journey-8.0.5.js
+customer-journey-8.0.6.js
 
 ### Latest Version
 
-customer-journey-8.0.5.js
+customer-journey-8.0.6.js
 
 ### Customer Journey Widget Properties
 
@@ -16,7 +16,7 @@ customer-journey-8.0.5.js
 
 * The following attributes and properties of JDS Widget are supported with the following version
 ```
-https://cjaas.cisco.com/widgets/customer-journey-8.0.5.js
+https://cjaas.cisco.com/widgets/customer-journey-8.0.6.js
 ```
 
 `@attr stream-read-token`: (<i>String</i>) - SAS Token for reading stream API (live stream events within Timeline)
@@ -61,7 +61,7 @@ https://cjaas.cisco.com/widgets/customer-journey-8.0.5.js
 ### The following example is showcasing how to embed this widget within lit-element code
 ```html   
     <customer-journey-widget
-      customer="Ben Smith"
+      customer="John Smith"
       base-url="https://jds-us1.cjaas.cisco.com"
       tape-read-token=${TAPE_READ_TOKEN}
       stream-read-token=${STREAM_READ_TOKEN}
@@ -95,7 +95,7 @@ https://cjaas.cisco.com/widgets/customer-journey-8.0.5.js
  "children": [
   {
     "comp": "customer-journey-widget",
-    "script": "https://cjaas.cisco.com/widgets/customer-journey-8.0.4.js",
+    "script": "https://cjaas.cisco.com/widgets/customer-journey-8.0.6.js",
     "attributes": {	
        "base-url": "https://uswest-nonprod.cjaas.cisco.com",
        "logs-on": "true",
@@ -136,7 +136,7 @@ https://cjaas.cisco.com/widgets/customer-journey-8.0.5.js
  "children": [
   {
     "comp": "customer-journey-widget",
-    "script": "https://cjaas.cisco.com/widgets/customer-journey-8.0.4.js",
+    "script": "https://cjaas.cisco.com/widgets/customer-journey-8.0.6.js",
     "attributes": {	
        "customer": "Ben Smith",
        "base-url": "https://uswest-nonprod.cjaas.cisco.com",
