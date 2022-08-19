@@ -97,7 +97,7 @@ https://cjaas.cisco.com/widgets/customer-journey-8.0.6.js
     "comp": "customer-journey-widget",
     "script": "https://cjaas.cisco.com/widgets/customer-journey-8.0.6.js",
     "attributes": {	
-       "base-url": "https://uswest-nonprod.cjaas.cisco.com",
+       "base-url": "https://jds-us1.cjaas.cisco.com",
        "logs-on": "true",
        "tape-read-token": "<your-tape-read-token>",
        "profile-read-token": "<your-profile-read-token>",
@@ -139,7 +139,7 @@ https://cjaas.cisco.com/widgets/customer-journey-8.0.6.js
     "script": "https://cjaas.cisco.com/widgets/customer-journey-8.0.6.js",
     "attributes": {	
        "customer": "Ben Smith",
-       "base-url": "https://uswest-nonprod.cjaas.cisco.com",
+       "base-url": "https://jds-us1.cjaas.cisco.com",
        "tape-read-token": "<your-tape-read-token>",
        "profile-read-token": "<your-profile-read-token>",
        "profile-write-token": "<your-profile-write-token>",
