@@ -507,7 +507,7 @@ export default class CustomerJourneyWidget extends LitElement {
           data = JSON.parse(event.data);
           data.time = DateTime.fromISO(data.time);
 
-          if (data.data && data?.dataContentType === "string") {
+          if (data.data && (data?.datacontenttype === "string" || data?.dataContentType === "string")) {
             data.data = JSON.parse(data.data);
           }
           this.newestEvents = this.sortEventsbyDate([data, ...this.newestEvents]);
