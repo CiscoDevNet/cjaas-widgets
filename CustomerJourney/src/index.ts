@@ -356,16 +356,16 @@ export default class CustomerJourneyWidget extends LitElement {
     }
   }
 
-  encodeCustomer(customer: string | null): string | null {
-    const encodedCustomer = customer ? btoa(customer) : null;
-    return encodedCustomer;
+  encodeParameter(value: string | null): string | null {
+    const encodedValue = value ? btoa(value) : null;
+    return encodedValue;
   }
 
   getProfileFromTemplateId(customer: string | null, templateId: string) {
     this.profileData = undefined;
     this.getProfileDataInProgress = true;
 
-    const url = `${this.baseUrl}/v1/journey/views?templateId=${templateId}&personId=${this.encodeCustomer(customer)}`;
+    const url = `${this.baseUrl}/v1/journey/views?templateId=${templateId}&personId=${this.encodeParameter(customer)}`;
 
     const config: AxiosRequestConfig = {
       method: "GET",
@@ -434,7 +434,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
     this.getEventsInProgress = true;
     this.baseUrlCheck();
-    const url = `${this.baseUrl}/v1/journey/streams/historic/${this.encodeCustomer(customer)}`;
+    const url = `${this.baseUrl}/v1/journey/streams/historic/${this.encodeParameter(customer)}`;
 
     const config: AxiosRequestConfig = {
       method: "GET",
@@ -490,7 +490,7 @@ export default class CustomerJourneyWidget extends LitElement {
           Authorization: `SharedAccessSignature ${this.streamReadToken}`,
         },
       };
-      const encodedCustomer = this.encodeCustomer(customer);
+      const encodedCustomer = this.encodeParameter(customer);
       const url = `${this.baseUrl}/streams/v1/journey/person/${encodedCustomer}?${this.streamReadToken}`;
       this.eventSource = new EventSource(url, header);
     }
@@ -667,7 +667,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * @returns Promise<IdentityData | undefined>
    */
   async getAliasesByAlias(customer: string | null): Promise<IdentityData | undefined> {
-    const url = `${this.baseUrl}/v1/journey/identities?aliases=${this.encodeCustomer(customer)}`;
+    const url = `${this.baseUrl}/v1/journey/identities?aliases=${this.encodeParameter(customer)}`;
 
     const config: AxiosRequestConfig = {
       method: "GET",
@@ -816,20 +816,17 @@ export default class CustomerJourneyWidget extends LitElement {
 
   deleteAliasById(identityId: string | null, aliasType: string, alias: string) {
     this.setInlineAliasLoader(alias, true);
-    const url = `${this.baseUrl}/v1/journey/identities/${identityId}/aliases`;
 
-    const requestData = JSON.stringify({
-      identities: [
-        {
-          type: aliasType,
-          values: [alias],
-        },
-      ],
-    });
+    const hasPlusSign = alias.charAt(0) === "+";
+
+    let aliasToDelete = alias;
+    if (aliasType === RawAliasTypes.Phone || hasPlusSign) {
+      aliasToDelete = this.encodeParameter(alias) || aliasToDelete;
+    }
+    const url = `${this.baseUrl}/v1/journey/identities/${identityId}/aliases?aliases=${aliasToDelete}`;
 
     const config: AxiosRequestConfig = {
       method: "DELETE",
-      data: requestData,
       headers: {
         Authorization: `SharedAccessSignature ${this.identityWriteToken}`,
         "Content-Type": "application/json",
@@ -848,7 +845,7 @@ export default class CustomerJourneyWidget extends LitElement {
         this.aliasErrorMessage = "";
       })
       .catch((err: Error) => {
-        console.error(`[JDS Widget] Failed to delete AliasById: (${identityId})`, requestData, err);
+        console.error(`[JDS Widget] Failed to delete AliasById: (${identityId})`, alias, err);
         this.aliasErrorMessage = `Failed to delete alias ${alias}.`;
       })
       .finally(() => {
