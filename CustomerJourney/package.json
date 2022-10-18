@@ -1,6 +1,6 @@
 {
   "name": "@cjaas/customer-journey-widget",
-  "version": "8.0.6",
+  "version": "8.0.8-dev1",
   "author": {
     "name": "Kevin Hyde",
     "email": "kehyde@cisco.com"
@@ -24,12 +24,14 @@
     "jest": "^26.4.2",
     "jest-config": "^26.4.2",
     "lit-element": "2.3.1",
-    "lit-html": "1.2.1"
+    "lit-html": "1.2.1",
+    "@types/express-serve-static-core": "4.17.30"
   },
   "peerDependencies": {
-    "@cjaas/common-components": "4.3.7",
+    "@cjaas/common-components": "4.3.10-dev3",
     "@momentum-ui/core": "19.15.4",
     "@momentum-ui/icons": "8.25.0",
+    "@momentum-ui/tokens": "1.7.1",
     "@momentum-ui/utils": "6.2.15",
     "@momentum-ui/web-components": "2.4.11-dev1",
     "lit-element": "2.3.1",
@@ -38,9 +40,10 @@
   "devDependencies": {
     "@babel/core": "^7.9.0",
     "@babel/preset-env": "^7.9.0",
-    "@cjaas/common-components": "4.3.7",
+    "@cjaas/common-components": "4.3.10-dev3",
     "@momentum-ui/core": "19.15.4",
     "@momentum-ui/icons": "8.25.0",
+    "@momentum-ui/tokens": "1.7.1",
     "@momentum-ui/utils": "6.2.15",
     "@momentum-ui/web-components": "2.4.11-dev1",
     "@open-wc/testing-helpers": "1.8.9",
@@ -59,6 +62,7 @@
     "@types/webpack-node-externals": "^1.7.1",
     "@typescript-eslint/eslint-plugin": "^2.22.0",
     "@typescript-eslint/parser": "^2.22.0",
+    "@types/express-serve-static-core": "4.17.30",
     "@wxcc-desktop/sdk-types": "^1.0.2",
     "alias-resolve-loader": "^2.0.4",
     "axios": "^0.21.4",
@@ -72,7 +76,7 @@
     "eslint-plugin-prettier": "^3.1.2",
     "extract-loader": "^4.0.3",
     "file-loader": "^4.3.0",
-    "fs-path": "^0.0.24",
+    "fs-path": "0.0.25",
     "genversion": "^3.1.1",
     "html-webpack-plugin": "^3.2.0",
     "husky": "3.1.0",
