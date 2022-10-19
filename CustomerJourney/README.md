@@ -6,6 +6,8 @@ This widget uses the JDS (Journey Data Services) APIs to display an individual c
 
 customer-journey-8.0.7.js
 
+<sub>_* Any older version will no longer work because the backend APIs have breaking changes. Please use this version going forward_</sub>
+
 ### Customer Journey Widget Properties
 
 <i>The JDS Customer Journey Widget accepts specific properties to interact with the JDS APIs</i>
@@ -70,9 +72,6 @@ https://cjaas.cisco.com/widgets/customer-journey-8.0.7.js
       logs-on
       live-stream
       time-frame="30-Days"
-      collapse-profile-section
-      collapse-alias-section
-      collapse-timeline-section
       icon-data-path="https://cjaas.cisco.com/widgets/iconMaps/defaultIcons.json"
     ></customer-journey-widget>
 ```
