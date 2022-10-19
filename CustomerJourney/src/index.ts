@@ -12,7 +12,7 @@ import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import axiosRetry from "axios-retry";
 import styles from "./assets/styles/View.scss";
 import * as iconData from "@/assets/icons.json";
-import { Profile, ServerSentEvent, IdentityData } from "./types/cjaas";
+import { Profile, ServerSentEvent, IdentityData, Alias, IdentityTypeObject } from "./types/cjaas";
 import { EventSourceInitDict } from "eventsource";
 import "@cjaas/common-components/dist/comp/cjaas-timeline";
 import "@cjaas/common-components/dist/comp/cjaas-profile";
@@ -20,9 +20,16 @@ import "@cjaas/common-components/dist/comp/cjaas-identity";
 import { Timeline } from "@cjaas/common-components/dist/types/components/timeline/Timeline";
 import { DateTime } from "luxon";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import { addAliasResponseBody, deleteAliasResponseBody } from "./actions";
 // @ts-ignore
 import { version } from "../version";
+
+export enum RawAliasTypes {
+  Phone = "phone",
+  Email = "email",
+  CustomerId = "customerId",
+  Unknown = "unknown",
+  Unselected = "",
+}
 
 export enum EventType {
   Agent = "agent",
@@ -34,6 +41,11 @@ export enum TimeFrame {
   "24-Hours" = "24-Hours",
   "7-Days" = "7-Days",
   "30-Days" = "30-Days",
+}
+
+export interface AliasObject {
+  type: RawAliasTypes;
+  value: string;
 }
 
 @customElementWithCheck("customer-journey-widget")
@@ -188,6 +200,12 @@ export default class CustomerJourneyWidget extends LitElement {
   @internalProperty() profileErrorMessage = "";
 
   /**
+   * Internal store for profile name error messages
+   * @prop profileNameErrorMessage
+   */
+  @internalProperty() nameApiErrorMessage = "";
+
+  /**
    * Internal store for timeline error messages
    * @prop timelineErrorMessage
    */
@@ -205,6 +223,12 @@ export default class CustomerJourneyWidget extends LitElement {
 
   @internalProperty() aliasDeleteInProgress: { [key: string]: boolean } = {};
 
+  @internalProperty() aliasNamesUpdateInProgress = false;
+
+  @internalProperty() firstName = "";
+
+  @internalProperty() lastName = "";
+
   @internalProperty() identityData: IdentityData | undefined;
 
   @internalProperty() identityID: string | null = null;
@@ -214,6 +238,8 @@ export default class CustomerJourneyWidget extends LitElement {
   @internalProperty() hasIdentityAPIBeenCalled = false;
 
   @internalProperty() hasHistoricalEventsAPIBeenCalled = false;
+
+  @internalProperty() aliasObjects: Array<AliasObject> = [];
 
   basicRetryConfig = {
     retries: 5,
@@ -280,6 +306,8 @@ export default class CustomerJourneyWidget extends LitElement {
       this.getExistingEvents(this.customer || null);
       this.subscribeToStream(this.customer || null);
       this.identityData = await this.getAliasesByAlias(this.customer || null);
+      this.firstName = this.identityData?.firstName || "";
+      this.lastName = this.identityData?.lastName || "";
       this.identityID = this.identityData?.id || null;
       this.debugLogMessage("identityID", this.identityID);
     }
@@ -328,16 +356,16 @@ export default class CustomerJourneyWidget extends LitElement {
     }
   }
 
-  encodeCustomer(customer: string | null): string | null {
-    const encodedCustomer = customer ? btoa(customer) : null;
-    return encodedCustomer;
+  encodeParameter(value: string | null): string | null {
+    const encodedValue = value ? btoa(value) : null;
+    return encodedValue;
   }
 
   getProfileFromTemplateId(customer: string | null, templateId: string) {
     this.profileData = undefined;
     this.getProfileDataInProgress = true;
 
-    const url = `${this.baseUrl}/v1/journey/views?templateId=${templateId}&personId=${this.encodeCustomer(customer)}`;
+    const url = `${this.baseUrl}/v1/journey/views?templateId=${templateId}&personId=${this.encodeParameter(customer)}`;
 
     const config: AxiosRequestConfig = {
       method: "GET",
@@ -406,7 +434,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
     this.getEventsInProgress = true;
     this.baseUrlCheck();
-    const url = `${this.baseUrl}/v1/journey/streams/historic/${this.encodeCustomer(customer)}`;
+    const url = `${this.baseUrl}/v1/journey/streams/historic/${this.encodeParameter(customer)}`;
 
     const config: AxiosRequestConfig = {
       method: "GET",
@@ -462,7 +490,7 @@ export default class CustomerJourneyWidget extends LitElement {
           Authorization: `SharedAccessSignature ${this.streamReadToken}`,
         },
       };
-      const encodedCustomer = this.encodeCustomer(customer);
+      const encodedCustomer = this.encodeParameter(customer);
       const url = `${this.baseUrl}/streams/v1/journey/person/${encodedCustomer}?${this.streamReadToken}`;
       this.eventSource = new EventSource(url, header);
     }
@@ -479,7 +507,7 @@ export default class CustomerJourneyWidget extends LitElement {
           data = JSON.parse(event.data);
           data.time = DateTime.fromISO(data.time);
 
-          if (data.data && data?.dataContentType === "string") {
+          if (data.data && (data?.datacontenttype === "string" || data?.dataContentType === "string")) {
             data.data = JSON.parse(data.data);
           }
           this.newestEvents = this.sortEventsbyDate([data, ...this.newestEvents]);
@@ -508,6 +536,13 @@ export default class CustomerJourneyWidget extends LitElement {
     }
 
     this.handleBackspace(srcEvent);
+  }
+
+  handleNamesUpdate(event: CustomEvent) {
+    this.nameApiErrorMessage = "";
+    const { firstName, lastName } = event?.detail;
+
+    this.addFirstLastNameIdentity(this.identityID, firstName, lastName);
   }
 
   renderEvents() {
@@ -552,6 +587,11 @@ export default class CustomerJourneyWidget extends LitElement {
           .profileData=${this.profileData}
           ?getProfileDataInProgress=${this.getProfileDataInProgress}
           error-message=${this.profileErrorMessage}
+          first-name=${this.firstName}
+          last-name=${this.lastName}
+          @edit-names=${this.handleNamesUpdate}
+          ?names-loading=${this.aliasNamesUpdateInProgress}
+          name-api-error-message=${this.nameApiErrorMessage}
         ></cjaas-profile>
       </section>
     `;
@@ -563,12 +603,13 @@ export default class CustomerJourneyWidget extends LitElement {
         <cjaas-identity
           .customer=${this.customer}
           .identityData=${this.identityData}
+          .aliasObjects=${this.aliasObjects}
           .aliasDeleteInProgress=${this.aliasDeleteInProgress}
           ?aliasGetInProgress=${this.aliasGetInProgress}
           ?aliasAddInProgress=${this.aliasAddInProgress}
           error-message=${this.aliasErrorMessage}
-          @deleteAlias=${(ev: CustomEvent) => this.deleteAliasById(this.identityID, ev.detail.alias)}
-          @addAlias=${(ev: CustomEvent) => this.addAliasById(this.identityID, ev.detail.alias)}
+          @delete-alias=${(ev: CustomEvent) => this.deleteAliasById(this.identityID, ev?.detail?.type, ev.detail.alias)}
+          @add-alias=${(ev: CustomEvent) => this.addAliasById(this.identityID, ev?.detail?.type, ev?.detail?.alias)}
           .minimal=${true}
         ></cjaas-identity>
       </section>
@@ -583,6 +624,41 @@ export default class CustomerJourneyWidget extends LitElement {
     return styles;
   }
 
+  createAliasMap(identities: Array<IdentityTypeObject> | undefined, aliases: Array<string> | undefined) {
+    const identityObjects: Array<AliasObject> = [];
+
+    if (identities) {
+      identities.forEach((identityTypeObject: IdentityTypeObject) => {
+        const { type, values } = identityTypeObject;
+        values.forEach((aliasValue: string) => {
+          identityObjects.push({ type, value: aliasValue });
+        });
+      });
+    }
+
+    this.debugLogMessage("identityObjects with types", identityObjects);
+
+    const existingAliases = identityObjects.map(identityObject => identityObject.value);
+
+    const oldAliases: Array<AliasObject> = [];
+    if (aliases) {
+      aliases.forEach((aliasValue: string) => {
+        let uniqueAlias = true;
+        existingAliases.forEach((existingValue: string) => {
+          if (existingValue === aliasValue) {
+            uniqueAlias = false;
+            return;
+          }
+        });
+        if (uniqueAlias) {
+          oldAliases.push({ type: RawAliasTypes.Unknown, value: aliasValue });
+        }
+      });
+    }
+
+    this.aliasObjects = identityObjects.concat(oldAliases);
+  }
+
   /**
    * Search for an Identity of an individual via aliases. This will return one/more Identities.
    * The Provided aliases belong to one/more Persons.
@@ -591,7 +667,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * @returns Promise<IdentityData | undefined>
    */
   async getAliasesByAlias(customer: string | null): Promise<IdentityData | undefined> {
-    const url = `${this.baseUrl}/v1/journey/identities?aliases=${this.encodeCustomer(customer)}`;
+    const url = `${this.baseUrl}/v1/journey/identities?aliases=${this.encodeParameter(customer)}`;
 
     const config: AxiosRequestConfig = {
       method: "GET",
@@ -611,9 +687,13 @@ export default class CustomerJourneyWidget extends LitElement {
     return axiosInstance
       .get(url)
       .then(response => {
-        const aliases = response?.data?.data?.length ? response?.data?.data[0] : undefined;
+        const identityAlias = response?.data?.data?.length ? response?.data?.data[0] : undefined;
+        const aliases = identityAlias?.aliases || undefined;
+        const identities = identityAlias?.identities || undefined;
+        this.createAliasMap(identities, aliases);
+
         this.aliasErrorMessage = "";
-        return aliases;
+        return identityAlias;
       })
       .catch((err: Error) => {
         console.error("[JDS Widget] Failed to fetch Aliases by Alias ", err);
@@ -634,7 +714,52 @@ export default class CustomerJourneyWidget extends LitElement {
    * @param alias
    * @returns void
    */
-  addAliasById(identityId: string | null, alias: string) {
+  addFirstLastNameIdentity(identityId: string | null, firstName: string, lastName: string) {
+    this.aliasNamesUpdateInProgress = true;
+
+    const url = `${this.baseUrl}/v1/journey/identities/${identityId}`;
+
+    if (!firstName.trim() && !lastName.trim()) {
+      console.error("[JDS Widget] You cannot add empty values to first or last name.");
+      return;
+    }
+
+    const requestData = JSON.stringify({
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+    });
+
+    const config: AxiosRequestConfig = {
+      method: "PUT",
+      data: requestData,
+      headers: {
+        Authorization: `SharedAccessSignature ${this.identityWriteToken}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    return axios(url, config)
+      .then((response: AxiosResponse<IdentityData>) => {
+        this.firstName = response?.data?.firstName;
+        this.lastName = response?.data?.lastName;
+        this.nameApiErrorMessage = "";
+      })
+      .catch(err => {
+        this.nameApiErrorMessage = `Failed to edit the name successfully`;
+        console.error(`[JDS Widget] Failed to edit Identity Names ${identityId}`, err?.response);
+      })
+      .finally(() => {
+        this.aliasNamesUpdateInProgress = false;
+      });
+  }
+
+  /**
+   * Add one or more aliases to existing Individual
+   * @param customer
+   * @param alias
+   * @returns void
+   */
+  addAliasById(identityId: string | null, aliasType: string, alias: string) {
     const url = `${this.baseUrl}/v1/journey/identities/${identityId}/aliases`;
 
     const trimmedAlias = alias.trim();
@@ -646,7 +771,12 @@ export default class CustomerJourneyWidget extends LitElement {
     this.aliasAddInProgress = true;
 
     const requestData = JSON.stringify({
-      aliases: [trimmedAlias],
+      identities: [
+        {
+          type: aliasType,
+          values: [alias],
+        },
+      ],
     });
 
     const config: AxiosRequestConfig = {
@@ -660,10 +790,12 @@ export default class CustomerJourneyWidget extends LitElement {
 
     return axios(url, config)
       .then((response: AxiosResponse<any>) => {
-        const responseData = response.data as addAliasResponseBody;
+        const responseData = response.data as IdentityData;
 
         if (this.identityData) {
           this.identityData.aliases = responseData?.aliases;
+          this.identityData = responseData;
+          this.createAliasMap(this.identityData?.identities, this.identityData?.aliases);
           this.requestUpdate();
         }
         this.aliasErrorMessage = "";
@@ -682,17 +814,19 @@ export default class CustomerJourneyWidget extends LitElement {
       });
   }
 
-  deleteAliasById(identityId: string | null, alias: string) {
+  deleteAliasById(identityId: string | null, aliasType: string, alias: string) {
     this.setInlineAliasLoader(alias, true);
-    const url = `${this.baseUrl}/v1/journey/identities/${identityId}/aliases`;
 
-    const requestData = JSON.stringify({
-      aliases: [alias],
-    });
+    const hasPlusSign = alias.charAt(0) === "+";
+
+    let aliasToDelete = alias;
+    if (aliasType === RawAliasTypes.Phone || hasPlusSign) {
+      aliasToDelete = this.encodeParameter(alias) || aliasToDelete;
+    }
+    const url = `${this.baseUrl}/v1/journey/identities/${identityId}/aliases?aliases=${aliasToDelete}`;
 
     const config: AxiosRequestConfig = {
       method: "DELETE",
-      data: requestData,
       headers: {
         Authorization: `SharedAccessSignature ${this.identityWriteToken}`,
         "Content-Type": "application/json",
@@ -701,16 +835,17 @@ export default class CustomerJourneyWidget extends LitElement {
 
     return axios(url, config)
       .then((response: any) => {
-        const responseData = response.data as deleteAliasResponseBody;
+        const responseData = response.data as IdentityData;
 
         if (this.identityData) {
-          this.identityData.aliases = responseData?.aliases;
+          this.identityData = responseData;
+          this.createAliasMap(this.identityData?.identities, this.identityData?.aliases);
           this.requestUpdate();
         }
         this.aliasErrorMessage = "";
       })
       .catch((err: Error) => {
-        console.error(`[JDS Widget] Failed to delete AliasById: (${identityId})`, requestData, err);
+        console.error(`[JDS Widget] Failed to delete AliasById: (${identityId})`, alias, err);
         this.aliasErrorMessage = `Failed to delete alias ${alias}.`;
       })
       .finally(() => {
