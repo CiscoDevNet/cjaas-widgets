@@ -218,11 +218,15 @@ cjaas-timeline::part(stream) {
 cjaas-identity {
   display: block;
   border-radius: 0.5rem;
-  // height: 8rem;
+  min-height: 150px;
 }
 
 cjaas-identity::part(alias-header-container) {
   display: none;
+}
+
+cjaas-identity::part(list) {
+  margin-top: 0;
 }
 
 cjaas-profile::part(top-content) {

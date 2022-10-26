@@ -11,14 +11,7 @@ export interface ProfileConfig {
     Metadata: any;
     Limit: number;
     DisplayName: string;
-    AggregationMode:
-      | "Value"
-      | "Count"
-      | "Sum"
-      | "Max"
-      | "Min"
-      | "Average"
-      | "Distinct";
+    AggregationMode: "Value" | "Count" | "Sum" | "Max" | "Min" | "Average" | "Distinct";
   }>;
 }
 
@@ -76,15 +69,23 @@ export interface JourneyEvent {
 //   };
 // }
 
+export interface IdentityTypeObject {
+  type: RAW_ALIAS_TYPES;
+  values: Array<string>;
+}
+
 export interface IdentityData {
   id: string;
   createdAt: string;
   modifiedAt: string;
   aliases: Array<string>;
+  identities: Array<IdentityTypeObject>;
+  firstName: string;
+  lastName: string;
 }
 
 export interface IdentityResponse {
-  aliasesSearched: Array<string>,
+  aliasesSearched: Array<string>;
   data: Array<IdentityData>;
 }
 
