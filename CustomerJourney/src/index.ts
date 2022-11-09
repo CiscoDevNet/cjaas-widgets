@@ -157,6 +157,11 @@ export default class CustomerJourneyWidget extends LitElement {
    */
   @property({ type: Boolean, attribute: "live-stream" }) liveStream = false;
   /**
+   * Toggle whether or not to ignore undefined origin timeline events
+   * @prop ignoreUndefinedOrigins
+   */
+  @property({ type: Boolean, attribute: "ignore-undefined-origins" }) ignoreUndefinedOrigins = false;
+  /**
    * Data pulled from Journey Profile retrieval (will match shape of provided Template)
    * @prop profileData
    */
@@ -459,7 +464,8 @@ export default class CustomerJourneyWidget extends LitElement {
           return event;
         });
         // const filteredEvents = this.filterEventTypes(EventType.Task, data.events);
-        const filteredEvents = myEvents;
+        const filteredEvents = this.filterOutUndefinedOrigins(myEvents);
+        // const filteredEvents = myEvents;
         this.events = this.sortEventsbyDate(filteredEvents);
         this.timelineErrorMessage = "";
         return filteredEvents;
@@ -474,6 +480,14 @@ export default class CustomerJourneyWidget extends LitElement {
           this.hasHistoricalEventsAPIBeenCalled = true;
         }
       });
+  }
+
+  filterOutUndefinedOrigins(events: Array<any>) {
+    if (this.ignoreUndefinedOrigins) {
+      return events.filter((event: any) => event?.data?.origin !== undefined);
+    } else {
+      return events;
+    }
   }
 
   subscribeToStream(customer: string | null) {
@@ -511,6 +525,7 @@ export default class CustomerJourneyWidget extends LitElement {
             data.data = JSON.parse(data.data);
           }
           this.newestEvents = this.sortEventsbyDate([data, ...this.newestEvents]);
+          this.newestEvents = this.filterOutUndefinedOrigins(this.newestEvents);
         } catch (err) {
           console.error("[JDS Widget] journey/stream: No parsable data fetched");
         }
@@ -526,6 +541,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
   updateComprehensiveEventList() {
     this.events = this.sortEventsbyDate([...this.newestEvents, ...this.events]);
+    this.events = this.filterOutUndefinedOrigins(this.events);
     this.newestEvents = [];
   }
 

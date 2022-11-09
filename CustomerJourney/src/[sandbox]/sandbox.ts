@@ -357,6 +357,7 @@ export class Sandbox extends LitElement {
    * webexcontactcenter
    */
   //  base-url="https://jds-prod-pf-westus2-apim.azure-api.net"
+  // natwestdemo@gmail.com
   renderOfficialDevVersion() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
 
@@ -381,6 +382,7 @@ export class Sandbox extends LitElement {
             profile-write-token=${PROFILE_WRITE_TOKEN}
             identity-read-token=${IDENTITY_READ_TOKEN}
             identity-write-token=${IDENTITY_WRITE_TOKEN}
+            ?ignore-undefined-origins=${false}
             live-stream
             time-frame="All"
           ></customer-journey-widget>
