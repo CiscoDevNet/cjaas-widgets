@@ -25,7 +25,7 @@ const IDENTITY_READ_TOKEN = process.env.DOTENV.IDENTITY_READ_TOKEN;
 const IDENTITY_WRITE_TOKEN = process.env.DOTENV.IDENTITY_WRITE_TOKEN;
 
 import "@momentum-ui/web-components";
-import "@cjaas/common-components";
+// import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
 import styles from "./sandbox.scss";
 import * as iconData from "@/assets/icons.json";
