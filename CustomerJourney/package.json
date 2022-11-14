@@ -1,6 +1,6 @@
 {
   "name": "@cjaas/customer-journey-widget",
-  "version": "8.0.7",
+  "version": "8.0.8-dev6",
   "author": {
     "name": "Kevin Hyde",
     "email": "kehyde@cisco.com"
@@ -24,10 +24,11 @@
     "jest": "^26.4.2",
     "jest-config": "^26.4.2",
     "lit-element": "2.3.1",
-    "lit-html": "1.2.1"
+    "lit-html": "1.2.1",
+    "@types/express-serve-static-core": "4.17.30"
   },
   "peerDependencies": {
-    "@cjaas/common-components": "4.3.9",
+    "@cjaas/common-components": "4.3.10-dev12",
     "@momentum-ui/core": "19.15.4",
     "@momentum-ui/icons": "8.25.0",
     "@momentum-ui/utils": "6.2.15",
@@ -38,7 +39,7 @@
   "devDependencies": {
     "@babel/core": "^7.9.0",
     "@babel/preset-env": "^7.9.0",
-    "@cjaas/common-components": "4.3.9",
+    "@cjaas/common-components": "4.3.10-dev12",
     "@momentum-ui/core": "19.15.4",
     "@momentum-ui/icons": "8.25.0",
     "@momentum-ui/utils": "6.2.15",
@@ -53,12 +54,13 @@
     "@types/luxon": "^1.25.1",
     "@types/node": "^13.13.52",
     "@types/webpack": "^4.41.7",
-    "@types/webpack-bundle-analyzer": "^4.4.1",
+    "@types/webpack-bundle-analyzer": "4.4.1",
     "@types/webpack-dev-server": "^3.10.0",
     "@types/webpack-merge": "^5.0.0",
     "@types/webpack-node-externals": "^1.7.1",
     "@typescript-eslint/eslint-plugin": "^2.22.0",
     "@typescript-eslint/parser": "^2.22.0",
+    "@types/express-serve-static-core": "4.17.30",
     "@wxcc-desktop/sdk-types": "^1.0.2",
     "alias-resolve-loader": "^2.0.4",
     "axios": "^0.21.4",
