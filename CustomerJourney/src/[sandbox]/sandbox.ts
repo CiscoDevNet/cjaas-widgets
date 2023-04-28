@@ -12,17 +12,17 @@
  */
 
 // @ts-ignore
-const TAPE_READ_TOKEN = process.env.DOTENV.TAPE_READ_TOKEN;
+const BEARER_TOKEN = process.env.DOTENV.BEARER_TOKEN;
 // @ts-ignore
-const STREAM_READ_TOKEN = process.env.DOTENV.STREAM_READ_TOKEN;
+const BASE_URL = process.env.DOTENV.BASE_URL;
 // @ts-ignore
-const PROFILE_READ_TOKEN = process.env.DOTENV.PROFILE_READ_TOKEN;
+const ORGANIZATION_ID = process.env.DOTENV.ORGANIZATION_ID;
 // @ts-ignore
-const PROFILE_WRITE_TOKEN = process.env.DOTENV.PROFILE_WRITE_TOKEN;
+const WORKSPACE_ID = process.env.DOTENV.WORKSPACE_ID;
 // @ts-ignore
-const IDENTITY_READ_TOKEN = process.env.DOTENV.IDENTITY_READ_TOKEN;
+const TEMLPATE_ID = process.env.DOTENV.TEMPLATE_ID;
 // @ts-ignore
-const IDENTITY_WRITE_TOKEN = process.env.DOTENV.IDENTITY_WRITE_TOKEN;
+const IDENTITY = process.env.DOTENV.IDENTITY;
 
 import "@momentum-ui/web-components";
 import "@cjaas/common-components";
@@ -31,7 +31,6 @@ import styles from "./sandbox.scss";
 import * as iconData from "@/assets/icons.json";
 import * as customIconData from "@/assets/custom-icons.json";
 import "..";
-import { TimeFrame } from "..";
 
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
@@ -98,178 +97,12 @@ export class Sandbox extends LitElement {
   }
 
   mockedInteractionData = {
-    ani: "egiere@cisco.com",
+    ani: IDENTITY,
+    // contactDirection: "OUTBOUND",
+    // dnis: "dnis",
   };
 
-  /**
-   * Using Elena's Resource Group
-   * API - https://jds-elenatst-westus-api.azurewebsites.net
-   * Data sink (Posting Events, Walk in) - https://jds-elenatst-westus-ds.azurewebsites.net
-   * Data stream (ReadStreamByPerson) - https://jds-elenatst-westus-st.azurewebsites.net
-   * example keyVault, not for this RS: https://devdeploytest-kv.vault.azure.net/
-   */
-  renderElenaResourceGroupVersion() {
-    const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
-    return html`
-      <div class="toggle">
-        ${this.themeToggle()}
-      </div>
-      <md-theme ?darkTheme=${this.darkTheme} lumos>
-        <div class="container">
-          <h2 class="sandbox-header">Customer Journey Widget </br><span style="font-size: 12px; font-weight: 100">Dev Version: using dev API endpoints & sasTokens</span></h2>
-          <div style=${containerStyle} class="widget-container">
-            <customer-journey-widget
-              limit="20"
-              customer="foobar"
-              user-search
-              .eventIconTemplate=${iconData}
-              base-url="https://jds-elenatst-westus-api.azurewebsites.net"
-              .tapeReadToken=${TAPE_READ_TOKEN}
-              .streamReadToken=${STREAM_READ_TOKEN}
-              .profileReadToken=${PROFILE_READ_TOKEN}
-              .profileWriteToken=${PROFILE_WRITE_TOKEN}
-              .identityReadToken=${IDENTITY_READ_TOKEN}
-              .identityWriteToken=${IDENTITY_WRITE_TOKEN}
-            ></customer-journey-widget>
-          </div>
-        </div>
-      </md-theme>
-    `;
-  }
-
-  /**
-   * Another Prod Test environment (https://cjaas-proddeploytest-api.azurewebsites.net)
-   */
-  renderProdTestVersion() {
-    const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
-    return html`
-      <div class="toggle">
-        ${this.themeToggle()}
-      </div>
-      <md-theme ?darkTheme=${this.darkTheme} lumos>
-        <div class="container">
-          <h2 class="sandbox-header">Customer Journey Widget </br><span style="font-size: 12px; font-weight: 100">Dev Version: using dev API endpoints & sasTokens</span></h2>
-          <div style=${containerStyle} class="widget-container">
-            <customer-journey-widget
-              limit="20"
-              customer="foobar"
-              user-search
-              .eventIconTemplate=${iconData}
-              base-url="https://cjaas-proddeploytest-api.azurewebsites.net"
-              template-id="journey-default-template"
-              .tapeReadToken=${TAPE_READ_TOKEN}
-              .streamReadToken=${STREAM_READ_TOKEN}
-              .profileReadToken=${PROFILE_READ_TOKEN}
-              .profileWriteToken=${PROFILE_WRITE_TOKEN}
-              .identityReadToken=${IDENTITY_READ_TOKEN}
-              .identityWriteToken=${IDENTITY_WRITE_TOKEN}
-            ></customer-journey-widget>
-          </div>
-        </div>
-      </md-theme>
-    `;
-  }
-
-  /**
-   * http://localhost:5192
-   * keyVault: "https://proddeploytest-kv.vault.azure.net/"
-   */
-  renderLocalProdTestVersion() {
-    const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
-    return html`
-      <div class="toggle">
-        ${this.themeToggle()}
-      </div>
-      <md-theme ?darkTheme=${this.darkTheme} lumos>
-        <div class="container">
-          <h2 class="sandbox-header">Customer Journey Widget </br><span style="font-size: 12px; font-weight: 100">Dev Version: using dev API endpoints & sasTokens</span></h2>
-          <div style=${containerStyle} class="widget-container">
-            <customer-journey-widget
-              limit="20"
-              customer="foobar"
-              user-search
-              .eventIconTemplate=${iconData}
-              base-url="http://localhost:5192"
-              .tapeReadToken=${TAPE_READ_TOKEN}
-              .streamReadToken=${STREAM_READ_TOKEN}
-              .profileReadToken=${PROFILE_READ_TOKEN}
-              .profileWriteToken=${PROFILE_WRITE_TOKEN}
-              .identityReadToken=${IDENTITY_READ_TOKEN}
-              .identityWriteToken=${IDENTITY_WRITE_TOKEN}
-            ></customer-journey-widget>
-          </div>
-        </div>
-      </md-theme>
-    `;
-  }
-
-  /**
-   * http://localhost:5192
-   * keyVault: "https://devdeploytest-kv.vault.azure.net/"
-   */
-  renderLocalDevTestVersion() {
-    const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
-    return html`
-      <div class="toggle">
-        ${this.themeToggle()}
-      </div>
-      <md-theme ?darkTheme=${this.darkTheme} lumos>
-        <div class="container">
-          <h2 class="sandbox-header">Customer Journey Widget </br><span style="font-size: 12px; font-weight: 100">Dev Version: using dev API endpoints & sasTokens</span></h2>
-          <div style=${containerStyle} class="widget-container">
-            <customer-journey-widget
-              limit="20"
-              customer="foobar"
-              user-search
-              .eventIconTemplate=${iconData}
-              base-url="http://localhost:5192"
-              .tapeReadToken=${TAPE_READ_TOKEN}
-              .streamReadToken=${STREAM_READ_TOKEN}
-              .profileReadToken=${PROFILE_READ_TOKEN}
-              .profileWriteToken=${PROFILE_WRITE_TOKEN}
-              .identityReadToken=${IDENTITY_READ_TOKEN}
-              .identityWriteToken=${IDENTITY_WRITE_TOKEN}
-            ></customer-journey-widget>
-          </div>
-        </div>
-      </md-theme>
-    `;
-  }
-
-  renderOldDevVersion() {
-    const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
-    // TODO: Verify that the JavaScript SAS Token script is still working. Below are keys made using Java from Srini
-    return html`
-      <div class="toggle">
-        ${this.themeToggle()}
-      </div>
-      <md-theme ?darkTheme=${this.darkTheme} lumos>
-        <div class="container">
-          <h2 class="sandbox-header">Customer Journey Widget </br><span style="font-size: 12px; font-weight: 100">Dev Version: using dev API endpoints & sasTokens</span></h2>
-          <div style=${containerStyle} class="widget-container">
-            <customer-journey-widget
-              limit="20"
-              customer="foobar"
-              user-search
-              .eventIconTemplate=${iconData}
-              base-url="https://cjaas-devus2.azurewebsites.net"
-              .tapeReadToken=${TAPE_READ_TOKEN}
-              .streamReadToken=${STREAM_READ_TOKEN}
-              .profileReadToken=${PROFILE_READ_TOKEN}
-              .profileWriteToken=${PROFILE_WRITE_TOKEN}
-              .identityReadToken=${IDENTITY_READ_TOKEN}
-              .identityWriteToken=${IDENTITY_WRITE_TOKEN}
-            ></customer-journey-widget>
-          </div>
-        </div>
-      </md-theme>
-    `;
-  }
-
-  /**
-   * Old Prod Version used within QA agent desktop environment
-   * */
-  renderOldProductionVersion() {
+  renderWidget() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
 
     return html`
@@ -281,110 +114,15 @@ export class Sandbox extends LitElement {
         <h2 class="sandbox-header">Customer Journey Widget </br><span style="font-size: 12px; font-weight: 100">Production Version: using prod API endpoints (same as QA Agent Desktop endpoints & sasTokens)</span></h2>
         <div style=${containerStyle} class="widget-container">
           <customer-journey-widget
-            limit="20"
-            user-search
-            customer="v3nki@cisco.com"
+            .bearerToken=${BEARER_TOKEN}
+            base-url=${BASE_URL}
+            .organizationId=${ORGANIZATION_ID}
             .interactionData=${this.mockedInteractionData}
-            .eventIconTemplate=${iconData}
-            base-url="https://uswest-nonprod.cjaas.cisco.com"
-            .tapeReadToken=${TAPE_READ_TOKEN}
-            .streamReadToken=${STREAM_READ_TOKEN}
-            .profileReadToken=${PROFILE_READ_TOKEN}
-            .profileWriteToken=${PROFILE_WRITE_TOKEN}
-            .identityReadToken=${IDENTITY_READ_TOKEN}
-            .identityWriteToken=${IDENTITY_WRITE_TOKEN}
-          ></customer-journey-widget>
-        </div>
-      </div>
-    </md-theme>
-  `;
-  }
-
-  /**
-   * New Production Version coming soon
-   * BaseUrl      https://jds-prod-pf-westus-apim.azure-api.net
-   * Data sink    https://jds-prod-pf-westus-apim.azure-api.net/events
-   * Data stream  https://jds-prod-pf-westus-apim.azure-api.net/streams
-   * KeyVault     https://jds-prod-pf-westus-kv.vault.azure.net/
-   *
-   * https://jds-prod-pf-westus-apim.azure-api.net/
-   *
-   * OrgName      testorg
-   * Namespace    sandbox
-   * KeyName      testorg
-   * */
-
-  //  https://jds-prod-pf-westus-apim.azure-api.net
-  renderOfficialProductionVersion() {
-    const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
-
-    return html`
-    <div class="toggle">
-      ${this.themeToggle()}
-    </div>
-    <md-theme ?darkTheme=${this.darkTheme} lumos>
-      <div class="container">
-        <h2 class="sandbox-header">Customer Journey Widget </br><span style="font-size: 12px; font-weight: 100">Production Version: using prod API endpoints (same as QA Agent Desktop endpoints & sasTokens)</span></h2>
-        <div style=${containerStyle} class="widget-container">
-          <customer-journey-widget
-            limit="20"
-            user-search
-            customer="egiere@gmail.com"
-            logs-on
-            base-url="https://jds-us1.cjaas.cisco.com"
-            tape-read-token=${TAPE_READ_TOKEN}
-            stream-read-token=${STREAM_READ_TOKEN}
-            profile-read-token=${PROFILE_READ_TOKEN}
-            profile-write-token=${PROFILE_WRITE_TOKEN}
-            identity-read-token=${IDENTITY_READ_TOKEN}
-            identity-write-token=${IDENTITY_WRITE_TOKEN}
+            workspace-id=${WORKSPACE_ID}
+            template-id=${TEMLPATE_ID}
             live-stream
-            time-frame="All"
-          ></customer-journey-widget>
-        </div>
-      </div>
-    </md-theme>
-  `;
-  }
-
-  // icon-data-path="https://cjaas.cisco.com/widgets/iconMaps/custom-icons.json"
-
-  /**
-   * Official Dev Environment
-   * https://jds-dev-pf-westus2-kv.vault.azure.net/
-   * wxccmailinator
-   * sandbox
-   * webexcontactcenter
-   */
-  //  base-url="https://jds-prod-pf-westus2-apim.azure-api.net"
-  // natwestdemo@gmail.com
-  renderOfficialDevVersion() {
-    const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
-
-    return html`
-    <div class="toggle">
-      ${this.themeToggle()}
-    </div>
-    <md-theme ?darkTheme=${this.darkTheme} lumos>
-      <div class="container">
-        <h2 class="sandbox-header">Customer Journey Widget </br><span style="font-size: 12px; font-weight: 100">Production Version: using prod API endpoints (same as QA Agent Desktop endpoints & sasTokens)</span></h2>
-        <div style=${containerStyle} class="widget-container">
-          <customer-journey-widget
-            limit="20"
-            user-search
-            customer="ross_geller@gmail.com"
             logs-on
-            .eventIconTemplate=${iconData}
-            base-url="https://uswest-nonprod.cjaas.cisco.com"
-            tape-read-token=${TAPE_READ_TOKEN}
-            stream-read-token=${STREAM_READ_TOKEN}
-            profile-read-token=${PROFILE_READ_TOKEN}
-            profile-write-token=${PROFILE_WRITE_TOKEN}
-            identity-read-token=${IDENTITY_READ_TOKEN}
-            identity-write-token=${IDENTITY_WRITE_TOKEN}
-            ?ignore-undefined-origins=${false}
-            live-stream
-            time-frame="All"
+            user-search
           ></customer-journey-widget>
         </div>
       </div>
@@ -392,30 +130,29 @@ export class Sandbox extends LitElement {
   `;
   }
 
-  // collapse-alias-section
-  // collapse-profile-section
-  // collapse-timeline-section
-  // time-frame=${TimeFrame["24-Hours"]}
+  //   `@prop bearerToken`: (<i>string</i>) - Agent Desktop bearerToken. Look at example to fetch directly from agent desktop store.
+
+  // `@prop interactionData`: (<i>object</i>) - Agent Desktop Interaction Data. Needs to have an `ani` property within object. This allows the JDS Widget to auto-populate with the current customer that the agent is interacting with. This overrides the customer attribute.
+
+  // `@prop organizationId`: (<i>string</i>) - Agent's organizationId. You can fetch it directly from agent desktop store. Check out examples.
+
+  // `@attr base-url`: (<i>String</i>) - Path to the proper Customer Journey API deployment
+
+  // `@attr workspace-id`: (<i>String</i>) - WorkspaceId sets the scope within the selected org. You can obtain this from the admin portal.
+
+  // `@attr template-id`: (<i>String</i>) - Sets the data template to retrieve customer Profile in desired format. You can obtain this by running get All templates Api. You might need to get assistance to create a templateId initially.
 
   render() {
-    /** You need to make sure you have the sasTokens appropriately defined in your .env file that are associated with dev or prod
-      TAPE_TOKEN
-      PROFILE_READ_TOKEN
-      PROFILE_WRITE_TOKEN
-      STREAM_TOKEN
-      IDENTITY_READ_SAS_TOKEN
-      IDENTITY_WRITE_SAS_TOKEN
-    */
+    /** Update .env file
+     * PRIVATE_KEY
+     * BEARER_TOKEN
+     * BASE_URL
+     * ORGANIZATION_ID
+     * WORKSPACE_ID
+     * TEMPLATE_ID
+     * IDENTITY
+     */
 
-    // return this.renderDevVersion();
-    // return this.renderProductionVersion();
-    // return this.renderProdTestVersion();
-    // return this.renderDevTestVersion();
-    // return this.renderLocalDevTestVersion();
-    // return this.renderLocalProdTestVersion();
-    // return this.renderElenaResourceGroupVersion();
-
-    return this.renderOfficialDevVersion();
-    // return this.renderOfficialProductionVersion();
+    return this.renderWidget();
   }
 }

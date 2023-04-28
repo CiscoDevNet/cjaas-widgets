@@ -1,5 +1,5 @@
 import * as helper from "./helper";
-import { SASTokens, UserData } from "./interface";
+import { UserData } from "./interface";
 
 declare const finesse: any;
 declare const gadgets: any;

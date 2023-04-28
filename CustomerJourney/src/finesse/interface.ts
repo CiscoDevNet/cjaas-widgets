@@ -1,15 +1,9 @@
 import { TimeFrame } from "..";
 
-export interface SASTokens {
-  tapeReadToken: string;
-  streamReadToken: string;
-  profileReadToken: string;
-  profileWriteToken: string;
-  identityReadToken: string;
-  identityWriteToken: string;
-}
-
 export interface QueryParameters {
+  bearerToken: string | null;
+  organizationId: string | undefined;
+  workspaceId: string | undefined;
   baseUrl: string;
   limit?: number;
   customer?: string;
@@ -22,22 +16,13 @@ export interface QueryParameters {
   collapseAliasSection?: boolean;
   iconDataPath?: string;
   templateId: string;
-  tapeReadToken: string;
-  streamReadToken: string;
-  profileReadToken: string;
-  profileWriteToken: string;
-  identityReadToken: string;
-  identityWriteToken: string;
 }
 
 export enum QueryParams {
   baseUrl = "baseUrl",
-  tapeReadToken = "tapeReadToken",
-  streamReadToken = "streamReadToken",
-  profileReadToken = "profileReadToken",
-  profileWriteToken = "profileWriteToken",
-  identityReadToken = "identityReadToken",
-  identityWriteToken = "identityWriteToken",
+  bearerToken = "bearerToken",
+  organizationId = "organizationId",
+  workspaceId = "workspaceId",
   minHeight = "minHeight",
   templateId = "templateId",
 }

@@ -15,6 +15,7 @@
       "@/*": ["./*"],
       "@css/*": ["./assets/styles/*"],
       "@img/*": ["./assets/images/*"],
+      "@types/*": ["./types/*"],
     }
   },
   "files": [

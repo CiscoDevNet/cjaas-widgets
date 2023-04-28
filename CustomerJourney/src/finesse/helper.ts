@@ -1,4 +1,4 @@
-import { QueryParameters, QueryParams, SASTokens, UserData } from "./interface";
+import { QueryParameters, QueryParams, UserData } from "./interface";
 import * as iconData from "@/assets/icons.json";
 import { TimeFrame } from "..";
 
@@ -83,13 +83,11 @@ export const setParametersToWidget = (queryParams: QueryParameters) => {
 
   console.log("[JDS Widget][finesse wrapper][setParametersToWidget] queryParams:", queryParams);
 
-  const tapeReadToken = sanitize(queryParams[QueryParams.tapeReadToken]);
-  const streamReadToken = sanitize(queryParams[QueryParams.streamReadToken]);
-  const profileReadToken = sanitize(queryParams[QueryParams.profileReadToken]);
-  const profileWriteToken = sanitize(queryParams[QueryParams.profileWriteToken]);
-  const identityReadToken = sanitize(queryParams[QueryParams.identityReadToken]);
-  const identityWriteToken = sanitize(queryParams[QueryParams.identityWriteToken]);
+  const sanitizedBearerToken = queryParams.bearerToken ? sanitize(queryParams[QueryParams.bearerToken]) : null;
 
+  widget.bearerToken = sanitizedBearerToken;
+  widget.organizationId = queryParams?.organizationId;
+  widget.workspaceId = queryParams?.workspaceId;
   widget.baseUrl = queryParams?.baseUrl;
   widget.limit = queryParams?.limit || 20;
   widget.customer = queryParams?.customer || null;
@@ -102,13 +100,6 @@ export const setParametersToWidget = (queryParams: QueryParameters) => {
   widget.collapseTimelineSection = queryParams?.collapseTimelineSection || false;
   widget.iconDataPath = queryParams?.iconDataPath || "";
   widget.templateId = queryParams?.templateId || "journey-default-template";
-
-  widget.tapeReadToken = tapeReadToken || null;
-  widget.streamReadToken = streamReadToken || null;
-  widget.profileReadToken = profileReadToken || null;
-  widget.profileWriteToken = profileWriteToken || null;
-  widget.identityReadToken = identityReadToken || null;
-  widget.identityWriteToken = identityWriteToken || null;
   widget.userSearch = true;
   widget.eventIconTemplate = iconData;
 

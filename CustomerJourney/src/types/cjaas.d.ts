@@ -1,3 +1,5 @@
+import { RawAliasTypes } from "@/widgets";
+
 export interface ServerSentEvent {
   data: string;
 }
@@ -56,36 +58,32 @@ export interface JourneyEvent {
   type: string;
 }
 
-// OLD IdentityResponse
-// export interface IdentityResponse {
-//   meta: {
-//     orgId: string;
-//   };
-//   data: {
-//     namespace: string;
-//     id: string;
-//     aliases: string[];
-//     lastSeen: JourneyEvent;
-//   };
-// }
-
 export interface IdentityTypeObject {
-  type: RAW_ALIAS_TYPES;
+  type: RawAliasTypes;
   values: Array<string>;
 }
 
 export interface IdentityData {
-  id: string;
   createdAt: string;
-  modifiedAt: string;
-  aliases: Array<string>;
-  identities: Array<IdentityTypeObject>;
+  createdBy: string;
+  updatedAt: string;
+  updatedBy: string;
+  id: string;
   firstName: string;
   lastName: string;
+  phone: Array<string>;
+  email: Array<string>;
+  temporaryId: Array<string>;
+  customerId: Array<string>;
+  aliases: Array<string>;
+  organizationId: string;
+  workspaceId: string;
 }
 
 export interface IdentityResponse {
-  aliasesSearched: Array<string>;
+  meta: {
+    organizationId: string;
+  };
   data: Array<IdentityData>;
 }
 
@@ -103,4 +101,15 @@ export interface Alias {
   namespace: string;
   id: string;
   aliases: string[];
+}
+
+export interface AliasObject {
+  type: RawAliasTypes;
+  value: string;
+}
+
+export interface jsonPatchOperation {
+  op: string;
+  path: string;
+  value: string;
 }
