@@ -109,6 +109,11 @@ export default class CustomerJourneyWidget extends LitElement {
    * @attr customer
    */
   @property({ type: String, reflect: true }) customer: string | null = null;
+  /**
+   * Customer ID or alias used for Journey lookup
+   * @attr customer
+   */
+  @property({ type: String, attribute: "cad-variable-lookup" }) cadVariableLookup: string | null = null;
 
   /**
    * Toggles display of field to find new Journey profiles
@@ -318,12 +323,32 @@ export default class CustomerJourneyWidget extends LitElement {
       if (this.interactionData) {
         this.debugLogMessage("interactionData", this.interactionData);
 
-        if (this.interactionData?.contactDirection === "OUTBOUND") {
+        let cadVariableValue;
+        if (this.cadVariableLookup && this.interactionData?.callAssociatedData) {
+          cadVariableValue = this.interactionData.callAssociatedData[this.cadVariableLookup]?.value;
+          if (!cadVariableValue) {
+            console.error(
+              `The CAD Variable (${this.cadVariableLookup}) doesn\'t exist within this interaction. Please check your flow configuration.`
+            );
+          }
+        }
+
+        if (cadVariableValue) {
+          this.customer = cadVariableValue;
+          this.debugLogMessage(`SET customer identifier (CAD Variable: ${this.cadVariableLookup})`, this.customer);
+        } else if (this.interactionData?.contactDirection === "OUTBOUND") {
           this.customer = this.interactionData?.dnis || null;
+          this.debugLogMessage(
+            `SET customer identifier (contactDirection: ${this.interactionData?.contactDirection})`,
+            this.customer
+          );
         } else {
           this.customer = this.interactionData?.ani || null;
+          this.debugLogMessage(
+            `SET customer identifier (contactDirection: ${this.interactionData?.contactDirection})`,
+            this.customer
+          );
         }
-        this.debugLogMessage(`SET customer identifier (${this.interactionData?.contactDirection})`, this.customer);
       } else {
         this.customer = null;
       }

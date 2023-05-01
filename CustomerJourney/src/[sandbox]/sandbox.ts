@@ -31,6 +31,7 @@ import styles from "./sandbox.scss";
 import * as iconData from "@/assets/icons.json";
 import * as customIconData from "@/assets/custom-icons.json";
 import "..";
+import { mockedInteractionData } from "./sandbox.mock";
 
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
@@ -96,12 +97,6 @@ export class Sandbox extends LitElement {
     } else return console.error("Invalid data-aspect input");
   }
 
-  mockedInteractionData = {
-    ani: IDENTITY,
-    // contactDirection: "OUTBOUND",
-    // dnis: "dnis",
-  };
-
   renderWidget() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
 
@@ -117,7 +112,7 @@ export class Sandbox extends LitElement {
             .bearerToken=${BEARER_TOKEN}
             base-url=${BASE_URL}
             .organizationId=${ORGANIZATION_ID}
-            .interactionData=${this.mockedInteractionData}
+            .interactionData=${mockedInteractionData("INBOUND", IDENTITY)}
             workspace-id=${WORKSPACE_ID}
             template-id=${TEMLPATE_ID}
             live-stream
@@ -129,18 +124,6 @@ export class Sandbox extends LitElement {
     </md-theme>
   `;
   }
-
-  //   `@prop bearerToken`: (<i>string</i>) - Agent Desktop bearerToken. Look at example to fetch directly from agent desktop store.
-
-  // `@prop interactionData`: (<i>object</i>) - Agent Desktop Interaction Data. Needs to have an `ani` property within object. This allows the JDS Widget to auto-populate with the current customer that the agent is interacting with. This overrides the customer attribute.
-
-  // `@prop organizationId`: (<i>string</i>) - Agent's organizationId. You can fetch it directly from agent desktop store. Check out examples.
-
-  // `@attr base-url`: (<i>String</i>) - Path to the proper Customer Journey API deployment
-
-  // `@attr workspace-id`: (<i>String</i>) - WorkspaceId sets the scope within the selected org. You can obtain this from the admin portal.
-
-  // `@attr template-id`: (<i>String</i>) - Sets the data template to retrieve customer Profile in desired format. You can obtain this by running get All templates Api. You might need to get assistance to create a templateId initially.
 
   render() {
     /** Update .env file

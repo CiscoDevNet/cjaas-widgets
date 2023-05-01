@@ -39,6 +39,7 @@ https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
 
 `@attr template-id`: (<i>String</i>) - Sets the data template to retrieve customer Profile in desired format. You can obtain this by running get All templates Api. You might need to get assistance to create a templateId initially.
 
+`@attr cad-variable-lookup`: (<i>String</i>) - Pass in a CAD Variable lookup value, which will fetch the defined value to that CAD Variable if it exists within the interactionData.
   
 #### Optional Properties
 `@attr customer`: (<i>String</i>) - Customer ID used for Journey lookup. (<i>PS: This is an alternative to InteractionData. InteractionData always overrides customer attribute.</i>)
@@ -81,6 +82,8 @@ workspace-id=${WORKSPACE_ID}
 
 template-id=${TEMPLATE_ID}
 
+cad-variable-lookup=${CAD-VARIABLE}
+
 .bearerToken=${BEARER_TOKEN}
 
 .eventIconTemplate=${iconData}
@@ -122,6 +125,8 @@ base-url="https://api-jds.dev-uswest2.ciscowxdap.com"
 workspace-id=${WORKSPACE_ID}
 
 template-id=${TEMPLATE_ID}
+
+cad-variable-lookup=${CAD-VARIABLE}
 
 .bearerToken=${BEARER_TOKEN}
 
@@ -172,6 +177,8 @@ time-frame="All"
 "workspace-id": "<your-workspace-id>",
 
 "template-id": "<your-template-id>",
+
+"cad-variable-lookup": "<your-cad-variable>",
 
 "live-stream": "true",
 
