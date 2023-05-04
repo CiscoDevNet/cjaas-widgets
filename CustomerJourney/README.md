@@ -60,6 +60,8 @@ https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
 
 `@attr user-search`: (<i>Boolean</i>) = false - Enables the Agent to search other customers by an identifier.
 
+`@attr read-only-aliases`: (<i>Boolean</i>) = false - Toggle to make alias section read only. In read only mode, the agent won't be able to add or remove aliases within this section.
+
 `@attr icon-data-path`: (<i>String</i>) - URL path of JSON template to set color and icon settings.
 
 `@prop eventIconTemplate`: (<i>json object</i>) = iconData (built-in) - Property to pass in JSON template to set color and icon settings.

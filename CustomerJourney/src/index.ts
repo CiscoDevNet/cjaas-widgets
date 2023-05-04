@@ -120,6 +120,13 @@ export default class CustomerJourneyWidget extends LitElement {
    * @attr user-search
    */
   @property({ type: Boolean, attribute: "user-search" }) userSearch = false;
+
+  /**
+   * Path to the proper Customer Journey API deployment
+   * @attr base-url
+   */
+  @property({ type: Boolean, attribute: "read-only-aliases" }) readOnlyAliases = false;
+
   /**
    * Set the number of Timeline Events to display
    * @attr limit
@@ -755,6 +762,7 @@ export default class CustomerJourneyWidget extends LitElement {
           @delete-alias=${(ev: CustomEvent) => this.deleteAliasById(this.identityId, ev?.detail?.type, ev.detail.alias)}
           @add-alias=${(ev: CustomEvent) => this.addAliasById(this.identityId, ev?.detail?.type, ev?.detail?.alias)}
           .minimal=${true}
+          ?read-only=${this.readOnlyAliases}
         ></cjaas-identity>
       </section>
     `;
