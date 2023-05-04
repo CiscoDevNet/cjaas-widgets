@@ -4,9 +4,9 @@ This widget uses the JDS (Journey Data Services) APIs to display an individual c
 
 ### Latest Version
 
-customer-journey-8.0.7.js
+customer-journey-8.0.9.js
 
-<sub>_* Any older version will no longer work because the backend APIs have breaking changes. Please use this version going forward_</sub>
+<sub>_* Any older version older than 8.0.7 will no longer work because the backend APIs have breaking changes. Please use this version going forward_</sub>
 
 ### Customer Journey Widget Properties
 
@@ -14,8 +14,9 @@ customer-journey-8.0.7.js
 
 * The following attributes and properties of JDS Widget are supported with the following version
 ```
-https://cjaas.cisco.com/widgets/customer-journey-8.0.7.js
+https://cjaas.cisco.com/widgets/customer-journey-8.0.9.js
 ```
+`@attr user-search`: (<i>Boolean</i>) = false - Enables the Agent to search other customers by an identifier.
 
 `@attr stream-read-token`: (<i>String</i>) - SAS Token for reading stream API (live stream events within Timeline)
 
@@ -45,6 +46,8 @@ https://cjaas.cisco.com/widgets/customer-journey-8.0.7.js
 
 `@attr collapse-alias-section`: (<i>Boolean</i>) = false - Toggle to have the Alias Section collapsed at start up.
 
+`@attr read-only-aliases`: (<i>Boolean</i>) = false - Toggle to make alias section read only. In read only mode, the agent won't be able to add or remove aliases within this section.
+
 `@attr time-frame`: (<i>"All" | "24-Hours" | "7-Days" | "30-Days"</i>) = "All" - Set the time frame the timeline section has selected at start up.
 
 `@attr live-stream`: (<i>Boolean</i>) = false - Toggle to set whether or not the timeline section is loading events in real time.
@@ -54,6 +57,8 @@ https://cjaas.cisco.com/widgets/customer-journey-8.0.7.js
 `@prop interactionData`: (<i>object</i>) - Agent Desktop Interaction Data. Needs to have an `ani` property within object. This allows the JDS Widget to auto-populate with the current customer that the agent is interacting with. This overrides the customer attribute.
 
 `@prop eventIconTemplate`: (<i>json object</i>) = iconData (built-in) - Property to pass in JSON template to set color and icon settings.
+
+`@attr cad-variable-lookup`: (<i>String</i>) - Pass in a CAD Variable lookup value, which will fetch the defined value to that CAD Variable if it exists within the interactionData. *When setting a CAD Variable within flow control, you will need to check the box `Make Agent Viewable`.
 
 ## Examples 
 ### The following example is showcasing how to embed this widget within lit-element code
@@ -71,8 +76,10 @@ https://cjaas.cisco.com/widgets/customer-journey-8.0.7.js
       limit=${20}
       logs-on
       live-stream
+      user-search
       time-frame="30-Days"
       icon-data-path="https://cjaas.cisco.com/widgets/iconMaps/defaultIcons.json"
+      cad-variable-lookup=${CAD-VARIABLE}
     ></customer-journey-widget>
 ```
 
@@ -94,6 +101,7 @@ https://cjaas.cisco.com/widgets/customer-journey-8.0.7.js
     "attributes": {	
        "base-url": "https://jds-us1.cjaas.cisco.com",
        "logs-on": "true",
+       "user-search": "true",
        "tape-read-token": "<your-tape-read-token>",
        "profile-read-token": "<your-profile-read-token>",
        "profile-write-token": "<your-profile-write-token>",
@@ -106,7 +114,8 @@ https://cjaas.cisco.com/widgets/customer-journey-8.0.7.js
        "collapse-profile-section": "true",
        "collapse-alias-section": "true",
        "collapse-timeline-section": "true",
-       "icon-data-path": "https://cjaas.cisco.com/widgets/iconMaps/defaultIcons.json"
+       "icon-data-path": "https://cjaas.cisco.com/widgets/iconMaps/defaultIcons.json",
+       "cad-variable-lookup": "customerId"
     },
     "properties": {
        "interactionData": "$STORE.agentContact.taskSelected"
@@ -134,6 +143,7 @@ https://cjaas.cisco.com/widgets/customer-journey-8.0.7.js
     "script": "https://cjaas.cisco.com/widgets/customer-journey-8.0.7.js",
     "attributes": {	
        "customer": "Ben Smith",
+       "user-search": "true",
        "base-url": "https://jds-us1.cjaas.cisco.com",
        "tape-read-token": "<your-tape-read-token>",
        "profile-read-token": "<your-profile-read-token>",
@@ -141,6 +151,7 @@ https://cjaas.cisco.com/widgets/customer-journey-8.0.7.js
        "stream-read-token": "<your-stream-read-token>",
        "identity-read-token": "<your-identity-read-token>",
        "identity-write-token": "<your-identity-write-token>",
+       "cad-variable-lookup": "<cad-variable-name>"
     },
     "wrapper": {
         "title": "Customer Journey Widget",

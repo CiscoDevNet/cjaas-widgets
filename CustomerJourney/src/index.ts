@@ -22,6 +22,7 @@ import { DateTime } from "luxon";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 // @ts-ignore
 import { version } from "../version";
+import { nothing } from "lit-html";
 
 export enum RawAliasTypes {
   Phone = "phone",
@@ -57,6 +58,11 @@ export default class CustomerJourneyWidget extends LitElement {
    */
   @property({ type: String, attribute: "base-url" }) baseUrl: string | undefined = undefined;
   /**
+   * Path to the proper Customer Journey API deployment
+   * @attr base-url
+   */
+  @property({ type: Boolean, attribute: "read-only-aliases" }) readOnlyAliases = false;
+  /**
    * Customer ID used for Journey lookup
    * @attr customer
    */
@@ -67,6 +73,12 @@ export default class CustomerJourneyWidget extends LitElement {
    */
   @property({ type: String, attribute: "profile-read-token" })
   profileReadToken: string | null = null;
+  /**
+   * Customer ID or alias used for Journey lookup
+   * @attr customer
+   */
+  @property({ type: String, attribute: "cad-variable-lookup" }) cadVariableLookup: string | null = null;
+
   /**
    * SAS Token that provides write permissions to Journey API (used for POST data template in Profile retrieval)
    * @attr profile-write-token
@@ -96,7 +108,7 @@ export default class CustomerJourneyWidget extends LitElement {
    */
   @property({ type: String, attribute: "stream-read-token" }) streamReadToken: string | null = null;
   /**
-   * Toggles display of field to find new Journey profiles
+   * Toggles display of field to find new Journey profiles by identity
    * @attr user-search
    */
   @property({ type: Boolean, attribute: "user-search" }) userSearch = false;
@@ -290,7 +302,33 @@ export default class CustomerJourneyWidget extends LitElement {
     if (changedProperties.has("interactionData")) {
       if (this.interactionData) {
         this.debugLogMessage("interactionData", this.interactionData);
-        this.customer = this.interactionData?.["ani"] || null;
+
+        let cadVariableValue;
+        if (this.cadVariableLookup && this.interactionData?.callAssociatedData) {
+          cadVariableValue = this.interactionData.callAssociatedData[this.cadVariableLookup]?.value;
+          if (!cadVariableValue) {
+            console.error(
+              `The CAD Variable (${this.cadVariableLookup}) doesn\'t exist within this interaction. Please check your flow configuration.`
+            );
+          }
+        }
+
+        if (cadVariableValue) {
+          this.customer = cadVariableValue;
+          this.debugLogMessage(`SET customer identifier (CAD Variable: ${this.cadVariableLookup})`, this.customer);
+        } else if (this.interactionData?.contactDirection === "OUTBOUND") {
+          this.customer = this.interactionData?.dnis || null;
+          this.debugLogMessage(
+            `SET customer identifier (contactDirection: ${this.interactionData?.contactDirection})`,
+            this.customer
+          );
+        } else {
+          this.customer = this.interactionData?.ani || null;
+          this.debugLogMessage(
+            `SET customer identifier (contactDirection: ${this.interactionData?.contactDirection})`,
+            this.customer
+          );
+        }
       } else {
         this.customer = null;
       }
@@ -627,6 +665,7 @@ export default class CustomerJourneyWidget extends LitElement {
           @delete-alias=${(ev: CustomEvent) => this.deleteAliasById(this.identityID, ev?.detail?.type, ev.detail.alias)}
           @add-alias=${(ev: CustomEvent) => this.addAliasById(this.identityID, ev?.detail?.type, ev?.detail?.alias)}
           .minimal=${true}
+          ?read-only=${this.readOnlyAliases}
         ></cjaas-identity>
       </section>
     `;
@@ -968,7 +1007,7 @@ export default class CustomerJourneyWidget extends LitElement {
     return html`
       <div class="customer-journey-widget-container">
         <div class="top-header-row">
-          ${this.renderMainInputSearch()}
+          ${this.userSearch ? this.renderMainInputSearch() : nothing}
         </div>
         ${this.customer ? this.renderSubWidgets() : this.renderEmptyStateView()}
       </div>

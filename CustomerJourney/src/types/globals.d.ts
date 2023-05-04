@@ -65,7 +65,7 @@ declare global {
     isHold?: boolean;
     ctqInProgress?: boolean;
     outdialTransferToQueueEnabled?: boolean;
-    callAssociatedData?: string;
+    callAssociatedData?: Record<string, any>;
     hasCustomerLeft?: boolean;
     isConvNotFound?: boolean;
     updatedBy?: string;

@@ -32,6 +32,7 @@ import * as iconData from "@/assets/icons.json";
 import * as customIconData from "@/assets/custom-icons.json";
 import "..";
 import { TimeFrame } from "..";
+import { mockedInteractionData } from "./sandbox.mock";
 
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
@@ -97,9 +98,9 @@ export class Sandbox extends LitElement {
     } else return console.error("Invalid data-aspect input");
   }
 
-  mockedInteractionData = {
-    ani: "egiere@cisco.com",
-  };
+  //   mockedInteractionData = {
+  //     ani: "egiere@cisco.com",
+  //   };
 
   /**
    * Using Elena's Resource Group
@@ -284,7 +285,7 @@ export class Sandbox extends LitElement {
             limit="20"
             user-search
             customer="v3nki@cisco.com"
-            .interactionData=${this.mockedInteractionData}
+            .interactionData=${mockedInteractionData("INBOUND", "rossgeller@gmail.com")}
             .eventIconTemplate=${iconData}
             base-url="https://uswest-nonprod.cjaas.cisco.com"
             .tapeReadToken=${TAPE_READ_TOKEN}
@@ -318,6 +319,9 @@ export class Sandbox extends LitElement {
   renderOfficialProductionVersion() {
     const containerStyle = `width: ${this.containerWidth}; height: ${this.containerHeight};`;
 
+    // new property
+    // read-only-aliases
+
     return html`
     <div class="toggle">
       ${this.themeToggle()}
@@ -329,7 +333,7 @@ export class Sandbox extends LitElement {
           <customer-journey-widget
             limit="20"
             user-search
-            customer="egiere@gmail.com"
+            customer="rossgeller@gmail.com"
             logs-on
             base-url="https://jds-us1.cjaas.cisco.com"
             tape-read-token=${TAPE_READ_TOKEN}
@@ -415,7 +419,7 @@ export class Sandbox extends LitElement {
     // return this.renderLocalProdTestVersion();
     // return this.renderElenaResourceGroupVersion();
 
-    return this.renderOfficialDevVersion();
-    // return this.renderOfficialProductionVersion();
+    // return this.renderOfficialDevVersion();
+    return this.renderOfficialProductionVersion();
   }
 }
