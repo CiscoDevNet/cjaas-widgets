@@ -100,10 +100,10 @@ export default class CustomerJourneyWidget extends LitElement {
    */
   @property({ type: String, attribute: "base-url" }) baseUrl: string | undefined = undefined;
   /**
-   * Workspace ID within your organization
-   * @attr workspace-id
+   * Project ID within your organization
+   * @attr project-id
    */
-  @property({ type: String, attribute: "workspace-id" }) workspaceId: string | undefined = undefined;
+  @property({ type: String, attribute: "project-id" }) projectId: string | undefined = undefined;
   /**
    * Customer ID or alias used for Journey lookup
    * @attr customer
@@ -310,17 +310,17 @@ export default class CustomerJourneyWidget extends LitElement {
 
     if (
       (changedProperties.has("organizationId") ||
-        changedProperties.has("workspaceId") ||
+        changedProperties.has("projectId") ||
         changedProperties.has("templateId")) &&
       this.organizationId &&
-      this.workspaceId &&
+      this.projectId &&
       this.templateId
     ) {
       this.debugLogMessage(
         "organizationId",
         this.organizationId,
-        "workspaceId",
-        this.workspaceId,
+        "projectId",
+        this.projectId,
         "templateId",
         this.templateId
       );
@@ -435,7 +435,7 @@ export default class CustomerJourneyWidget extends LitElement {
         },
       };
 
-      const url = `${this.baseUrl}/v1/api/progressive-profile-view/stream/workspace-id/${this.workspaceId}/identity/${customer}/template-id/${templateId}?organizationId=${this.organizationId}&bearerToken=${this.bearerToken}`;
+      const url = `${this.baseUrl}/v1/api/progressive-profile-view/stream/workspace-id/${this.projectId}/identity/${customer}/template-id/${templateId}?organizationId=${this.organizationId}&bearerToken=${this.bearerToken}`;
       this.profileEventSource = new EventSource(url, header);
     }
 
@@ -481,7 +481,7 @@ export default class CustomerJourneyWidget extends LitElement {
       return;
     }
 
-    const url = `${this.baseUrl}/v1/api/progressive-profile-view/workspace-id/${this.workspaceId}/person-id/${this.identityId}/template-id/${templateId}`;
+    const url = `${this.baseUrl}/v1/api/progressive-profile-view/workspace-id/${this.projectId}/person-id/${this.identityId}/template-id/${templateId}`;
 
     const config: AxiosRequestConfig = {
       method: "GET",
@@ -552,7 +552,7 @@ export default class CustomerJourneyWidget extends LitElement {
     this.getEventsInProgress = true;
     this.baseUrlCheck();
     const encodedCustomer = this.encodeParameter(customer);
-    const url = `${this.baseUrl}/v1/api/events/workspace-id/${this.workspaceId}?organizationId=${this.organizationId}&identity=${encodedCustomer}`;
+    const url = `${this.baseUrl}/v1/api/events/workspace-id/${this.projectId}?organizationId=${this.organizationId}&identity=${encodedCustomer}`;
 
     const config: AxiosRequestConfig = {
       method: "GET",
@@ -616,7 +616,7 @@ export default class CustomerJourneyWidget extends LitElement {
         },
       };
 
-      const url = `${this.baseUrl}/v1/api/events/stream/workspace-id/${this.workspaceId}/identity/${customer}?organizationId=${this.organizationId}&bearerToken=${this.bearerToken}`;
+      const url = `${this.baseUrl}/v1/api/events/stream/workspace-id/${this.projectId}/identity/${customer}?organizationId=${this.organizationId}&bearerToken=${this.bearerToken}`;
       this.journeyEventSource = new EventSource(url, header);
     }
 
@@ -835,7 +835,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * @returns Promise<IdentityData | undefined>
    */
   async getAliasesById(identityId: string | undefined): Promise<IdentityData | undefined> {
-    const url = `${this.baseUrl}/admin/v1/api/person/workspace-id/${this.workspaceId}?personId=${identityId}&organizationId=${this.organizationId}`;
+    const url = `${this.baseUrl}/admin/v1/api/person/workspace-id/${this.projectId}?personId=${identityId}&organizationId=${this.organizationId}`;
 
     const config: AxiosRequestConfig = {
       method: "GET",
@@ -880,7 +880,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * @returns Promise<IdentityData | undefined>
    */
   async getAliasesByAlias(customer: string | null): Promise<IdentityData | undefined> {
-    const url = `${this.baseUrl}/admin/v1/api/person/workspace-id/${this.workspaceId}/aliases/${customer}?organizationId=${this.organizationId}`;
+    const url = `${this.baseUrl}/admin/v1/api/person/workspace-id/${this.projectId}/aliases/${customer}?organizationId=${this.organizationId}`;
 
     const config: AxiosRequestConfig = {
       method: "GET",
@@ -970,7 +970,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * @returns void
    */
   async patchAliasChange(identityId: string | undefined, requestBody: Array<jsonPatchOperation>) {
-    const url = `${this.baseUrl}/admin/v1/api/person/workspace-id/${this.workspaceId}/person-id/${identityId}?organizationId=${this.organizationId}`;
+    const url = `${this.baseUrl}/admin/v1/api/person/workspace-id/${this.projectId}/person-id/${identityId}?organizationId=${this.organizationId}`;
 
     const config: AxiosRequestConfig = {
       method: "PATCH",

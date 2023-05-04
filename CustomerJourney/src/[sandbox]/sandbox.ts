@@ -18,7 +18,7 @@ const BASE_URL = process.env.DOTENV.BASE_URL;
 // @ts-ignore
 const ORGANIZATION_ID = process.env.DOTENV.ORGANIZATION_ID;
 // @ts-ignore
-const WORKSPACE_ID = process.env.DOTENV.WORKSPACE_ID;
+const PROJECT_ID = process.env.DOTENV.PROJECT_ID;
 // @ts-ignore
 const TEMLPATE_ID = process.env.DOTENV.TEMPLATE_ID;
 // @ts-ignore
@@ -113,7 +113,7 @@ export class Sandbox extends LitElement {
             base-url=${BASE_URL}
             .organizationId=${ORGANIZATION_ID}
             .interactionData=${mockedInteractionData("INBOUND", IDENTITY)}
-            workspace-id=${WORKSPACE_ID}
+            project-id=${PROJECT_ID}
             template-id=${TEMLPATE_ID}
             live-stream
             logs-on
@@ -131,7 +131,7 @@ export class Sandbox extends LitElement {
      * BEARER_TOKEN
      * BASE_URL
      * ORGANIZATION_ID
-     * WORKSPACE_ID
+     * PROJECT_ID
      * TEMPLATE_ID
      * IDENTITY
      */

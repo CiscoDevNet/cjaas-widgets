@@ -2,9 +2,13 @@ import { TimeFrame } from "..";
 
 export interface QueryParameters {
   bearerToken: string | null;
-  organizationId: string | undefined;
-  workspaceId: string | undefined;
   baseUrl: string;
+  organizationId: string | undefined;
+  projectId: string | undefined;
+  templateId: string;
+
+  cadVariableLookup?: string | null;
+  readOnlyAliases?: boolean;
   limit?: number;
   customer?: string;
   logsOn?: boolean;
@@ -15,14 +19,13 @@ export interface QueryParameters {
   collapseProfileSection?: boolean;
   collapseAliasSection?: boolean;
   iconDataPath?: string;
-  templateId: string;
 }
 
 export enum QueryParams {
   baseUrl = "baseUrl",
   bearerToken = "bearerToken",
   organizationId = "organizationId",
-  workspaceId = "workspaceId",
+  projectId = "projectId",
   minHeight = "minHeight",
   templateId = "templateId",
 }

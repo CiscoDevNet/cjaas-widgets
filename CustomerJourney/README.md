@@ -10,7 +10,7 @@ This widget uses the JDS (Journey Data Services) APIs to display an individual c
 ### Latest Version
 customer-journey-9.0.0.js
 <sub>_* This version is supported by an entire set of APIs. You don't need SAS Tokens anymore, just a reference to the agent desktop CI access token._</sub>
-<sub>_* New required parameters: BearerToken, OrganizationId, and workspace-Id_</sub>
+<sub>_* New required parameters: BearerToken, OrganizationId, and project-id_</sub>
 <sub>_* Any older version will no longer work because the widget is using a whole new set of APIs. Please use this version going forward. You will have to onboard an organization and set things up in admin portal._</sub>
   
 ### Customer Journey Widget Properties
@@ -35,7 +35,7 @@ https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
 
 `@attr base-url`: (<i>String</i>) - Path to the proper Customer Journey API deployment
 
-`@attr workspace-id`: (<i>String</i>) - WorkspaceId sets the scope within the selected org. You can obtain this from the admin portal.
+`@attr project-id`: (<i>String</i>) - ProjectId sets the scope within the selected org. You can obtain this from the admin portal.
 
 `@attr template-id`: (<i>String</i>) - Sets the data template to retrieve customer Profile in desired format. You can obtain this by running get All templates Api. You might need to get assistance to create a templateId initially.
 
@@ -80,7 +80,7 @@ base-url="https://api-jds.dev-uswest2.ciscowxdap.com"
 
 .organizationId=${ORGANIZATION-ID}
 
-workspace-id=${WORKSPACE_ID}
+project-id=${PROJECT_ID}
 
 template-id=${TEMPLATE_ID}
 
@@ -124,7 +124,7 @@ base-url="https://api-jds.dev-uswest2.ciscowxdap.com"
 
 .organizationId=${ORGANIZATION-ID}
 
-workspace-id=${WORKSPACE_ID}
+project-id=${PROJECT_ID}
 
 template-id=${TEMPLATE_ID}
 
@@ -176,7 +176,7 @@ time-frame="All"
 
 "base-url": "https://api-jds.dev-uswest2.ciscowxdap.com",
 
-"workspace-id": "<your-workspace-id>",
+"project-id": "<your-project-id>",
 
 "template-id": "<your-template-id>",
 
@@ -451,12 +451,12 @@ BEARER_TOKEN="bearer token"
 BEARER_TOKEN="<your bearer token>"
 BASE_URL="<your base url>"
 ORGANIZATION_ID="<your organization id>"
-WORKSPACE_ID="<your workspace id>"
+PROJECT_ID="<your project id>"
 TEMPLATE_ID="<your template-id>"
 
 ```
 
-- Where used in your app, pass the correct ORGANIZATION, NAMESPACE, and APP_NAME values from your admin portal
+- Where used in your app, pass the correct ORGANIZATION and PROJECT_ID values from your admin portal
 
   
 

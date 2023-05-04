@@ -87,8 +87,12 @@ export const setParametersToWidget = (queryParams: QueryParameters) => {
 
   widget.bearerToken = sanitizedBearerToken;
   widget.organizationId = queryParams?.organizationId;
-  widget.workspaceId = queryParams?.workspaceId;
+  widget.projectId = queryParams?.projectId;
+  widget.templateId = queryParams?.templateId || "journey-default-template";
   widget.baseUrl = queryParams?.baseUrl;
+
+  widget.cadVariableLookup = queryParams?.cadVariableLookup || null;
+  widget.readOnlyAliases = queryParams?.readOnlyAliases || false;
   widget.limit = queryParams?.limit || 20;
   widget.customer = queryParams?.customer || null;
   widget.logsOn = queryParams?.logsOn || false;
@@ -99,7 +103,6 @@ export const setParametersToWidget = (queryParams: QueryParameters) => {
   widget.collapseAliasSection = queryParams?.collapseAliasSection || false;
   widget.collapseTimelineSection = queryParams?.collapseTimelineSection || false;
   widget.iconDataPath = queryParams?.iconDataPath || "";
-  widget.templateId = queryParams?.templateId || "journey-default-template";
   widget.userSearch = true;
   widget.eventIconTemplate = iconData;
 
