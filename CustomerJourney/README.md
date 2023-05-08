@@ -1,47 +1,52 @@
 
 # JDS Customer Journey Widget
 
-  
-
-This widget uses the JDS (Journey Data Services) APIs to display an individual customer's journey as a history of events. It first retrieves the complete event history from the tape endpoint and compiles toggles for all event channelTypes, and then subscribes to a live stream of new events so they appear in real time. This code can be used as is, or be starter code for your own Custom Widget. It also embodies Identity Alias management and Profile view with a tempate named 'journey-default-template'
-
-  
+This widget uses the JDS (Journey Data Services) APIs to display an individual customer's journey as a history of events. It first retrieves the complete event history from the tape endpoint and compiles toggles for all event channelTypes, and then subscribes to a live stream of new events so they appear in real time. This code can be used as is, or be starter code for your own Custom Widget. It also embodies Identity Alias management and Profile view with a tempate named 'journey-default-template'  
 
 ### Latest Version
+```
 customer-journey-9.0.0.js
+```
+
 <sub>_* This version is supported by an entire set of APIs. You don't need SAS Tokens anymore, just a reference to the agent desktop CI access token._</sub>
 <sub>_* New required parameters: BearerToken, OrganizationId, and project-id_</sub>
 <sub>_* Any older version will no longer work because the widget is using a whole new set of APIs. Please use this version going forward. You will have to onboard an organization and set things up in admin portal._</sub>
   
+### Version 9.0.0 Code Location
+<sub>_* Currently, there are two version of the widget still available. So, Version 9.0.0 doesn't live in master yet._</sub>
+
+```
+BRANCH NAME: jds-widget-9-new-apis
+```
+Branch Link: https://github.com/CiscoDevNet/cjaas-widgets/tree/jds-widget-9-new-apis/CustomerJourney
+
 ### Customer Journey Widget Properties
 
 <i>The JDS Customer Journey Widget accepts specific properties to interact with the JDS APIs</i>
 
- 
 * The following attributes and properties of JDS Widget are supported with the following version
 
 ```
-
 https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
 
 ```
 
 #### Required Properties
-`@prop bearerToken`: (<i>string</i>) - Agent Desktop bearerToken. Look at example to fetch directly from agent desktop store.
+`@prop bearerToken`: (<i>string</i>) - Agent Desktop bearerToken. Look at example to fetch directly from agent desktop store. Refer to example below on how to assign this property dynamically.
 
-`@prop interactionData`: (<i>object</i>) - Agent Desktop Interaction Data. Based on the `contactDirection`, if OUTBOUND, selects the `dnis`, otherwise, selects the `ani` property within object. This allows the JDS Widget to auto-populate with the current customer that the agent is interacting with. This overrides the customer attribute.
+`@prop interactionData`: (<i>object</i>) - Agent Desktop Interaction Data. This allows the JDS Widget to auto-populate with the current customer request that the agent is interacting with. This overrides the customer attribute. Refer to example below on how to assign this property dynamically.
 
-`@prop organizationId`: (<i>string</i>) - Agent's organizationId. You can fetch it directly from agent desktop store. Check out examples.
+`@prop organizationId`: (<i>string</i>) - Agent's organizationId. You can fetch it directly from agent desktop store. Check out examples. Refer to example below on how to assign this property dynamically.
 
-`@attr base-url`: (<i>String</i>) - Path to the proper Customer Journey API deployment
+`@attr base-url`: (<i>String</i>) - Path to the proper Customer Journey API deployment. To use the production instance of the Customer Journey Widget, the base-url can be set to `"https://api-jds.prod-useast1.ciscowxdap.com"`.
 
-`@attr project-id`: (<i>String</i>) - ProjectId sets the scope within the selected org. You can obtain this from the admin portal.
+`@attr project-id`: (<i>String</i>) - ProjectId sets the scope within the selected org. You can obtain this from the admin portal by selecting on the specific project for project details.
 
 `@attr template-id`: (<i>String</i>) - Sets the data template to retrieve customer Profile in desired format. You can obtain this by running get All templates Api. You might need to get assistance to create a templateId initially.
-
-`@attr cad-variable-lookup`: (<i>String</i>) - Pass in a CAD Variable lookup value, which will fetch the defined value to that CAD Variable if it exists within the interactionData.
   
 #### Optional Properties
+`@attr cad-variable-lookup`: (<i>String</i>) - Pass in a CAD Variable lookup value, which will fetch the defined value to that CAD Variable if it exists within the interactionData. You can configure a particular CAD variable within flow control. Make sure to check the box: `Make Agent Viewable`.
+
 `@attr customer`: (<i>String</i>) - Customer ID used for Journey lookup. (<i>PS: This is an alternative to InteractionData. InteractionData always overrides customer attribute.</i>)
 
 `@attr limit`: (<i>Number</i>) = 20 - Set the number of Timeline Events to display
@@ -68,155 +73,92 @@ https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
 
 ## Examples
 
-### The following example is showcasing how to embed this widget within lit-element code
+### An example of how to upload JDS widget into DesktopLayout.json for Agent Desktop.
 
-```html
+<sub>_* Prerequisite: Onboard a Customer Journey organization, create a project, and toggle on the Webex Contact Center Connector. _</sub>
 
-<customer-journey-widget
+1. You will need to log into the Agent Admin Portal, and navigate to Desktop Layouts.
+2. Create a Desktop Layout or select an existing one, assign a agent team to use this layout, and this is where you will upload your configured DesktopLayout.json file.
+3. A good starting point with configuring a Desktop Layout JSON file, is to download an existing one.
+4. Within an existing DesktopLayout JSON file, search for the data property `"area" < "panel" < "children"`.
+5. You need to provide the following two objects ("md-tab" component, and "md-tab-panel" component) into the "children" array like the following example shown below.
+6. Notice the `"comp": "customer-journey-widget"` section. Below that, is where you are passing in required properties and attributes to customize your widget configuration. Please refer to the documentation just above to understand all the required parameters and the other optional parameters at your disposal.
+7. For quick setup, you can follow the example exactly with the exception of providing your own `"project-id"` and `"template-id"`.
 
-customer="John Smith"
-
-base-url="https://api-jds.dev-uswest2.ciscowxdap.com"
-
-.organizationId=${ORGANIZATION-ID}
-
-project-id=${PROJECT_ID}
-
-template-id=${TEMPLATE_ID}
-
-cad-variable-lookup=${CAD-VARIABLE}
-
-.bearerToken=${BEARER_TOKEN}
-
-.eventIconTemplate=${iconData}
-
-limit=${20}
-
-logs-on
-
-live-stream
-
-time-frame="30-Days"
-
-icon-data-path="https://cjaas.cisco.com/widgets/iconMaps/defaultIcons.json"
-
-></customer-journey-widget>
-
-```
-
-  
-
-```html
-
-<customer-journey-widget
-
-limit="20"
-
-user-search
-
-customer="rossgeller@gmail.com"
-
-logs-on
-
-.eventIconTemplate=${iconData}
-
-base-url="https://api-jds.dev-uswest2.ciscowxdap.com"
-
-.organizationId=${ORGANIZATION-ID}
-
-project-id=${PROJECT_ID}
-
-template-id=${TEMPLATE_ID}
-
-cad-variable-lookup=${CAD-VARIABLE}
-
-.bearerToken=${BEARER_TOKEN}
-
-live-stream
-
-time-frame="All"
-
-></customer-journey-widget>
-
-```
-
-  
-
-### An example of how to upload JDS widget into DesktopLayout.json for Agent Desktop
-
-* In order to set the customer attribute, you must remove the interactionData property. The second example below demonstrates how to pass in customer.
-
-* All boolean attributes default as false. If you want them to remain false, just don't pass it in at all.
-
-  
+<sub>_* All boolean attributes default as false. If you want them to remain false, just don't pass it in at all._</sub>
 
 ```json
-
-{
-
-"comp": "md-tab-panel",
-
-"attributes": {
-
-"slot": "panel",
-
-"class": "widget-pane"
-
-},
-
 "children": [
-
-{
-
-"comp": "customer-journey-widget",
-
-"script": "https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js",
-
-"attributes": {
-
-"base-url": "https://api-jds.dev-uswest2.ciscowxdap.com",
-
-"project-id": "<your-project-id>",
-
-"template-id": "<your-template-id>",
-
-"cad-variable-lookup": "<your-cad-variable>",
-
-"live-stream": "true",
-
-"logs-on": "true",
-
-"time-frame": "30-Days",
-
-"icon-data-path": "https://cjaas.cisco.com/widgets/iconMaps/defaultIcons.json"
-
-},
-
-"properties": {
-
-"interactionData": "$STORE.agentContact.taskSelected",
-
-"bearerToken": "$STORE.auth.accessToken",
-
-"organizationId": "$STORE.agentContact.taskSelected.orgId"
-
-},
-
-"wrapper": {
-
-"title": "Customer Journey Widget",
-
-"maximizeAreaName": "app-maximize-area"
-
-}
-
-}
-
+    {
+        "comp": "md-tab",
+        "attributes": {
+            "slot": "tab",
+            "class": "widget-pane-tab"
+        },
+        "children": [
+            {
+                "comp": "span",
+                "textContent": "Customer Journey"
+            }
+        ]
+    },
+    {
+        "comp": "md-tab-panel",
+        "attributes": {
+            "slot": "panel",
+            "class": "widget-pane"
+        },
+        "children": [
+            {
+                "comp": "customer-journey-widget",
+                "script": "https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js",
+                "attributes": {
+                    "base-url": "https://api-jds.prod-useast1.ciscowxdap.com",
+                    "user-search": "true",
+                    "live-stream": "true",
+                    "logs-on": "true",
+                    "project-id": "<your-project-id>",
+                    "template-id": "<your-template-id>"
+                },
+                "properties": {
+                    "interactionData": "$STORE.agentContact.taskSelected",
+                    "bearerToken": "$STORE.auth.accessToken",
+                    "organizationId":  "$STORE.agentContact.taskSelected.orgId"
+                },
+                "wrapper": {
+                    "title": "Customer Journey Widget",
+                    "maximizeAreaName": "app-maximize-area"
+                }
+            }
+        ]
+    }
 ]
-
-},
-
 ```
+
+
+### The following example is showcasing how to configure the local sandbox widget.
+```
+FILENAME: CustomerJourney/src/[sandbox]/sandbox.ts
+```
+
+```html
+    <customer-journey-widget
+        customer="John Smith"
+        base-url="https://api-jds.dev-uswest2.ciscowxdap.com"
+        .organizationId=${ORGANIZATION-ID}
+        project-id=${PROJECT_ID}
+        template-id=${TEMPLATE_ID}
+        cad-variable-lookup=${CAD-VARIABLE}
+        .bearerToken=${BEARER_TOKEN}
+        .eventIconTemplate=${iconData}
+        limit=${20}
+        user-search
+        logs-on
+        live-stream
+        time-frame="30-Days"
+        icon-data-path="https://cjaas.cisco.com/widgets/iconMaps/defaultIcons.json"
+    ></customer-journey-widget>
+```  
 
 
 ### Default Icon Mapping JSON File (Begin with this file, to modify for icon-data-path url file)
@@ -426,13 +368,19 @@ time-frame="All"
 
 ## Dev Environment: Getting Started
 
-- Create a `.env` file that contains the following secrets
+- Create a `.env` file that contains below variables
+
+```
+BEARER_TOKEN="<your-bearer-token>"
+BASE_URL="<your-base-url>"
+ORGANIZATION_ID="<your-organization-id>"
+PROJECT_ID="<your-project-id>"
+TEMPLATE_ID="<your-template-id>"
+IDENTITY="<your-customer-lookup-alias>"
 
 ```
 
-BEARER_TOKEN="bearer token"
-
-```
+- Where used in your app, pass the correct ORGANIZATION and PROJECT_ID values from your admin portal
 
 - run `yarn install`
 
@@ -441,25 +389,6 @@ BEARER_TOKEN="bearer token"
 - navigate browser to `[localhost:8889](http://localhost:8889/)`
 
   
-
-## Using in Deployment
-
-- Create a `.env` file that contains below secrets for production
-
-```
-
-BEARER_TOKEN="<your bearer token>"
-BASE_URL="<your base url>"
-ORGANIZATION_ID="<your organization id>"
-PROJECT_ID="<your project id>"
-TEMPLATE_ID="<your template-id>"
-
-```
-
-- Where used in your app, pass the correct ORGANIZATION and PROJECT_ID values from your admin portal
-
-  
-
 ## Build and Deploy Modules
 
 If you are using this widget as a starter for your own custom needs, follow these steps to publish it for your use.
@@ -536,14 +465,16 @@ Use any of cjaas-sdk tools from https://github.com/CiscoDevNet/cjaas-sdk to gene
 
   
 
-* NEED TO UPDATE *
+* Update Coming Soon *
 
+// version 9
 ``` xml
-
-<gadget>{Cloud hosted location}/finesse/CiscoJDSCustomerJourneyGadget.xml?profileReadToken=so%3Ddemoassure%26sn%3Dsandbox%26ss%3Dprofile%26sp%3Dr%26se%3D2022-05-05T09%3A13%3A31.505017500Z%26sk%3DjourneyUi%26sig%3DoX7V4ajfaknNJ3tcnOTNpFJQ4uwTztbomVp%252BWmJb4%253D&profileWriteToken=so%3Ddemoassure%26sn%3Dsandbox%26ss%3Dprofile%26sp%3Dw%26se%3D2022-05-05T09%3A13%3A31.506625800Z%26sk%3DjourneyUi%26sig%3DSD%252Fc7pmz%252Buc5qXB44%252FfXDeSd4C9dq8Ub%252F2TieK%252FOM%253D&streamReadToken=so%3Ddemoassure%26sn%3Dsandbox%26ss%3Dstream%26sp%3Dr%26se%3D2022-05-05T09%3A13%3A31.507991400Z%26sk%3DjourneyUi%26sig%3DUjo16g0oPXyOUc25JXe5NqMNIRSJpgCmz7DT3OZC6%252BM%253D&tapeReadToken=so%3Ddemoassure%26sn%3Dsandbox%26ss%3Dtape%26sp%3Dr%26se%3D2022-05-05T09%3A13%3A31.509055200Z%26sk%3DjourneyUi%26sig%3DPAM7q9A8R1C10YW8wIvScG6yAoGtW97nnwE60BqRI%253D&identityReadToken=so%3Ddemoassure%26sn%3Dsandbox%26ss%3Didmt%26sp%3Dr%26se%3D2022-05-05T09%3A13%3A31.510959300Z%26sk%3DjourneyUi%26sig%3Dp9wWUjp%252Bde965kRL05iI%252FFDEAAL2f0g7COrtFVZiU%253D&identityWriteToken=so%3Ddemoassure%26sn%3Dsandbox%26ss%3Didmt%26sp%3Dw%26se%3D2022-05-05T09%3A13%3A31.511875Z%26sk%3DjourneyUi%26sig%3DbQGGM%252FYAqHrCQRbVTKfX3dZA%252BlGVQfjcxO2JMrdY8%253D&
-
-minHeight=480px&
-
-profileTemplate=new-template</gadget>
-
+<gadget>
+https://cjaas.cisco.com/widgetswidgets/finesse/v9.0.0/CiscoJDSCustomerJourneyGadget.xml?
+bearerToken={yourBearerToken}
+&organizationId={yourOrgId}
+&projectId={yourProjectId}
+&templateId={yourTemplateId}
+&minHeight=480px
+</gadget>
 ```
