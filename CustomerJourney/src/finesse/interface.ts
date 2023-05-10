@@ -5,16 +5,16 @@ export interface QueryParameters {
   baseUrl: string;
   organizationId: string | undefined;
   projectId: string | undefined;
-  templateId: string;
 
+  templateId: string;
   cadVariableLookup?: string | null;
   readOnlyAliases?: boolean;
   limit?: number;
   customer?: string;
   logsOn?: boolean;
-  liveStream?: boolean;
+  disableEventStream?: boolean;
   timeFrame?: TimeFrame;
-  userSearch?: boolean;
+  disableUserSearch?: boolean;
   collapseTimelineSection?: boolean;
   collapseProfileSection?: boolean;
   collapseAliasSection?: boolean;

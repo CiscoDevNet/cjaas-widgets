@@ -116,10 +116,10 @@ export default class CustomerJourneyWidget extends LitElement {
   @property({ type: String, attribute: "cad-variable-lookup" }) cadVariableLookup: string | null = null;
 
   /**
-   * Toggles display of field to find new Journey profiles
-   * @attr user-search
+   * Toggles off display of field to find new Journey profiles
+   * @attr disable-user-search
    */
-  @property({ type: Boolean, attribute: "user-search" }) userSearch = false;
+  @property({ type: Boolean, attribute: "disable-user-search" }) disableUserSearch = false;
 
   /**
    * Path to the proper Customer Journey API deployment
@@ -169,9 +169,9 @@ export default class CustomerJourneyWidget extends LitElement {
   @property({ type: String, attribute: "time-frame" }) timeFrame: TimeFrame = TimeFrame.All;
   /**
    * Toggle to either queue or immediately load new events occurring in the stream
-   * @prop live-stream
+   * @prop disable-event-stream
    */
-  @property({ type: Boolean, attribute: "live-stream" }) liveStream = false;
+  @property({ type: Boolean, attribute: "disable-event-stream" }) disableEventStream = false;
   /**
    * Toggle whether or not to ignore undefined origin timeline events
    * @prop ignoreUndefinedOrigins
@@ -412,6 +412,32 @@ export default class CustomerJourneyWidget extends LitElement {
   encodeParameter(value: string | null): string | null {
     const encodedUrlValue = value ? encodeURIComponent(value) : null;
     return encodedUrlValue;
+  }
+
+  async getDefaultTemplateId() {
+    const templateName = "journey-default-template";
+    const url = `${this.baseUrl}/admin/v1/api/profile-view-template/workspace-id/${this.projectId}/template-name/${templateName} `;
+
+    const config: AxiosRequestConfig = {
+      method: "GET",
+      url,
+      headers: {
+        Authorization: `Bearer ${this.bearerToken}`,
+      },
+    };
+
+    const axiosInstance = axios.create(config);
+
+    return axiosInstance
+      .get(url)
+      .then(response => {
+        const { id } = response?.data?.data;
+        return id;
+      })
+      .catch((err: Error) => {
+        console.error(`[JDS Widget] Unable to fetch the ID of the journey-default-template`, err);
+        return undefined;
+      });
   }
 
   subscribeToProfileViewStream(customer: string | null, templateId: string | undefined) {
@@ -683,9 +709,14 @@ export default class CustomerJourneyWidget extends LitElement {
     this.lastName = this.identityData?.lastName || "";
     this.identityId = this.identityData?.id;
     this.debugLogMessage("identityId", this.identityId);
-    this.getProfileView(this.identityId, this.templateId);
 
     this.subscribeToEventStream(this.customer || null);
+
+    if (!this.templateId) {
+      this.templateId = await this.getDefaultTemplateId();
+    }
+
+    this.getProfileView(this.identityId, this.templateId);
     this.subscribeToProfileViewStream(this.customer || null, this.templateId);
   }
 
@@ -707,7 +738,7 @@ export default class CustomerJourneyWidget extends LitElement {
         @new-event-queue-cleared=${this.updateComprehensiveEventList}
         limit=${this.limit}
         is-event-filter-visible
-        ?live-stream=${this.liveStream}
+        ?live-stream=${!this.disableEventStream}
         time-frame=${this.timeFrame}
         error-message=${this.timelineErrorMessage}
       ></cjaas-timeline>
@@ -1216,7 +1247,7 @@ export default class CustomerJourneyWidget extends LitElement {
     return html`
       <div class="customer-journey-widget-container">
         <div class="top-header-row">
-          ${this.userSearch ? this.renderMainInputSearch() : nothing}
+          ${this.disableUserSearch ? nothing : this.renderMainInputSearch()}
         </div>
         ${this.customer ? this.renderSubWidgets() : this.renderEmptyStateView()}
       </div>

@@ -114,10 +114,7 @@ export class Sandbox extends LitElement {
             .organizationId=${ORGANIZATION_ID}
             .interactionData=${mockedInteractionData("INBOUND", IDENTITY)}
             project-id=${PROJECT_ID}
-            template-id=${TEMLPATE_ID}
-            live-stream
             logs-on
-            user-search
           ></customer-journey-widget>
         </div>
       </div>

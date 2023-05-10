@@ -96,14 +96,13 @@ export const setParametersToWidget = (queryParams: QueryParameters) => {
   widget.limit = queryParams?.limit || 20;
   widget.customer = queryParams?.customer || null;
   widget.logsOn = queryParams?.logsOn || false;
-  widget.liveStream = queryParams?.liveStream || false;
+  widget.disableEventStream = queryParams?.disableEventStream || false;
   widget.timeFrame = queryParams?.timeFrame || TimeFrame.All;
-  widget.userSearch = queryParams?.userSearch || false;
+  widget.disableUserSearch = queryParams?.disableUserSearch || false;
   widget.collapseProfileSection = queryParams?.collapseProfileSection || false;
   widget.collapseAliasSection = queryParams?.collapseAliasSection || false;
   widget.collapseTimelineSection = queryParams?.collapseTimelineSection || false;
   widget.iconDataPath = queryParams?.iconDataPath || "";
-  widget.userSearch = true;
   widget.eventIconTemplate = iconData;
 
   console.log("[JDS Widget][finesse wrapper][setParametersToWidget] widget initialized", widget);

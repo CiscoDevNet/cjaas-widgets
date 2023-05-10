@@ -42,9 +42,9 @@ https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
 
 `@attr project-id`: (<i>String</i>) - ProjectId sets the scope within the selected org. You can obtain this from the admin portal by selecting on the specific project for project details.
 
-`@attr template-id`: (<i>String</i>) - Sets the data template to retrieve customer Profile in desired format. You can obtain this by running get All templates Api. You might need to get assistance to create a templateId initially.
-  
 #### Optional Properties
+`@attr template-id`: (<i>String</i>) - Sets the data template to retrieve customer Profile in desired format. By default, this gets assigned to the associated templateId of the `journey-default-template` via an API call.
+
 `@attr cad-variable-lookup`: (<i>String</i>) - Pass in a CAD Variable lookup value, which will fetch the defined value to that CAD Variable if it exists within the interactionData. You can configure a particular CAD variable within flow control. Make sure to check the box: `Make Agent Viewable`.
 
 `@attr customer`: (<i>String</i>) - Customer ID used for Journey lookup. (<i>PS: This is an alternative to InteractionData. InteractionData always overrides customer attribute.</i>)
@@ -61,9 +61,9 @@ https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
 
 `@attr time-frame`: (<i>"All" | "24-Hours" | "7-Days" | "30-Days"</i>) = "All" - Set the time frame the timeline section has selected at start up.
 
-`@attr live-stream`: (<i>Boolean</i>) = false - Toggle to set whether or not the timeline section is loading events in real time.
+`@attr disable-event-stream`: (<i>Boolean</i>) = false - Toggle to set whether or not the timeline section is loading events in real time.
 
-`@attr user-search`: (<i>Boolean</i>) = false - Enables the Agent to search other customers by an identifier.
+`@attr disable-user-search`: (<i>Boolean</i>) = false - Disables the Agent to search other customers by an identifier.
 
 `@attr read-only-aliases`: (<i>Boolean</i>) = false - Toggle to make alias section read only. In read only mode, the agent won't be able to add or remove aliases within this section.
 
@@ -114,8 +114,6 @@ https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
                 "script": "https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js",
                 "attributes": {
                     "base-url": "https://api-jds.prod-useast1.ciscowxdap.com",
-                    "user-search": "true",
-                    "live-stream": "true",
                     "logs-on": "true",
                     "project-id": "<your-project-id>",
                     "template-id": "<your-template-id>"
@@ -152,9 +150,7 @@ FILENAME: CustomerJourney/src/[sandbox]/sandbox.ts
         .bearerToken=${BEARER_TOKEN}
         .eventIconTemplate=${iconData}
         limit=${20}
-        user-search
         logs-on
-        live-stream
         time-frame="30-Days"
         icon-data-path="https://cjaas.cisco.com/widgets/iconMaps/defaultIcons.json"
     ></customer-journey-widget>
