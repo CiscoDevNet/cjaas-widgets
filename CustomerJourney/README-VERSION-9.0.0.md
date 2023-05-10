@@ -1,7 +1,7 @@
 
 # JDS Customer Journey Widget
 
-This widget uses the JDS (Journey Data Services) APIs to display an individual customer's journey as a history of events. It first retrieves the complete event history from the tape endpoint and compiles toggles for all event channelTypes, and then subscribes to a live stream of new events so they appear in real time. This code can be used as is, or be starter code for your own Custom Widget. It also embodies Identity Alias management and Profile view with a tempate named 'journey-default-template'  
+This widget uses the JDS (Journey Data Services) APIs to display an individual customer's journey as a history of events. It first retrieves the complete event history from the tape endpoint and compiles toggles for all event channelTypes, and then subscribes to a live stream of new events so they appear in real time. This code can be used as is, or be starter code for your own Custom Widget. It also embodies Identity Alias management and Profile view with a template named 'journey-default-template'
 
 ### Latest Version
 ```
@@ -28,7 +28,6 @@ Branch Link: https://github.com/CiscoDevNet/cjaas-widgets/tree/jds-widget-9-new-
 
 ```
 https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
-
 ```
 
 #### Required Properties
@@ -42,9 +41,9 @@ https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
 
 `@attr project-id`: (<i>String</i>) - ProjectId sets the scope within the selected org. You can obtain this from the admin portal by selecting on the specific project for project details.
 
-`@attr template-id`: (<i>String</i>) - Sets the data template to retrieve customer Profile in desired format. You can obtain this by running get All templates Api. You might need to get assistance to create a templateId initially.
-  
 #### Optional Properties
+`@attr template-id`: (<i>String</i>) - Sets the data template to retrieve customer Profile in desired format. By default, this gets assigned to the associated templateId of the `journey-default-template` via an API call.
+
 `@attr cad-variable-lookup`: (<i>String</i>) - Pass in a CAD Variable lookup value, which will fetch the defined value to that CAD Variable if it exists within the interactionData. You can configure a particular CAD variable within flow control. Make sure to check the box: `Make Agent Viewable`.
 
 `@attr customer`: (<i>String</i>) - Customer ID used for Journey lookup. (<i>PS: This is an alternative to InteractionData. InteractionData always overrides customer attribute.</i>)
@@ -61,9 +60,9 @@ https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
 
 `@attr time-frame`: (<i>"All" | "24-Hours" | "7-Days" | "30-Days"</i>) = "All" - Set the time frame the timeline section has selected at start up.
 
-`@attr live-stream`: (<i>Boolean</i>) = false - Toggle to set whether or not the timeline section is loading events in real time.
+`@attr disable-event-stream`: (<i>Boolean</i>) = false - Toggle to set whether or not the journey timeline section is loading events in real time.
 
-`@attr user-search`: (<i>Boolean</i>) = false - Enables the Agent to search other customers by an identifier.
+`@attr disable-user-search`: (<i>Boolean</i>) = false - Disables the Agent to search other customers by an identifier.
 
 `@attr read-only-aliases`: (<i>Boolean</i>) = false - Toggle to make alias section read only. In read only mode, the agent won't be able to add or remove aliases within this section.
 
@@ -79,62 +78,78 @@ https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
 
 1. You will need to log into the Agent Admin Portal, and navigate to Desktop Layouts.
 2. Create a Desktop Layout or select an existing one, assign a agent team to use this layout, and this is where you will upload your configured DesktopLayout.json file.
-3. A good starting point with configuring a Desktop Layout JSON file, is to download an existing one.
-4. Within an existing DesktopLayout JSON file, search for the data property `"area" < "panel" < "children"`.
-5. You need to provide the following two objects ("md-tab" component, and "md-tab-panel" component) into the "children" array like the following example shown below.
-6. Notice the `"comp": "customer-journey-widget"` section. Below that, is where you are passing in required properties and attributes to customize your widget configuration. Please refer to the documentation just above to understand all the required parameters and the other optional parameters at your disposal.
-7. For quick setup, you can follow the example exactly with the exception of providing your own `"project-id"` and `"template-id"`.
+3. When you create a new desktop layout, they provide you with a default layout JSON file. Download that file and use it as a starting point.
+4. Within the downloaded default desktop layout JSON file, search for the data property `"visibility": "IVR_TRANSCRIPT"`. Find the following code block associated with that.
 
-<sub>_* All boolean attributes default as false. If you want them to remain false, just don't pass it in at all._</sub>
-
+#### Find the IVR_TRANSCRIPT md-tab-panel object
 ```json
-"children": [
-    {
-        "comp": "md-tab",
-        "attributes": {
-            "slot": "tab",
-            "class": "widget-pane-tab"
-        },
-        "children": [
-            {
-                "comp": "span",
-                "textContent": "Customer Journey"
-            }
-        ]
+{
+    "comp": "md-tab-panel",
+    "attributes": {
+    "slot": "panel",
+    "class": "widget-pane"
     },
+    "children": [
     {
-        "comp": "md-tab-panel",
+        "comp": "slot",
         "attributes": {
-            "slot": "panel",
-            "class": "widget-pane"
-        },
-        "children": [
-            {
-                "comp": "customer-journey-widget",
-                "script": "https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js",
-                "attributes": {
-                    "base-url": "https://api-jds.prod-useast1.ciscowxdap.com",
-                    "user-search": "true",
-                    "live-stream": "true",
-                    "logs-on": "true",
-                    "project-id": "<your-project-id>",
-                    "template-id": "<your-template-id>"
-                },
-                "properties": {
-                    "interactionData": "$STORE.agentContact.taskSelected",
-                    "bearerToken": "$STORE.auth.accessToken",
-                    "organizationId":  "$STORE.agentContact.taskSelected.orgId"
-                },
-                "wrapper": {
-                    "title": "Customer Journey Widget",
-                    "maximizeAreaName": "app-maximize-area"
-                }
-            }
-        ]
+        "name": "IVR_TRANSCRIPT"
+        }
     }
-]
+    ],
+    "visibility": "IVR_TRANSCRIPT"
+},
+//// Add the customer journey widget code block (provided below) here
 ```
 
+#### Add this Customer Journey Widget code block
+```json
+{
+    "comp": "md-tab",
+    "attributes": {
+        "slot": "tab",
+        "class": "widget-pane-tab"
+    },
+    "children": [
+        {
+            "comp": "span",
+            "textContent": "Customer Journey"
+        }
+    ]
+},
+{
+    "comp": "md-tab-panel",
+    "attributes": {
+        "slot": "panel",
+        "class": "widget-pane"
+    },
+    "children": [
+        {
+            "comp": "customer-journey-widget",
+            "script": "https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js",
+            "attributes": {
+                "base-url": "https://api-jds.prod-useast1.ciscowxdap.com",
+                "logs-on": "true",
+                "project-id": "<your-project-id>",
+            },
+            "properties": {
+                "interactionData": "$STORE.agentContact.taskSelected",
+                "bearerToken": "$STORE.auth.accessToken",
+                "organizationId":  "$STORE.agentContact.taskSelected.orgId"
+            },
+            "wrapper": {
+                "title": "Customer Journey Widget",
+                "maximizeAreaName": "app-maximize-area"
+            }
+        }
+    ]
+}
+```
+7. For quick setup, use the exact code block above with the exception of providing your own `"project-id"`.
+8. Feel free to reference all the optional attributes and properties listed at the top. These allow you to customize your customer journey widget configuration.
+9. Save the desktop Layout that now has your customer journey widget code. Then Save it within the Admin of Agent Desktop. Just refresh your Agent Desktop and the new configuration should load.
+
+<sub>_* All boolean attributes default as false. If you want them to remain false, just don't pass it in at all._</sub>
 
 ### The following example is showcasing how to configure the local sandbox widget.
 ```
@@ -152,223 +167,123 @@ FILENAME: CustomerJourney/src/[sandbox]/sandbox.ts
         .bearerToken=${BEARER_TOKEN}
         .eventIconTemplate=${iconData}
         limit=${20}
-        user-search
         logs-on
-        live-stream
         time-frame="30-Days"
         icon-data-path="https://cjaas.cisco.com/widgets/iconMaps/defaultIcons.json"
     ></customer-journey-widget>
 ```  
 
 
-### Default Icon Mapping JSON File (Begin with this file, to modify for icon-data-path url file)
+### Default Icon Mapping JSON File
+This file is a mapping system to associate `data.channelType` of every incoming journey event to a particular icon. 
 
+Begin with this file, to modify, and save. Host your saved version and refernce it throught the `icon-data-path` widget property.
 [/src/assets/icons.json](https://github.com/CiscoDevNet/cjaas-widgets/blob/592aab211e332d8af13d4b0c830443e38a50aa09/CustomerJourney/src/assets/icons.json)
 
 ```
-
 {
-
-"SMS": {
-
-"name": "icon-sms_16",
-
-"color": "mint"
-
-},
-
-"Telephony": {
-
-"name": "icon-handset-active_16",
-
-"color": "green"
-
-},
-
-"Voice": {
-
-"name": "icon-handset-active_16",
-
-"color": "green"
-
-},
-
-"Call": {
-
-"name": "icon-handset-active_16",
-
-"color": "green"
-
-},
-
-"Chat": {
-
-"name": "icon-chat-active_16",
-
-"color": "cobalt"
-
-},
-
-"Email": {
-
-"name": "icon-email-active_16",
-
-"color": "violet"
-
-},
-
-"wrapup": {
-
-"name": "icon-close-space_18",
-
-"color": "red"
-
-},
-
-"agent": {
-
-"name": "icon-headset_16",
-
-"color": "pink"
-
-},
-
-"Messenger": {
-
-"name": "icon-messenger_16",
-
-"color": "cobalt"
-
-},
-
-"social": {
-
-"name": "icon-contact-group_16",
-
-"color": "mint"
-
-},
-
-"task": {
-
-"name": "icon-tasks_16",
-
-"color": "yellow"
-
-},
-
-"Login": {
-
-"name": "icon-sign-in_24",
-
-"color": "gold"
-
-},
-
-"Page Visit": {
-
-"name": "icon-mouse-cursor_16",
-
-"color": "grey"
-
-},
-
-"Entered ZipCode": {
-
-"name": "icon-location_16",
-
-"color": "cyan"
-
-},
-
-"Identify": {
-
-"name": "icon-user_16",
-
-"color": "blue"
-
-},
-
-"Quote": {
-
-"name": "icon-file-spreadsheet_16",
-
-"color": "cobalt",
-
-"showcase": "firstName"
-
-},
-
-"NPS.*": {
-
-"name": "icon-analysis_16",
-
-"color": "red"
-
-},
-
-"Initiated Walk In": {
-
-"name": "icon-audio-video_16",
-
-"color": "orange"
-
-},
-
-"IMI_Inbound": {
-
-"name": "icon-call-incoming_16",
-
-"color": "green"
-
-},
-
-"IMI_Outbound": {
-
-"name": "icon-call-outgoing_16",
-
-"color": "darkmint"
-
-},
-
-"Trigger Sent to Server": {
-
-"name": "icon-event_16",
-
-"color": "violet",
-
-"showcase": "user"
-
-},
-
-"Survey Response Collected": {
-
-"name": "icon-report_16",
-
-"color": "gold"
-
-},
-
-"multi events single day": {
-
-"name": "icon-calendar-day_12",
-
-"color": "yellow"
-
+  "SMS": {
+    "name": "icon-sms_16",
+    "color": "mint"
+  },
+  "Telephony": {
+    "name": "icon-handset-active_16",
+    "color": "green"
+  },
+  "Voice": {
+    "name": "icon-handset-active_16",
+    "color": "green"
+  },
+  "Call": {
+    "name": "icon-handset-active_16",
+    "color": "green"
+  },
+  "Chat": {
+    "name": "icon-chat-active_16",
+    "color": "cobalt"
+  },
+  "Email": {
+    "name": "icon-email-active_16",
+    "color": "violet"
+  },
+  "wrapup": {
+    "name": "icon-close-space_18",
+    "color": "red"
+  },
+  "agent": {
+    "name": "icon-headset_16",
+    "color": "pink"
+  },
+  "Messenger": {
+    "name": "icon-messenger_16",
+    "color": "cobalt"
+  },
+  "social": {
+    "name": "icon-contact-group_16",
+    "color": "mint"
+  },
+  "task": {
+    "name": "icon-tasks_16",
+    "color": "yellow"
+  },
+  "Login": {
+    "name": "icon-sign-in_24",
+    "color": "gold"
+  },
+  "Page Visit": {
+    "name": "icon-mouse-cursor_16",
+    "color": "grey"
+  },
+  "Entered ZipCode": {
+    "name": "icon-location_16",
+    "color": "cyan"
+  },
+  "Identify": {
+    "name": "icon-user_16",
+    "color": "blue"
+  },
+  "Quote": {
+    "name": "icon-file-spreadsheet_16",
+    "color": "cobalt",
+    "showcase": "firstName"
+  },
+  "NPS.*": {
+    "name": "icon-analysis_16",
+    "color": "red"
+  },
+  "Initiated Walk In": {
+    "name": "icon-audio-video_16",
+    "color": "orange"
+  },
+  "IMI_Inbound": {
+    "name": "icon-call-incoming_16",
+    "color": "green"
+  },
+  "IMI_Outbound": {
+    "name": "icon-call-outgoing_16",
+    "color": "darkmint"
+  },
+  "Trigger Sent to Server": {
+    "name": "icon-event_16",
+    "color": "violet",
+    "showcase": "user"
+  },
+  "Survey Response Collected": {
+    "name": "icon-report_16",
+    "color": "gold"
+  },
+  "multi events single day": {
+    "name": "icon-calendar-day_12",
+    "color": "yellow"
+  }
 }
-
-}
-
-  
-
 ```
 
-  
-  
+
 
 ## Dev Environment: Getting Started
 
-- Create a `.env` file that contains below variables
+Create a `.env` file that contains below variables (TEMPLATE_ID OPTIONAL)
 
 ```
 BEARER_TOKEN="<your-bearer-token>"
@@ -381,87 +296,53 @@ IDENTITY="<your-customer-lookup-alias>"
 ```
 
 - Where used in your app, pass the correct ORGANIZATION and PROJECT_ID values from your admin portal
-
 - run `yarn install`
-
 - run `yarn start`
-
 - navigate browser to `[localhost:8889](http://localhost:8889/)`
 
   
 ## Build and Deploy Modules
-
 If you are using this widget as a starter for your own custom needs, follow these steps to publish it for your use.
-
-  
 
 Once your widget is complete, it must be exported as a JS module that can be delivered via CDN. The build is configured to export a Web Component that can be used in your project.
 
 - run `yarn dist` to create a compiled, minified JS module
-
 - navigate to `CustomerJourney/dist/index.js`
-
 - rename and upload the bundled module (index.js) to your hosting service
-
 - import according to your web application's config.
 
-  
 
 ### Sharing widget information with Agent/Supervisor Desktop administrator
 
-  
-
 To be able to place your custom widget within Agent/Supervisor Desktop, Contact Center administrator will need three pieces of information:
-
-  
 
 1. The URL to the `***.js` file that you had previously generated and placed on a CDN.
 
 2. Information regarding any properties/attributes that are required to be set for the widget to function (e.g. for Maps widget in th Examples folder, one will require to pass Google Maps API key to an `api-key` attribute).
 
-  
-
 If you require dynamic data from Agent/Supervisor Desktop, you might want to either request it though [`wxcc-js-api`](https://apim-dev-portal.appstaging.ciscoccservice.com/documentation/guides/desktop#javascript-api) methods within your widget, or through properties - when the list of [Data Providers](https://apim-dev-portal.appstaging.ciscoccservice.com/documentation/guides/desktop#data-provider%E2%80%94widget-properties-and-attributes) contains the required information.
 
-  
 
 3. A quick preview/screenshot or the aspect ratio that is optimal for this widget. This way, an administrator will be able to make the best decision while placing it on the Desktop layout.
 
-  
-
 ### Placing Widget in JSON layout
-
-  
-
 **Reference**: [Desktop Layout Reference guide for Administrator](https://www.cisco.com/c/en/us/td/docs/voice_ip_comm/cust_contact/contact_center/CJP/SetupandAdministrationGuide_2/b_mp-release-2/b_cc-release-2_chapter_011.html#topic_8230815F4023699032326F948C3F1495).
-
-  
 
 In case you are an administrator for Contact Center Agent Desktop or are working with an administrator, you might be trying to place this component in a JSON layout specification file to test in your Contact Center environment.
 
-  
-
 This specific Widget Starter is designed to be places in a ["panel"](https://www.cisco.com/c/en/us/td/docs/voice_ip_comm/cust_contact/contact_center/CJP/SetupandAdministrationGuide_2/b_mp-release-2/b_cc-release-2_chapter_011.html#topic_BF0EBDF65DCB0A552164D6306657C892__AuxPane) area of JSON layout specification. This is due to this widget relying on a task-specific information with the reference derived from the current location/address bar value.
 
-  
-
 # Adding Widget to CCE/CCX
-
 Customer Journey widget can be added to CCE and CCX agent dashboards as gadgets. It needs a wrapper component that sets the theme for the widget.
 
-  
-
 ## Generate Query String for Gadget
-
 Use any of cjaas-sdk tools from https://github.com/CiscoDevNet/cjaas-sdk to generate sas-tokens.
-
-  
-
+ 
 ## Add gadget to admin config
 
 1. In the admin portal of CCE/CCX dashboard, edit desktop layout xml.
-
 2. Add gadget config with supported queryStrings to agent desktop config in appropriate place.
+
 
 ``` xml
 <gadget>
