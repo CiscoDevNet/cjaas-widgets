@@ -13,7 +13,7 @@ customer-journey-9.0.0.js
 <sub>_* Any older version will no longer work because the widget is using a whole new set of APIs. Please use this version going forward. You will have to onboard an organization and set things up in admin portal._</sub>
   
 ### Version 9.0.0 Code Location
-<sub>_* Currently, there are two version of the widget still available. So, Version 9.0.0 doesn't live in master yet._</sub>
+<sub>_Currently, there are two version of the widget still available. So, Version 9.0.0 doesn't live in master yet._</sub>
 
 ```
 BRANCH NAME: jds-widget-9-new-apis
@@ -24,7 +24,7 @@ Branch Link: https://github.com/CiscoDevNet/cjaas-widgets/tree/jds-widget-9-new-
 
 <i>The JDS Customer Journey Widget accepts specific properties to interact with the JDS APIs</i>
 
-* The following attributes and properties of JDS Widget are supported with the following version
+<sub>_The following attributes and properties of JDS Widget are supported with the following version_</sub>
 
 ```
 https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
@@ -74,7 +74,7 @@ https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
 
 ### An example of how to upload JDS widget into DesktopLayout.json for Agent Desktop.
 
-<sub>_* Prerequisite: Onboard a Customer Journey organization, create a project, and toggle on the Webex Contact Center Connector. _</sub>
+<sub>_Prerequisite: Onboard a Customer Journey organization, create a project, and toggle on the Webex Contact Center Connector._</sub>
 
 1. You will need to log into the Agent Admin Portal, and navigate to Desktop Layouts.
 2. Create a Desktop Layout or select an existing one, assign a agent team to use this layout, and this is where you will upload your configured DesktopLayout.json file.
@@ -99,7 +99,7 @@ https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
     ],
     "visibility": "IVR_TRANSCRIPT"
 },
-//// Add the customer journey widget code block (provided below) here
+# Add the customer journey widget code block (provided below) here
 ```
 
 #### Add this Customer Journey Widget code block
