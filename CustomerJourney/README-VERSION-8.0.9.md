@@ -1,11 +1,11 @@
-# JDS Customer Journey Widget
+# JDS Customer Journey Widget: Version 8.0.9
 
 This widget uses the JDS (Journey Data Services) APIs to display an individual customer's journey as a history of events. It first retrieves the complete event history from the tape endpoint and compiles toggles for all event channelTypes, and then subscribes to a live stream of new events so they appear in real time. This code can be used as is, or be starter code for your own Custom Widget. It also embodies Identity Alias management and Profile view with a tempate named 'journey-default-template' 
 
 ### Latest Version
-
-customer-journey-8.0.7.js
-
+```
+customer-journey-8.0.9.js
+```
 <sub>_* Any older version will no longer work because the backend APIs have breaking changes. Please use this version going forward_</sub>
 
 ### Customer Journey Widget Properties
