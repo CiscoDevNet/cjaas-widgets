@@ -82,6 +82,9 @@ https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
 4. Within the downloaded default desktop layout JSON file, search for the data property `"visibility": "IVR_TRANSCRIPT"`. Find the following code block associated with that.
 
 #### Find the IVR_TRANSCRIPT md-tab-panel object
+
+<sub>_IVR_TRANSCRIPT may appear a few times, please find the last appearance of `"visibility": "IVR_TRANSCRIPT"`_</sub>
+
 ```json
 {
     "comp": "md-tab-panel",
