@@ -143,7 +143,7 @@ https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
             }
         }
     ]
-}
+},
 ```
 7. For quick setup, use the exact code block above with the exception of providing your own `"project-id"`.
 8. Feel free to reference all the optional attributes and properties listed at the top. These allow you to customize your customer journey widget configuration.
