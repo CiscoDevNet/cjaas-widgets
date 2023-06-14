@@ -147,12 +147,11 @@ https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
         }
     ]
 },
+// All boolean attributes default as false. If you want the attribute to remain false, just don't pass it in at all.
 ```
 7. For quick setup, use the exact code block above with the exception of providing your own `"project-id"`.
 8. Feel free to reference all the optional attributes and properties listed at the top. These allow you to customize your customer journey widget configuration.
 9. Save the desktop Layout that now has your customer journey widget code. Then Save it within the Admin of Agent Desktop. Just refresh your Agent Desktop and the new configuration should load.
-
-<sub>_* All boolean attributes default as false. If you want them to remain false, just don't pass it in at all._</sub>
 
 ### If you want to add the Widget to the side nav of Agent Desktop (say for a supervisor account)
 1. It will mostly be the same, but you will have to manually enter in your organizationId property instead of relying on the variable.
