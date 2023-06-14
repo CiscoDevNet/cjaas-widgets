@@ -133,12 +133,12 @@ https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
             "attributes": {
                 "base-url": "https://api-jds.prod-useast1.ciscowxdap.com",
                 "logs-on": "true",
-                "project-id": "<your-project-id>"
+                "project-id": "<your-project-id>" // manually add your project-id here.
             },
             "properties": {
                 "interactionData": "$STORE.agentContact.taskSelected",
                 "bearerToken": "$STORE.auth.accessToken",
-                "organizationId":  "$STORE.agentContact.taskSelected.orgId"
+                "organizationId": "$STORE.agentContact.taskSelected.orgId"
             },
             "wrapper": {
                 "title": "Customer Journey Widget",
@@ -153,6 +153,11 @@ https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
 9. Save the desktop Layout that now has your customer journey widget code. Then Save it within the Admin of Agent Desktop. Just refresh your Agent Desktop and the new configuration should load.
 
 <sub>_* All boolean attributes default as false. If you want them to remain false, just don't pass it in at all._</sub>
+
+### If you want to add the Widget to the side nav of Agent Desktop (say for a supervisor account)
+1. It will mostly be the same, but you will have to manually enter in your organizationId property instead of relying on the variable.
+     - Instead of `"organizationId": "$STORE.agentContact.taskSelected.orgId"`
+     -  You will need to obtain your orgId and pass it in like so `"organizationId": "<your-org-id>"`
 
 ### The following example is showcasing how to configure the local sandbox widget.
 ```
