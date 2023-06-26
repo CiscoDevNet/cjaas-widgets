@@ -1082,6 +1082,17 @@ export default class CustomerJourneyWidget extends LitElement {
         console.error(`[JDS Widget] Failed to add AliasById ${identityId}`, err?.response);
 
         let subErrorMessage = "";
+
+        if (err?.response?.data?.status === "BAD_REQUEST") {
+          const doesAliasAlreadyExists = err?.response.data.errors.find((error: string) =>
+            error.includes("Alias to be added already exists to some other Person")
+          );
+
+          if (doesAliasAlreadyExists) {
+            subErrorMessage = `This alias already exists for some other person.`;
+          }
+        }
+
         if (err?.response?.data?.status === 409) {
           subErrorMessage = "This alias is a duplicate.";
         }
