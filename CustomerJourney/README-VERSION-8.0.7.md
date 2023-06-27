@@ -6,6 +6,10 @@ This widget uses the JDS (Journey Data Services) APIs to display an individual c
 ```
 customer-journey-8.0.7.js
 ```
+Github Branch: `jds-widget-8.0.7`
+
+"@cjaas/common-components" version: `4.3.10` (4.3.9 before package dependency updates)
+
 <sub>_* Any older version will no longer work because the backend APIs have breaking changes. Please use this version going forward_</sub>
 
 ### Customer Journey Widget Properties
