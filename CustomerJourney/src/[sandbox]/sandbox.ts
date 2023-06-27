@@ -113,6 +113,8 @@ export class Sandbox extends LitElement {
             base-url=${BASE_URL}
             .organizationId=${ORGANIZATION_ID}
             .interactionData=${mockedInteractionData("INBOUND", IDENTITY)}
+            enable-sub-text-links
+            compact-wxcc-events
             project-id=${PROJECT_ID}
             logs-on
           ></customer-journey-widget>

@@ -30,6 +30,7 @@ import {
   jsonPatchOperation,
 } from "./types/cjaas";
 import { nothing } from "lit-html";
+import { mockedCustomUITimelineItems } from "./[sandbox]/sandbox.mock";
 
 export enum EventType {
   Agent = "agent",
@@ -173,10 +174,27 @@ export default class CustomerJourneyWidget extends LitElement {
    */
   @property({ type: Boolean, attribute: "disable-event-stream" }) disableEventStream = false;
   /**
+   * Toggle whether or not to hide all wxcc events from the journey timeline
+   * @prop hideWxccEvents
+   */
+  @property({ type: Boolean, attribute: "hide-wxcc-events" }) hideWxccEvents = false;
+  /**
+   * Toggle whether or not to show only 1 event of each TaskId
+   * @prop compactWxccEvents
+   */
+  @property({ type: Boolean, attribute: "compact-wxcc-events" }) compactWxccEvents = false;
+  /**
    * Toggle whether or not to ignore undefined origin timeline events
    * @prop ignoreUndefinedOrigins
    */
   @property({ type: Boolean, attribute: "ignore-undefined-origins" }) ignoreUndefinedOrigins = false;
+
+  /**
+   * Feature flag to enable sub text url links
+   * @prop parseSubTextUrls
+   */
+  @property({ type: Boolean, attribute: "enable-sub-text-links" }) enableSubTextLinks = true;
+
   /**
    * Data pulled from Journey Profile retrieval (will match shape of provided Template)
    * @prop profileData
@@ -383,7 +401,13 @@ export default class CustomerJourneyWidget extends LitElement {
       }
     });
 
-    this.debugLogMessage("Sorted events", events);
+    this.debugLogMessage("Verbose Sorted Events", events);
+
+    if (this.compactWxccEvents) {
+      const filteredEvents = this.filterUniqueTaskIds(events);
+      this.debugLogMessage("Sorted Events (Per Unique TaskId)", filteredEvents);
+      return filteredEvents;
+    }
     return events;
   }
 
@@ -567,9 +591,99 @@ export default class CustomerJourneyWidget extends LitElement {
     return profileTablePayload;
   }
 
-  filterEventTypes(typePrefix: EventType, events: Array<Timeline.CustomerEvent>) {
-    const filteredEvents = events.filter((event: Timeline.CustomerEvent) => event.type.includes(`${typePrefix}:`));
-    return filteredEvents;
+  parseWxccData(event: Timeline.CustomerEvent) {
+    const [eventType, eventSubType] = event?.type.split(":");
+    const channelTypeText = event?.data?.channelType === "telephony" ? "call" : event?.data?.channelType;
+    const agentState = event?.data?.currentState;
+    const formattedAgentState = agentState ? agentState?.charAt(0)?.toUpperCase() + agentState?.slice(1) : undefined;
+    const { channelType, currentState } = event?.data;
+
+    let wxccTitle, wxccSubTitle, wxccIconType, wxccFilterType;
+    const isWxccEvent = event.source.includes("com/cisco/wxcc");
+
+    const compactWxccSubTitle = !this.compactWxccEvents
+      ? `${eventSubType || ""} ${channelTypeText || ""}`
+      : isWxccEvent
+      ? `WXCC ${channelTypeText || ""} event`
+      : channelTypeText || "";
+
+    switch (eventType) {
+      case EventType.Agent:
+        wxccTitle = `Agent ${formattedAgentState || "Event"}`;
+        wxccFilterType = currentState ? `agent ${currentState}` : "";
+        wxccIconType = "agent";
+        break;
+      case EventType.Task:
+        wxccTitle = event?.data?.origin || event?.identity;
+        // wxccSubTitle = `${eventSubType || ""} ${channelTypeText || ""}`;
+        wxccSubTitle = compactWxccSubTitle;
+        wxccFilterType = channelType || event?.identitytype;
+        wxccIconType = channelType || event?.identitytype;
+        break;
+      default:
+        wxccTitle = event?.data?.origin || event?.identity;
+        wxccSubTitle = `${channelTypeText || ""}`;
+        wxccFilterType = channelType || event?.identitytype || "misc";
+        wxccIconType = channelType || event?.identitytype;
+        break;
+    }
+
+    const wxccFilterTypes = isWxccEvent ? ["WXCC"] : [];
+    if (wxccFilterType) {
+      wxccFilterTypes.push(wxccFilterType);
+    }
+
+    return {
+      wxccTitle,
+      wxccSubTitle,
+      wxccIconType,
+      wxccFilterTypes,
+    };
+  }
+
+  hasUniqueTaskId(event: Timeline.CustomerEvent, uniqueTaskIds: Set<string>) {
+    return (!event?.data?.taskId || !uniqueTaskIds.has(event?.data?.taskId)) && uniqueTaskIds.add(event?.data?.taskId);
+  }
+
+  finalizeEventList(events: Timeline.CustomerEvent[]): Timeline.CustomerEvent[] {
+    const uniqueTaskIds = new Set<string>();
+
+    const shouldIncludeUndefinedOriginEvents = (event: Timeline.CustomerEvent) =>
+      this.ignoreUndefinedOrigins ? !!event?.data?.origin : true;
+    const shouldIncludeWxccEvents = (event: Timeline.CustomerEvent) =>
+      this.hideWxccEvents ? !event.source.includes("com/cisco/wxcc") : true;
+    const shouldIncludeAllWxccEvents = (event: Timeline.CustomerEvent) =>
+      this.compactWxccEvents ? this.hasUniqueTaskId(event, uniqueTaskIds) : true;
+
+    const filteredModifiedEvents = events
+      ?.filter((event: Timeline.CustomerEvent) => {
+        if (
+          shouldIncludeUndefinedOriginEvents(event) &&
+          shouldIncludeWxccEvents(event) &&
+          shouldIncludeAllWxccEvents(event)
+        ) {
+          return event;
+        }
+      })
+      .map((event: Timeline.CustomerEvent) => {
+        const { wxccTitle, wxccSubTitle, wxccFilterTypes, wxccIconType } = this.parseWxccData(event);
+
+        const title = event?.customUIData?.title || wxccTitle;
+        const subTitle = event?.customUIData?.subTitle || wxccSubTitle;
+        const iconType = event?.customUIData?.iconType || wxccIconType;
+        const filterTypes = this.uniqueFilterTypes((event?.customUIData?.filterTypes || []).concat(wxccFilterTypes));
+
+        event.renderingData = {
+          title,
+          subTitle,
+          iconType,
+          filterTypes,
+        };
+
+        return event;
+      });
+
+    return this.sortEventsbyDate(filteredModifiedEvents);
   }
 
   getExistingEvents(customer: string | null) {
@@ -594,18 +708,15 @@ export default class CustomerJourneyWidget extends LitElement {
       axiosRetry(axiosInstance, this.basicRetryConfig);
     }
 
+    // FOLLOWING CODE IS TO MOCK TIMELINE EVENTS
+    // this.getEventsInProgress = false;
+    // this.events = this.finalizeEventList(mockedCustomUITimelineItems);
+    // return this.events;
+
     return axiosInstance
       .get(url)
       .then((response: any) => {
-        const myEvents = response?.data?.data?.map((event: any) => {
-          event.time = DateTime.fromISO(event.time);
-          return event;
-        });
-        const filteredEvents = this.filterOutUndefinedOrigins(myEvents);
-        this.events = this.sortEventsbyDate(filteredEvents);
-
-        this.timelineErrorMessage = "";
-        return filteredEvents;
+        this.events = this.finalizeEventList(response?.data?.data);
       })
       .catch((err: Error) => {
         console.error(`[JDS Widget] Could not fetch Customer Journey events for customer (${customer})`, err);
@@ -619,13 +730,17 @@ export default class CustomerJourneyWidget extends LitElement {
       });
   }
 
-  filterOutUndefinedOrigins(events: Array<any>) {
-    if (this.ignoreUndefinedOrigins) {
-      return events.filter((event: any) => event?.data?.origin !== undefined);
-    } else {
-      return events;
-    }
-  }
+  filterUniqueTaskIds = (events: Array<Timeline.CustomerEvent>) => {
+    const set = new Set();
+    const result = events.filter(o => (!o?.data?.taskId || !set.has(o?.data?.taskId)) && set.add(o?.data?.taskId));
+    return result;
+  };
+
+  uniqueFilterTypes = (filterTypes: Array<string>) => {
+    const set = new Set();
+    const result = filterTypes.filter(type => (!type || !set.has(type)) && set.add(type));
+    return result;
+  };
 
   subscribeToEventStream(customer: string | null) {
     if (this.journeyEventSource) {
@@ -666,8 +781,7 @@ export default class CustomerJourneyWidget extends LitElement {
           if (data.data && (data?.datacontenttype === "string" || data?.dataContentType === "string")) {
             data.data = JSON.parse(data.data);
           }
-          this.newestEvents = this.sortEventsbyDate([data, ...this.newestEvents]);
-          this.newestEvents = this.filterOutUndefinedOrigins(this.newestEvents);
+          this.newestEvents = this.finalizeEventList([data, ...this.newestEvents]);
         } catch (err) {
           console.error("[JDS Widget] journey/stream: No parsable data fetched");
         }
@@ -682,8 +796,7 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   updateComprehensiveEventList() {
-    this.events = this.sortEventsbyDate([...this.newestEvents, ...this.events]);
-    this.events = this.filterOutUndefinedOrigins(this.events);
+    this.events = this.finalizeEventList([...this.newestEvents, ...this.events]);
     this.newestEvents = [];
   }
 
@@ -739,6 +852,7 @@ export default class CustomerJourneyWidget extends LitElement {
         limit=${this.limit}
         is-event-filter-visible
         ?live-stream=${!this.disableEventStream}
+        ?enable-sub-text-links=${this.enableSubTextLinks}
         time-frame=${this.timeFrame}
         error-message=${this.timelineErrorMessage}
       ></cjaas-timeline>

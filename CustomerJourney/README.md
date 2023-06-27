@@ -65,11 +65,17 @@ https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
 
 `@attr disable-user-search`: (<i>Boolean</i>) = false - Disables the Agent to search other customers by an identifier.
 
+`@attr hide-wxcc-events`: (<i>Boolean</i>) = false - Removes any WXCC Event from the journey timeline.
+
+`@attr compact-wxcc-events`: (<i>Boolean</i>) = false - Will display every single WXCC event by default, otherwise it will show only 1 event per unique taskId.
+
 `@attr read-only-aliases`: (<i>Boolean</i>) = false - Toggle to make alias section read only. In read only mode, the agent won't be able to add or remove aliases within this section.
 
 `@attr icon-data-path`: (<i>String</i>) - URL path of JSON template to set color and icon settings.
 
 `@prop eventIconTemplate`: (<i>json object</i>) = iconData (built-in) - Property to pass in JSON template to set color and icon settings.
+
+`@prop enable-sub-text-links`: (<i>json object</i>) = false - Enables links to become clickable within string values of event data. Just need to follow this format "this is an example text [click here](https://www.google.com)"
 
 ## Examples
 
