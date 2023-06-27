@@ -1,4 +1,4 @@
-import { QueryParameters, QueryParams, SASTokens, UserData } from "./interface";
+import { QueryParameters, QueryParams, UserData } from "./interface";
 import * as iconData from "@/assets/icons.json";
 import { TimeFrame } from "..";
 
@@ -83,33 +83,26 @@ export const setParametersToWidget = (queryParams: QueryParameters) => {
 
   console.log("[JDS Widget][finesse wrapper][setParametersToWidget] queryParams:", queryParams);
 
-  const tapeReadToken = sanitize(queryParams[QueryParams.tapeReadToken]);
-  const streamReadToken = sanitize(queryParams[QueryParams.streamReadToken]);
-  const profileReadToken = sanitize(queryParams[QueryParams.profileReadToken]);
-  const profileWriteToken = sanitize(queryParams[QueryParams.profileWriteToken]);
-  const identityReadToken = sanitize(queryParams[QueryParams.identityReadToken]);
-  const identityWriteToken = sanitize(queryParams[QueryParams.identityWriteToken]);
+  const sanitizedBearerToken = queryParams.bearerToken ? sanitize(queryParams[QueryParams.bearerToken]) : null;
 
+  widget.bearerToken = sanitizedBearerToken;
+  widget.organizationId = queryParams?.organizationId;
+  widget.projectId = queryParams?.projectId;
+  widget.templateId = queryParams?.templateId || "journey-default-template";
   widget.baseUrl = queryParams?.baseUrl;
+
+  widget.cadVariableLookup = queryParams?.cadVariableLookup || null;
+  widget.readOnlyAliases = queryParams?.readOnlyAliases || false;
   widget.limit = queryParams?.limit || 20;
   widget.customer = queryParams?.customer || null;
   widget.logsOn = queryParams?.logsOn || false;
-  widget.liveStream = queryParams?.liveStream || false;
+  widget.disableEventStream = queryParams?.disableEventStream || false;
   widget.timeFrame = queryParams?.timeFrame || TimeFrame.All;
-  widget.userSearch = queryParams?.userSearch || false;
+  widget.disableUserSearch = queryParams?.disableUserSearch || false;
   widget.collapseProfileSection = queryParams?.collapseProfileSection || false;
   widget.collapseAliasSection = queryParams?.collapseAliasSection || false;
   widget.collapseTimelineSection = queryParams?.collapseTimelineSection || false;
   widget.iconDataPath = queryParams?.iconDataPath || "";
-  widget.templateId = queryParams?.templateId || "journey-default-template";
-
-  widget.tapeReadToken = tapeReadToken || null;
-  widget.streamReadToken = streamReadToken || null;
-  widget.profileReadToken = profileReadToken || null;
-  widget.profileWriteToken = profileWriteToken || null;
-  widget.identityReadToken = identityReadToken || null;
-  widget.identityWriteToken = identityWriteToken || null;
-  widget.userSearch = true;
   widget.eventIconTemplate = iconData;
 
   console.log("[JDS Widget][finesse wrapper][setParametersToWidget] widget initialized", widget);

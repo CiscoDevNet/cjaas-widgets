@@ -1,43 +1,31 @@
 import { TimeFrame } from "..";
 
-export interface SASTokens {
-  tapeReadToken: string;
-  streamReadToken: string;
-  profileReadToken: string;
-  profileWriteToken: string;
-  identityReadToken: string;
-  identityWriteToken: string;
-}
-
 export interface QueryParameters {
+  bearerToken: string | null;
   baseUrl: string;
+  organizationId: string | undefined;
+  projectId: string | undefined;
+
+  templateId: string;
+  cadVariableLookup?: string | null;
+  readOnlyAliases?: boolean;
   limit?: number;
   customer?: string;
   logsOn?: boolean;
-  liveStream?: boolean;
+  disableEventStream?: boolean;
   timeFrame?: TimeFrame;
-  userSearch?: boolean;
+  disableUserSearch?: boolean;
   collapseTimelineSection?: boolean;
   collapseProfileSection?: boolean;
   collapseAliasSection?: boolean;
   iconDataPath?: string;
-  templateId: string;
-  tapeReadToken: string;
-  streamReadToken: string;
-  profileReadToken: string;
-  profileWriteToken: string;
-  identityReadToken: string;
-  identityWriteToken: string;
 }
 
 export enum QueryParams {
   baseUrl = "baseUrl",
-  tapeReadToken = "tapeReadToken",
-  streamReadToken = "streamReadToken",
-  profileReadToken = "profileReadToken",
-  profileWriteToken = "profileWriteToken",
-  identityReadToken = "identityReadToken",
-  identityWriteToken = "identityWriteToken",
+  bearerToken = "bearerToken",
+  organizationId = "organizationId",
+  projectId = "projectId",
   minHeight = "minHeight",
   templateId = "templateId",
 }

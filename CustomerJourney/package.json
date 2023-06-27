@@ -1,6 +1,6 @@
 {
   "name": "@cjaas/customer-journey-widget",
-  "version": "8.0.7",
+  "version": "9.0.0",
   "author": {
     "name": "Kevin Hyde",
     "email": "kehyde@cisco.com"
@@ -27,7 +27,7 @@
     "lit-html": "1.2.1"
   },
   "peerDependencies": {
-    "@cjaas/common-components": "4.3.9",
+    "@cjaas/common-components": "4.4.1-dev2",
     "@momentum-ui/core": "19.15.4",
     "@momentum-ui/icons": "8.25.0",
     "@momentum-ui/utils": "6.2.15",
@@ -38,7 +38,7 @@
   "devDependencies": {
     "@babel/core": "^7.9.0",
     "@babel/preset-env": "^7.9.0",
-    "@cjaas/common-components": "4.3.9",
+    "@cjaas/common-components": "4.4.1-dev2",
     "@momentum-ui/core": "19.15.4",
     "@momentum-ui/icons": "8.25.0",
     "@momentum-ui/utils": "6.2.15",
@@ -86,9 +86,9 @@
     "lodash": "^4.17.20",
     "luxon": "^1.25.0",
     "mobx": "^6.0.1",
-    "node-sass": "^4.13.1",
     "prettier": "^1.19.1",
     "remove-files-webpack-plugin": "^1.4.0",
+    "sass": "^1.60.0",
     "sass-loader": "^8.0.2",
     "stylelint": "^12.0.1",
     "stylelint-config-sass-guidelines": "^7.0.0",
@@ -96,7 +96,7 @@
     "ts-jest": "26.3.0",
     "ts-loader": "^6.2.1",
     "ts-node": "^8.6.2",
-    "typescript": "^3.8.3",
+    "typescript": "^5.0.4",
     "webpack": "^4.42.0",
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.10.3",
