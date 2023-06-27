@@ -28,6 +28,8 @@ This version has some new things since version 8.0.7:
 ```
 customer-journey-8.0.7.js
 ```
+"@cjaas/common-components" version: `4.3.10` (v4.3.10-widget-8.0.7 branch)
+
 <sub>_This version still requires SAS Tokens_</sub>
 
 Please navigate to this [README-VERSION-8.0.7.md](https://github.com/CiscoDevNet/cjaas-widgets/blob/main/CustomerJourney/README-VERSION-8.0.7.md)
