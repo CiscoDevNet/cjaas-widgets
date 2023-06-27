@@ -7,6 +7,9 @@ This widget uses the JDS (Journey Data Services) APIs to display an individual c
 ```
 customer-journey-9.0.0.js
 ```
+Github Branch: `main`
+
+"@cjaas/common-components" version: `4.4.1` (main branch)
 
 <sub>_* This version is supported by an entire set of APIs. You don't need SAS Tokens anymore, just a reference to the agent desktop CI access token._</sub>
 <sub>_* New required parameters: BearerToken, OrganizationId, and project-id_</sub>

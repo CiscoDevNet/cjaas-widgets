@@ -6,6 +6,8 @@ This widget uses the JDS (Journey Data Services) APIs to display an individual c
 ```
 customer-journey-9.0.0.js
 ```
+Github Branch: `main`
+
 <sub>_This version is supported by an entire set of APIs. You don't need SAS Tokens anymore, just a reference to the agent desktop CI access token._</sub>
 
 Please navigate to this [README-VERSION-9.0.0.md](https://github.com/CiscoDevNet/cjaas-widgets/blob/main/CustomerJourney/README-VERSION-9.0.0.md)
@@ -14,6 +16,8 @@ Please navigate to this [README-VERSION-9.0.0.md](https://github.com/CiscoDevNet
 ```
 customer-journey-8.0.9.js
 ```
+Github Branch: `jds-widget-8.0.9`
+
 <sub>_This version still requires SAS Tokens_</sub>
 
 Please navigate to this [README-VERSION-8.0.9.md](https://github.com/CiscoDevNet/cjaas-widgets/blob/main/CustomerJourney/README-VERSION-8.0.9.md)
@@ -28,6 +32,8 @@ This version has some new things since version 8.0.7:
 ```
 customer-journey-8.0.7.js
 ```
+Github Branch: `jds-widget-8.0.7`
+
 <sub>_This version still requires SAS Tokens_</sub>
 
 Please navigate to this [README-VERSION-8.0.7.md](https://github.com/CiscoDevNet/cjaas-widgets/blob/main/CustomerJourney/README-VERSION-8.0.7.md)
