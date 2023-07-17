@@ -98,7 +98,6 @@ export const setParametersToWidget = (queryParams: QueryParameters) => {
   widget.logsOn = queryParams?.logsOn || false;
   widget.disableEventStream = queryParams?.disableEventStream || false;
   widget.timeFrame = queryParams?.timeFrame || TimeFrame.All;
-  widget.disableUserSearch = queryParams?.disableUserSearch || false;
   widget.collapseProfileSection = queryParams?.collapseProfileSection || false;
   widget.collapseAliasSection = queryParams?.collapseAliasSection || false;
   widget.collapseTimelineSection = queryParams?.collapseTimelineSection || false;
