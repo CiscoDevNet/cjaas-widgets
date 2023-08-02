@@ -10,13 +10,13 @@ import { html, internalProperty, property, LitElement, PropertyValues, query } f
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import axiosRetry from "axios-retry";
 import styles from "./assets/styles/View.scss";
-import * as iconData from "@/assets/icons.json";
+import * as iconData from "@/assets/defaultIcons-v10.json";
 import { EventSourceInitDict } from "eventsource";
-import "@cjaas/common-components/dist/comp/cjaas-timeline";
+import "@cjaas/common-components/dist/comp/cjaas-timeline-v2.js";
 import "@cjaas/common-components/dist/comp/cjass-profile-v2.js";
-import { Timeline } from "@cjaas/common-components";
+import { TimelineV2 } from "@cjaas/common-components";
 import { DateTime } from "luxon";
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 // @ts-ignore
 import { version } from "../version";
 import {
@@ -33,11 +33,17 @@ export enum EventType {
   Task = "task",
 }
 
-export enum TimeFrame {
-  "All" = "All",
-  "24-Hours" = "24-Hours",
-  "7-Days" = "7-Days",
-  "30-Days" = "30-Days",
+export interface ProfileDataPoint {
+  displayName: string;
+  value: string;
+}
+
+export enum TimeRangeOption {
+  "AllTime" = "All Time",
+  "Last10Days" = "Last 10 Days",
+  "Last30Days" = "Last 30 Days",
+  "Last6Months" = "Last 6 Months",
+  "Last12Months" = "Last 12 Months",
 }
 
 export enum RawAliasTypes {
@@ -78,7 +84,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * Property to pass in JSON template to set color and icon settings
    * @prop eventIconTemplate
    */
-  @property({ attribute: false }) eventIconTemplate: Timeline.TimelineCustomizations = iconData;
+  @property({ attribute: false }) eventIconTemplate: TimelineV2.TimelineCustomizations = iconData;
 
   /**
    * Organization ID
@@ -153,10 +159,12 @@ export default class CustomerJourneyWidget extends LitElement {
    */
   @property({ type: Boolean, attribute: "collapse-alias-section" }) collapseAliasSection = false;
   /**
-   * @attr time-frame
-   * Determine default time frame on start
+   * @attr default-time-range-option
+   * Determine default time range on start
    */
-  @property({ type: String, attribute: "time-frame" }) timeFrame: TimeFrame = TimeFrame.All;
+  @property({ type: String, attribute: "default-time-range-option" })
+  defaultTimeRangeOption: TimeRangeOption = TimeRangeOption.AllTime;
+
   /**
    * Toggle to either queue or immediately load new events occurring in the stream
    * @prop disable-event-stream
@@ -168,20 +176,20 @@ export default class CustomerJourneyWidget extends LitElement {
    */
   @property({ type: Boolean, attribute: "ignore-undefined-origins" }) ignoreUndefinedOrigins = false;
   /**
-   * Data pulled from Journey Profile retrieval (will match shape of provided Template)
-   * @prop profileData
+   * @prop profileDataPoints
+   * The profile Data Points provided from the template fetch, populated in the table view
    */
-  @internalProperty() profileData: Profile | undefined;
+  @property({ attribute: false }) profileDataPoints: Array<ProfileDataPoint> = [];
   /**
    * Timeline data fetched from journey history
    * @prop events
    */
-  @internalProperty() events: Array<Timeline.CustomerEvent> = [];
+  @internalProperty() events: Array<TimelineV2.CustomerEvent> = [];
   /**
    * Queue array of incoming events via Stream
    * @prop newestEvents
    */
-  @internalProperty() newestEvents: Array<Timeline.CustomerEvent> = [];
+  @internalProperty() newestEvents: Array<TimelineV2.CustomerEvent> = [];
   /**
    * Store for Stream event source for journey event data
    * @prop journeyEventSource
@@ -216,16 +224,32 @@ export default class CustomerJourneyWidget extends LitElement {
   @internalProperty() profileErrorMessage = "";
 
   /**
+   * Internal store for profile error tracking Id
+   * @prop profileErrorTrackingId
+   */
+  @internalProperty() profileErrorTrackingId = "";
+
+  /**
    * Internal store for profile name error messages
    * @prop profileNameErrorMessage
    */
   @internalProperty() nameApiErrorMessage = "";
+
+  @internalProperty() nameApiErrorTrackingId = "";
 
   /**
    * Internal store for timeline error messages
    * @prop timelineErrorMessage
    */
   @internalProperty() timelineErrorMessage = "";
+
+  @internalProperty() timelineErrorTrackingId = "";
+
+  @internalProperty() isEntireWidgetErroring = false;
+
+  @internalProperty() entireWidgetErrorTrackingId = "";
+
+  @internalProperty() entireWidgetLoading = false;
 
   /**
    * Internal toggle for responsive layout
@@ -257,6 +281,8 @@ export default class CustomerJourneyWidget extends LitElement {
 
   @internalProperty() aliasObjects: Array<AliasObject> = [];
 
+  @internalProperty() profileDataPointCount = 0;
+
   basicRetryConfig = {
     retries: 1,
     retryDelay: () => 3000,
@@ -280,6 +306,7 @@ export default class CustomerJourneyWidget extends LitElement {
     super.firstUpdated(_changedProperties);
 
     console.log(`[JDS Widget][Version] customer-journey-${version}`);
+    this.entireWidgetLoading = true;
   }
 
   async update(changedProperties: PropertyValues) {
@@ -288,7 +315,7 @@ export default class CustomerJourneyWidget extends LitElement {
     if (changedProperties.has("iconDataPath") && this.iconDataPath) {
       this.loadJSON(
         this.iconDataPath,
-        (iconDataJson: Timeline.TimelineCustomizations) => {
+        (iconDataJson: TimelineV2.TimelineCustomizations) => {
           this.eventIconTemplate = iconDataJson;
           this.debugLogMessage("Icon data loaded externally", this.eventIconTemplate);
         },
@@ -352,7 +379,11 @@ export default class CustomerJourneyWidget extends LitElement {
     }
 
     if (changedProperties.has("customer")) {
-      this.handleNewCustomer();
+      if (this.customer) {
+        this.handleNewCustomer(this.customer, this.templateId);
+      } else {
+        console.error("[JDS WIDGET] customer is undefined", this.customer);
+      }
     }
   }
 
@@ -362,7 +393,37 @@ export default class CustomerJourneyWidget extends LitElement {
     }
   }
 
-  sortEventsbyDate(events: Timeline.CustomerEvent[]) {
+  //   getQueueNameOfLatestEvent(event: TimelineV2.CustomerEvent) {
+  //     const { createdTime, queueId } = event?.data;
+
+  //     const fromDateMS = createdTime;
+  //     const toDateMS = createdTime + 86400000;
+  //     const queueIds = queueId;
+
+  //     const url = `https://api.qaus1.ciscoccservice.com/v1/queues/statistics?from=${fromDateMS}&to=${toDateMS}&interval=15&queueIds=${queueIds}&orgId=${this.organizationId}`;
+
+  //     const config: AxiosRequestConfig = {
+  //       method: "GET",
+  //       url,
+  //       headers: {
+  //         Authorization: `Bearer ${this.bearerToken}`,
+  //       },
+  //     };
+
+  //     const axiosInstance = axios.create(config);
+
+  //     return axiosInstance
+  //       .get(url)
+  //       .then(response => {
+  //         const queueName = response?.data?.data?.[0]?.queueName;
+  //         return queueName;
+  //       })
+  //       .catch((err: AxiosError) => {
+  //         console.error(`[JDS Widget] getQueueNameOfLatestEvent`, err);
+  //       });
+  //   }
+
+  sortEventsByDate(events: TimelineV2.CustomerEvent[]) {
     events?.sort((previous, current) => {
       if (previous.time > current.time) {
         return -1;
@@ -424,7 +485,7 @@ export default class CustomerJourneyWidget extends LitElement {
         const { id } = response?.data?.data;
         return id;
       })
-      .catch((err: Error) => {
+      .catch((err: AxiosError) => {
         console.error(`[JDS Widget] Unable to fetch the ID of the journey-default-template`, err);
         return undefined;
       });
@@ -440,12 +501,34 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   async subscribeToProfileViewStreamByTemplateId(customer: string | null, templateId: string | undefined) {
-    if (!customer || !templateId) {
-      console.error(`[JDS WIDGET] Failed to stream progressive profile view. Need customer & templateId provided.`);
-    }
+    const profileTemplateId = !templateId ? await this.getDefaultTemplateId() : templateId;
 
-    const url = `${this.baseUrl}/v1/api/progressive-profile-view/stream/workspace-id/${this.projectId}/identity/${customer}/template-id/${templateId}?organizationId=${this.organizationId}&bearerToken=${this.bearerToken}`;
+    const url = `${this.baseUrl}/v1/api/progressive-profile-view/stream/workspace-id/${this.projectId}/identity/${customer}/template-id/${profileTemplateId}?organizationId=${this.organizationId}&bearerToken=${this.bearerToken}`;
     return this.subscribeToProfileViewStream(url);
+  }
+
+  collectProfileDataPoints(profileData: any) {
+    if (profileData) {
+      const profileDataPoints: Array<ProfileDataPoint> = profileData
+        ?.filter((x: any) => x?.query?.widgetAttributes?.type === "table")
+        .map((x: any) => {
+          const { displayName } = x?.query;
+          const value = x.result;
+          return {
+            displayName,
+            value,
+          };
+        });
+
+      this.profileDataPointCount = profileDataPoints?.length;
+      this.debugLogMessage("ProfileData", profileData);
+      this.debugLogMessage("Profile data points", profileDataPoints);
+
+      return profileDataPoints;
+    } else {
+      this.profileDataPointCount = 0;
+      return [];
+    }
   }
 
   async subscribeToProfileViewStream(requestUrl: string) {
@@ -485,7 +568,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
           const { attributes, personId } = data;
           this.profileErrorMessage = "";
-          this.profileData = this.parseProfileResponse(attributes, personId);
+          this.profileDataPoints = this.parseProfileResponse(attributes, personId);
         } catch (err) {
           console.error("[JDS Widget] profile/stream: No parsable data fetched");
           this.profileErrorMessage = "Failed to get the latest profile data";
@@ -500,27 +583,25 @@ export default class CustomerJourneyWidget extends LitElement {
     }
   }
 
-  async getProfileViewByTemplateName(customer: string | null, templateName: string | undefined) {
-    if (!customer || !templateName) {
-      console.error(`[JDS WIDGET] Failed to get progressive profile view. Need customer & templateName provided.`);
-    }
+  //   async getProfileViewByTemplateName(customer: string | null, templateName: string | undefined) {
+  //     if (!customer || !templateName) {
+  //       console.error(`[JDS WIDGET] Failed to get progressive profile view. Need customer & templateName provided.`);
+  //     }
 
-    this.profileData = undefined;
-    this.getProfileDataInProgress = true;
+  //     this.profileData = undefined;
+  //     this.getProfileDataInProgress = true;
 
-    const url = `${this.baseUrl}/v1/api/progressive-profile-view/workspace-id/${this.projectId}/identity/${customer}/template-name/${templateName}`;
-    return this.handleProfileViewResponse(url, templateName);
-  }
+  //     const url = `${this.baseUrl}/v1/api/progressive-profile-view/workspace-id/${this.projectId}/identity/${customer}/template-name/${templateName}`;
+  //     return this.handleProfileViewResponse(url, templateName);
+  //   }
 
   async getProfileViewByTemplateId(customer: string | null, templateId: string | undefined) {
-    if (!customer || !templateId) {
-      console.error(`[JDS WIDGET] Failed to get progressive profile view. Need customer & templateId provided.`);
-    }
+    const profileTemplateId = !templateId ? await this.getDefaultTemplateId() : templateId;
 
-    this.profileData = undefined;
+    this.profileDataPoints = [];
     this.getProfileDataInProgress = true;
 
-    const url = `${this.baseUrl}/v1/api/progressive-profile-view/workspace-id/${this.projectId}/identity/${customer}/template-id/${templateId}`;
+    const url = `${this.baseUrl}/v1/api/progressive-profile-view/workspace-id/${this.projectId}/identity/${customer}/template-id/${profileTemplateId}`;
 
     return this.handleProfileViewResponse(url, templateId);
   }
@@ -545,15 +626,23 @@ export default class CustomerJourneyWidget extends LitElement {
       .then(response => {
         const { attributes, personId } = response?.data?.data[0];
         this.profileErrorMessage = "";
-        this.profileData = this.parseProfileResponse(attributes, personId);
+        this.profileDataPoints = this.parseProfileResponse(attributes, personId);
+        return this.profileDataPoints;
       })
-      .catch((err: Error) => {
-        this.profileData = undefined;
+      .catch((err: AxiosError) => {
+        this.profileDataPoints = [];
         this.profileErrorMessage = `Failed to fetch profile data.`;
+
+        if (err?.response?.data?.trackingId) {
+          this.profileErrorTrackingId = err?.response?.data?.trackingId;
+        }
+
         console.error(
           `[JDS Widget] Unable to fetch the Profile for customer (${this.customer}) with template (${templateReference})`,
           err
         );
+
+        return undefined;
       })
       .finally(() => {
         this.getProfileDataInProgress = false;
@@ -581,11 +670,11 @@ export default class CustomerJourneyWidget extends LitElement {
     });
 
     profileTablePayload.personId = personId;
-    return profileTablePayload;
+    return this.collectProfileDataPoints(profileTablePayload);
   }
 
-  filterEventTypes(typePrefix: EventType, events: Array<Timeline.CustomerEvent>) {
-    const filteredEvents = events.filter((event: Timeline.CustomerEvent) => event.type.includes(`${typePrefix}:`));
+  filterEventTypes(typePrefix: EventType, events: Array<TimelineV2.CustomerEvent>) {
+    const filteredEvents = events.filter((event: TimelineV2.CustomerEvent) => event.type.includes(`${typePrefix}:`));
     return filteredEvents;
   }
 
@@ -595,6 +684,7 @@ export default class CustomerJourneyWidget extends LitElement {
     this.getEventsInProgress = true;
     this.baseUrlCheck();
     const encodedCustomer = this.encodeParameter(customer);
+
     const url = `${this.baseUrl}/v1/api/events/workspace-id/${this.projectId}?organizationId=${this.organizationId}&identity=${encodedCustomer}`;
 
     const config: AxiosRequestConfig = {
@@ -613,20 +703,29 @@ export default class CustomerJourneyWidget extends LitElement {
 
     return axiosInstance
       .get(url)
-      .then((response: any) => {
+      .then(async (response: any) => {
         const myEvents = response?.data?.data?.map((event: any) => {
           event.time = DateTime.fromISO(event.time);
           return event;
         });
         const filteredEvents = this.filterOutUndefinedOrigins(myEvents);
-        this.events = this.sortEventsbyDate(filteredEvents);
+        this.events = this.sortEventsByDate(filteredEvents);
+
+        // const queueName = await this.getQueueNameOfLatestEvent(this.events[0]);
+        // console.log("queueName", queueName);
+        // this.events[0].data.queueName = queueName;
 
         this.timelineErrorMessage = "";
-        return filteredEvents;
+        this.timelineErrorTrackingId = "";
+        return this.events;
       })
-      .catch((err: Error) => {
-        console.error(`[JDS Widget] Could not fetch Customer Journey events for customer (${customer})`, err);
+      .catch((err: AxiosError) => {
+        console.error(`[JDS Widget] Could not fetch Customer Journey events for customer (${customer})`, err?.response);
         this.timelineErrorMessage = `Failure to fetch the journey for ${customer}.`;
+        if (err?.response?.data?.trackingId) {
+          this.timelineErrorTrackingId = err?.response?.data?.trackingId;
+        }
+        return undefined;
       })
       .finally(() => {
         this.getEventsInProgress = false;
@@ -683,10 +782,10 @@ export default class CustomerJourneyWidget extends LitElement {
           if (data.data && (data?.datacontenttype === "string" || data?.dataContentType === "string")) {
             data.data = JSON.parse(data.data);
           }
-          this.newestEvents = this.sortEventsbyDate([data, ...this.newestEvents]);
+          this.newestEvents = this.sortEventsByDate([data, ...this.newestEvents]);
           this.newestEvents = this.filterOutUndefinedOrigins(this.newestEvents);
         } catch (err) {
-          console.error("[JDS Widget] journey/stream: No parsable data fetched");
+          console.error("[JDS Widget] journey/stream: No parsable data fetched", err);
         }
       };
 
@@ -699,7 +798,7 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   updateComprehensiveEventList() {
-    this.events = this.sortEventsbyDate([...this.newestEvents, ...this.events]);
+    this.events = this.sortEventsByDate([...this.newestEvents, ...this.events]);
     this.events = this.filterOutUndefinedOrigins(this.events);
     this.newestEvents = [];
   }
@@ -714,68 +813,91 @@ export default class CustomerJourneyWidget extends LitElement {
     this.handleBackspace(srcEvent);
   }
 
-  async callProfileAPIs(customer: string | null, templateId?: string | undefined) {
-    await this.getFirstLastNameIdentity(customer);
-
-    if (templateId) {
-      this.getProfileViewByTemplateId(customer, templateId);
-      this.subscribeToProfileViewStreamByTemplateId(customer, templateId);
-    } else {
-      // currently, stream API doesn't work with templateName
-      const defaultTemplateId = await this.getDefaultTemplateId();
-      this.getProfileViewByTemplateId(customer, defaultTemplateId);
-      this.subscribeToProfileViewStreamByTemplateId(customer, defaultTemplateId);
-
-      //   const defaultProfileTemplate = "journey-default-template";
-      //   this.getProfileViewByTemplateName(customer, defaultProfileTemplate);
-      //   this.subscribeToProfileViewStreamByTemplateName(customer, defaultProfileTemplate);
-    }
-  }
-
   async callTimelineAPIs(customer: string | null) {
     this.newestEvents = [];
     this.getExistingEvents(customer || null);
     this.subscribeToEventStream(customer || null);
   }
 
-  async callAliasAPIs(customer: string | null) {
-    this.aliasGetInProgress = true;
-    this.identityData = await this.getIdentityDataByAlias(customer || null);
-    this.firstName = this.identityData?.firstName || "";
-    this.lastName = this.identityData?.lastName || "";
-    this.identityId = this.identityData?.id;
-    this.debugLogMessage("identityId", this.identityId);
+  //   async callAliasAPIs(customer: string | null) {
+  //     this.aliasGetInProgress = true;
+  //     this.identityData = await this.getIdentityDataByAlias(customer || null);
+  //     this.firstName = this.identityData?.firstName || "";
+  //     this.lastName = this.identityData?.lastName || "";
+  //     this.identityId = this.identityData?.id;
+  //     this.debugLogMessage("identityId", this.identityId);
+  //   }
+
+  async loadNonStreamAPIs(customer: string, templateId: string | undefined) {
+    this.isEntireWidgetErroring = false;
+    this.entireWidgetErrorTrackingId = "";
+    this.entireWidgetLoading = true;
+    this.newestEvents = [];
+
+    let apiResponses;
+    apiResponses = await Promise.all([
+      this.getExistingEvents(customer),
+      this.getFirstLastNameIdentity(customer),
+      this.getProfileViewByTemplateId(customer, templateId),
+    ]);
+
+    const didAllFail = apiResponses.every(apiResponse => !apiResponse);
+
+    this.isEntireWidgetErroring = didAllFail;
+    this.entireWidgetErrorTrackingId = didAllFail ? this.timelineErrorTrackingId : "";
+    this.entireWidgetLoading = false;
+
+    return apiResponses;
   }
 
-  async handleNewCustomer() {
-    this.debugLogMessage("customer", this.customer);
-    this.syncLoadingStatuses(true);
+  async handleNewCustomer(customer: string, templateId: string | undefined) {
+    this.debugLogMessage("customer", customer);
 
-    this.callProfileAPIs(this.customer, this.templateId);
-    this.callTimelineAPIs(this.customer);
+    await this.loadNonStreamAPIs(customer, templateId);
+
+    this.subscribeToEventStream(customer || null);
+    this.subscribeToProfileViewStreamByTemplateId(customer, templateId);
   }
 
   handleNamesUpdate(event: CustomEvent) {
     this.nameApiErrorMessage = "";
+    this.nameApiErrorTrackingId = "";
     const { firstName, lastName } = event?.detail;
 
     this.addFirstLastNameIdentity(this.identityId, firstName, lastName);
   }
 
-  async handleProfileTryAgain(event: CustomEvent) {
-    this.getProfileDataInProgress = true;
-    this.profileErrorMessage = "";
-    this.callProfileAPIs(this.customer);
+  handleWidgetTryAgain() {
+    if (this.customer) {
+      this.handleNewCustomer(this.customer, this.templateId);
+    }
   }
 
-  handleNameTryAgain(event: CustomEvent) {
+  async handleProfileTryAgain() {
+    this.getProfileDataInProgress = true;
+    this.profileErrorMessage = "";
+
+    await this.getFirstLastNameIdentity(this.customer);
+    this.getProfileViewByTemplateId(this.customer, this.templateId);
+    this.subscribeToProfileViewStreamByTemplateId(this.customer, this.templateId);
+  }
+
+  handleNameTryAgain() {
     this.nameApiErrorMessage = "";
+    this.nameApiErrorTrackingId = "";
     this.getFirstLastNameIdentity(this.customer);
+  }
+
+  handleTimelineTryAgain() {
+    this.timelineErrorMessage = "";
+    this.timelineErrorTrackingId = "";
+    this.getExistingEvents(this.customer);
+    this.subscribeToEventStream(this.customer);
   }
 
   renderEvents() {
     return html`
-      <cjaas-timeline
+      <cjaas-timeline-v2
         ?getEventsInProgress=${this.getEventsInProgress}
         .historicEvents=${this.events}
         .newestEvents=${this.newestEvents}
@@ -785,9 +907,11 @@ export default class CustomerJourneyWidget extends LitElement {
         limit=${this.limit}
         is-event-filter-visible
         ?live-stream=${!this.disableEventStream}
-        time-frame=${this.timeFrame}
+        time-range-option=${this.defaultTimeRangeOption}
         error-message=${this.timelineErrorMessage}
-      ></cjaas-timeline>
+        error-tracking-id=${this.timelineErrorTrackingId}
+        @timeline-error-try-again=${this.handleTimelineTryAgain}
+      ></cjaas-timeline-v2>
     `;
   }
 
@@ -801,7 +925,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
   renderEventList() {
     return html`
-      <section class="sub-widget-section" id="events-list">
+      <section class="sub-widget-section events-list">
         ${this.renderEvents()}
       </section>
     `;
@@ -809,10 +933,10 @@ export default class CustomerJourneyWidget extends LitElement {
 
   renderProfile() {
     return html`
-      <section class="sub-widget-section">
+      <section class="sub-widget-section profile-view">
         <cjaas-profile-v2
           .customer=${this.customer || ""}
-          .profileData=${this.profileData}
+          .profileDataPoints=${this.profileDataPoints}
           ?getProfileDataInProgress=${this.getProfileDataInProgress}
           error-message=${this.profileErrorMessage}
           first-name=${this.firstName}
@@ -822,6 +946,8 @@ export default class CustomerJourneyWidget extends LitElement {
           @name-error-try-again=${this.handleNameTryAgain}
           ?names-loading=${this.aliasNamesUpdateInProgress}
           name-api-error-message=${this.nameApiErrorMessage}
+          profile-error-tracking-id=${this.profileErrorTrackingId}
+          name-error-tracking-id=${this.nameApiErrorTrackingId}
         ></cjaas-profile-v2>
       </section>
     `;
@@ -909,7 +1035,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * @param customer
    * @returns Promise<IdentityData | undefined>
    */
-  async getIdentityDataByAlias(customer: string | null, usedToFetchNames = false): Promise<IdentityData | undefined> {
+  async getIdentityDataByAlias(customer: string | null): Promise<IdentityData | undefined> {
     const url = `${this.baseUrl}/admin/v1/api/person/workspace-id/${this.projectId}/aliases/${customer}?organizationId=${this.organizationId}`;
 
     const config: AxiosRequestConfig = {
@@ -927,30 +1053,10 @@ export default class CustomerJourneyWidget extends LitElement {
       axiosRetry(axiosInstance, this.basicRetryConfig);
     }
 
-    return axiosInstance
-      .get(url)
-      .then((response: AxiosResponse<IdentityResponse>) => {
-        const identityData = response?.data?.data?.length ? response?.data?.data[0] : undefined;
-
-        this.aliasErrorMessage = "";
-        this.nameApiErrorMessage = "";
-        return identityData;
-      })
-      .catch((err: Error) => {
-        console.error("[JDS Widget] Failed to fetch Aliases by Alias ", err);
-        this.aliasErrorMessage = `Failed to fetch aliases. Cannot execute any other actions.`;
-        this.nameApiErrorMessage = "Failed to fetch name";
-        return undefined;
-      })
-      .finally(() => {
-        this.aliasGetInProgress = false;
-        if (usedToFetchNames) {
-          this.aliasNamesUpdateInProgress = false;
-        }
-        if (!this.hasIdentityAPIBeenCalled) {
-          this.hasIdentityAPIBeenCalled = true;
-        }
-      });
+    return axiosInstance.get(url).then((response: AxiosResponse<IdentityResponse>) => {
+      const identityData = response?.data?.data?.length ? response?.data?.data[0] : undefined;
+      return identityData;
+    });
   }
 
   getAliasesByAlias(identityData: any) {
@@ -960,10 +1066,34 @@ export default class CustomerJourneyWidget extends LitElement {
 
   async getFirstLastNameIdentity(customer: string | null) {
     this.aliasNamesUpdateInProgress = true;
-    this.identityData = await this.getIdentityDataByAlias(customer, true);
-    this.firstName = this.identityData?.firstName || "";
-    this.lastName = this.identityData?.lastName || "";
-    this.identityId = this.identityData?.id;
+
+    return this.getIdentityDataByAlias(customer)
+      .then((identityData: IdentityData | undefined) => {
+        this.nameApiErrorMessage = "";
+        this.nameApiErrorTrackingId = "";
+
+        this.firstName = identityData?.firstName || "";
+        this.lastName = identityData?.lastName || "";
+        this.identityId = identityData?.id;
+
+        return { firstName: this.firstName, lastName: this.lastName, identityId: this.identityId };
+      })
+      .catch((err: AxiosError) => {
+        console.error(`[JDS Widget] Failed to fetch first and last name by Alias: [${customer}]`, err);
+        this.nameApiErrorMessage = "Failed to fetch name";
+        if (err?.response?.data?.trackingId) {
+          this.nameApiErrorTrackingId = err?.response?.data?.trackingId;
+        }
+        return undefined;
+      })
+      .finally(() => {
+        this.aliasGetInProgress = false;
+        this.aliasNamesUpdateInProgress = false;
+
+        if (!this.hasIdentityAPIBeenCalled) {
+          this.hasIdentityAPIBeenCalled = true;
+        }
+      });
   }
 
   /**
@@ -979,7 +1109,6 @@ export default class CustomerJourneyWidget extends LitElement {
     if (!firstName.trim() && !lastName.trim()) {
       this.aliasNamesUpdateInProgress = false;
       console.error("[JDS Widget] You cannot add empty values to first or last name.");
-      return;
     }
 
     const requestBody = [
@@ -1000,10 +1129,12 @@ export default class CustomerJourneyWidget extends LitElement {
         this.firstName = response?.data?.data?.firstName;
         this.lastName = response?.data?.data?.lastName;
         this.nameApiErrorMessage = "";
+        return { firstName: this.firstName, lastName: this.lastName };
       })
-      .catch(err => {
+      .catch((err: AxiosError) => {
         this.nameApiErrorMessage = `Failed to edit the name successfully`;
         console.error(`[JDS Widget] Failed to edit Identity Names ${identityId}`, err?.response);
+        return undefined;
       })
       .finally(() => {
         this.aliasNamesUpdateInProgress = false;
@@ -1031,137 +1162,55 @@ export default class CustomerJourneyWidget extends LitElement {
     return axios(url, config);
   }
 
-  async generatePatchIndex(operation: PatchOperations, aliasType: IdentityAliasTypes, alias: string) {
-    const identityData = await this.getIdentityDataByAlias(alias);
-    if (!identityData) {
-      return null;
-    }
-    const arrayOfAliasesByType: Array<string> = identityData[aliasType];
-
-    switch (operation) {
-      case PatchOperations.Add:
-        return arrayOfAliasesByType?.length || 0;
-      case PatchOperations.Remove:
-        const index = arrayOfAliasesByType.indexOf(alias);
-        return index;
-      case PatchOperations.Replace:
-        return arrayOfAliasesByType.indexOf(alias);
-        break;
-      default:
-    }
-  }
-
-  /**
-   * Add one or more aliases to existing Individual
-   * @param customer
-   * @param alias
-   * @returns void
-   */
-  async addAliasById(identityId: string | undefined, aliasType: IdentityAliasTypes, alias: string) {
-    this.aliasAddInProgress = true;
-
-    const trimmedAlias = alias.trim();
-    if (!trimmedAlias) {
-      this.aliasAddInProgress = false;
-      console.error("[JDS Widget] You cannot add an empty value as a new alias");
-      return;
-    }
-
-    const index = await this.generatePatchIndex(PatchOperations.Add, aliasType, alias);
-
-    const requestBody = [
-      {
-        op: "add",
-        path: `/${aliasType}/${index}`,
-        value: trimmedAlias,
-      },
-    ];
-
-    return this.patchAliasChange(identityId, requestBody)
-      .then((response: AxiosResponse<any>) => {
-        const responseData = response.data?.data as IdentityData;
-
-        if (this.identityData) {
-          this.identityData.aliases = responseData?.aliases;
-          this.identityData = responseData;
-          this.createAliasMap(this.identityData);
-          this.requestUpdate();
-        }
-        this.aliasErrorMessage = "";
-      })
-      .catch(err => {
-        console.error(`[JDS Widget] Failed to add AliasById ${identityId}`, err?.response);
-
-        let subErrorMessage = "";
-
-        if (err?.response?.data?.status === "BAD_REQUEST") {
-          const doesAliasAlreadyExists = err?.response.data.errors.find((error: string) =>
-            error.includes("Alias to be added already exists to some other Person")
-          );
-
-          if (doesAliasAlreadyExists) {
-            subErrorMessage = `This alias already exists for some other person.`;
-          }
-        }
-
-        if (err?.response?.data?.status === 409) {
-          subErrorMessage = "This alias is a duplicate.";
-        }
-        this.aliasErrorMessage = `Failed to add alias(es) ${alias}. ${subErrorMessage}`;
-      })
-      .finally(() => {
-        this.aliasAddInProgress = false;
-      });
-  }
-
   hasPlusSign(alias: string): boolean {
     const hasPlusSign = alias.trim().charAt(0) === "+";
     return hasPlusSign;
   }
 
-  async deleteAliasById(identityId: string | undefined, aliasType: IdentityAliasTypes, alias: string) {
-    this.setInlineAliasLoader(alias, true);
-    const hasPlusSign = this.hasPlusSign(alias);
-    let aliasToDelete = alias;
-    if (aliasType === IdentityAliasTypes.Phone || hasPlusSign) {
-      aliasToDelete = this.encodeParameter(alias) || aliasToDelete;
-    }
+  //   async deleteAliasById(identityId: string | undefined, aliasType: IdentityAliasTypes, alias: string) {
+  //     this.setInlineAliasLoader(alias, true);
+  //     const hasPlusSign = this.hasPlusSign(alias);
+  //     let aliasToDelete = alias;
+  //     if (aliasType === IdentityAliasTypes.Phone || hasPlusSign) {
+  //       aliasToDelete = this.encodeParameter(alias) || aliasToDelete;
+  //     }
 
-    const trimmedAlias = alias.trim();
-    if (!trimmedAlias) {
-      this.setInlineAliasLoader(alias, false);
-      console.error("[JDS Widget] You cannot add an empty value as a new alias");
-      return;
-    }
+  //     const trimmedAlias = alias.trim();
+  //     if (!trimmedAlias) {
+  //       this.setInlineAliasLoader(alias, false);
+  //       console.error("[JDS Widget] You cannot add an empty value as a new alias");
+  //       return;
+  //     }
 
-    const index = await this.generatePatchIndex(PatchOperations.Remove, aliasType, alias);
+  //     const index = await this.generatePatchIndex(PatchOperations.Remove, aliasType, alias);
 
-    const requestBody = [
-      {
-        op: "remove",
-        path: `/${aliasType}/${index}`,
-        value: trimmedAlias,
-      },
-    ];
+  //     const requestBody = [
+  //       {
+  //         op: "remove",
+  //         path: `/${aliasType}/${index}`,
+  //         value: trimmedAlias,
+  //       },
+  //     ];
 
-    return this.patchAliasChange(identityId, requestBody)
-      .then((response: any) => {
-        const responseData = response.data?.data as IdentityData;
-        if (this.identityData) {
-          this.identityData = responseData;
-          this.createAliasMap(this.identityData);
-          this.requestUpdate();
-        }
-        this.aliasErrorMessage = "";
-      })
-      .catch((err: Error) => {
-        console.error(`[JDS Widget] Failed to delete AliasById: (${identityId})`, alias, err);
-        this.aliasErrorMessage = `Failed to delete alias ${alias}.`;
-      })
-      .finally(() => {
-        this.setInlineAliasLoader(alias, false);
-      });
-  }
+  //     return this.patchAliasChange(identityId, requestBody)
+  //       .then((response: any) => {
+  //         const responseData = response.data?.data as IdentityData;
+  //         if (this.identityData) {
+  //           this.identityData = responseData;
+  //           this.createAliasMap(this.identityData);
+  //           this.requestUpdate();
+  //         }
+  //         this.aliasErrorMessage = "";
+  //       })
+  //       .catch((err: AxiosError) => {
+  //         console.error(`[JDS Widget] Failed to delete AliasById: (${identityId})`, alias, err);
+  //         this.aliasErrorMessage = `Failed to delete alias ${alias}.`;
+  //         return err?.response?.data;
+  //       })
+  //       .finally(() => {
+  //         this.setInlineAliasLoader(alias, false);
+  //       });
+  //   }
 
   setInlineAliasLoader(alias: string, state: boolean) {
     const duplicate = Object.assign({}, this.aliasDeleteInProgress);
@@ -1181,41 +1230,41 @@ export default class CustomerJourneyWidget extends LitElement {
     this.getEventsInProgress = status;
   }
 
-  refreshUserSearch() {
-    const inputValue = this.customerInput.value.trim();
-    if (this.customer === inputValue) {
-      this.handleNewCustomer();
-    } else {
-      this.syncLoadingStatuses();
-      this.customer = inputValue;
-    }
-  }
+  //   refreshUserSearch() {
+  //     const inputValue = this.customerInput.value.trim();
+  //     if (this.customer === inputValue) {
+  //       this.handleNewCustomer(this.customer, this.templateId);
+  //     } else {
+  //       this.syncLoadingStatuses();
+  //       this.customer = inputValue;
+  //     }
+  //   }
 
-  renderMainInputSearch() {
-    return html`
-      <div class="flex-inline">
-        <span class="custom-input-label">Lookup User</span>
-        <div class="input-wrapper">
-          <md-input
-            searchable
-            class="customer-journey-search-input"
-            id="customer-input"
-            value=${this.customer || ""}
-            shape="pill"
-            @input-keydown=${(event: CustomEvent) => this.handleKeyDown(event)}
-          >
-          </md-input>
-          <div class="reload-icon">
-            <md-tooltip message="Reload Widget">
-              <md-button circle @click=${this.refreshUserSearch}>
-                <md-icon name="icon-refresh_12"></md-icon>
-              </md-button>
-            </md-tooltip>
-          </div>
-        </div>
-      </div>
-    `;
-  }
+  //   renderMainInputSearch() {
+  //     return html`
+  //       <div class="flex-inline">
+  //         <span class="custom-input-label">Lookup User</span>
+  //         <div class="input-wrapper">
+  //           <md-input
+  //             searchable
+  //             class="customer-journey-search-input"
+  //             id="customer-input"
+  //             value=${this.customer || ""}
+  //             shape="pill"
+  //             @input-keydown=${(event: CustomEvent) => this.handleKeyDown(event)}
+  //           >
+  //           </md-input>
+  //           <div class="reload-icon">
+  //             <md-tooltip message="Reload Widget">
+  //               <md-button circle @click=${this.refreshUserSearch}>
+  //                 <md-icon name="icon-refresh_12"></md-icon>
+  //               </md-button>
+  //             </md-tooltip>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     `;
+  //   }
 
   renderEmptyStateView() {
     return html`
@@ -1226,21 +1275,44 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   renderSubWidgets() {
-    const tooltipMessage = `Aliases are alternate ways to identify a customer. Adding aliases can help you form a more complete profile of your customer.`;
-
     return html`
-      <div class="sub-widget-container">
+      <div
+        class=${`sub-widget-container ${
+          this.profileDataPointCount > 3 ? "flex-direction-row" : "flex-direction-column"
+        }`}
+      >
         ${this.renderProfile()} ${this.renderEventList()}
       </div>
     `;
   }
 
   renderFunctionalWidget() {
-    return html`
-      <div class="customer-journey-widget-container">
-        ${this.customer ? this.renderSubWidgets() : this.renderEmptyStateView()}
-      </div>
-    `;
+    if (this.isEntireWidgetErroring) {
+      return html`
+        <div class="customer-journey-widget-container">
+          <cjaas-error-notification
+            title="Failed to load data"
+            tracking-id=${this.entireWidgetErrorTrackingId}
+            @error-try-again=${this.handleWidgetTryAgain}
+          ></cjaas-error-notification>
+        </div>
+      `;
+    } else if (this.entireWidgetLoading) {
+      return html`
+        <div class="customer-journey-widget-container">
+          <div class="widget-loading-wrapper">
+            <md-spinner size="56"></md-spinner>
+            <p class="loading-text">Loading...</p>
+          </div>
+        </div>
+      `;
+    } else {
+      return html`
+        <div class="customer-journey-widget-container populated-data">
+          ${this.customer ? this.renderSubWidgets() : this.renderEmptyStateView()}
+        </div>
+      `;
+    }
   }
 
   render() {

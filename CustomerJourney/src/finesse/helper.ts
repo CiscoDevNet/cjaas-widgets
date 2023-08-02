@@ -1,6 +1,6 @@
 import { QueryParameters, QueryParams, UserData } from "./interface";
 import * as iconData from "@/assets/icons.json";
-import { TimeFrame } from "..";
+import { TimelineV2 } from "@cjaas/common-components";
 
 declare const finesse: any;
 declare const gadgets: any;
@@ -97,7 +97,7 @@ export const setParametersToWidget = (queryParams: QueryParameters) => {
   widget.customer = queryParams?.customer || null;
   widget.logsOn = queryParams?.logsOn || false;
   widget.disableEventStream = queryParams?.disableEventStream || false;
-  widget.timeFrame = queryParams?.timeFrame || TimeFrame.All;
+  widget.defaultTimeRangeOption = queryParams?.defaultTimeRangeOption || TimelineV2.TimeRangeOption.Last30Days;
   widget.collapseProfileSection = queryParams?.collapseProfileSection || false;
   widget.collapseAliasSection = queryParams?.collapseAliasSection || false;
   widget.collapseTimelineSection = queryParams?.collapseTimelineSection || false;

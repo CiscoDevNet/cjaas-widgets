@@ -1,4 +1,4 @@
-import { TimeFrame } from "..";
+import { TimelineV2 } from "@cjaas/common-components";
 
 export interface QueryParameters {
   bearerToken: string | null;
@@ -13,7 +13,7 @@ export interface QueryParameters {
   customer?: string;
   logsOn?: boolean;
   disableEventStream?: boolean;
-  timeFrame?: TimeFrame;
+  defaultTimeRangeOption?: TimelineV2.TimeRangeOption.Last30Days;
   disableUserSearch?: boolean;
   collapseTimelineSection?: boolean;
   collapseProfileSection?: boolean;
