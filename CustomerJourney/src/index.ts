@@ -27,6 +27,7 @@ import {
   AliasObject,
   jsonPatchOperation,
 } from "./types/cjaas";
+import _ from "lodash";
 
 export enum EventType {
   Agent = "agent",
@@ -64,6 +65,36 @@ export enum PatchOperations {
   Add = "add",
   Remove = "remove",
   Replace = "replace",
+}
+
+export interface CustomUIDataPayload {
+  title?: string;
+  subTitle?: string;
+  iconType?: string;
+  channelTypeTag?: string;
+}
+
+export interface RenderingDataObject {
+  title?: string;
+  subTitle?: string;
+  iconType?: string;
+  channelTypeTag?: string;
+}
+
+export interface CustomerEvent {
+  specversion: string;
+  type: string;
+  source: string;
+  id: string;
+  time: string;
+  identity: string;
+  identitytype: "email" | "phone" | "customerId";
+  previousidentity?: null;
+  datacontenttype: string;
+  person?: string;
+  data: Record<string, any>;
+  renderingData?: RenderingDataObject;
+  customUIData?: CustomUIDataPayload;
 }
 
 @customElementWithCheck("customer-journey-widget")
@@ -171,6 +202,16 @@ export default class CustomerJourneyWidget extends LitElement {
    */
   @property({ type: Boolean, attribute: "disable-event-stream" }) disableEventStream = false;
   /**
+   * Toggle whether or not to hide all wxcc events from the journey timeline
+   * @prop hideWxccEvents
+   */
+  @property({ type: Boolean, attribute: "hide-wxcc-events" }) hideWxccEvents = false;
+  /**
+   * Toggle whether or not to show only 1 event of each TaskId
+   * @prop compactWxccEvents
+   */
+  @property({ type: Boolean, attribute: "compact-wxcc-events" }) compactWxccEvents = false;
+  /**
    * Toggle whether or not to ignore undefined origin timeline events
    * @prop ignoreUndefinedOrigins
    */
@@ -184,12 +225,17 @@ export default class CustomerJourneyWidget extends LitElement {
    * Timeline data fetched from journey history
    * @prop events
    */
-  @internalProperty() events: Array<TimelineV2.CustomerEvent> = [];
+  @internalProperty() events: Array<CustomerEvent> = [];
   /**
    * Queue array of incoming events via Stream
    * @prop newestEvents
    */
-  @internalProperty() newestEvents: Array<TimelineV2.CustomerEvent> = [];
+  @internalProperty() newestEvents: Array<CustomerEvent> = [];
+  /**
+   * Most recent event with task:ended type
+   * @prop mostRecentEvent
+   */
+  @internalProperty() mostRecentEvent: CustomerEvent | undefined = undefined;
   /**
    * Store for Stream event source for journey event data
    * @prop journeyEventSource
@@ -393,7 +439,7 @@ export default class CustomerJourneyWidget extends LitElement {
     }
   }
 
-  //   getQueueNameOfLatestEvent(event: TimelineV2.CustomerEvent) {
+  //   getQueueNameOfLatestEvent(event: CustomerEvent) {
   //     const { createdTime, queueId } = event?.data;
 
   //     const fromDateMS = createdTime;
@@ -423,19 +469,27 @@ export default class CustomerJourneyWidget extends LitElement {
   //       });
   //   }
 
-  sortEventsByDate(events: TimelineV2.CustomerEvent[]) {
-    events?.sort((previous, current) => {
-      if (previous.time > current.time) {
-        return -1;
-      } else if (previous.time < current.time) {
-        return 1;
-      } else {
-        return 0;
-      }
-    });
+  sortEventsByDate(events: CustomerEvent[]) {
+    if (events?.length) {
+      events?.sort((previous, current) => {
+        if (previous.time > current.time) {
+          return -1;
+        } else if (previous.time < current.time) {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
+    }
 
-    this.debugLogMessage("Sorted events", events);
-    return events;
+    this.debugLogMessage("Sorted Events", events);
+
+    // if (this.compactWxccEvents) {
+    //   const filteredEvents = this.filterUniqueTaskIds(events);
+    //   this.debugLogMessage("Sorted Events (Per Unique TaskId)", filteredEvents);
+    //   return filteredEvents;
+    // }
+    return events || [];
   }
 
   loadJSON(path: string, success: any, error: any) {
@@ -673,8 +727,183 @@ export default class CustomerJourneyWidget extends LitElement {
     return this.collectProfileDataPoints(profileTablePayload);
   }
 
-  filterEventTypes(typePrefix: EventType, events: Array<TimelineV2.CustomerEvent>) {
-    const filteredEvents = events.filter((event: TimelineV2.CustomerEvent) => event.type.includes(`${typePrefix}:`));
+  parseWxccData(event: CustomerEvent) {
+    /////
+    const { channelType, direction } = event?.data;
+    const channelTypeText = channelType === "telephony" ? "voice" : channelType;
+    const formatDirectionText = direction?.toLowerCase();
+
+    // event.renderingData = {
+    //   title: `${formatDirectionText} ${channelTypeText}`,
+    //   subTitle: event?.data?.queueName || `Queue ID: ${event?.data?.queueId}`,
+    //   channelType: channelTypeText,
+    //   iconType: channelType === "telephony" ? `${formatDirectionText}-call` : channelType,
+    // };
+
+    let wxccTitle, wxccSubTitle, wxccIconType, wxccChannelTypeTag;
+    // const isWxccEvent = event.source.includes("wxcc");
+
+    wxccTitle = `${formatDirectionText} ${channelTypeText}`;
+    wxccSubTitle = event?.data?.queueName || `Queue ID: ${event?.data?.queueId}`;
+    wxccChannelTypeTag = channelTypeText;
+    wxccIconType = channelType === "telephony" ? `${formatDirectionText}-call` : channelType;
+
+    /////
+
+    // const [eventType, eventSubType] = event?.type.split(":");
+    // const channelTypeText = event?.data?.channelType === "telephony" ? "call" : event?.data?.channelType;
+    // const agentState = event?.data?.currentState;
+    // const formattedAgentState = agentState ? agentState?.charAt(0)?.toUpperCase() + agentState?.slice(1) : undefined;
+    // const { channelType, currentState } = event?.data;
+
+    // let wxccTitle, wxccSubTitle, wxccIconType, wxccFilterType;
+    // const isWxccEvent = event.source.includes("wxcc");
+
+    // const compactWxccSubTitle = !this.compactWxccEvents
+    //   ? `${eventSubType || ""} ${channelTypeText || ""}`
+    //   : isWxccEvent
+    //   ? `WXCC ${channelTypeText || ""} event`
+    //   : channelTypeText || "";
+
+    // switch (eventType) {
+    //   case EventType.Agent:
+    //     wxccTitle = `Agent ${formattedAgentState || "Event"}`;
+    //     wxccFilterType = currentState ? `agent ${currentState}` : "";
+    //     wxccIconType = "agent";
+    //     break;
+    //   case EventType.Task:
+    //     wxccTitle = event?.data?.origin || event?.identity;
+    //     // wxccSubTitle = `${eventSubType || ""} ${channelTypeText || ""}`;
+    //     wxccSubTitle = compactWxccSubTitle;
+    //     wxccFilterType = channelType || event?.identitytype;
+    //     wxccIconType = channelType || event?.identitytype;
+    //     break;
+    //   default:
+    //     wxccTitle = event?.data?.origin || event?.identity;
+    //     wxccSubTitle = `${channelTypeText || ""}`;
+    //     wxccFilterType = channelType || event?.identitytype || "misc";
+    //     wxccIconType = channelType || event?.identitytype;
+    //     break;
+    // }
+
+    // const wxccFilterTypes = isWxccEvent ? ["WXCC"] : [];
+    // if (wxccFilterType) {
+    //   wxccFilterTypes.push(wxccFilterType);
+    // }
+
+    return {
+      wxccTitle,
+      wxccSubTitle,
+      wxccChannelTypeTag,
+      wxccIconType,
+      //   wxccFilterTypes,
+    };
+  }
+
+  hasUniqueTaskId(event: CustomerEvent, uniqueTaskIds: Set<string>) {
+    return (!event?.data?.taskId || !uniqueTaskIds.has(event?.data?.taskId)) && uniqueTaskIds.add(event?.data?.taskId);
+  }
+
+  /////////
+  combineTaskIdEvents(events: Array<CustomerEvent>) {
+    const taskIdEvents: any = {};
+    events.forEach((event: CustomerEvent) => {
+      const eventTaskId = event?.data?.taskId;
+      if (!taskIdEvents[eventTaskId]) {
+        taskIdEvents[eventTaskId] = event;
+      } else {
+        taskIdEvents[eventTaskId] = _.merge(event, taskIdEvents[eventTaskId]);
+      }
+    });
+
+    return Object.values(taskIdEvents) as Array<CustomerEvent>;
+
+    // const set = new Set();
+    // return events.filter((event: CustomerEvent) => !set.has(event?.data?.taskId) && set.add(event?.data?.taskId));
+  }
+
+  //   /**
+  //    * @method formatEvents
+  //    */
+  //   formatEvents(allEvents: Array<CustomerEvent> | null): Array<CustomerEvent> | null {
+  //     this.mostRecentEvent = undefined;
+  //     // get the most recent event that isn't ongoing (last task:ended event)
+
+  //     const events = allEvents ? this.combineTaskIdEvents(allEvents) : null;
+  //     console.log("[JDS Widget} sorted events (by taskId)", events);
+
+  //     events?.map((event: CustomerEvent) => {
+  //       const [eventType, eventSubType] = event?.type.split(":");
+  //       const channelTypeText = event?.data?.channelType === "telephony" ? "call" : event?.data?.channelType;
+  //       const agentState = event?.data?.currentState;
+  //       const formattedAgentState = agentState ? agentState?.charAt(0)?.toUpperCase() + agentState?.slice(1) : undefined;
+  //       const { channelType } = event?.data;
+
+  //       const formatDirectionText = event?.data?.direction?.toLowerCase();
+
+  //       event.renderData = {
+  //         title: `${formatDirectionText} ${channelTypeText}`,
+  //         description: event?.data?.queueName || `Queue ID: ${event?.data?.queueId}`,
+  //         filterType: channelType === "telephony" ? "voice" : channelType,
+  //         iconType: channelType === "telephony" ? `${formatDirectionText}-call` : channelType,
+  //       };
+
+  //       if (!this.mostRecentEvent && event?.type === "task:ended") {
+  //         this.mostRecentEvent = event;
+  //         console.log("[JDS Widget] Most Recent Event", this.mostRecentEvent);
+  //       }
+  //     });
+
+  //     return events;
+  //   }
+  ////
+
+  finalizeEventList(events: CustomerEvent[]): CustomerEvent[] {
+    this.mostRecentEvent = undefined;
+
+    const allSortedEvents = this.sortEventsByDate(events);
+    this.debugLogMessage("All Sorted Events", allSortedEvents);
+
+    const combineTaskIdEventList = allSortedEvents ? this.combineTaskIdEvents(allSortedEvents) : [];
+
+    const shouldIncludeWxccEvents = (event: CustomerEvent) =>
+      this.hideWxccEvents ? !event.source.includes("wxcc") : true;
+
+    const filteredModifiedEvents = combineTaskIdEventList
+      ?.filter((event: CustomerEvent) => {
+        if (shouldIncludeWxccEvents(event)) {
+          return event;
+        }
+      })
+      .map((event: CustomerEvent) => {
+        const { wxccTitle, wxccSubTitle, wxccChannelTypeTag, wxccIconType } = this.parseWxccData(event);
+
+        const title = event?.customUIData?.title || wxccTitle;
+        const subTitle = event?.customUIData?.subTitle || wxccSubTitle;
+        const iconType = event?.customUIData?.iconType || wxccIconType;
+        const channelTypeTag = event?.customUIData?.channelTypeTag || wxccChannelTypeTag;
+
+        event.renderingData = {
+          title,
+          subTitle,
+          iconType,
+          channelTypeTag,
+        };
+
+        if (!this.mostRecentEvent && event?.type === "task:ended") {
+          this.mostRecentEvent = event;
+          this.debugLogMessage("Most Recent Event", this.mostRecentEvent);
+        }
+
+        return event;
+      });
+
+    this.debugLogMessage("Formatted Sorted Events", filteredModifiedEvents);
+    return filteredModifiedEvents;
+  }
+
+  filterEventTypes(typePrefix: EventType, events: Array<CustomerEvent>) {
+    const filteredEvents = events.filter((event: CustomerEvent) => event.type.includes(`${typePrefix}:`));
     return filteredEvents;
   }
 
@@ -684,7 +913,6 @@ export default class CustomerJourneyWidget extends LitElement {
     this.getEventsInProgress = true;
     this.baseUrlCheck();
     const encodedCustomer = this.encodeParameter(customer);
-
     const url = `${this.baseUrl}/v1/api/events/workspace-id/${this.projectId}?organizationId=${this.organizationId}&identity=${encodedCustomer}`;
 
     const config: AxiosRequestConfig = {
@@ -703,18 +931,8 @@ export default class CustomerJourneyWidget extends LitElement {
 
     return axiosInstance
       .get(url)
-      .then(async (response: any) => {
-        const myEvents = response?.data?.data?.map((event: any) => {
-          event.time = DateTime.fromISO(event.time);
-          return event;
-        });
-        const filteredEvents = this.filterOutUndefinedOrigins(myEvents);
-        this.events = this.sortEventsByDate(filteredEvents);
-
-        // const queueName = await this.getQueueNameOfLatestEvent(this.events[0]);
-        // console.log("queueName", queueName);
-        // this.events[0].data.queueName = queueName;
-
+      .then((response: any) => {
+        this.events = this.finalizeEventList(response?.data?.data);
         this.timelineErrorMessage = "";
         this.timelineErrorTrackingId = "";
         return this.events;
@@ -742,6 +960,18 @@ export default class CustomerJourneyWidget extends LitElement {
       return events;
     }
   }
+
+  filterUniqueTaskIds = (events: Array<CustomerEvent>) => {
+    const set = new Set();
+    const result = events.filter(o => (!o?.data?.taskId || !set.has(o?.data?.taskId)) && set.add(o?.data?.taskId));
+    return result;
+  };
+
+  uniqueFilterTypes = (filterTypes: Array<string>) => {
+    const set = new Set();
+    const result = filterTypes.filter(type => (!type || !set.has(type)) && set.add(type));
+    return result;
+  };
 
   subscribeToEventStream(customer: string | null) {
     if (this.journeyEventSource) {
@@ -782,8 +1012,7 @@ export default class CustomerJourneyWidget extends LitElement {
           if (data.data && (data?.datacontenttype === "string" || data?.dataContentType === "string")) {
             data.data = JSON.parse(data.data);
           }
-          this.newestEvents = this.sortEventsByDate([data, ...this.newestEvents]);
-          this.newestEvents = this.filterOutUndefinedOrigins(this.newestEvents);
+          this.newestEvents = this.finalizeEventList([data, ...this.newestEvents]);
         } catch (err) {
           console.error("[JDS Widget] journey/stream: No parsable data fetched", err);
         }
@@ -798,8 +1027,7 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   updateComprehensiveEventList() {
-    this.events = this.sortEventsByDate([...this.newestEvents, ...this.events]);
-    this.events = this.filterOutUndefinedOrigins(this.events);
+    this.events = this.finalizeEventList([...this.newestEvents, ...this.events]);
     this.newestEvents = [];
   }
 
@@ -901,6 +1129,7 @@ export default class CustomerJourneyWidget extends LitElement {
         ?getEventsInProgress=${this.getEventsInProgress}
         .historicEvents=${this.events}
         .newestEvents=${this.newestEvents}
+        .mostRecentEvent=${this.mostRecentEvent}
         .eventIconTemplate=${this.eventIconTemplate}
         .badgeKeyword=${this.badgeKeyword}
         @new-event-queue-cleared=${this.updateComprehensiveEventList}
