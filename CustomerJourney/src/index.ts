@@ -72,6 +72,7 @@ export interface CustomUIDataPayload {
   subTitle?: string;
   iconType?: string;
   channelTypeTag?: string;
+  eventSource?: string;
 }
 
 export interface RenderingDataObject {
@@ -79,6 +80,7 @@ export interface RenderingDataObject {
   subTitle?: string;
   iconType?: string;
   channelTypeTag?: string;
+  eventSource?: string;
 }
 
 export interface CustomerEvent {
@@ -740,13 +742,14 @@ export default class CustomerJourneyWidget extends LitElement {
     //   iconType: channelType === "telephony" ? `${formatDirectionText}-call` : channelType,
     // };
 
-    let wxccTitle, wxccSubTitle, wxccIconType, wxccChannelTypeTag;
-    // const isWxccEvent = event.source.includes("wxcc");
+    let wxccTitle, wxccSubTitle, wxccIconType, wxccChannelTypeTag, wxccSource;
+    const isWxccEvent = event?.source.includes("wxcc");
 
     wxccTitle = `${formatDirectionText} ${channelTypeText}`;
     wxccSubTitle = event?.data?.queueName || `Queue ID: ${event?.data?.queueId}`;
     wxccChannelTypeTag = channelTypeText;
     wxccIconType = channelType === "telephony" ? `${formatDirectionText}-call` : channelType;
+    wxccSource = isWxccEvent ? "wxcc" : "";
 
     /////
 
@@ -796,6 +799,7 @@ export default class CustomerJourneyWidget extends LitElement {
       wxccSubTitle,
       wxccChannelTypeTag,
       wxccIconType,
+      wxccSource,
       //   wxccFilterTypes,
     };
   }
@@ -876,18 +880,20 @@ export default class CustomerJourneyWidget extends LitElement {
         }
       })
       .map((event: CustomerEvent) => {
-        const { wxccTitle, wxccSubTitle, wxccChannelTypeTag, wxccIconType } = this.parseWxccData(event);
+        const { wxccTitle, wxccSubTitle, wxccChannelTypeTag, wxccIconType, wxccSource } = this.parseWxccData(event);
 
         const title = event?.customUIData?.title || wxccTitle;
         const subTitle = event?.customUIData?.subTitle || wxccSubTitle;
         const iconType = event?.customUIData?.iconType || wxccIconType;
         const channelTypeTag = event?.customUIData?.channelTypeTag || wxccChannelTypeTag;
+        const eventSource = event?.customUIData?.eventSource || wxccSource || event?.source;
 
         event.renderingData = {
           title,
           subTitle,
           iconType,
           channelTypeTag,
+          eventSource,
         };
 
         if (!this.mostRecentEvent && event?.type === "task:ended") {
