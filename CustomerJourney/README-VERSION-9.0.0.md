@@ -15,6 +15,9 @@ Github Branch: `main`
 <sub>_* New required parameters: BearerToken, OrganizationId, and project-id_</sub>
 <sub>_* Any older version will no longer work because the widget is using a whole new set of APIs. Please use this version going forward. You will have to onboard an organization and set things up in admin portal._</sub>
 
+### Quick Start CJDS Widget Setup
+Vidcast Link: https://app.vidcast.io/share/0ebc75d5-62a4-4771-819e-518991c23b23
+
 ### Customer Journey Widget Properties
 
 <i>The JDS Customer Journey Widget accepts specific properties to interact with the JDS APIs</i>
