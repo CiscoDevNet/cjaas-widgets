@@ -1,3 +1,6 @@
+# CJDS Widget In Focus
+[Customer Journey Widget](https://github.com/CiscoDevNet/cjaas-widgets/tree/main/CustomerJourney)
+
 # CJaaS Widgets
 
 This open-source repository will help you start developing your own CJaaS Widgets.
