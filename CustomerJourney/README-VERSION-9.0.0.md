@@ -9,19 +9,14 @@ customer-journey-9.0.0.js
 ```
 Github Branch: `main`
 
-"@cjaas/common-components" version: `4.4.1` (main branch)
+"@cjaas/common-components" version: `4.4.2` (main branch)
 
 <sub>_* This version is supported by an entire set of APIs. You don't need SAS Tokens anymore, just a reference to the agent desktop CI access token._</sub>
 <sub>_* New required parameters: BearerToken, OrganizationId, and project-id_</sub>
 <sub>_* Any older version will no longer work because the widget is using a whole new set of APIs. Please use this version going forward. You will have to onboard an organization and set things up in admin portal._</sub>
-  
-### Version 9.0.0 Code Location
-<sub>_Currently, there are two version of the widget still available. So, Version 9.0.0 doesn't live in master yet._</sub>
 
-```
-BRANCH NAME: jds-widget-9-new-apis
-```
-Branch Link: https://github.com/CiscoDevNet/cjaas-widgets/tree/jds-widget-9-new-apis/CustomerJourney
+### Quick Start CJDS Widget Setup
+Vidcast Link: https://app.vidcast.io/share/0ebc75d5-62a4-4771-819e-518991c23b23
 
 ### Customer Journey Widget Properties
 
