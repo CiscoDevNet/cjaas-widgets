@@ -8,9 +8,8 @@
 :host {
   color: var(--md-primary-text-color, var(--color-gray-100));
   font-family: "CiscoSansTT Regular", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  width: calc(100% - 1.5rem);
-  height: calc(100% - 1.5rem);
-  margin: 12px;
+  width: 100%;
+  height: 100%;
   display: block;
   display: flex;
   flex-direction: column;
@@ -22,6 +21,50 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  padding: 1rem;
+  background-color: var(--md-primary-one-bg-color, #ffffff);
+  display: flex;
+  justify-content: center;
+
+  &.populated-data {
+    background-color: var(--md-secondary-two-bg-color, #f7f7f7);
+    display: block;
+    justify-content: unset;
+
+    .sub-widget-container {
+        height: 100%;
+        display: flex;
+        overflow-y: hidden;
+        gap: 0.5rem;
+
+        &.flex-direction-row {
+            flex-direction: row;
+
+            .sub-widget-section.profile-view {
+                flex: 1;
+                max-width: 40%;
+            }
+
+            .sub-widget-section.events-list {
+                flex: 1;
+            }
+        }
+
+        &.flex-direction-column {
+            flex-direction: column;
+        }
+    }
+  }
+
+  .widget-loading-wrapper {
+    align-self: center;
+
+    .loading-text {
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 14px;
+    }
+  }
 }
 
 .empty-state-container {
@@ -211,10 +254,6 @@ div.profile {
   }
 }
 
-cjaas-timeline::part(stream) {
-  height: calc(100% - 2rem);
-}
-
 cjaas-identity {
   display: block;
   border-radius: 0.5rem;
@@ -316,8 +355,9 @@ details[open] summary md-icon {
   overflow: hidden;
 }
 
-#events-list {
+.events-list {
   height: 100%;
+  overflow: hidden;
 }
 
 .sub-widget-header {
@@ -343,7 +383,13 @@ details[open] summary md-icon {
 }
 
 .sub-widget-section {
-  padding: 1rem 0 0;
+  background-color: var(--md-primary-one-bg-color, #ffffff);
+  border-radius: 10px;
+  border: 1px solid var(--md-tertiary-two-bg-color, #ededed);
+
+  cjaas-timeline-v2 {
+    height: 100%;
+  }
 }
 
 .sub-widget-detail-container {

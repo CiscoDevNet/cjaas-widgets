@@ -7,18 +7,17 @@
  */
 
 import { html, internalProperty, property, LitElement, PropertyValues, query } from "lit-element";
-import { classMap } from "lit-html/directives/class-map.js";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import axiosRetry from "axios-retry";
 import styles from "./assets/styles/View.scss";
-import * as iconData from "@/assets/icons.json";
+import * as iconData from "@/assets/defaultIcons-v10.json";
 import { EventSourceInitDict } from "eventsource";
-import "@cjaas/common-components/dist/comp/cjaas-timeline";
-import "@cjaas/common-components/dist/comp/cjaas-profile";
-import "@cjaas/common-components/dist/comp/cjaas-identity";
-import { Timeline } from "@cjaas/common-components/dist/types/components/timeline/Timeline";
+import "@cjaas/common-components/dist/comp/cjaas-timeline-v2.js";
+import "@cjaas/common-components/dist/comp/cjass-profile-v2.js";
+import { TimelineV2 } from "@cjaas/common-components";
 import { DateTime } from "luxon";
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import { v4 as uuidv4 } from "uuid";
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 // @ts-ignore
 import { version } from "../version";
 import {
@@ -29,18 +28,24 @@ import {
   AliasObject,
   jsonPatchOperation,
 } from "./types/cjaas";
-import { nothing } from "lit-html";
+import _ from "lodash";
 
 export enum EventType {
   Agent = "agent",
   Task = "task",
 }
 
-export enum TimeFrame {
-  "All" = "All",
-  "24-Hours" = "24-Hours",
-  "7-Days" = "7-Days",
-  "30-Days" = "30-Days",
+export interface ProfileDataPoint {
+  displayName: string;
+  value: string;
+}
+
+export enum TimeRangeOption {
+  "AllTime" = "All Time",
+  "Last10Days" = "Last 10 Days",
+  "Last30Days" = "Last 30 Days",
+  "Last6Months" = "Last 6 Months",
+  "Last12Months" = "Last 12 Months",
 }
 
 export enum RawAliasTypes {
@@ -63,6 +68,39 @@ export enum PatchOperations {
   Replace = "replace",
 }
 
+export interface CustomUIDataPayload {
+  title?: string;
+  subTitle?: string;
+  iconType?: string;
+  channelTypeTag?: string;
+  eventSource?: string;
+}
+
+export interface RenderingDataObject {
+  title?: string;
+  subTitle?: string;
+  iconType?: string;
+  channelTypeTag?: string;
+  eventSource?: string;
+  isActive?: boolean;
+}
+
+export interface CustomerEvent {
+  specversion: string;
+  type: string;
+  source: string;
+  id: string;
+  time: string;
+  identity: string;
+  identitytype: "email" | "phone" | "customerId";
+  previousidentity?: null;
+  datacontenttype: string;
+  person?: string;
+  data: Record<string, any>;
+  renderingData?: RenderingDataObject;
+  customUIData?: CustomUIDataPayload;
+}
+
 @customElementWithCheck("customer-journey-widget")
 export default class CustomerJourneyWidget extends LitElement {
   /**
@@ -81,7 +119,7 @@ export default class CustomerJourneyWidget extends LitElement {
    * Property to pass in JSON template to set color and icon settings
    * @prop eventIconTemplate
    */
-  @property({ attribute: false }) eventIconTemplate: Timeline.TimelineCustomizations = iconData;
+  @property({ attribute: false }) eventIconTemplate: TimelineV2.TimelineCustomizations = iconData;
 
   /**
    * Organization ID
@@ -114,13 +152,6 @@ export default class CustomerJourneyWidget extends LitElement {
    * @attr customer
    */
   @property({ type: String, attribute: "cad-variable-lookup" }) cadVariableLookup: string | null = null;
-
-  /**
-   * Toggles off display of field to find new Journey profiles
-   * @attr disable-user-search
-   */
-  @property({ type: Boolean, attribute: "disable-user-search" }) disableUserSearch = false;
-
   /**
    * Path to the proper Customer Journey API deployment
    * @attr base-url
@@ -163,35 +194,52 @@ export default class CustomerJourneyWidget extends LitElement {
    */
   @property({ type: Boolean, attribute: "collapse-alias-section" }) collapseAliasSection = false;
   /**
-   * @attr time-frame
-   * Determine default time frame on start
+   * @attr default-time-range-option
+   * Determine default time range on start
    */
-  @property({ type: String, attribute: "time-frame" }) timeFrame: TimeFrame = TimeFrame.All;
+  @property({ type: String, attribute: "default-time-range-option" })
+  defaultTimeRangeOption: TimeRangeOption = TimeRangeOption.AllTime;
+
   /**
    * Toggle to either queue or immediately load new events occurring in the stream
    * @prop disable-event-stream
    */
   @property({ type: Boolean, attribute: "disable-event-stream" }) disableEventStream = false;
   /**
+   * Toggle whether or not to hide all wxcc events from the journey timeline
+   * @prop hideWxccEvents
+   */
+  @property({ type: Boolean, attribute: "hide-wxcc-events" }) hideWxccEvents = false;
+  /**
+   * Toggle whether or not to show only 1 event of each TaskId
+   * @prop compactWxccEvents
+   */
+  @property({ type: Boolean, attribute: "compact-wxcc-events" }) compactWxccEvents = false;
+  /**
    * Toggle whether or not to ignore undefined origin timeline events
    * @prop ignoreUndefinedOrigins
    */
   @property({ type: Boolean, attribute: "ignore-undefined-origins" }) ignoreUndefinedOrigins = false;
   /**
-   * Data pulled from Journey Profile retrieval (will match shape of provided Template)
-   * @prop profileData
+   * @prop profileDataPoints
+   * The profile Data Points provided from the template fetch, populated in the table view
    */
-  @internalProperty() profileData: Profile | undefined;
+  @property({ attribute: false }) profileDataPoints: Array<ProfileDataPoint> = [];
   /**
    * Timeline data fetched from journey history
    * @prop events
    */
-  @internalProperty() events: Array<Timeline.CustomerEvent> = [];
+  @internalProperty() events: Array<CustomerEvent> = [];
   /**
    * Queue array of incoming events via Stream
    * @prop newestEvents
    */
-  @internalProperty() newestEvents: Array<Timeline.CustomerEvent> = [];
+  @internalProperty() newestEvents: Array<CustomerEvent> = [];
+  /**
+   * Most recent event with task:ended type
+   * @prop mostRecentEvent
+   */
+  @internalProperty() mostRecentEvent: CustomerEvent | undefined = undefined;
   /**
    * Store for Stream event source for journey event data
    * @prop journeyEventSource
@@ -226,16 +274,32 @@ export default class CustomerJourneyWidget extends LitElement {
   @internalProperty() profileErrorMessage = "";
 
   /**
+   * Internal store for profile error tracking Id
+   * @prop profileErrorTrackingId
+   */
+  @internalProperty() profileErrorTrackingId = "";
+
+  /**
    * Internal store for profile name error messages
    * @prop profileNameErrorMessage
    */
   @internalProperty() nameApiErrorMessage = "";
+
+  @internalProperty() nameApiErrorTrackingId = "";
 
   /**
    * Internal store for timeline error messages
    * @prop timelineErrorMessage
    */
   @internalProperty() timelineErrorMessage = "";
+
+  @internalProperty() timelineErrorTrackingId = "";
+
+  @internalProperty() isEntireWidgetErroring = false;
+
+  @internalProperty() entireWidgetErrorTrackingId = "";
+
+  @internalProperty() entireWidgetLoading = false;
 
   /**
    * Internal toggle for responsive layout
@@ -267,6 +331,8 @@ export default class CustomerJourneyWidget extends LitElement {
 
   @internalProperty() aliasObjects: Array<AliasObject> = [];
 
+  @internalProperty() profileDataPointCount = 0;
+
   basicRetryConfig = {
     retries: 1,
     retryDelay: () => 3000,
@@ -290,6 +356,7 @@ export default class CustomerJourneyWidget extends LitElement {
     super.firstUpdated(_changedProperties);
 
     console.log(`[JDS Widget][Version] customer-journey-${version}`);
+    this.entireWidgetLoading = true;
   }
 
   async update(changedProperties: PropertyValues) {
@@ -298,7 +365,7 @@ export default class CustomerJourneyWidget extends LitElement {
     if (changedProperties.has("iconDataPath") && this.iconDataPath) {
       this.loadJSON(
         this.iconDataPath,
-        (iconDataJson: Timeline.TimelineCustomizations) => {
+        (iconDataJson: TimelineV2.TimelineCustomizations) => {
           this.eventIconTemplate = iconDataJson;
           this.debugLogMessage("Icon data loaded externally", this.eventIconTemplate);
         },
@@ -362,7 +429,11 @@ export default class CustomerJourneyWidget extends LitElement {
     }
 
     if (changedProperties.has("customer")) {
-      this.handleNewCustomer();
+      if (this.customer) {
+        this.handleNewCustomer(this.customer, this.templateId);
+      } else {
+        console.error("[JDS WIDGET] customer is undefined", this.customer);
+      }
     }
   }
 
@@ -372,19 +443,57 @@ export default class CustomerJourneyWidget extends LitElement {
     }
   }
 
-  sortEventsbyDate(events: Timeline.CustomerEvent[]) {
-    events?.sort((previous, current) => {
-      if (previous.time > current.time) {
-        return -1;
-      } else if (previous.time < current.time) {
-        return 1;
-      } else {
-        return 0;
-      }
-    });
+  //   getQueueNameOfLatestEvent(event: CustomerEvent) {
+  //     const { createdTime, queueId } = event?.data;
 
-    this.debugLogMessage("Sorted events", events);
-    return events;
+  //     const fromDateMS = createdTime;
+  //     const toDateMS = createdTime + 86400000;
+  //     const queueIds = queueId;
+
+  //     const url = `https://api.qaus1.ciscoccservice.com/v1/queues/statistics?from=${fromDateMS}&to=${toDateMS}&interval=15&queueIds=${queueIds}&orgId=${this.organizationId}`;
+
+  //     const config: AxiosRequestConfig = {
+  //       method: "GET",
+  //       url,
+  //       headers: {
+  //         Authorization: `Bearer ${this.bearerToken}`,
+  //       },
+  //     };
+
+  //     const axiosInstance = axios.create(config);
+
+  //     return axiosInstance
+  //       .get(url)
+  //       .then(response => {
+  //         const queueName = response?.data?.data?.[0]?.queueName;
+  //         return queueName;
+  //       })
+  //       .catch((err: AxiosError) => {
+  //         console.error(`[JDS Widget] getQueueNameOfLatestEvent`, err);
+  //       });
+  //   }
+
+  sortEventsByDate(events: CustomerEvent[]) {
+    if (events?.length) {
+      events?.sort((previous, current) => {
+        if (previous.time > current.time) {
+          return -1;
+        } else if (previous.time < current.time) {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
+    }
+
+    this.debugLogMessage("Sorted Events", events);
+
+    // if (this.compactWxccEvents) {
+    //   const filteredEvents = this.filterUniqueTaskIds(events);
+    //   this.debugLogMessage("Sorted Events (Per Unique TaskId)", filteredEvents);
+    //   return filteredEvents;
+    // }
+    return events || [];
   }
 
   loadJSON(path: string, success: any, error: any) {
@@ -434,18 +543,53 @@ export default class CustomerJourneyWidget extends LitElement {
         const { id } = response?.data?.data;
         return id;
       })
-      .catch((err: Error) => {
+      .catch((err: AxiosError) => {
         console.error(`[JDS Widget] Unable to fetch the ID of the journey-default-template`, err);
         return undefined;
       });
   }
 
-  subscribeToProfileViewStream(customer: string | null, templateId: string | undefined) {
-    if (!customer || !templateId) {
-      console.error(`[JDS WIDGET] Failed to stream progressive profile view. Need customer & templateId provided.`);
-      return;
+  async subscribeToProfileViewStreamByTemplateName(customer: string | null, templateName: string | undefined) {
+    if (!customer || !templateName) {
+      console.error(`[JDS WIDGET] Failed to stream progressive profile view. Need customer & templateName provided.`);
     }
 
+    const url = `${this.baseUrl}/v1/api/progressive-profile-view/stream/workspace-id/${this.projectId}/identity/${customer}/template-name/${templateName}?organizationId=${this.organizationId}&bearerToken=${this.bearerToken}`;
+    return this.subscribeToProfileViewStream(url);
+  }
+
+  async subscribeToProfileViewStreamByTemplateId(customer: string | null, templateId: string | undefined) {
+    const profileTemplateId = !templateId ? await this.getDefaultTemplateId() : templateId;
+
+    const url = `${this.baseUrl}/v1/api/progressive-profile-view/stream/workspace-id/${this.projectId}/identity/${customer}/template-id/${profileTemplateId}?organizationId=${this.organizationId}&bearerToken=${this.bearerToken}`;
+    return this.subscribeToProfileViewStream(url);
+  }
+
+  collectProfileDataPoints(profileData: any) {
+    if (profileData) {
+      const profileDataPoints: Array<ProfileDataPoint> = profileData
+        ?.filter((x: any) => x?.query?.widgetAttributes?.type === "table")
+        .map((x: any) => {
+          const { displayName } = x?.query;
+          const value = x.result;
+          return {
+            displayName,
+            value,
+          };
+        });
+
+      this.profileDataPointCount = profileDataPoints?.length;
+      this.debugLogMessage("ProfileData", profileData);
+      this.debugLogMessage("Profile data points", profileDataPoints);
+
+      return profileDataPoints;
+    } else {
+      this.profileDataPointCount = 0;
+      return [];
+    }
+  }
+
+  async subscribeToProfileViewStream(requestUrl: string) {
     if (this.profileEventSource) {
       this.profileEventSource.close();
     }
@@ -461,14 +605,13 @@ export default class CustomerJourneyWidget extends LitElement {
         },
       };
 
-      const url = `${this.baseUrl}/v1/api/progressive-profile-view/stream/workspace-id/${this.projectId}/identity/${customer}/template-id/${templateId}?organizationId=${this.organizationId}&bearerToken=${this.bearerToken}`;
-      this.profileEventSource = new EventSource(url, header);
+      this.profileEventSource = new EventSource(requestUrl, header);
     }
 
     if (this.profileEventSource) {
       this.profileEventSource.onopen = event => {
         console.log(
-          `[JDS Widget] The ProfileView stream connection has been established for customer \'${customer}\'.`
+          `[JDS Widget] The ProfileView stream connection has been established for customer \'${this.customer}\'.`
         );
       };
 
@@ -483,9 +626,10 @@ export default class CustomerJourneyWidget extends LitElement {
 
           const { attributes, personId } = data;
           this.profileErrorMessage = "";
-          this.profileData = this.parseProfileResponse(attributes, personId);
+          this.profileDataPoints = this.parseProfileResponse(attributes, personId);
         } catch (err) {
           console.error("[JDS Widget] profile/stream: No parsable data fetched");
+          this.profileErrorMessage = "Failed to get the latest profile data";
         }
       };
 
@@ -493,25 +637,37 @@ export default class CustomerJourneyWidget extends LitElement {
         console.error(`[JDS Widget] There was an Profile EventSource error: `, error);
       };
     } else {
-      console.error(`[JDS Widget] No Profile EventSource is active for ${customer}`);
+      console.error(`[JDS Widget] No Profile EventSource is active for ${this.customer}`);
     }
   }
 
-  getProfileView(identityId: string | undefined, templateId: string | undefined) {
-    this.profileData = undefined;
+  //   async getProfileViewByTemplateName(customer: string | null, templateName: string | undefined) {
+  //     if (!customer || !templateName) {
+  //       console.error(`[JDS WIDGET] Failed to get progressive profile view. Need customer & templateName provided.`);
+  //     }
+
+  //     this.profileData = undefined;
+  //     this.getProfileDataInProgress = true;
+
+  //     const url = `${this.baseUrl}/v1/api/progressive-profile-view/workspace-id/${this.projectId}/identity/${customer}/template-name/${templateName}`;
+  //     return this.handleProfileViewResponse(url, templateName);
+  //   }
+
+  async getProfileViewByTemplateId(customer: string | null, templateId: string | undefined) {
+    const profileTemplateId = !templateId ? await this.getDefaultTemplateId() : templateId;
+
+    this.profileDataPoints = [];
     this.getProfileDataInProgress = true;
 
-    if (!identityId || !templateId) {
-      this.getProfileDataInProgress = false;
-      console.error(`[JDS WIDGET] Failed to fetch the profile data. Need identityId & templateId provided.`);
-      return;
-    }
+    const url = `${this.baseUrl}/v1/api/progressive-profile-view/workspace-id/${this.projectId}/identity/${customer}/template-id/${profileTemplateId}`;
 
-    const url = `${this.baseUrl}/v1/api/progressive-profile-view/workspace-id/${this.projectId}/person-id/${this.identityId}/template-id/${templateId}`;
+    return this.handleProfileViewResponse(url, templateId);
+  }
 
+  async handleProfileViewResponse(requestUrl: string, templateReference: string | undefined) {
     const config: AxiosRequestConfig = {
       method: "GET",
-      url,
+      url: requestUrl,
       headers: {
         Authorization: `Bearer ${this.bearerToken}`,
       },
@@ -524,19 +680,27 @@ export default class CustomerJourneyWidget extends LitElement {
     }
 
     return axiosInstance
-      .get(url)
+      .get(requestUrl)
       .then(response => {
         const { attributes, personId } = response?.data?.data[0];
         this.profileErrorMessage = "";
-        this.profileData = this.parseProfileResponse(attributes, personId);
+        this.profileDataPoints = this.parseProfileResponse(attributes, personId);
+        return this.profileDataPoints;
       })
-      .catch((err: Error) => {
-        this.profileData = undefined;
-        this.profileErrorMessage = `Failed to fetch the profile data.`;
+      .catch((err: AxiosError) => {
+        this.profileDataPoints = [];
+        this.profileErrorMessage = `Failed to fetch profile data.`;
+
+        if (err?.response?.data?.trackingId) {
+          this.profileErrorTrackingId = err?.response?.data?.trackingId;
+        }
+
         console.error(
-          `[JDS Widget] Unable to fetch the Profile for customer (${this.customer}) with templateId (${templateId})`,
+          `[JDS Widget] Unable to fetch the Profile for customer (${this.customer}) with template (${templateReference})`,
           err
         );
+
+        return undefined;
       })
       .finally(() => {
         this.getProfileDataInProgress = false;
@@ -564,11 +728,246 @@ export default class CustomerJourneyWidget extends LitElement {
     });
 
     profileTablePayload.personId = personId;
-    return profileTablePayload;
+    return this.collectProfileDataPoints(profileTablePayload);
   }
 
-  filterEventTypes(typePrefix: EventType, events: Array<Timeline.CustomerEvent>) {
-    const filteredEvents = events.filter((event: Timeline.CustomerEvent) => event.type.includes(`${typePrefix}:`));
+  hasTaskExpired(event: CustomerEvent): Boolean {
+    console.log("eventTime", event?.time, DateTime.local().toUTC());
+    const date = new Date(event.time).valueOf();
+    const now = new Date(Date.now()).valueOf();
+    const oneHourMs = 3600000; // 1 hour delay
+    const isExpired = now - oneHourMs > date;
+    console.log("expire", date, now, isExpired, event.time);
+
+    console.log("hasTaskExpired?", isExpired);
+    return isExpired;
+  }
+
+  parseWxccData(event: CustomerEvent) {
+    /////
+    const { channelType, direction } = event?.data;
+    const channelTypeText = channelType === "telephony" ? "voice" : channelType;
+    const formatDirectionText = direction?.toLowerCase();
+
+    // event.renderingData = {
+    //   title: `${formatDirectionText} ${channelTypeText}`,
+    //   subTitle: event?.data?.queueName || `Queue ID: ${event?.data?.queueId}`,
+    //   channelType: channelTypeText,
+    //   iconType: channelType === "telephony" ? `${formatDirectionText}-call` : channelType,
+    // };
+
+    let wxccTitle, wxccSubTitle, wxccIconType, wxccChannelTypeTag, wxccSource, wxccIsActive;
+    const isWxccEvent = event?.source.includes("wxcc");
+
+    if (isWxccEvent) {
+      wxccTitle = `${!!direction ? formatDirectionText : ""} ${channelTypeText}`;
+      wxccSubTitle = event?.data?.queueName || `Queue ID: ${event?.data?.queueId}`;
+      wxccChannelTypeTag = channelTypeText;
+      wxccIconType = channelType === "telephony" && !!direction ? `${formatDirectionText}-call` : channelType;
+      wxccSource = isWxccEvent ? "wxcc" : "";
+      wxccIsActive = isWxccEvent ? !this.hasTaskExpired(event) && event?.type !== "task:ended" : false;
+    }
+
+    /////
+
+    // const [eventType, eventSubType] = event?.type.split(":");
+    // const channelTypeText = event?.data?.channelType === "telephony" ? "call" : event?.data?.channelType;
+    // const agentState = event?.data?.currentState;
+    // const formattedAgentState = agentState ? agentState?.charAt(0)?.toUpperCase() + agentState?.slice(1) : undefined;
+    // const { channelType, currentState } = event?.data;
+
+    // let wxccTitle, wxccSubTitle, wxccIconType, wxccFilterType;
+    // const isWxccEvent = event.source.includes("wxcc");
+
+    // const compactWxccSubTitle = !this.compactWxccEvents
+    //   ? `${eventSubType || ""} ${channelTypeText || ""}`
+    //   : isWxccEvent
+    //   ? `WXCC ${channelTypeText || ""} event`
+    //   : channelTypeText || "";
+
+    // switch (eventType) {
+    //   case EventType.Agent:
+    //     wxccTitle = `Agent ${formattedAgentState || "Event"}`;
+    //     wxccFilterType = currentState ? `agent ${currentState}` : "";
+    //     wxccIconType = "agent";
+    //     break;
+    //   case EventType.Task:
+    //     wxccTitle = event?.data?.origin || event?.identity;
+    //     // wxccSubTitle = `${eventSubType || ""} ${channelTypeText || ""}`;
+    //     wxccSubTitle = compactWxccSubTitle;
+    //     wxccFilterType = channelType || event?.identitytype;
+    //     wxccIconType = channelType || event?.identitytype;
+    //     break;
+    //   default:
+    //     wxccTitle = event?.data?.origin || event?.identity;
+    //     wxccSubTitle = `${channelTypeText || ""}`;
+    //     wxccFilterType = channelType || event?.identitytype || "misc";
+    //     wxccIconType = channelType || event?.identitytype;
+    //     break;
+    // }
+
+    // const wxccFilterTypes = isWxccEvent ? ["WXCC"] : [];
+    // if (wxccFilterType) {
+    //   wxccFilterTypes.push(wxccFilterType);
+    // }
+
+    return {
+      wxccTitle,
+      wxccSubTitle,
+      wxccChannelTypeTag,
+      wxccIconType,
+      wxccSource,
+      wxccIsActive,
+      //   wxccFilterTypes,
+    };
+  }
+
+  hasUniqueTaskId(event: CustomerEvent, uniqueTaskIds: Set<string>) {
+    return (!event?.data?.taskId || !uniqueTaskIds.has(event?.data?.taskId)) && uniqueTaskIds.add(event?.data?.taskId);
+  }
+
+  /////////
+  combineTaskIdEvents(events: Array<CustomerEvent>) {
+    const taskIdEvents: any = {};
+    events.forEach((event: CustomerEvent) => {
+      const eventTaskId = event?.data?.taskId || uuidv4();
+      if (!taskIdEvents[eventTaskId]) {
+        taskIdEvents[eventTaskId] = event;
+      } else {
+        taskIdEvents[eventTaskId] = _.merge(event, taskIdEvents[eventTaskId]);
+      }
+    });
+
+    console.log("[combineTaskIds] taskIdEvents", taskIdEvents);
+    return Object.values(taskIdEvents) as Array<CustomerEvent>;
+
+    // const set = new Set();
+    // return events.filter((event: CustomerEvent) => !set.has(event?.data?.taskId) && set.add(event?.data?.taskId));
+  }
+
+  //   /**
+  //    * @method formatEvents
+  //    */
+  //   formatEvents(allEvents: Array<CustomerEvent> | null): Array<CustomerEvent> | null {
+  //     this.mostRecentEvent = undefined;
+  //     // get the most recent event that isn't ongoing (last task:ended event)
+
+  //     const events = allEvents ? this.combineTaskIdEvents(allEvents) : null;
+  //     console.log("[JDS Widget} sorted events (by taskId)", events);
+
+  //     events?.map((event: CustomerEvent) => {
+  //       const [eventType, eventSubType] = event?.type.split(":");
+  //       const channelTypeText = event?.data?.channelType === "telephony" ? "call" : event?.data?.channelType;
+  //       const agentState = event?.data?.currentState;
+  //       const formattedAgentState = agentState ? agentState?.charAt(0)?.toUpperCase() + agentState?.slice(1) : undefined;
+  //       const { channelType } = event?.data;
+
+  //       const formatDirectionText = event?.data?.direction?.toLowerCase();
+
+  //       event.renderData = {
+  //         title: `${formatDirectionText} ${channelTypeText}`,
+  //         description: event?.data?.queueName || `Queue ID: ${event?.data?.queueId}`,
+  //         filterType: channelType === "telephony" ? "voice" : channelType,
+  //         iconType: channelType === "telephony" ? `${formatDirectionText}-call` : channelType,
+  //       };
+
+  //       if (!this.mostRecentEvent && event?.type === "task:ended") {
+  //         this.mostRecentEvent = event;
+  //         console.log("[JDS Widget] Most Recent Event", this.mostRecentEvent);
+  //       }
+  //     });
+
+  //     return events;
+  //   }
+  ////
+
+  generateSubTitle(eventData: any) {
+    if (!eventData) {
+      return "";
+    }
+
+    const generateSubTitle = Object.keys(eventData)
+      .filter(eventDataKey => eventDataKey !== "uiData")
+      .map(key => `${key}: ${eventData[key]}`)
+      .join(", ");
+
+    return generateSubTitle;
+  }
+
+  finalizeEventList(events: CustomerEvent[]): CustomerEvent[] {
+    this.mostRecentEvent = undefined;
+
+    const allSortedEvents = this.sortEventsByDate(events);
+    this.debugLogMessage("All Sorted Events", allSortedEvents);
+
+    const combineTaskIdEventList = allSortedEvents ? this.combineTaskIdEvents(allSortedEvents) : [];
+    // const combineTaskIdEventList = allSortedEvents;
+
+    const shouldIncludeWxccEvents = (event: CustomerEvent) =>
+      this.hideWxccEvents ? !event.source.includes("wxcc") : true;
+
+    const filteredModifiedEvents = combineTaskIdEventList
+      ?.filter((event: CustomerEvent) => {
+        if (shouldIncludeWxccEvents(event)) {
+          return event;
+        }
+      })
+      .map((event: CustomerEvent) => {
+        const {
+          wxccTitle,
+          wxccSubTitle,
+          wxccChannelTypeTag,
+          wxccIconType,
+          wxccSource,
+          wxccIsActive,
+        } = this.parseWxccData(event);
+
+        // const title = event?.customUIData?.title || wxccTitle;
+        // const subTitle = event?.customUIData?.subTitle || wxccSubTitle;
+        // const iconType = event?.customUIData?.iconType || wxccIconType;
+        // const channelTypeTag = event?.customUIData?.channelTypeTag || wxccChannelTypeTag;
+        // const eventSource = event?.customUIData?.eventSource || wxccSource || event?.source;
+        // const isActive = event?.renderingData?.isActive || wxccIsActive || false;
+        const isWxccEvent = event?.source.includes("wxcc");
+
+        // const title = wxccTitle || event?.data?.origin || event?.identity;
+        // const subTitle = wxccSubTitle || event?.data?.join(", ");
+        // const iconType = wxccIconType || event?.data?.channelType || event?.data?.identitytype;
+        // const channelTypeTag = wxccChannelTypeTag || event?.data?.identitytype;
+        // const eventSource = wxccSource || event?.source;
+        // const isActive = isWxccEvent ? wxccIsActive : false;
+
+        const title = wxccTitle || event?.data?.uiData?.title || event?.identity;
+        const subTitle = wxccSubTitle || event?.data?.uiData?.subTitle || this.generateSubTitle(event?.data);
+        const iconType =
+          wxccIconType || event?.data?.uiData?.iconType || event?.data?.channelType || event?.data?.identitytype;
+        const channelTypeTag = wxccChannelTypeTag || event?.data?.uiData?.channelTypeTag || event?.data?.identitytype;
+        const eventSource = wxccSource || event?.data?.uiData?.eventSource || event?.source;
+        const isActive = isWxccEvent ? wxccIsActive : false;
+
+        event.renderingData = {
+          title,
+          subTitle,
+          iconType,
+          channelTypeTag,
+          eventSource,
+          isActive,
+        };
+
+        if (!this.mostRecentEvent && event?.type === "task:ended") {
+          this.mostRecentEvent = event;
+          this.debugLogMessage("Most Recent Event", this.mostRecentEvent);
+        }
+
+        return event;
+      });
+
+    this.debugLogMessage("Formatted Sorted Events", filteredModifiedEvents);
+    return filteredModifiedEvents;
+  }
+
+  filterEventTypes(typePrefix: EventType, events: Array<CustomerEvent>) {
+    const filteredEvents = events.filter((event: CustomerEvent) => event.type.includes(`${typePrefix}:`));
     return filteredEvents;
   }
 
@@ -597,19 +996,18 @@ export default class CustomerJourneyWidget extends LitElement {
     return axiosInstance
       .get(url)
       .then((response: any) => {
-        const myEvents = response?.data?.data?.map((event: any) => {
-          event.time = DateTime.fromISO(event.time);
-          return event;
-        });
-        const filteredEvents = this.filterOutUndefinedOrigins(myEvents);
-        this.events = this.sortEventsbyDate(filteredEvents);
-
+        this.events = this.finalizeEventList(response?.data?.data);
         this.timelineErrorMessage = "";
-        return filteredEvents;
+        this.timelineErrorTrackingId = "";
+        return this.events;
       })
-      .catch((err: Error) => {
-        console.error(`[JDS Widget] Could not fetch Customer Journey events for customer (${customer})`, err);
-        this.timelineErrorMessage = `Failure to fetch the journey for ${this.customer}.`;
+      .catch((err: AxiosError) => {
+        console.error(`[JDS Widget] Could not fetch Customer Journey events for customer (${customer})`, err?.response);
+        this.timelineErrorMessage = `Failure to fetch the journey for ${customer}.`;
+        if (err?.response?.data?.trackingId) {
+          this.timelineErrorTrackingId = err?.response?.data?.trackingId;
+        }
+        return undefined;
       })
       .finally(() => {
         this.getEventsInProgress = false;
@@ -626,6 +1024,18 @@ export default class CustomerJourneyWidget extends LitElement {
       return events;
     }
   }
+
+  filterUniqueTaskIds = (events: Array<CustomerEvent>) => {
+    const set = new Set();
+    const result = events.filter(o => (!o?.data?.taskId || !set.has(o?.data?.taskId)) && set.add(o?.data?.taskId));
+    return result;
+  };
+
+  uniqueFilterTypes = (filterTypes: Array<string>) => {
+    const set = new Set();
+    const result = filterTypes.filter(type => (!type || !set.has(type)) && set.add(type));
+    return result;
+  };
 
   subscribeToEventStream(customer: string | null) {
     if (this.journeyEventSource) {
@@ -666,10 +1076,9 @@ export default class CustomerJourneyWidget extends LitElement {
           if (data.data && (data?.datacontenttype === "string" || data?.dataContentType === "string")) {
             data.data = JSON.parse(data.data);
           }
-          this.newestEvents = this.sortEventsbyDate([data, ...this.newestEvents]);
-          this.newestEvents = this.filterOutUndefinedOrigins(this.newestEvents);
+          this.newestEvents = this.finalizeEventList([data, ...this.newestEvents]);
         } catch (err) {
-          console.error("[JDS Widget] journey/stream: No parsable data fetched");
+          console.error("[JDS Widget] journey/stream: No parsable data fetched", err);
         }
       };
 
@@ -682,8 +1091,7 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   updateComprehensiveEventList() {
-    this.events = this.sortEventsbyDate([...this.newestEvents, ...this.events]);
-    this.events = this.filterOutUndefinedOrigins(this.events);
+    this.events = this.finalizeEventList([...this.newestEvents, ...this.events]);
     this.newestEvents = [];
   }
 
@@ -697,51 +1105,106 @@ export default class CustomerJourneyWidget extends LitElement {
     this.handleBackspace(srcEvent);
   }
 
-  async handleNewCustomer() {
-    this.syncLoadingStatuses(true);
-
-    this.aliasGetInProgress = true;
-    this.debugLogMessage("customer", this.customer);
+  async callTimelineAPIs(customer: string | null) {
     this.newestEvents = [];
-    this.getExistingEvents(this.customer || null);
-    this.identityData = await this.getAliasesByAlias(this.customer || null);
-    this.firstName = this.identityData?.firstName || "";
-    this.lastName = this.identityData?.lastName || "";
-    this.identityId = this.identityData?.id;
-    this.debugLogMessage("identityId", this.identityId);
+    this.getExistingEvents(customer || null);
+    this.subscribeToEventStream(customer || null);
+  }
 
-    this.subscribeToEventStream(this.customer || null);
+  //   async callAliasAPIs(customer: string | null) {
+  //     this.aliasGetInProgress = true;
+  //     this.identityData = await this.getIdentityDataByAlias(customer || null);
+  //     this.firstName = this.identityData?.firstName || "";
+  //     this.lastName = this.identityData?.lastName || "";
+  //     this.identityId = this.identityData?.id;
+  //     this.debugLogMessage("identityId", this.identityId);
+  //   }
 
-    if (!this.templateId) {
-      this.templateId = await this.getDefaultTemplateId();
-    }
+  async loadNonStreamAPIs(customer: string, templateId: string | undefined) {
+    this.isEntireWidgetErroring = false;
+    this.entireWidgetErrorTrackingId = "";
+    this.entireWidgetLoading = true;
+    this.newestEvents = [];
 
-    this.getProfileView(this.identityId, this.templateId);
-    this.subscribeToProfileViewStream(this.customer || null, this.templateId);
+    let apiResponses;
+    apiResponses = await Promise.all([
+      this.getExistingEvents(customer),
+      this.getFirstLastNameIdentity(customer),
+      this.getProfileViewByTemplateId(customer, templateId),
+    ]);
+
+    const didAllFail = apiResponses.every(apiResponse => !apiResponse);
+
+    this.isEntireWidgetErroring = didAllFail;
+    this.entireWidgetErrorTrackingId = didAllFail ? this.timelineErrorTrackingId : "";
+    this.entireWidgetLoading = false;
+
+    return apiResponses;
+  }
+
+  async handleNewCustomer(customer: string, templateId: string | undefined) {
+    this.debugLogMessage("customer", customer);
+
+    await this.loadNonStreamAPIs(customer, templateId);
+
+    this.subscribeToEventStream(customer || null);
+    this.subscribeToProfileViewStreamByTemplateId(customer, templateId);
   }
 
   handleNamesUpdate(event: CustomEvent) {
     this.nameApiErrorMessage = "";
+    this.nameApiErrorTrackingId = "";
     const { firstName, lastName } = event?.detail;
 
     this.addFirstLastNameIdentity(this.identityId, firstName, lastName);
   }
 
+  handleWidgetTryAgain() {
+    if (this.customer) {
+      this.handleNewCustomer(this.customer, this.templateId);
+    }
+  }
+
+  async handleProfileTryAgain() {
+    this.getProfileDataInProgress = true;
+    this.profileErrorMessage = "";
+
+    await this.getFirstLastNameIdentity(this.customer);
+    this.getProfileViewByTemplateId(this.customer, this.templateId);
+    this.subscribeToProfileViewStreamByTemplateId(this.customer, this.templateId);
+  }
+
+  handleNameTryAgain() {
+    this.nameApiErrorMessage = "";
+    this.nameApiErrorTrackingId = "";
+    this.getFirstLastNameIdentity(this.customer);
+  }
+
+  handleTimelineTryAgain() {
+    this.timelineErrorMessage = "";
+    this.timelineErrorTrackingId = "";
+    this.getExistingEvents(this.customer);
+    this.subscribeToEventStream(this.customer);
+  }
+
   renderEvents() {
     return html`
-      <cjaas-timeline
+      <cjaas-timeline-v2
         ?getEventsInProgress=${this.getEventsInProgress}
         .historicEvents=${this.events}
         .newestEvents=${this.newestEvents}
+        .mostRecentEvent=${this.mostRecentEvent}
         .eventIconTemplate=${this.eventIconTemplate}
         .badgeKeyword=${this.badgeKeyword}
         @new-event-queue-cleared=${this.updateComprehensiveEventList}
         limit=${this.limit}
         is-event-filter-visible
         ?live-stream=${!this.disableEventStream}
-        time-frame=${this.timeFrame}
+        time-range-option=${this.defaultTimeRangeOption}
         error-message=${this.timelineErrorMessage}
-      ></cjaas-timeline>
+        error-tracking-id=${this.timelineErrorTrackingId}
+        @timeline-error-try-again=${this.handleTimelineTryAgain}
+      ></cjaas-timeline-v2>
     `;
   }
 
@@ -755,7 +1218,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
   renderEventList() {
     return html`
-      <section class="sub-widget-section" id="events-list">
+      <section class="sub-widget-section events-list">
         ${this.renderEvents()}
       </section>
     `;
@@ -763,45 +1226,45 @@ export default class CustomerJourneyWidget extends LitElement {
 
   renderProfile() {
     return html`
-      <section class="sub-widget-section">
-        <cjaas-profile
+      <section class="sub-widget-section profile-view">
+        <cjaas-profile-v2
           .customer=${this.customer || ""}
-          .profileData=${this.profileData}
+          .profileDataPoints=${this.profileDataPoints}
           ?getProfileDataInProgress=${this.getProfileDataInProgress}
           error-message=${this.profileErrorMessage}
           first-name=${this.firstName}
           last-name=${this.lastName}
           @edit-names=${this.handleNamesUpdate}
+          @profile-error-try-again=${this.handleProfileTryAgain}
+          @name-error-try-again=${this.handleNameTryAgain}
           ?names-loading=${this.aliasNamesUpdateInProgress}
           name-api-error-message=${this.nameApiErrorMessage}
-        ></cjaas-profile>
+          profile-error-tracking-id=${this.profileErrorTrackingId}
+          name-error-tracking-id=${this.nameApiErrorTrackingId}
+        ></cjaas-profile-v2>
       </section>
     `;
   }
 
-  renderIdentity() {
-    return html`
-      <section class="sub-widget-section">
-        <cjaas-identity
-          .customer=${this.customer}
-          .identityData=${this.identityData}
-          .aliasObjects=${this.aliasObjects}
-          .aliasDeleteInProgress=${this.aliasDeleteInProgress}
-          ?aliasGetInProgress=${this.aliasGetInProgress}
-          ?aliasAddInProgress=${this.aliasAddInProgress}
-          error-message=${this.aliasErrorMessage}
-          @delete-alias=${(ev: CustomEvent) => this.deleteAliasById(this.identityId, ev?.detail?.type, ev.detail.alias)}
-          @add-alias=${(ev: CustomEvent) => this.addAliasById(this.identityId, ev?.detail?.type, ev?.detail?.alias)}
-          .minimal=${true}
-          ?read-only=${this.readOnlyAliases}
-        ></cjaas-identity>
-      </section>
-    `;
-  }
-
-  private get classes() {
-    return { expanded: this.expanded };
-  }
+  //   renderIdentity() {
+  //     return html`
+  //       <section class="sub-widget-section">
+  //         <cjaas-identity
+  //           .customer=${this.customer}
+  //           .identityData=${this.identityData}
+  //           .aliasObjects=${this.aliasObjects}
+  //           .aliasDeleteInProgress=${this.aliasDeleteInProgress}
+  //           ?aliasGetInProgress=${this.aliasGetInProgress}
+  //           ?aliasAddInProgress=${this.aliasAddInProgress}
+  //           error-message=${this.aliasErrorMessage}
+  //           @delete-alias=${(ev: CustomEvent) => this.deleteAliasById(this.identityId, ev?.detail?.type, ev.detail.alias)}
+  //           @add-alias=${(ev: CustomEvent) => this.addAliasById(this.identityId, ev?.detail?.type, ev?.detail?.alias)}
+  //           .minimal=${true}
+  //           ?read-only=${this.readOnlyAliases}
+  //         ></cjaas-identity>
+  //       </section>
+  //     `;
+  //   }
 
   static get styles() {
     return styles;
@@ -859,58 +1322,13 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   /**
-   * Search for an Identity of an individual via Person Id. This will return one/more Identities.
-   * The Provided aliases belong to one/more Persons.
-   * This is where we gather the ID of the individual for future alias actions
-   * @param personId
-   * @returns Promise<IdentityData | undefined>
-   */
-  async getAliasesById(identityId: string | undefined): Promise<IdentityData | undefined> {
-    const url = `${this.baseUrl}/admin/v1/api/person/workspace-id/${this.projectId}?personId=${identityId}&organizationId=${this.organizationId}`;
-
-    const config: AxiosRequestConfig = {
-      method: "GET",
-      url,
-      headers: {
-        Authorization: `Bearer ${this.bearerToken}`,
-        "Content-Type": "application/json",
-      },
-    };
-
-    const axiosInstance = axios.create(config);
-
-    if (!this.hasIdentityAPIBeenCalled) {
-      axiosRetry(axiosInstance, this.basicRetryConfig);
-    }
-
-    return axiosInstance
-      .get(url)
-      .then((response: AxiosResponse<IdentityResponse>) => {
-        const identityData = response?.data?.data?.length ? response?.data?.data[0] : undefined;
-        this.aliasErrorMessage = "";
-        return identityData;
-      })
-      .catch((err: Error) => {
-        console.error("[JDS Widget] Failed to fetch Aliases by Alias ", err);
-        this.aliasErrorMessage = `Failed to fetch aliases. Cannot execute any other actions.`;
-        return undefined;
-      })
-      .finally(() => {
-        this.aliasGetInProgress = false;
-        if (!this.hasIdentityAPIBeenCalled) {
-          this.hasIdentityAPIBeenCalled = true;
-        }
-      });
-  }
-
-  /**
    * Search for an Identity of an individual via aliases. This will return one/more Identities.
    * The Provided aliases belong to one/more Persons.
    * This is where we gather the ID of the individual for future alias actions
    * @param customer
    * @returns Promise<IdentityData | undefined>
    */
-  async getAliasesByAlias(customer: string | null): Promise<IdentityData | undefined> {
+  async getIdentityDataByAlias(customer: string | null): Promise<IdentityData | undefined> {
     const url = `${this.baseUrl}/admin/v1/api/person/workspace-id/${this.projectId}/aliases/${customer}?organizationId=${this.organizationId}`;
 
     const config: AxiosRequestConfig = {
@@ -928,22 +1346,43 @@ export default class CustomerJourneyWidget extends LitElement {
       axiosRetry(axiosInstance, this.basicRetryConfig);
     }
 
-    return axiosInstance
-      .get(url)
-      .then((response: AxiosResponse<IdentityResponse>) => {
-        const identityData = response?.data?.data?.length ? response?.data?.data[0] : undefined;
-        this.createAliasMap(identityData);
+    return axiosInstance.get(url).then((response: AxiosResponse<IdentityResponse>) => {
+      const identityData = response?.data?.data?.length ? response?.data?.data[0] : undefined;
+      return identityData;
+    });
+  }
 
-        this.aliasErrorMessage = "";
-        return identityData;
+  getAliasesByAlias(identityData: any) {
+    this.createAliasMap(identityData);
+    this.requestUpdate();
+  }
+
+  async getFirstLastNameIdentity(customer: string | null) {
+    this.aliasNamesUpdateInProgress = true;
+
+    return this.getIdentityDataByAlias(customer)
+      .then((identityData: IdentityData | undefined) => {
+        this.nameApiErrorMessage = "";
+        this.nameApiErrorTrackingId = "";
+
+        this.firstName = identityData?.firstName || "";
+        this.lastName = identityData?.lastName || "";
+        this.identityId = identityData?.id;
+
+        return { firstName: this.firstName, lastName: this.lastName, identityId: this.identityId };
       })
-      .catch((err: Error) => {
-        console.error("[JDS Widget] Failed to fetch Aliases by Alias ", err);
-        this.aliasErrorMessage = `Failed to fetch aliases. Cannot execute any other actions.`;
+      .catch((err: AxiosError) => {
+        console.error(`[JDS Widget] Failed to fetch first and last name by Alias: [${customer}]`, err);
+        this.nameApiErrorMessage = "Failed to fetch name";
+        if (err?.response?.data?.trackingId) {
+          this.nameApiErrorTrackingId = err?.response?.data?.trackingId;
+        }
         return undefined;
       })
       .finally(() => {
         this.aliasGetInProgress = false;
+        this.aliasNamesUpdateInProgress = false;
+
         if (!this.hasIdentityAPIBeenCalled) {
           this.hasIdentityAPIBeenCalled = true;
         }
@@ -963,7 +1402,6 @@ export default class CustomerJourneyWidget extends LitElement {
     if (!firstName.trim() && !lastName.trim()) {
       this.aliasNamesUpdateInProgress = false;
       console.error("[JDS Widget] You cannot add empty values to first or last name.");
-      return;
     }
 
     const requestBody = [
@@ -984,10 +1422,12 @@ export default class CustomerJourneyWidget extends LitElement {
         this.firstName = response?.data?.data?.firstName;
         this.lastName = response?.data?.data?.lastName;
         this.nameApiErrorMessage = "";
+        return { firstName: this.firstName, lastName: this.lastName };
       })
-      .catch(err => {
+      .catch((err: AxiosError) => {
         this.nameApiErrorMessage = `Failed to edit the name successfully`;
         console.error(`[JDS Widget] Failed to edit Identity Names ${identityId}`, err?.response);
+        return undefined;
       })
       .finally(() => {
         this.aliasNamesUpdateInProgress = false;
@@ -1015,142 +1455,55 @@ export default class CustomerJourneyWidget extends LitElement {
     return axios(url, config);
   }
 
-  async generatePatchIndex(
-    operation: PatchOperations,
-    identityId: string | undefined,
-    aliasType: IdentityAliasTypes,
-    alias: string
-  ) {
-    const identity = await this.getAliasesById(identityId);
-    if (!identity) {
-      return null;
-    }
-    const arrayOfAliasesByType: Array<string> = identity[aliasType];
-
-    switch (operation) {
-      case PatchOperations.Add:
-        return arrayOfAliasesByType?.length || 0;
-      case PatchOperations.Remove:
-        const index = arrayOfAliasesByType.indexOf(alias);
-        return index;
-      case PatchOperations.Replace:
-        return arrayOfAliasesByType.indexOf(alias);
-        break;
-      default:
-    }
-  }
-
-  /**
-   * Add one or more aliases to existing Individual
-   * @param customer
-   * @param alias
-   * @returns void
-   */
-  async addAliasById(identityId: string | undefined, aliasType: IdentityAliasTypes, alias: string) {
-    this.aliasAddInProgress = true;
-
-    const trimmedAlias = alias.trim();
-    if (!trimmedAlias) {
-      this.aliasAddInProgress = false;
-      console.error("[JDS Widget] You cannot add an empty value as a new alias");
-      return;
-    }
-
-    const index = await this.generatePatchIndex(PatchOperations.Add, identityId, aliasType, alias);
-
-    const requestBody = [
-      {
-        op: "add",
-        path: `/${aliasType}/${index}`,
-        value: trimmedAlias,
-      },
-    ];
-
-    return this.patchAliasChange(identityId, requestBody)
-      .then((response: AxiosResponse<any>) => {
-        const responseData = response.data?.data as IdentityData;
-
-        if (this.identityData) {
-          this.identityData.aliases = responseData?.aliases;
-          this.identityData = responseData;
-          this.createAliasMap(this.identityData);
-          this.requestUpdate();
-        }
-        this.aliasErrorMessage = "";
-      })
-      .catch(err => {
-        console.error(`[JDS Widget] Failed to add AliasById ${identityId}`, err?.response);
-
-        let subErrorMessage = "";
-
-        if (err?.response?.data?.status === "BAD_REQUEST") {
-          const doesAliasAlreadyExists = err?.response.data.errors.find((error: string) =>
-            error.includes("Alias to be added already exists to some other Person")
-          );
-
-          if (doesAliasAlreadyExists) {
-            subErrorMessage = `This alias already exists for some other person.`;
-          }
-        }
-
-        if (err?.response?.data?.status === 409) {
-          subErrorMessage = "This alias is a duplicate.";
-        }
-        this.aliasErrorMessage = `Failed to add alias(es) ${alias}. ${subErrorMessage}`;
-      })
-      .finally(() => {
-        this.aliasAddInProgress = false;
-      });
-  }
-
   hasPlusSign(alias: string): boolean {
     const hasPlusSign = alias.trim().charAt(0) === "+";
     return hasPlusSign;
   }
 
-  async deleteAliasById(identityId: string | undefined, aliasType: IdentityAliasTypes, alias: string) {
-    this.setInlineAliasLoader(alias, true);
-    const hasPlusSign = this.hasPlusSign(alias);
-    let aliasToDelete = alias;
-    if (aliasType === IdentityAliasTypes.Phone || hasPlusSign) {
-      aliasToDelete = this.encodeParameter(alias) || aliasToDelete;
-    }
+  //   async deleteAliasById(identityId: string | undefined, aliasType: IdentityAliasTypes, alias: string) {
+  //     this.setInlineAliasLoader(alias, true);
+  //     const hasPlusSign = this.hasPlusSign(alias);
+  //     let aliasToDelete = alias;
+  //     if (aliasType === IdentityAliasTypes.Phone || hasPlusSign) {
+  //       aliasToDelete = this.encodeParameter(alias) || aliasToDelete;
+  //     }
 
-    const trimmedAlias = alias.trim();
-    if (!trimmedAlias) {
-      this.setInlineAliasLoader(alias, false);
-      console.error("[JDS Widget] You cannot add an empty value as a new alias");
-      return;
-    }
+  //     const trimmedAlias = alias.trim();
+  //     if (!trimmedAlias) {
+  //       this.setInlineAliasLoader(alias, false);
+  //       console.error("[JDS Widget] You cannot add an empty value as a new alias");
+  //       return;
+  //     }
 
-    const index = await this.generatePatchIndex(PatchOperations.Remove, identityId, aliasType, alias);
+  //     const index = await this.generatePatchIndex(PatchOperations.Remove, aliasType, alias);
 
-    const requestBody = [
-      {
-        op: "remove",
-        path: `/${aliasType}/${index}`,
-        value: trimmedAlias,
-      },
-    ];
+  //     const requestBody = [
+  //       {
+  //         op: "remove",
+  //         path: `/${aliasType}/${index}`,
+  //         value: trimmedAlias,
+  //       },
+  //     ];
 
-    return this.patchAliasChange(identityId, requestBody)
-      .then((response: any) => {
-        const responseData = response.data?.data as IdentityData;
-        if (this.identityData) {
-          this.identityData = responseData;
-          this.createAliasMap(this.identityData);
-          this.requestUpdate();
-        }
-        this.aliasErrorMessage = "";
-      })
-      .catch((err: Error) => {
-        console.error(`[JDS Widget] Failed to delete AliasById: (${identityId})`, alias, err);
-        this.aliasErrorMessage = `Failed to delete alias ${alias}.`;
-      })
-      .finally(() => {
-        this.setInlineAliasLoader(alias, false);
-      });
-  }
+  //     return this.patchAliasChange(identityId, requestBody)
+  //       .then((response: any) => {
+  //         const responseData = response.data?.data as IdentityData;
+  //         if (this.identityData) {
+  //           this.identityData = responseData;
+  //           this.createAliasMap(this.identityData);
+  //           this.requestUpdate();
+  //         }
+  //         this.aliasErrorMessage = "";
+  //       })
+  //       .catch((err: AxiosError) => {
+  //         console.error(`[JDS Widget] Failed to delete AliasById: (${identityId})`, alias, err);
+  //         this.aliasErrorMessage = `Failed to delete alias ${alias}.`;
+  //         return err?.response?.data;
+  //       })
+  //       .finally(() => {
+  //         this.setInlineAliasLoader(alias, false);
+  //       });
+  //   }
 
   setInlineAliasLoader(alias: string, state: boolean) {
     const duplicate = Object.assign({}, this.aliasDeleteInProgress);
@@ -1170,99 +1523,89 @@ export default class CustomerJourneyWidget extends LitElement {
     this.getEventsInProgress = status;
   }
 
-  refreshUserSearch() {
-    const inputValue = this.customerInput.value.trim();
-    if (this.customer === inputValue) {
-      this.handleNewCustomer();
-    } else {
-      this.syncLoadingStatuses();
-      this.customer = inputValue;
-    }
-  }
+  //   refreshUserSearch() {
+  //     const inputValue = this.customerInput.value.trim();
+  //     if (this.customer === inputValue) {
+  //       this.handleNewCustomer(this.customer, this.templateId);
+  //     } else {
+  //       this.syncLoadingStatuses();
+  //       this.customer = inputValue;
+  //     }
+  //   }
 
-  renderMainInputSearch() {
-    return html`
-      <div class="flex-inline">
-        <span class="custom-input-label">Lookup User</span>
-        <div class="input-wrapper">
-          <md-input
-            searchable
-            class="customer-journey-search-input"
-            id="customer-input"
-            value=${this.customer || ""}
-            shape="pill"
-            @input-keydown=${(event: CustomEvent) => this.handleKeyDown(event)}
-          >
-          </md-input>
-          <div class="reload-icon">
-            <md-tooltip message="Reload Widget">
-              <md-button circle @click=${this.refreshUserSearch}>
-                <md-icon name="icon-refresh_12"></md-icon>
-              </md-button>
-            </md-tooltip>
-          </div>
-        </div>
-      </div>
-    `;
-  }
+  //   renderMainInputSearch() {
+  //     return html`
+  //       <div class="flex-inline">
+  //         <span class="custom-input-label">Lookup User</span>
+  //         <div class="input-wrapper">
+  //           <md-input
+  //             searchable
+  //             class="customer-journey-search-input"
+  //             id="customer-input"
+  //             value=${this.customer || ""}
+  //             shape="pill"
+  //             @input-keydown=${(event: CustomEvent) => this.handleKeyDown(event)}
+  //           >
+  //           </md-input>
+  //           <div class="reload-icon">
+  //             <md-tooltip message="Reload Widget">
+  //               <md-button circle @click=${this.refreshUserSearch}>
+  //                 <md-icon name="icon-refresh_12"></md-icon>
+  //               </md-button>
+  //             </md-tooltip>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     `;
+  //   }
 
   renderEmptyStateView() {
     return html`
       <div class="empty-state-container">
-        <!-- <img src="./assets/images/flashlight-search-192.svg" alt="search-illustration" /> -->
-        <!-- TODO: Add Illustrations to empty state view -->
         <p class="empty-state-text">Enter a user to search for a Journey</p>
       </div>
     `;
   }
 
   renderSubWidgets() {
-    const tooltipMessage = `Aliases are alternate ways to identify a customer. Adding aliases can help you form a more complete profile of your customer.`;
-
     return html`
-      <div class="sub-widget-flex-container${classMap(this.classes)}">
-        <div class="column left-column">
-          <details class="sub-widget-detail-container" ?open=${!this.collapseProfileSection}>
-            <summary
-              ><span class="sub-widget-header">Profile</span><md-icon name="icon-arrow-up_12"></md-icon>
-            </summary>
-            ${this.renderProfile()}
-          </details>
-          <details class="grid-identity sub-widget-detail-container" ?open=${!this.collapseAliasSection}>
-            <summary>
-              <span class="sub-widget-header">Aliases</span>
-              <md-tooltip class="alias-info-tooltip" .message=${tooltipMessage}>
-                <md-icon name="info_14"></md-icon>
-              </md-tooltip>
-              <md-icon class="alias-expand-icon" name="icon-arrow-up_12"></md-icon>
-            </summary>
-            ${this.renderIdentity()}
-          </details>
-        </div>
-        <div class="column right-column">
-          <details class="grid-timeline sub-widget-detail-container" ?open=${!this.collapseTimelineSection}>
-            <summary>
-              <span class="sub-widget-header">Journey</span>
-              <md-icon name="icon-arrow-up_12"></md-icon>
-            </summary>
-            <div class="container">
-              ${this.renderEventList()}
-            </div>
-          </details>
-        </div>
+      <div
+        class=${`sub-widget-container ${
+          this.profileDataPointCount > 3 ? "flex-direction-row" : "flex-direction-column"
+        }`}
+      >
+        ${this.renderProfile()} ${this.renderEventList()}
       </div>
     `;
   }
 
   renderFunctionalWidget() {
-    return html`
-      <div class="customer-journey-widget-container">
-        <div class="top-header-row">
-          ${this.disableUserSearch ? nothing : this.renderMainInputSearch()}
+    if (this.isEntireWidgetErroring) {
+      return html`
+        <div class="customer-journey-widget-container">
+          <cjaas-error-notification
+            title="Failed to load data"
+            tracking-id=${this.entireWidgetErrorTrackingId}
+            @error-try-again=${this.handleWidgetTryAgain}
+          ></cjaas-error-notification>
         </div>
-        ${this.customer ? this.renderSubWidgets() : this.renderEmptyStateView()}
-      </div>
-    `;
+      `;
+    } else if (this.entireWidgetLoading) {
+      return html`
+        <div class="customer-journey-widget-container">
+          <div class="widget-loading-wrapper">
+            <md-spinner size="56"></md-spinner>
+            <p class="loading-text">Loading...</p>
+          </div>
+        </div>
+      `;
+    } else {
+      return html`
+        <div class="customer-journey-widget-container populated-data">
+          ${this.customer ? this.renderSubWidgets() : this.renderEmptyStateView()}
+        </div>
+      `;
+    }
   }
 
   render() {

@@ -36,7 +36,7 @@ import { mockedInteractionData } from "./sandbox.mock";
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
   @internalProperty() darkTheme = false;
-  @internalProperty() containerWidth = "80vw";
+  @internalProperty() containerWidth = "99vw";
   @internalProperty() containerHeight = "80vh";
   @internalProperty() selectedComponent = "Activity Item";
   static get styles() {
