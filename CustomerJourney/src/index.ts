@@ -16,6 +16,7 @@ import "@cjaas/common-components/dist/comp/cjaas-timeline-v2.js";
 import "@cjaas/common-components/dist/comp/cjass-profile-v2.js";
 import { TimelineV2 } from "@cjaas/common-components";
 import { DateTime } from "luxon";
+import { v4 as uuidv4 } from "uuid";
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 // @ts-ignore
 import { version } from "../version";
@@ -81,6 +82,7 @@ export interface RenderingDataObject {
   iconType?: string;
   channelTypeTag?: string;
   eventSource?: string;
+  isActive?: boolean;
 }
 
 export interface CustomerEvent {
@@ -729,6 +731,18 @@ export default class CustomerJourneyWidget extends LitElement {
     return this.collectProfileDataPoints(profileTablePayload);
   }
 
+  hasTaskExpired(event: CustomerEvent): Boolean {
+    console.log("eventTime", event?.time, DateTime.local().toUTC());
+    const date = new Date(event.time).valueOf();
+    const now = new Date(Date.now()).valueOf();
+    const oneHourMs = 3600000; // 1 hour delay
+    const isExpired = now - oneHourMs > date;
+    console.log("expire", date, now, isExpired, event.time);
+
+    console.log("hasTaskExpired?", isExpired);
+    return isExpired;
+  }
+
   parseWxccData(event: CustomerEvent) {
     /////
     const { channelType, direction } = event?.data;
@@ -742,14 +756,17 @@ export default class CustomerJourneyWidget extends LitElement {
     //   iconType: channelType === "telephony" ? `${formatDirectionText}-call` : channelType,
     // };
 
-    let wxccTitle, wxccSubTitle, wxccIconType, wxccChannelTypeTag, wxccSource;
+    let wxccTitle, wxccSubTitle, wxccIconType, wxccChannelTypeTag, wxccSource, wxccIsActive;
     const isWxccEvent = event?.source.includes("wxcc");
 
-    wxccTitle = `${formatDirectionText} ${channelTypeText}`;
-    wxccSubTitle = event?.data?.queueName || `Queue ID: ${event?.data?.queueId}`;
-    wxccChannelTypeTag = channelTypeText;
-    wxccIconType = channelType === "telephony" ? `${formatDirectionText}-call` : channelType;
-    wxccSource = isWxccEvent ? "wxcc" : "";
+    if (isWxccEvent) {
+      wxccTitle = `${!!direction ? formatDirectionText : ""} ${channelTypeText}`;
+      wxccSubTitle = event?.data?.queueName || `Queue ID: ${event?.data?.queueId}`;
+      wxccChannelTypeTag = channelTypeText;
+      wxccIconType = channelType === "telephony" && !!direction ? `${formatDirectionText}-call` : channelType;
+      wxccSource = isWxccEvent ? "wxcc" : "";
+      wxccIsActive = isWxccEvent ? !this.hasTaskExpired(event) && event?.type !== "task:ended" : false;
+    }
 
     /////
 
@@ -800,6 +817,7 @@ export default class CustomerJourneyWidget extends LitElement {
       wxccChannelTypeTag,
       wxccIconType,
       wxccSource,
+      wxccIsActive,
       //   wxccFilterTypes,
     };
   }
@@ -812,7 +830,7 @@ export default class CustomerJourneyWidget extends LitElement {
   combineTaskIdEvents(events: Array<CustomerEvent>) {
     const taskIdEvents: any = {};
     events.forEach((event: CustomerEvent) => {
-      const eventTaskId = event?.data?.taskId;
+      const eventTaskId = event?.data?.taskId || uuidv4();
       if (!taskIdEvents[eventTaskId]) {
         taskIdEvents[eventTaskId] = event;
       } else {
@@ -820,6 +838,7 @@ export default class CustomerJourneyWidget extends LitElement {
       }
     });
 
+    console.log("[combineTaskIds] taskIdEvents", taskIdEvents);
     return Object.values(taskIdEvents) as Array<CustomerEvent>;
 
     // const set = new Set();
@@ -862,6 +881,19 @@ export default class CustomerJourneyWidget extends LitElement {
   //   }
   ////
 
+  generateSubTitle(eventData: any) {
+    if (!eventData) {
+      return "";
+    }
+
+    const generateSubTitle = Object.keys(eventData)
+      .filter(eventDataKey => eventDataKey !== "uiData")
+      .map(key => `${key}: ${eventData[key]}`)
+      .join(", ");
+
+    return generateSubTitle;
+  }
+
   finalizeEventList(events: CustomerEvent[]): CustomerEvent[] {
     this.mostRecentEvent = undefined;
 
@@ -869,6 +901,7 @@ export default class CustomerJourneyWidget extends LitElement {
     this.debugLogMessage("All Sorted Events", allSortedEvents);
 
     const combineTaskIdEventList = allSortedEvents ? this.combineTaskIdEvents(allSortedEvents) : [];
+    // const combineTaskIdEventList = allSortedEvents;
 
     const shouldIncludeWxccEvents = (event: CustomerEvent) =>
       this.hideWxccEvents ? !event.source.includes("wxcc") : true;
@@ -880,13 +913,37 @@ export default class CustomerJourneyWidget extends LitElement {
         }
       })
       .map((event: CustomerEvent) => {
-        const { wxccTitle, wxccSubTitle, wxccChannelTypeTag, wxccIconType, wxccSource } = this.parseWxccData(event);
+        const {
+          wxccTitle,
+          wxccSubTitle,
+          wxccChannelTypeTag,
+          wxccIconType,
+          wxccSource,
+          wxccIsActive,
+        } = this.parseWxccData(event);
 
-        const title = event?.customUIData?.title || wxccTitle;
-        const subTitle = event?.customUIData?.subTitle || wxccSubTitle;
-        const iconType = event?.customUIData?.iconType || wxccIconType;
-        const channelTypeTag = event?.customUIData?.channelTypeTag || wxccChannelTypeTag;
-        const eventSource = event?.customUIData?.eventSource || wxccSource || event?.source;
+        // const title = event?.customUIData?.title || wxccTitle;
+        // const subTitle = event?.customUIData?.subTitle || wxccSubTitle;
+        // const iconType = event?.customUIData?.iconType || wxccIconType;
+        // const channelTypeTag = event?.customUIData?.channelTypeTag || wxccChannelTypeTag;
+        // const eventSource = event?.customUIData?.eventSource || wxccSource || event?.source;
+        // const isActive = event?.renderingData?.isActive || wxccIsActive || false;
+        const isWxccEvent = event?.source.includes("wxcc");
+
+        // const title = wxccTitle || event?.data?.origin || event?.identity;
+        // const subTitle = wxccSubTitle || event?.data?.join(", ");
+        // const iconType = wxccIconType || event?.data?.channelType || event?.data?.identitytype;
+        // const channelTypeTag = wxccChannelTypeTag || event?.data?.identitytype;
+        // const eventSource = wxccSource || event?.source;
+        // const isActive = isWxccEvent ? wxccIsActive : false;
+
+        const title = wxccTitle || event?.data?.uiData?.title || event?.identity;
+        const subTitle = wxccSubTitle || event?.data?.uiData?.subTitle || this.generateSubTitle(event?.data);
+        const iconType =
+          wxccIconType || event?.data?.uiData?.iconType || event?.data?.channelType || event?.data?.identitytype;
+        const channelTypeTag = wxccChannelTypeTag || event?.data?.uiData?.channelTypeTag || event?.data?.identitytype;
+        const eventSource = wxccSource || event?.data?.uiData?.eventSource || event?.source;
+        const isActive = isWxccEvent ? wxccIsActive : false;
 
         event.renderingData = {
           title,
@@ -894,6 +951,7 @@ export default class CustomerJourneyWidget extends LitElement {
           iconType,
           channelTypeTag,
           eventSource,
+          isActive,
         };
 
         if (!this.mostRecentEvent && event?.type === "task:ended") {
