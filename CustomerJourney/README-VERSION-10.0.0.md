@@ -1,5 +1,5 @@
 
-# JDS Customer Journey Widget: Version 9.0.0
+# JDS Customer Journey Widget: Version 10.0.0
 
 This widget uses the JDS (Journey Data Services) APIs to display an individual customer's journey as a history of events. It first retrieves the complete event history from the tape endpoint and compiles toggles for all event channelTypes, and then subscribes to a live stream of new events so they appear in real time. This code can be used as is, or be starter code for your own Custom Widget. It also embodies a profile view with a default template named 'journey-default-template'
 
@@ -25,22 +25,22 @@ https://app.vidcast.io/share/0ebc75d5-62a4-4771-819e-518991c23b23
 
 #### CJDS Widget (PROD) Setup Instructions 
 
-1. To start, download the following Desktop Layout JSON file.  
+1. To start, copy the contents of the following Desktop Layout JSON file and create a new file with the contents pasted.  
 
-<ADD HOSTED DESKTOP LAYOUT WIDGET SAMPLE FILE>	
+- [DesktopLayoutStarterTemplate](https://raw.githubusercontent.com/CiscoDevNet/cjaas-widgets/main/CustomerJourney/src/assets/CJDSWidget-10-LayoutTemplate.json)
 
-2. Open the downloaded file and search for `ENTER_YOUR_PROJECT_ID_HERE` and replace that text with your project ID in quotations (from Control Hub) and save your Desktop Layout JSON file.
+2. Within that file and search for `ENTER_YOUR_PROJECT_ID_HERE` and replace that text with your project ID in quotations (from Control Hub) and save your Desktop Layout JSON file.
 <img width="465" alt="Desktop Layout JSON File" src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/0d42e76d-621e-4c86-b82b-9b2c08660d65">
 <img width="450" alt="Control Hub JDS Admin Portal" src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/40af9fb6-9704-4267-9369-b6bb4945b3d1">
 
   
 4. Go to Admin Portal for Agent Desktop: https://portal-v2.wxcc-us1.cisco.com 
 
-5. Sign in as an Admin and go to Provisioning > Desktop layout 
+5. Sign in as an Admin and go to `Provisioning` > `Desktop layout` 
 
 6. Create a new Layout or edit an existing desktop layout, assign an agent team, upload your modified Desktop Layout JSON file and save. 
 
-7. Now, you can log into [Agent Desktop](https://desktop.wxcc-us1.cisco.com/) as an Agent or refresh the Agent Desktop browser page and the new Desktop Layout will take effect with your CJDS Widget configuration. The next time you accept an incoming customer request, the widget will apear on the right hand side.
+7. Now, you can log into [Agent Desktop](https://desktop.wxcc-us1.cisco.com/) as an Agent or refresh the Agent Desktop browser page and the new Desktop Layout will take effect and your CJDS Widget will appear in the right hand side the next time you accept an incoming customer request.
 
 <sub>_* If you need help setting up the widget in Agent Desktop, contact cjds_widget@cisco.com._</sub>
   
