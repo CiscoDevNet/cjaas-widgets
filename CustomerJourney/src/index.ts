@@ -10,7 +10,7 @@ import { html, internalProperty, property, LitElement, PropertyValues, query } f
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import axiosRetry from "axios-retry";
 import styles from "./assets/styles/View.scss";
-import * as iconData from "@/assets/defaultIcons-v10.json";
+import * as iconData from "@/assets/default-icon-map.json";
 import { EventSourceInitDict } from "eventsource";
 import "@cjaas/common-components/dist/comp/cjaas-timeline-v2.js";
 import "@cjaas/common-components/dist/comp/cjass-profile-v2.js";

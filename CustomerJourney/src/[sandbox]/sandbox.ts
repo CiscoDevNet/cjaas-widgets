@@ -29,7 +29,7 @@ import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
 import styles from "./sandbox.scss";
 import * as iconData from "@/assets/icons.json";
-import * as customIconData from "@/assets/custom-icons.json";
+import * as customIconData from "@/assets/sandbox/custom-icons.json";
 import "..";
 import { mockedInteractionData } from "./sandbox.mock";
 

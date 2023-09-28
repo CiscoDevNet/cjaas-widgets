@@ -1,5 +1,10 @@
-# CJDS Widget In Focus
-[Customer Journey Widget](https://github.com/CiscoDevNet/cjaas-widgets/tree/main/CustomerJourney)
+# Customer Journey Widget (CJDS Widget)
+* [CJDS Widget Documentation](https://github.com/CiscoDevNet/cjaas-widgets/blob/main/CustomerJourney/README.md)
+
+### Latest Version
+```
+customer-journey-10.0.0.js
+```
 
 # CJaaS Widgets
 

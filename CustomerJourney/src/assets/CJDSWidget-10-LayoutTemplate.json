@@ -1,0 +1,359 @@
+{
+	"version": "0.0.7",
+	"appTitle": "Contact Center Desktop",
+	"logo": "",
+	"dragDropEnabled": false,
+	"notificationTimer": 8,
+	"maximumNotificationCount": 3,
+	"browserNotificationTimer": 8,
+	"wxmConfigured": false,
+	"desktopChatApp": {
+		"webexConfigured": true
+	},
+	"area": {
+		"header": {
+			"id": "dw-header",
+			"widgets": {
+				"comp1": {
+					"comp": "div"
+				}
+			},
+			"layout": {
+				"areas": [
+					[
+						"comp1"
+					]
+				],
+				"size": {
+					"cols": [
+						1
+					],
+					"rows": [
+						1
+					]
+				}
+			}
+		},
+		"headless": {
+			"id": "dw-headless",
+			"widgets": {
+				"comp1": {
+					"comp": "div"
+				}
+			},
+			"layout": {
+				"areas": [
+					[
+						"comp1"
+					]
+				],
+				"size": {
+					"cols": [
+						1
+					],
+					"rows": [
+						1
+					]
+				}
+			}
+		},
+		"panel": {
+			"comp": "md-tabs",
+			"attributes": {
+				"class": "widget-tabs"
+			},
+			"children": [
+				{
+					"comp": "md-tab",
+					"attributes": {
+						"slot": "tab",
+						"class": "widget-pane-tab"
+					},
+					"children": [
+						{
+							"comp": "slot",
+							"attributes": {
+								"name": "IVR_TRANSCRIPT_TAB"
+							}
+						}
+					],
+					"visibility": "IVR_TRANSCRIPT"
+				},
+				{
+					"comp": "md-tab-panel",
+					"attributes": {
+						"slot": "panel",
+						"class": "widget-pane"
+					},
+					"children": [
+						{
+							"comp": "slot",
+							"attributes": {
+								"name": "IVR_TRANSCRIPT"
+							}
+						}
+					],
+					"visibility": "IVR_TRANSCRIPT"
+				},
+				{
+					"comp": "md-tab",
+					"attributes": {
+						"slot": "tab",
+						"class": "widget-pane-tab"
+					},
+					"children": [
+						{
+							"comp": "span",
+							"textContent": "Customer Journey"
+						}
+					]
+				},
+				{
+					"comp": "md-tab-panel",
+					"attributes": {
+						"slot": "panel",
+						"class": "widget-pane"
+					},
+					"children": [
+						{
+							"comp": "customer-journey-widget",
+							"script": "https://cjaas.cisco.com/widgets/customer-journey-10.0.0.js",
+							"attributes": {
+								"base-url": "https://api-jds.prod-useast1.ciscowxdap.com",
+            					"project-id": "ENTER_YOUR_PROJECT_ID_HERE",
+                                "logs-on": "true"
+							},
+							"properties": {
+								"interactionData": "$STORE.agentContact.taskSelected",
+								"bearerToken": "$STORE.auth.accessToken",
+								"organizationId":  "$STORE.agentContact.taskSelected.orgId"
+							},
+							"wrapper": {
+								"title": "Customer Journey Widget",
+								"maximizeAreaName": "app-maximize-area"
+							}
+						}
+					]
+				},
+				{
+					"comp": "md-tab",
+					"attributes": {
+						"slot": "tab",
+						"class": "widget-pane-tab"
+					},
+					"children": [
+						{
+							"comp": "span",
+							"textContent": "CRM"
+						}
+					]
+				},
+				{
+					"comp": "md-tab-panel",
+					"attributes": {
+						"slot": "panel",
+						"class": "widget-pane"
+					},
+					"children": [
+						{
+							"comp": "crm-widget",
+							"script": "https://cjaas.cisco.com/web-components/v4/crm.js",
+							"properties": {
+								"phone-number": "+1 773-555-5555"
+							},
+							"wrapper": {
+								"title": "Customer Relationship View",
+								"maximizeAreaName": "app-maximize-area"
+							}
+						}
+					]
+				},
+				{
+					"comp": "md-tab",
+					"attributes": {
+						"slot": "tab"
+					},
+					"children": [
+						{
+							"comp": "slot",
+							"attributes": {
+								"name": "WXM_JOURNEY_TAB"
+							}
+						}
+					],
+					"visibility": "WXM_JOURNEY"
+				},
+				{
+					"comp": "md-tab-panel",
+					"attributes": {
+						"slot": "panel",
+						"class": "widget-pane"
+					},
+					"children": [
+						{
+							"comp": "agentx-wc-cloudcherry-widget",
+							"properties": {
+								"userModel": "$STORE.app.userModel",
+								"spaceId": "",
+								"metricsId": "",
+								"ani": "$STORE.agentContact.taskSelected.ani",
+								"isDarkMode": "$STORE.app.darkMode"
+							},
+							"wrapper": {
+								"title": "Customer Experience Journey",
+								"maximizeAreaName": "app-maximize-area"
+							}
+						}
+					],
+					"visibility": "WXM_JOURNEY"
+				},
+				{
+					"comp": "md-tab",
+					"attributes": {
+						"slot": "tab",
+						"class": "widget-pane-tab"
+					},
+					"children": [
+						{
+							"comp": "slot",
+							"attributes": {
+								"name": "CONTACT_HISTORY_TAB"
+							}
+						}
+					]
+				},
+				{
+					"comp": "md-tab-panel",
+					"attributes": {
+						"slot": "panel",
+						"class": "widget-pane"
+					},
+					"children": [
+						{
+							"comp": "slot",
+							"attributes": {
+								"name": "CONTACT_HISTORY"
+							}
+						}
+					]
+				},
+				{
+					"comp": "md-tab",
+					"attributes": {
+						"slot": "tab",
+						"class": "widget-pane-tab"
+					},
+					"children": [
+						{
+							"comp": "slot",
+							"attributes": {
+								"name": "SCREEN_POP_TAB"
+							}
+						}
+					],
+					"visibility": "SCREEN_POP"
+				},
+				{
+					"comp": "md-tab-panel",
+					"attributes": {
+						"slot": "panel",
+						"class": "widget-pane"
+					},
+					"children": [
+						{
+							"comp": "slot",
+							"attributes": {
+								"name": "SCREEN_POP"
+							}
+						}
+					],
+					"visibility": "SCREEN_POP"
+				}
+			]
+		},
+		"navigation": [
+			{
+				"nav": {
+					"label": "Customer Experience Analytics",
+					"icon": "/app/images/wxm.bcd45cc3.svg",
+					"iconType": "other",
+					"navigateTo": "wxm-metrics",
+					"align": "top"
+				},
+				"page": {
+					"id": "wxm-metrics",
+					"widgets": {
+						"comp1": {
+							"comp": "agentx-wc-cloudcherry-widget",
+							"attributes": {
+								"metrics": true
+							},
+							"properties": {
+								"userModel": "$STORE.app.userModel",
+								"spaceId": "",
+								"metricsId": "",
+								"isDarkMode": "$STORE.app.darkMode",
+								"agentId": "$STORE.agent.agentId"
+							}
+						}
+					},
+					"layout": {
+						"areas": [
+							[
+								"comp1"
+							]
+						],
+						"size": {
+							"cols": [
+								1
+							],
+							"rows": [
+								1
+							]
+						}
+					}
+				},
+				"visibility": "WXM_METRICS"
+			},
+			{
+				"nav": {
+					"label": "Fox News",
+					"icon": "https://static.foxnews.com/static/orion/styles/img/fox-news/s/logos/fox-news-logo.svg",
+					"iconType": "other",
+					"navigateTo": "news",
+					"align": "top"
+				},
+				"page": {
+					"id": "news",
+					"widgets": {
+						"comp1": {
+							"comp": "agentx-wc-iframe",
+							"attributes": {
+								"src": "https://www.foxnews.com/"
+							},
+							"wrapper": {
+								"title": "Fox News",
+								"maximizeAreaName": "app-maximize-area"
+							}
+						}
+					},
+					"layout": {
+						"areas": [
+							[
+								"comp1"
+							]
+						],
+						"size": {
+							"cols": [
+								1
+							],
+							"rows": [
+								1
+							]
+						}
+					}
+				}
+			}
+		]
+	}
+}
