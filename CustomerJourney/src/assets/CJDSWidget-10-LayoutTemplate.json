@@ -120,8 +120,8 @@
 							"script": "https://cjaas.cisco.com/widgets/customer-journey-10.0.0.js",
 							"attributes": {
 								"base-url": "https://api-jds.prod-useast1.ciscowxdap.com",
-            					"project-id": "ENTER_YOUR_PROJECT_ID_HERE",
-                                "logs-on": "true"
+								"project-id": "ENTER_YOUR_PROJECT_ID_HERE",
+								"logs-on": "true"
 							},
 							"properties": {
 								"interactionData": "$STORE.agentContact.taskSelected",
