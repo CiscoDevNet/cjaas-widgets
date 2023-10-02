@@ -178,21 +178,21 @@ export default class CustomerJourneyWidget extends LitElement {
    * set badge icon based on declared keyword from dataset
    */
   @property({ type: String, attribute: "badge-keyword" }) badgeKeyword = "channelType";
-  /**
-   * @prop collapse-timeline-section
-   * determines whether the timeline section is collapsed by default
-   */
-  @property({ type: Boolean, attribute: "collapse-timeline-section" }) collapseTimelineSection = false;
-  /**
-   * @prop collapse-profile-section
-   * determines whether the profile section is collapsed by default
-   */
-  @property({ type: Boolean, attribute: "collapse-profile-section" }) collapseProfileSection = false;
-  /**
-   * @prop collapse-alias-section
-   * determines whether the alias section is collapsed by default
-   */
-  @property({ type: Boolean, attribute: "collapse-alias-section" }) collapseAliasSection = false;
+  //   /**
+  //    * @prop collapse-timeline-section
+  //    * determines whether the timeline section is collapsed by default
+  //    */
+  //   @property({ type: Boolean, attribute: "collapse-timeline-section" }) collapseTimelineSection = false;
+  //   /**
+  //    * @prop collapse-profile-section
+  //    * determines whether the profile section is collapsed by default
+  //    */
+  //   @property({ type: Boolean, attribute: "collapse-profile-section" }) collapseProfileSection = false;
+  //   /**
+  //    * @prop collapse-alias-section
+  //    * determines whether the alias section is collapsed by default
+  //    */
+  //   @property({ type: Boolean, attribute: "collapse-alias-section" }) collapseAliasSection = false;
   /**
    * @attr default-time-range-option
    * Determine default time range on start
