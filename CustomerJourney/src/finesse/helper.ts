@@ -92,15 +92,15 @@ export const setParametersToWidget = (queryParams: QueryParameters) => {
   widget.baseUrl = queryParams?.baseUrl;
 
   widget.cadVariableLookup = queryParams?.cadVariableLookup || null;
-  widget.readOnlyAliases = queryParams?.readOnlyAliases || false;
+  //   widget.readOnlyAliases = queryParams?.readOnlyAliases || false;
   widget.limit = queryParams?.limit || 20;
   widget.customer = queryParams?.customer || null;
   widget.logsOn = queryParams?.logsOn || false;
   widget.disableEventStream = queryParams?.disableEventStream || false;
   widget.defaultTimeRangeOption = queryParams?.defaultTimeRangeOption || TimelineV2.TimeRangeOption.Last30Days;
-  widget.collapseProfileSection = queryParams?.collapseProfileSection || false;
-  widget.collapseAliasSection = queryParams?.collapseAliasSection || false;
-  widget.collapseTimelineSection = queryParams?.collapseTimelineSection || false;
+  //   widget.collapseProfileSection = queryParams?.collapseProfileSection || false;
+  //   widget.collapseAliasSection = queryParams?.collapseAliasSection || false;
+  //   widget.collapseTimelineSection = queryParams?.collapseTimelineSection || false;
   widget.iconDataPath = queryParams?.iconDataPath || "";
   widget.eventIconTemplate = iconData;
 

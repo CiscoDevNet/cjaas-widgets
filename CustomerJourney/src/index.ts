@@ -152,11 +152,11 @@ export default class CustomerJourneyWidget extends LitElement {
    * @attr customer
    */
   @property({ type: String, attribute: "cad-variable-lookup" }) cadVariableLookup: string | null = null;
-  /**
-   * Path to the proper Customer Journey API deployment
-   * @attr base-url
-   */
-  @property({ type: Boolean, attribute: "read-only-aliases" }) readOnlyAliases = false;
+  //   /**
+  //    * Path to the proper Customer Journey API deployment
+  //    * @attr base-url
+  //    */
+  //   @property({ type: Boolean, attribute: "read-only-aliases" }) readOnlyAliases = false;
 
   /**
    * Set the number of Timeline Events to display

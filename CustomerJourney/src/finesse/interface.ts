@@ -8,16 +8,16 @@ export interface QueryParameters {
 
   templateId: string;
   cadVariableLookup?: string | null;
-  readOnlyAliases?: boolean;
+  //   readOnlyAliases?: boolean;
   limit?: number;
   customer?: string;
   logsOn?: boolean;
   disableEventStream?: boolean;
   defaultTimeRangeOption?: TimelineV2.TimeRangeOption.Last30Days;
   disableUserSearch?: boolean;
-  collapseTimelineSection?: boolean;
-  collapseProfileSection?: boolean;
-  collapseAliasSection?: boolean;
+  //   collapseTimelineSection?: boolean;
+  //   collapseProfileSection?: boolean;
+  //   collapseAliasSection?: boolean;
   iconDataPath?: string;
 }
 
