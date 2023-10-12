@@ -737,16 +737,16 @@ export default class CustomerJourneyWidget extends LitElement {
     const now = new Date(Date.now()).valueOf();
     const oneHourMs = 3600000; // 1 hour delay
     const isExpired = now - oneHourMs > date;
-    console.log("expire", date, now, isExpired, event.time);
-
-    console.log("hasTaskExpired?", isExpired);
+    console.log("hasTaskExpired", date, now, isExpired, event.time);
     return isExpired;
   }
 
   parseWxccData(event: CustomerEvent) {
     /////
     const { channelType, direction } = event?.data;
-    const channelTypeText = channelType === "telephony" ? "voice" : channelType;
+    const channelTypeText = channelType === "telephony" ? "call" : channelType;
+    const identityTypeText = event?.identitytype === "phone" ? "call" : event?.identitytype;
+    const communicationTypeText = channelTypeText || identityTypeText;
     const formatDirectionText = direction?.toLowerCase();
 
     // event.renderingData = {
@@ -760,12 +760,16 @@ export default class CustomerJourneyWidget extends LitElement {
     const isWxccEvent = event?.source.includes("wxcc");
 
     if (isWxccEvent) {
-      wxccTitle = `${!!direction ? formatDirectionText : ""} ${channelTypeText}`;
-      wxccSubTitle = event?.data?.queueName || `Queue ID: ${event?.data?.queueId}`;
-      wxccChannelTypeTag = channelTypeText;
-      wxccIconType = channelType === "telephony" && !!direction ? `${formatDirectionText}-call` : channelType;
+      wxccTitle = `${!!direction ? formatDirectionText : ""} ${communicationTypeText}`;
+      wxccSubTitle = event?.data?.queueName || (event?.data?.queueId ? `Queue ID: ${event?.data?.queueId}` : "");
+      wxccChannelTypeTag =
+        channelTypeText === "call" || identityTypeText === "call" ? "voice" : channelTypeText || identityTypeText;
+      wxccIconType =
+        communicationTypeText === "call" && !!direction ? `${formatDirectionText}-call` : communicationTypeText;
       wxccSource = isWxccEvent ? "wxcc" : "";
-      wxccIsActive = isWxccEvent ? !this.hasTaskExpired(event) && event?.type !== "task:ended" : false;
+      wxccIsActive = isWxccEvent
+        ? !this.hasTaskExpired(event) && event?.type !== "task:ended" && event?.type !== "empath:data"
+        : false;
     }
 
     /////
@@ -938,7 +942,8 @@ export default class CustomerJourneyWidget extends LitElement {
         // const isActive = isWxccEvent ? wxccIsActive : false;
 
         const title = wxccTitle || event?.data?.uiData?.title || event?.identity;
-        const subTitle = wxccSubTitle || event?.data?.uiData?.subTitle || this.generateSubTitle(event?.data);
+        const subTitle =
+          wxccSubTitle || event?.data?.uiData?.subTitle || (!isWxccEvent ? this.generateSubTitle(event?.data) : "");
         const iconType =
           wxccIconType || event?.data?.uiData?.iconType || event?.data?.channelType || event?.data?.identitytype;
         const channelTypeTag = wxccChannelTypeTag || event?.data?.uiData?.channelTypeTag || event?.data?.identitytype;
@@ -954,7 +959,7 @@ export default class CustomerJourneyWidget extends LitElement {
           isActive,
         };
 
-        if (!this.mostRecentEvent && event?.type === "task:ended") {
+        if (!this.mostRecentEvent && (event?.type === "task:ended" || event?.type === "empath:data")) {
           this.mostRecentEvent = event;
           this.debugLogMessage("Most Recent Event", this.mostRecentEvent);
         }

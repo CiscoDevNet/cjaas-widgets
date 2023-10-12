@@ -1,10 +1,4 @@
 {
-    "outbound-call": {
-      "name": "icon-outgoing-call-active_16"
-    },
-    "inbound-call": {
-      "name": "icon-incoming-call-active_16"
-    },
     "Chat": {
       "name": "icon-chat-active_16"
     },
@@ -27,6 +21,15 @@
       "name": "icon-handset-active_16"
     },
     "Call": {
+      "name": "icon-handset-active_16"
+    },
+    "outbound-call": {
+      "name": "icon-outgoing-call-active_16"
+    },
+    "inbound-call": {
+      "name": "icon-incoming-call-active_16"
+    },
+    "Phone": {
       "name": "icon-handset-active_16"
     },
     "wrapup": {
