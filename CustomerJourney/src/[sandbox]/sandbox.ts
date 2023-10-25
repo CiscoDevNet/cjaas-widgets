@@ -20,7 +20,7 @@ const ORGANIZATION_ID = process.env.DOTENV.ORGANIZATION_ID;
 // @ts-ignore
 const PROJECT_ID = process.env.DOTENV.PROJECT_ID;
 // @ts-ignore
-const TEMLPATE_ID = process.env.DOTENV.TEMPLATE_ID;
+const TEMPLATE_ID = process.env.DOTENV.TEMPLATE_ID;
 // @ts-ignore
 const IDENTITY = process.env.DOTENV.IDENTITY;
 

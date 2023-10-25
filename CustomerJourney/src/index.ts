@@ -30,6 +30,8 @@ import {
   jsonPatchOperation,
 } from "./types/cjaas";
 import { nothing } from "lit-html";
+import mixpanel from 'mixpanel-browser';
+import { CJDS_WIDGET_LOAD, EVENT_STREAM_LOADED, HISTORICAL_EVENTS_LOADED, IS_DEFAULT_TEMPLATE, PROGRESSIVE_PROFILE_LOADED, PROGRESSIVE_PROFILE_STREAM_LOADED, mixpanelKey } from "./types/mixpanel.constants";
 
 export enum EventType {
   Agent = "agent",
@@ -267,6 +269,8 @@ export default class CustomerJourneyWidget extends LitElement {
 
   @internalProperty() aliasObjects: Array<AliasObject> = [];
 
+  @internalProperty() defaultMetricProperties: any;
+
   basicRetryConfig = {
     retries: 1,
     retryDelay: () => 3000,
@@ -290,6 +294,17 @@ export default class CustomerJourneyWidget extends LitElement {
     super.firstUpdated(_changedProperties);
 
     console.log(`[JDS Widget][Version] customer-journey-${version}`);
+
+    this.defaultMetricProperties = {
+      organizationId: this.organizationId, 
+      projectId: this.projectId, 
+      templateId: this.templateId, 
+      widgetVersion: version,
+      agentId: this.interactionData?.agentId,
+      teamName: this.interactionData?.virtualTeamName,
+      interactionId: this.interactionData?.interactionId,
+      environment: process.env.NODE_ENV
+    }
   }
 
   async update(changedProperties: PropertyValues) {
@@ -432,6 +447,12 @@ export default class CustomerJourneyWidget extends LitElement {
       .get(url)
       .then(response => {
         const { id } = response?.data?.data;
+        //Track if they are using default template or new template     
+        mixpanel.track(IS_DEFAULT_TEMPLATE, {
+          ...this.defaultMetricProperties,
+          "isDefaultTemplate": true
+        })
+        
         return id;
       })
       .catch((err: Error) => {
@@ -470,6 +491,10 @@ export default class CustomerJourneyWidget extends LitElement {
         console.log(
           `[JDS Widget] The ProfileView stream connection has been established for customer \'${customer}\'.`
         );
+        mixpanel.track(PROGRESSIVE_PROFILE_STREAM_LOADED, {
+          ...this.defaultMetricProperties,
+          loaded: true, 
+        })
       };
 
       this.profileEventSource.onmessage = (event: ServerSentEvent) => {
@@ -486,14 +511,29 @@ export default class CustomerJourneyWidget extends LitElement {
           this.profileData = this.parseProfileResponse(attributes, personId);
         } catch (err) {
           console.error("[JDS Widget] profile/stream: No parsable data fetched");
+          mixpanel.track(PROGRESSIVE_PROFILE_STREAM_LOADED, {
+            ...this.defaultMetricProperties,
+            loaded: false, 
+            message: "[JDS Widget] profile/stream: No parsable data fetched"
+          })
         }
       };
 
       this.journeyEventSource!.onerror = error => {
         console.error(`[JDS Widget] There was an Profile EventSource error: `, error);
+        mixpanel.track(PROGRESSIVE_PROFILE_STREAM_LOADED, {
+          ...this.defaultMetricProperties,
+          loaded: false, 
+          message: `[JDS Widget] There was an Profile EventSource error:  ${error}`
+        })
       };
     } else {
       console.error(`[JDS Widget] No Profile EventSource is active for ${customer}`);
+      mixpanel.track(PROGRESSIVE_PROFILE_STREAM_LOADED, {
+        ...this.defaultMetricProperties,
+        loaded: false, 
+        message: `[JDS Widget] No Profile EventSource is active for ${customer}`
+      })
     }
   }
 
@@ -529,6 +569,10 @@ export default class CustomerJourneyWidget extends LitElement {
         const { attributes, personId } = response?.data?.data[0];
         this.profileErrorMessage = "";
         this.profileData = this.parseProfileResponse(attributes, personId);
+        mixpanel.track(PROGRESSIVE_PROFILE_LOADED, {
+          ...this.defaultMetricProperties,
+          loaded: true
+        })
       })
       .catch((err: Error) => {
         this.profileData = undefined;
@@ -537,6 +581,10 @@ export default class CustomerJourneyWidget extends LitElement {
           `[JDS Widget] Unable to fetch the Profile for customer (${this.customer}) with templateId (${templateId})`,
           err
         );
+        mixpanel.track(PROGRESSIVE_PROFILE_LOADED, {
+          ...this.defaultMetricProperties,
+          loaded: false
+        })
       })
       .finally(() => {
         this.getProfileDataInProgress = false;
@@ -603,13 +651,22 @@ export default class CustomerJourneyWidget extends LitElement {
         });
         const filteredEvents = this.filterOutUndefinedOrigins(myEvents);
         this.events = this.sortEventsbyDate(filteredEvents);
-
         this.timelineErrorMessage = "";
+        mixpanel.track(HISTORICAL_EVENTS_LOADED, {
+          ...this.defaultMetricProperties,
+          loaded: true
+        })
+        console.log(filteredEvents);
         return filteredEvents;
       })
       .catch((err: Error) => {
         console.error(`[JDS Widget] Could not fetch Customer Journey events for customer (${customer})`, err);
         this.timelineErrorMessage = `Failure to fetch the journey for ${this.customer}.`;
+        mixpanel.track(HISTORICAL_EVENTS_LOADED, {
+          ...this.defaultMetricProperties,
+          loaded: false, 
+          message: `[JDS Widget] Could not fetch Customer Journey events for customer (${customer}): ` + err
+        })
       })
       .finally(() => {
         this.getEventsInProgress = false;
@@ -651,6 +708,10 @@ export default class CustomerJourneyWidget extends LitElement {
         console.log(
           `[JDS Widget] The Journey event stream connection has been established for customer \'${customer}\'.`
         );
+        mixpanel.track(EVENT_STREAM_LOADED, {
+          ...this.defaultMetricProperties,
+          loaded: true, 
+        })
       };
 
       this.journeyEventSource.onmessage = (event: ServerSentEvent) => {
@@ -674,10 +735,20 @@ export default class CustomerJourneyWidget extends LitElement {
       };
 
       this.journeyEventSource!.onerror = error => {
-        console.error(`[JDS Widget] There was an Journey EventSource error: `, error);
+        console.error(`[JDS Widget] There was an Journey EventSource error:` + error);
+        mixpanel.track(EVENT_STREAM_LOADED, {
+          ...this.defaultMetricProperties,
+          loaded: false,
+          error: `[JDS Widget] There was an Journey EventSource error:` + error
+        })
       };
     } else {
       console.error(`[JDS Widget] No Journey EventSource is active for ${customer}`);
+      mixpanel.track(EVENT_STREAM_LOADED, {
+        ...this.defaultMetricProperties,
+        loaded: false,
+        error: `[JDS Widget] No Journey EventSource is active for ${customer}`
+      })
     }
   }
 
@@ -712,8 +783,23 @@ export default class CustomerJourneyWidget extends LitElement {
 
     this.subscribeToEventStream(this.customer || null);
 
+    mixpanel.init(mixpanelKey, { debug: true, track_pageview: true, persistence: 'localStorage' });
+ 
+    // Set this to a unique identifier for the user performing the event.
+    mixpanel.identify(this.defaultMetricProperties?.agentId);
+    
+    // Track that widget is open 
+    mixpanel.track(CJDS_WIDGET_LOAD, {
+      ...this.defaultMetricProperties,
+    })
+
     if (!this.templateId) {
       this.templateId = await this.getDefaultTemplateId();
+    } else {
+      mixpanel.track(IS_DEFAULT_TEMPLATE, {
+        ...this.defaultMetricProperties,
+        "isDefaultTemplate": false,
+      })
     }
 
     this.getProfileView(this.identityId, this.templateId);
