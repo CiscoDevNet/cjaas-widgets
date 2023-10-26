@@ -296,7 +296,9 @@ export default class CustomerJourneyWidget extends LitElement {
     console.log(`[JDS Widget][Version] customer-journey-${version}`);
 
     this.defaultMetricProperties = {
+      baseUrl: this.baseUrl,
       organizationId: this.organizationId, 
+      organizationName: this.interactionData?.ownerName,
       projectId: this.projectId, 
       templateId: this.templateId, 
       widgetVersion: version,
@@ -524,7 +526,7 @@ export default class CustomerJourneyWidget extends LitElement {
         mixpanel.track(PROGRESSIVE_PROFILE_STREAM_LOADED, {
           ...this.defaultMetricProperties,
           loaded: false, 
-          message: `[JDS Widget] There was an Profile EventSource error:  ${error}`
+          message: `[JDS Widget] There was an Profile EventSource error`
         })
       };
     } else {
@@ -583,7 +585,8 @@ export default class CustomerJourneyWidget extends LitElement {
         );
         mixpanel.track(PROGRESSIVE_PROFILE_LOADED, {
           ...this.defaultMetricProperties,
-          loaded: false
+          loaded: false,
+          message:  `[JDS Widget] Unable to fetch the Profile for customer (${this.customer}) with templateId (${templateId})` + err.message
         })
       })
       .finally(() => {
@@ -665,7 +668,7 @@ export default class CustomerJourneyWidget extends LitElement {
         mixpanel.track(HISTORICAL_EVENTS_LOADED, {
           ...this.defaultMetricProperties,
           loaded: false, 
-          message: `[JDS Widget] Could not fetch Customer Journey events for customer (${customer}): ` + err
+          message: `[JDS Widget] Could not fetch Customer Journey events for customer (${customer}): ` + err.message
         })
       })
       .finally(() => {
@@ -736,11 +739,6 @@ export default class CustomerJourneyWidget extends LitElement {
 
       this.journeyEventSource!.onerror = error => {
         console.error(`[JDS Widget] There was an Journey EventSource error:` + error);
-        mixpanel.track(EVENT_STREAM_LOADED, {
-          ...this.defaultMetricProperties,
-          loaded: false,
-          error: `[JDS Widget] There was an Journey EventSource error:` + error
-        })
       };
     } else {
       console.error(`[JDS Widget] No Journey EventSource is active for ${customer}`);
