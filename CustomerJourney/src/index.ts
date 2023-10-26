@@ -523,9 +523,8 @@ export default class CustomerJourneyWidget extends LitElement {
     return encodedUrlValue;
   }
 
-  async getDefaultTemplateId() {
-    const templateName = "journey-default-template";
-    const url = `${this.baseUrl}/admin/v1/api/profile-view-template/workspace-id/${this.projectId}/template-name/${templateName} `;
+  async getSubscribedProjectId() {
+    const url = `${this.baseUrl}/admin/v1/api/workspace?organizationId=${this.organizationId}`;
 
     const config: AxiosRequestConfig = {
       method: "GET",
@@ -540,14 +539,66 @@ export default class CustomerJourneyWidget extends LitElement {
     return axiosInstance
       .get(url)
       .then(response => {
-        const { id } = response?.data?.data;
-        return id;
+        const workspaces = response?.data?.data;
+        const activeWorkspace = workspaces?.find((workspace: any) => !!workspace.wxccSubscriptionIds?.length);
+        return activeWorkspace?.id;
       })
       .catch((err: AxiosError) => {
-        console.error(`[JDS Widget] Unable to fetch the ID of the journey-default-template`, err);
+        console.error(`[JDS Widget] Unable to fetch the organization's workspaces`, err);
         return undefined;
       });
   }
+
+  async getProjectsFirstProfileTemplateId() {
+    const url = `${this.baseUrl}/admin/v1/api/profile-view-template/workspace-id/${this.projectId}?organizationId=${this.organizationId}`;
+
+    const config: AxiosRequestConfig = {
+      method: "GET",
+      url,
+      headers: {
+        Authorization: `Bearer ${this.bearerToken}`,
+      },
+    };
+
+    const axiosInstance = axios.create(config);
+
+    return axiosInstance
+      .get(url)
+      .then(response => {
+        const projectTemplates = response?.data?.data;
+        return projectTemplates?.[0]?.id;
+      })
+      .catch((err: AxiosError) => {
+        console.error(`[JDS Widget] Unable to fetch the organization's workspaces`, err);
+        return undefined;
+      });
+  }
+
+  //   async getDefaultTemplateId() {
+  //     const templateName = "journey-default-template";
+  //     const url = `${this.baseUrl}/admin/v1/api/profile-view-template/workspace-id/${this.projectId}/template-name/${templateName} `;
+
+  //     const config: AxiosRequestConfig = {
+  //       method: "GET",
+  //       url,
+  //       headers: {
+  //         Authorization: `Bearer ${this.bearerToken}`,
+  //       },
+  //     };
+
+  //     const axiosInstance = axios.create(config);
+
+  //     return axiosInstance
+  //       .get(url)
+  //       .then(response => {
+  //         const { id } = response?.data?.data;
+  //         return id;
+  //       })
+  //       .catch((err: AxiosError) => {
+  //         console.error(`[JDS Widget] Unable to fetch the ID of the journey-default-template`, err);
+  //         return undefined;
+  //       });
+  //   }
 
   async subscribeToProfileViewStreamByTemplateName(customer: string | null, templateName: string | undefined) {
     if (!customer || !templateName) {
@@ -559,7 +610,7 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   async subscribeToProfileViewStreamByTemplateId(customer: string | null, templateId: string | undefined) {
-    const profileTemplateId = !templateId ? await this.getDefaultTemplateId() : templateId;
+    const profileTemplateId = !templateId ? await this.getProjectsFirstProfileTemplateId() : templateId;
 
     const url = `${this.baseUrl}/v1/api/progressive-profile-view/stream/workspace-id/${this.projectId}/identity/${customer}/template-id/${profileTemplateId}?organizationId=${this.organizationId}&bearerToken=${this.bearerToken}`;
     return this.subscribeToProfileViewStream(url);
@@ -654,7 +705,7 @@ export default class CustomerJourneyWidget extends LitElement {
   //   }
 
   async getProfileViewByTemplateId(customer: string | null, templateId: string | undefined) {
-    const profileTemplateId = !templateId ? await this.getDefaultTemplateId() : templateId;
+    const profileTemplateId = !templateId ? await this.getProjectsFirstProfileTemplateId() : templateId;
 
     this.profileDataPoints = [];
     this.getProfileDataInProgress = true;
@@ -1110,11 +1161,11 @@ export default class CustomerJourneyWidget extends LitElement {
     this.handleBackspace(srcEvent);
   }
 
-  async callTimelineAPIs(customer: string | null) {
-    this.newestEvents = [];
-    this.getExistingEvents(customer || null);
-    this.subscribeToEventStream(customer || null);
-  }
+  //   async callTimelineAPIs(customer: string | null) {
+  //     this.newestEvents = [];
+  //     this.getExistingEvents(customer || null);
+  //     this.subscribeToEventStream(customer || null);
+  //   }
 
   //   async callAliasAPIs(customer: string | null) {
   //     this.aliasGetInProgress = true;
@@ -1149,6 +1200,22 @@ export default class CustomerJourneyWidget extends LitElement {
 
   async handleNewCustomer(customer: string, templateId: string | undefined) {
     this.debugLogMessage("customer", customer);
+
+    const projectId = await this.getSubscribedProjectId();
+    if (projectId) {
+      this.projectId = projectId;
+      this.debugLogMessage("Fetched WXCC subscribed Project Id", this.projectId);
+
+      const templateId = await this.getProjectsFirstProfileTemplateId();
+      if (templateId) {
+        this.templateId = templateId;
+        this.debugLogMessage("Fetched project's first template Id", this.templateId);
+      } else {
+        console.error(`[JDS Widget] You need to create a profile template for your WXCC subscribed Project`);
+      }
+    } else {
+      console.error(`[JDS Widget] You need to enable WXCC subscriptions for one of your projects`);
+    }
 
     await this.loadNonStreamAPIs(customer, templateId);
 
