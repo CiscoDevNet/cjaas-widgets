@@ -305,7 +305,8 @@ export default class CustomerJourneyWidget extends LitElement {
       agentId: this.interactionData?.agentId,
       teamName: this.interactionData?.virtualTeamName,
       interactionId: this.interactionData?.interactionId,
-      environment: process.env.NODE_ENV
+      environment: process.env.NODE_ENV,
+      channelType: this.interactionData?.mediaType
     }
   }
 
@@ -495,7 +496,6 @@ export default class CustomerJourneyWidget extends LitElement {
         );
         mixpanel.track(PROGRESSIVE_PROFILE_STREAM_LOADED, {
           ...this.defaultMetricProperties,
-          loaded: true, 
         })
       };
 
@@ -515,7 +515,7 @@ export default class CustomerJourneyWidget extends LitElement {
           console.error("[JDS Widget] profile/stream: No parsable data fetched");
           mixpanel.track(PROGRESSIVE_PROFILE_STREAM_LOADED, {
             ...this.defaultMetricProperties,
-            loaded: false, 
+            error: true, 
             message: "[JDS Widget] profile/stream: No parsable data fetched"
           })
         }
@@ -523,17 +523,12 @@ export default class CustomerJourneyWidget extends LitElement {
 
       this.journeyEventSource!.onerror = error => {
         console.error(`[JDS Widget] There was an Profile EventSource error: `, error);
-        mixpanel.track(PROGRESSIVE_PROFILE_STREAM_LOADED, {
-          ...this.defaultMetricProperties,
-          loaded: false, 
-          message: `[JDS Widget] There was an Profile EventSource error`
-        })
       };
     } else {
       console.error(`[JDS Widget] No Profile EventSource is active for ${customer}`);
       mixpanel.track(PROGRESSIVE_PROFILE_STREAM_LOADED, {
         ...this.defaultMetricProperties,
-        loaded: false, 
+        error: true, 
         message: `[JDS Widget] No Profile EventSource is active for ${customer}`
       })
     }
@@ -573,7 +568,6 @@ export default class CustomerJourneyWidget extends LitElement {
         this.profileData = this.parseProfileResponse(attributes, personId);
         mixpanel.track(PROGRESSIVE_PROFILE_LOADED, {
           ...this.defaultMetricProperties,
-          loaded: true
         })
       })
       .catch((err: Error) => {
@@ -585,7 +579,7 @@ export default class CustomerJourneyWidget extends LitElement {
         );
         mixpanel.track(PROGRESSIVE_PROFILE_LOADED, {
           ...this.defaultMetricProperties,
-          loaded: false,
+          error: true,
           message:  `[JDS Widget] Unable to fetch the Profile for customer (${this.customer}) with templateId (${templateId})` + err.message
         })
       })
@@ -657,7 +651,6 @@ export default class CustomerJourneyWidget extends LitElement {
         this.timelineErrorMessage = "";
         mixpanel.track(HISTORICAL_EVENTS_LOADED, {
           ...this.defaultMetricProperties,
-          loaded: true
         })
         console.log(filteredEvents);
         return filteredEvents;
@@ -667,7 +660,7 @@ export default class CustomerJourneyWidget extends LitElement {
         this.timelineErrorMessage = `Failure to fetch the journey for ${this.customer}.`;
         mixpanel.track(HISTORICAL_EVENTS_LOADED, {
           ...this.defaultMetricProperties,
-          loaded: false, 
+          error: true, 
           message: `[JDS Widget] Could not fetch Customer Journey events for customer (${customer}): ` + err.message
         })
       })
@@ -713,7 +706,6 @@ export default class CustomerJourneyWidget extends LitElement {
         );
         mixpanel.track(EVENT_STREAM_LOADED, {
           ...this.defaultMetricProperties,
-          loaded: true, 
         })
       };
 
@@ -744,8 +736,8 @@ export default class CustomerJourneyWidget extends LitElement {
       console.error(`[JDS Widget] No Journey EventSource is active for ${customer}`);
       mixpanel.track(EVENT_STREAM_LOADED, {
         ...this.defaultMetricProperties,
-        loaded: false,
-        error: `[JDS Widget] No Journey EventSource is active for ${customer}`
+        error: true,
+        message: `[JDS Widget] No Journey EventSource is active for ${customer}`
       })
     }
   }
