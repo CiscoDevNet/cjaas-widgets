@@ -1,6 +1,6 @@
 {
   "name": "@cjaas/customer-journey-widget",
-  "version": "9.0.2-dev1-mixpanel",
+  "version": "9.0.0",
   "author": {
     "name": "Kevin Hyde",
     "email": "kehyde@cisco.com"
