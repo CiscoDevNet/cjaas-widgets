@@ -17,6 +17,13 @@
   overflow-y: auto;
 }
 
+.widget-container {
+    background-color: var(--md-secondary-two-bg-color, #f7f7f7);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
 .customer-journey-widget-container {
   display: flex;
   flex-direction: column;
@@ -25,6 +32,14 @@
   background-color: var(--md-primary-one-bg-color, #ffffff);
   display: flex;
   justify-content: center;
+
+  &.with-user-search {
+    //  height: calc(100% - 4.75rem);
+    //  padding-top: 0.5rem;
+     padding: 0;
+     height: calc(100% - 7.25rem);
+     margin: 1rem;
+  }
 
   &.populated-data {
     background-color: var(--md-secondary-two-bg-color, #f7f7f7);
@@ -36,6 +51,10 @@
         display: flex;
         overflow-y: hidden;
         gap: 0.5rem;
+
+        // &.with-user-search {
+        //     height: calc(100% - 4.75rem);
+        // }
 
         &.flex-direction-row {
             flex-direction: row;
@@ -82,6 +101,10 @@
 }
 
 .top-header-row {
+    // margin-bottom: 0.5rem;
+    margin: 1rem 1rem 0;
+    flex: 0 0 68px;
+
   .flex-inline {
     display: flex;
     padding: 1rem 2rem 0;
@@ -124,6 +147,50 @@
     }
   }
 }
+
+.top-header-row {
+    .flex-inline {
+      display: flex;
+      padding: 1rem 2rem 0;
+      row-gap: 0.75rem;
+      flex-wrap: wrap;
+  
+      .custom-input-label {
+        margin-right: 1rem;
+        align-items: center;
+        font-size: 1rem;
+        margin-top: 0.2rem;
+        display: inline-block;
+      }
+  
+      .input-wrapper {
+        display: flex;
+        flex: 1;
+  
+        .customer-journey-search-input {
+          flex: 1;
+          min-width: 10rem;
+          color: var(--md-primary-text-color, #171b1f);
+        }
+      }
+  
+      .customer-journey-search-input::part(input) {
+        max-width: 100rem;
+        min-width: 12rem;
+      }
+  
+      .filter-buttons > md-button {
+        display: inline-block;
+        margin-bottom: 0.5rem;
+      }
+  
+      .reload-icon {
+        margin-left: 0.5rem;
+        width: 2rem;
+        height: 2rem;
+      }
+    }
+  }
 
 .outer-container {
   height: 100%;

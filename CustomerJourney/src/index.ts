@@ -10,7 +10,7 @@ import { html, internalProperty, property, LitElement, PropertyValues, query } f
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import axiosRetry from "axios-retry";
 import styles from "./assets/styles/View.scss";
-import * as iconData from "@/assets/default-icon-map.json";
+import * as iconData from "@/assets/default-icon-color-map.json";
 import { EventSourceInitDict } from "eventsource";
 import "@cjaas/common-components/dist/comp/cjaas-timeline-v2.js";
 import "@cjaas/common-components/dist/comp/cjass-profile-v2.js";
@@ -29,6 +29,7 @@ import {
   jsonPatchOperation,
 } from "./types/cjaas";
 import _ from "lodash";
+import { nothing } from "lit-html";
 
 export enum EventType {
   Agent = "agent",
@@ -74,6 +75,7 @@ export interface CustomUIDataPayload {
   iconType?: string;
   channelTypeTag?: string;
   eventSource?: string;
+  filterTags?: string | Array<string>;
 }
 
 export interface RenderingDataObject {
@@ -83,6 +85,7 @@ export interface RenderingDataObject {
   channelTypeTag?: string;
   eventSource?: string;
   isActive?: boolean;
+  filterTags?: Array<string>;
 }
 
 export interface CustomerEvent {
@@ -98,8 +101,10 @@ export interface CustomerEvent {
   person?: string;
   data: Record<string, any>;
   renderingData?: RenderingDataObject;
-  customUIData?: CustomUIDataPayload;
+  //   uiData?: CustomUIDataPayload;
 }
+
+export const DEFAULT_CHANNEL_OPTION = "All Channels";
 
 @customElementWithCheck("customer-journey-widget")
 export default class CustomerJourneyWidget extends LitElement {
@@ -157,6 +162,11 @@ export default class CustomerJourneyWidget extends LitElement {
   //    * @attr base-url
   //    */
   //   @property({ type: Boolean, attribute: "read-only-aliases" }) readOnlyAliases = false;
+
+  /**
+   * enable user search
+   */
+  @property({ type: Boolean, attribute: "enable-user-search" }) enableUserSearch = false;
 
   /**
    * Set the number of Timeline Events to display
@@ -332,6 +342,8 @@ export default class CustomerJourneyWidget extends LitElement {
   @internalProperty() aliasObjects: Array<AliasObject> = [];
 
   @internalProperty() profileDataPointCount = 0;
+
+  @internalProperty() dynamicFilterOptions: Array<string> = [];
 
   basicRetryConfig = {
     retries: 1,
@@ -756,20 +768,21 @@ export default class CustomerJourneyWidget extends LitElement {
     //   iconType: channelType === "telephony" ? `${formatDirectionText}-call` : channelType,
     // };
 
-    let wxccTitle, wxccSubTitle, wxccIconType, wxccChannelTypeTag, wxccSource, wxccIsActive;
-    const isWxccEvent = event?.source.includes("wxcc");
+    let wxccTitle, wxccSubTitle, wxccIconType, wxccChannelTypeTag, wxccSource, wxccIsActive, wxccFilterType;
+    // const isWxccEvent = event?.source.includes("wxcc");
 
-    if (isWxccEvent) {
+    if (this.isWxccEvent(event)) {
       wxccTitle = `${!!direction ? formatDirectionText : ""} ${communicationTypeText}`;
       wxccSubTitle = event?.data?.queueName || (event?.data?.queueId ? `Queue ID: ${event?.data?.queueId}` : "");
       wxccChannelTypeTag =
         channelTypeText === "call" || identityTypeText === "call" ? "voice" : channelTypeText || identityTypeText;
       wxccIconType =
         communicationTypeText === "call" && !!direction ? `${formatDirectionText}-call` : communicationTypeText;
-      wxccSource = isWxccEvent ? "wxcc" : "";
-      wxccIsActive = isWxccEvent
+      wxccSource = this.isWxccEvent(event) ? "wxcc" : "";
+      wxccIsActive = this.isWxccEvent(event)
         ? !this.hasTaskExpired(event) && event?.type !== "task:ended" && event?.type !== "empath:data"
         : false;
+      //   wxccFilterType = isWxccEvent ? channelTypeText || event?.identitytype || "misc" : "";
     }
 
     /////
@@ -810,10 +823,13 @@ export default class CustomerJourneyWidget extends LitElement {
     //     break;
     // }
 
-    // const wxccFilterTypes = isWxccEvent ? ["WXCC"] : [];
-    // if (wxccFilterType) {
-    //   wxccFilterTypes.push(wxccFilterType);
-    // }
+    wxccFilterType = this.isWxccEvent(event) ? channelTypeText || event?.identitytype || "misc" : "";
+
+    // const wxccFilterTypes = this.isWxccEvent(event) ? ["WXCC"] : [];
+    const wxccFilterTypes = [];
+    if (wxccFilterType) {
+      wxccFilterTypes.push(wxccFilterType);
+    }
 
     return {
       wxccTitle,
@@ -822,7 +838,7 @@ export default class CustomerJourneyWidget extends LitElement {
       wxccIconType,
       wxccSource,
       wxccIsActive,
-      //   wxccFilterTypes,
+      wxccFilterTypes,
     };
   }
 
@@ -898,7 +914,58 @@ export default class CustomerJourneyWidget extends LitElement {
     return generateSubTitle;
   }
 
+  /**
+   * @method createSets
+   * @returns void
+   * Sets `filterOptions` property to a unique set of filter options for filter feature.
+   */
+  createDynamicFilterOptions(events: Array<CustomerEvent> | null): Array<string> {
+    const uniqueFilterTypes: Set<string> = new Set(); // ex. chat, telephony, email, agent connected, etc
+    uniqueFilterTypes.add(DEFAULT_CHANNEL_OPTION);
+
+    (events || []).forEach(event => {
+      // wxcc events
+      const { channelType } = event?.data;
+      const channelTypeText = channelType === "telephony" ? "call" : channelType;
+      const wxccFilterType = this.isWxccEvent(event) ? channelTypeText || event?.identitytype || "misc" : "";
+
+      if (wxccFilterType) {
+        // if (this.isWxccEvent(event)) {
+        //   uniqueFilterTypes.add("wxcc");
+        // }
+        uniqueFilterTypes.add(wxccFilterType);
+      }
+
+      // custom events
+      const customEventFilterTags = event?.data?.uiData?.filterTags;
+
+      if (customEventFilterTags) {
+        if (Array.isArray(customEventFilterTags)) {
+          customEventFilterTags.forEach((eventFilterType: string) => {
+            uniqueFilterTypes.add(eventFilterType);
+          });
+        } else {
+          uniqueFilterTypes.add(customEventFilterTags);
+        }
+      }
+    });
+    return Array.from(uniqueFilterTypes);
+  }
+
+  isWxccEvent(event: CustomerEvent) {
+    return event?.source.includes("wxcc");
+  }
+
+  createCustomFilterSet(event: CustomerEvent) {
+    const customFilterTags = event?.data?.uiData?.filterTags;
+    if (Array.isArray(customFilterTags)) {
+      customFilterTags.forEach(filterTag => {});
+    }
+  }
+
   finalizeEventList(events: CustomerEvent[]): CustomerEvent[] {
+    this.dynamicFilterOptions = this.createDynamicFilterOptions(events);
+    console.log("dynamic options", this.dynamicFilterOptions);
     this.mostRecentEvent = undefined;
 
     const allSortedEvents = this.sortEventsByDate(events);
@@ -924,15 +991,16 @@ export default class CustomerJourneyWidget extends LitElement {
           wxccIconType,
           wxccSource,
           wxccIsActive,
+          wxccFilterTypes,
         } = this.parseWxccData(event);
 
-        // const title = event?.customUIData?.title || wxccTitle;
-        // const subTitle = event?.customUIData?.subTitle || wxccSubTitle;
-        // const iconType = event?.customUIData?.iconType || wxccIconType;
-        // const channelTypeTag = event?.customUIData?.channelTypeTag || wxccChannelTypeTag;
-        // const eventSource = event?.customUIData?.eventSource || wxccSource || event?.source;
+        // const title = event?.uiData?.title || wxccTitle;
+        // const subTitle = event?.uiData?.subTitle || wxccSubTitle;
+        // const iconType = event?.uiData?.iconType || wxccIconType;
+        // const channelTypeTag = event?.uiData?.channelTypeTag || wxccChannelTypeTag;
+        // const eventSource = event?.uiData?.eventSource || wxccSource || event?.source;
         // const isActive = event?.renderingData?.isActive || wxccIsActive || false;
-        const isWxccEvent = event?.source.includes("wxcc");
+        // const isWxccEvent = event?.source.includes("wxcc");
 
         // const title = wxccTitle || event?.data?.origin || event?.identity;
         // const subTitle = wxccSubTitle || event?.data?.join(", ");
@@ -943,12 +1011,15 @@ export default class CustomerJourneyWidget extends LitElement {
 
         const title = wxccTitle || event?.data?.uiData?.title || event?.identity;
         const subTitle =
-          wxccSubTitle || event?.data?.uiData?.subTitle || (!isWxccEvent ? this.generateSubTitle(event?.data) : "");
+          wxccSubTitle ||
+          event?.data?.uiData?.subTitle ||
+          (!this.isWxccEvent(event) ? this.generateSubTitle(event?.data) : "");
         const iconType =
           wxccIconType || event?.data?.uiData?.iconType || event?.data?.channelType || event?.data?.identitytype;
         const channelTypeTag = wxccChannelTypeTag || event?.data?.uiData?.channelTypeTag || event?.data?.identitytype;
         const eventSource = wxccSource || event?.data?.uiData?.eventSource || event?.source;
-        const isActive = isWxccEvent ? wxccIsActive : false;
+        const isActive = this.isWxccEvent(event) ? wxccIsActive : false;
+        const filterTags = this.isWxccEvent(event) ? wxccFilterTypes : event?.data?.uiData?.filterTags;
 
         event.renderingData = {
           title,
@@ -957,9 +1028,17 @@ export default class CustomerJourneyWidget extends LitElement {
           channelTypeTag,
           eventSource,
           isActive,
+          filterTags,
         };
 
-        if (!this.mostRecentEvent && (event?.type === "task:ended" || event?.type === "empath:data")) {
+        // Most Recent Event
+        // if a WXCC event, has to be a completed event. isWxccEvent && event?.type === "task:ended"
+        // if custom event, then just print as most recent
+
+        if (
+          !this.mostRecentEvent &&
+          (!this.isWxccEvent(event) || (this.isWxccEvent(event) && event?.type === "task:ended"))
+        ) {
           this.mostRecentEvent = event;
           this.debugLogMessage("Most Recent Event", this.mostRecentEvent);
         }
@@ -1193,12 +1272,14 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   renderEvents() {
+    console.log("render timeline dynamic", this.dynamicFilterOptions);
     return html`
       <cjaas-timeline-v2
         ?getEventsInProgress=${this.getEventsInProgress}
         .historicEvents=${this.events}
         .newestEvents=${this.newestEvents}
         .mostRecentEvent=${this.mostRecentEvent}
+        .dynamicChannelTypeOptions=${this.dynamicFilterOptions}
         .eventIconTemplate=${this.eventIconTemplate}
         .badgeKeyword=${this.badgeKeyword}
         @new-event-queue-cleared=${this.updateComprehensiveEventList}
@@ -1528,41 +1609,41 @@ export default class CustomerJourneyWidget extends LitElement {
     this.getEventsInProgress = status;
   }
 
-  //   refreshUserSearch() {
-  //     const inputValue = this.customerInput.value.trim();
-  //     if (this.customer === inputValue) {
-  //       this.handleNewCustomer(this.customer, this.templateId);
-  //     } else {
-  //       this.syncLoadingStatuses();
-  //       this.customer = inputValue;
-  //     }
-  //   }
+  refreshUserSearch() {
+    const inputValue = this.customerInput.value.trim();
+    if (this.customer === inputValue) {
+      this.handleNewCustomer(this.customer, this.templateId);
+    } else {
+      this.syncLoadingStatuses();
+      this.customer = inputValue;
+    }
+  }
 
-  //   renderMainInputSearch() {
-  //     return html`
-  //       <div class="flex-inline">
-  //         <span class="custom-input-label">Lookup User</span>
-  //         <div class="input-wrapper">
-  //           <md-input
-  //             searchable
-  //             class="customer-journey-search-input"
-  //             id="customer-input"
-  //             value=${this.customer || ""}
-  //             shape="pill"
-  //             @input-keydown=${(event: CustomEvent) => this.handleKeyDown(event)}
-  //           >
-  //           </md-input>
-  //           <div class="reload-icon">
-  //             <md-tooltip message="Reload Widget">
-  //               <md-button circle @click=${this.refreshUserSearch}>
-  //                 <md-icon name="icon-refresh_12"></md-icon>
-  //               </md-button>
-  //             </md-tooltip>
-  //           </div>
-  //         </div>
-  //       </div>
-  //     `;
-  //   }
+  renderMainInputSearch() {
+    return html`
+      <div class="flex-inline sub-widget-section">
+        <span class="custom-input-label">Lookup Identity</span>
+        <div class="input-wrapper">
+          <md-input
+            searchable
+            class="customer-journey-search-input"
+            id="customer-input"
+            value=${this.customer || ""}
+            shape="pill"
+            @input-keydown=${(event: CustomEvent) => this.handleKeyDown(event)}
+          >
+          </md-input>
+          <div class="reload-icon">
+            <md-tooltip message="Reload Widget">
+              <md-button circle @click=${this.refreshUserSearch}>
+                <md-icon name="icon-refresh_12"></md-icon>
+              </md-button>
+            </md-tooltip>
+          </div>
+        </div>
+      </div>
+    `;
+  }
 
   renderEmptyStateView() {
     return html`
@@ -1577,17 +1658,17 @@ export default class CustomerJourneyWidget extends LitElement {
       <div
         class=${`sub-widget-container ${
           this.profileDataPointCount > 3 ? "flex-direction-row" : "flex-direction-column"
-        }`}
+        } ${this.enableUserSearch ? "with-user-search" : ""}`}
       >
         ${this.renderProfile()} ${this.renderEventList()}
       </div>
     `;
   }
 
-  renderFunctionalWidget() {
+  renderFunctionalWidget(withUserSearch = false) {
     if (this.isEntireWidgetErroring) {
       return html`
-        <div class="customer-journey-widget-container">
+        <div class=${`customer-journey-widget-container ${withUserSearch ? "with-user-search" : ""}`}>
           <cjaas-error-notification
             title="Failed to load data"
             tracking-id=${this.entireWidgetErrorTrackingId}
@@ -1597,7 +1678,7 @@ export default class CustomerJourneyWidget extends LitElement {
       `;
     } else if (this.entireWidgetLoading) {
       return html`
-        <div class="customer-journey-widget-container">
+        <div class=${`customer-journey-widget-container ${withUserSearch ? "with-user-search" : ""}`}>
           <div class="widget-loading-wrapper">
             <md-spinner size="56"></md-spinner>
             <p class="loading-text">Loading...</p>
@@ -1606,7 +1687,10 @@ export default class CustomerJourneyWidget extends LitElement {
       `;
     } else {
       return html`
-        <div class="customer-journey-widget-container populated-data">
+        <div class=${`customer-journey-widget-container populated-data ${withUserSearch ? "with-user-search" : ""}`}>
+          <!-- <div class="top-header-row">
+            ${this.enableUserSearch ? this.renderMainInputSearch() : nothing}
+          </div> -->
           ${this.customer ? this.renderSubWidgets() : this.renderEmptyStateView()}
         </div>
       `;
@@ -1614,7 +1698,18 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   render() {
-    return this.renderFunctionalWidget();
+    if (this.enableUserSearch) {
+      return html`
+        <div class="widget-container user-search">
+          <div class="top-header-row">
+            ${this.enableUserSearch ? this.renderMainInputSearch() : nothing}
+          </div>
+          ${this.renderFunctionalWidget(true)}
+        </div>
+      `;
+    } else {
+      return this.renderFunctionalWidget();
+    }
   }
 }
 

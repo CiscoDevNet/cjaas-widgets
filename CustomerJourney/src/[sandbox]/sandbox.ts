@@ -112,6 +112,7 @@ export class Sandbox extends LitElement {
             .bearerToken=${BEARER_TOKEN}
             base-url=${BASE_URL}
             .organizationId=${ORGANIZATION_ID}
+            ?enable-user-search=${true}
             .interactionData=${mockedInteractionData("INBOUND", IDENTITY)}
             project-id=${PROJECT_ID}
             logs-on
