@@ -18,7 +18,7 @@ import "@cjaas/common-components/dist/comp/cjaas-profile";
 import "@cjaas/common-components/dist/comp/cjaas-identity";
 import { Timeline } from "@cjaas/common-components/dist/types/components/timeline/Timeline";
 import { DateTime } from "luxon";
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 // @ts-ignore
 import { version } from "../version";
 import {
@@ -298,7 +298,7 @@ export default class CustomerJourneyWidget extends LitElement {
     this.defaultMetricProperties = {
       baseUrl: this.baseUrl,
       organizationId: this.organizationId, 
-      organizationName: this.interactionData?.ownerName,
+      ownerName: this.interactionData?.ownerName,
       projectId: this.projectId, 
       templateId: this.templateId, 
       widgetVersion: version,
@@ -570,7 +570,7 @@ export default class CustomerJourneyWidget extends LitElement {
           ...this.defaultMetricProperties,
         })
       })
-      .catch((err: Error) => {
+      .catch((err: AxiosError) => {
         this.profileData = undefined;
         this.profileErrorMessage = `Failed to fetch the profile data.`;
         console.error(
@@ -580,7 +580,8 @@ export default class CustomerJourneyWidget extends LitElement {
         mixpanel.track(PROGRESSIVE_PROFILE_LOADED, {
           ...this.defaultMetricProperties,
           error: true,
-          message:  `[JDS Widget] Unable to fetch the Profile for customer (${this.customer}) with templateId (${templateId})` + err.message
+          message: JSON.stringify(err.response?.data?.errors),
+          trackingId: err.response?.data?.trackingId
         })
       })
       .finally(() => {
@@ -655,13 +656,14 @@ export default class CustomerJourneyWidget extends LitElement {
         console.log(filteredEvents);
         return filteredEvents;
       })
-      .catch((err: Error) => {
+      .catch((err: AxiosError) => {
         console.error(`[JDS Widget] Could not fetch Customer Journey events for customer (${customer})`, err);
         this.timelineErrorMessage = `Failure to fetch the journey for ${this.customer}.`;
         mixpanel.track(HISTORICAL_EVENTS_LOADED, {
           ...this.defaultMetricProperties,
           error: true, 
-          message: `[JDS Widget] Could not fetch Customer Journey events for customer (${customer}): ` + err.message
+          message: JSON.stringify(err.response?.data?.errors),
+          trackingId: err.response?.data?.trackingId
         })
       })
       .finally(() => {
