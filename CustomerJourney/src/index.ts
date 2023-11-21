@@ -121,6 +121,12 @@ export default class CustomerJourneyWidget extends LitElement {
    */
   @property({ attribute: false }) interactionData: Interaction | undefined;
   /**
+   * Property to pass in WxCC Global callAssociatedData
+   * @prop agentContact
+   * @type any
+   */
+  @property({ attribute: false }) callAssociatedData: any;
+  /**
    * Property to pass in JSON template to set color and icon settings
    * @prop eventIconTemplate
    */
@@ -167,6 +173,11 @@ export default class CustomerJourneyWidget extends LitElement {
    * enable user search
    */
   @property({ type: Boolean, attribute: "enable-user-search" }) enableUserSearch = false;
+  /**
+   * Property to pass in url of iconData JSON template to set color and icon settings
+   * @prop iconDataPath
+   */
+  @property({ type: String, attribute: "use-cad-default-filter" }) useCadDefaultFilter: string = "";
 
   /**
    * Set the number of Timeline Events to display
@@ -235,6 +246,12 @@ export default class CustomerJourneyWidget extends LitElement {
    * The profile Data Points provided from the template fetch, populated in the table view
    */
   @property({ attribute: false }) profileDataPoints: Array<ProfileDataPoint> = [];
+  /**
+   * @prop showAliasIcon
+   * Feature Flag to have the Alias Icon and Modal visible
+   */
+  @property({ type: Boolean, attribute: "show-alias-icon" }) showAliasIcon = false;
+  /**
   /**
    * Timeline data fetched from journey history
    * @prop events
@@ -325,6 +342,8 @@ export default class CustomerJourneyWidget extends LitElement {
 
   @internalProperty() aliasNamesUpdateInProgress = false;
 
+  @internalProperty() aliases: Array<string> | null = null;
+
   @internalProperty() firstName = "";
 
   @internalProperty() lastName = "";
@@ -405,6 +424,12 @@ export default class CustomerJourneyWidget extends LitElement {
       );
     }
 
+    if (changedProperties.has("callAssociatedData") && this.callAssociatedData) {
+      this.debugLogMessage("callAssociatedData", this.callAssociatedData);
+    }
+
+    // agentContact.taskMap.{{Task}}.interaction. callAssociatedData
+    // STORE.agentContact.taskMap.Task.interaction.callAssociatedData
     if (changedProperties.has("interactionData")) {
       if (this.interactionData) {
         this.debugLogMessage("interactionData", this.interactionData);
@@ -1273,6 +1298,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
   renderEvents() {
     console.log("render timeline dynamic", this.dynamicFilterOptions);
+
     return html`
       <cjaas-timeline-v2
         ?getEventsInProgress=${this.getEventsInProgress}
@@ -1315,6 +1341,7 @@ export default class CustomerJourneyWidget extends LitElement {
       <section class="sub-widget-section profile-view">
         <cjaas-profile-v2
           .customer=${this.customer || ""}
+          .aliases=${this.showAliasIcon ? this.aliases : null}
           .profileDataPoints=${this.profileDataPoints}
           ?getProfileDataInProgress=${this.getProfileDataInProgress}
           error-message=${this.profileErrorMessage}
@@ -1454,6 +1481,7 @@ export default class CustomerJourneyWidget extends LitElement {
         this.firstName = identityData?.firstName || "";
         this.lastName = identityData?.lastName || "";
         this.identityId = identityData?.id;
+        this.aliases = identityData?.aliases || null;
 
         return { firstName: this.firstName, lastName: this.lastName, identityId: this.identityId };
       })

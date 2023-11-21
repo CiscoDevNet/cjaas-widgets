@@ -20,7 +20,7 @@ const ORGANIZATION_ID = process.env.DOTENV.ORGANIZATION_ID;
 // @ts-ignore
 const PROJECT_ID = process.env.DOTENV.PROJECT_ID;
 // @ts-ignore
-const TEMLPATE_ID = process.env.DOTENV.TEMPLATE_ID;
+const TEMPLATE_ID = process.env.DOTENV.TEMPLATE_ID;
 // @ts-ignore
 const IDENTITY = process.env.DOTENV.IDENTITY;
 
@@ -113,6 +113,8 @@ export class Sandbox extends LitElement {
             base-url=${BASE_URL}
             .organizationId=${ORGANIZATION_ID}
             ?enable-user-search=${true}
+            ?show-alias-icon=${true}
+            .templateId=${TEMPLATE_ID}
             .interactionData=${mockedInteractionData("INBOUND", IDENTITY)}
             project-id=${PROJECT_ID}
             logs-on

@@ -457,6 +457,11 @@ details[open] summary md-icon {
   cjaas-timeline-v2 {
     height: 100%;
   }
+
+  cjaas-profile-v2 {
+    z-index: 999;
+    position: relative;
+  }
 }
 
 .sub-widget-detail-container {
