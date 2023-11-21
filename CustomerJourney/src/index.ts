@@ -18,6 +18,7 @@ import { TimelineV2 } from "@cjaas/common-components";
 import { DateTime } from "luxon";
 import { v4 as uuidv4 } from "uuid";
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+import { Desktop } from "@wxcc-desktop/sdk";
 import { ifDefined } from "lit-html/directives/if-defined";
 // @ts-ignore
 import { version } from "../version";
@@ -386,6 +387,13 @@ export default class CustomerJourneyWidget extends LitElement {
   @query("#customer-input") customerInput!: HTMLInputElement;
   @query(".profile") widget!: Element;
 
+  connectedCallback() {
+    super.connectedCallback();
+
+    const locale = Desktop.config.clientLocale;
+    this.debugLogMessage("i18n locale", locale);
+  }
+
   async firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
 
@@ -428,15 +436,9 @@ export default class CustomerJourneyWidget extends LitElement {
     }
 
     if (changedProperties.has("useCadFilterOption") && this.useCadFilterOption) {
-      this.debugLogMessage("useCadFilterOption", this.useCadFilterOption);
-
       let jdsDefaultFilter;
       if (this.interactionData?.callAssociatedData) {
-        // jdsDefaultFilter
-        jdsDefaultFilter = this.interactionData.callAssociatedData["CallDeflected"]?.value;
-        if ((jdsDefaultFilter = "Voice")) {
-          jdsDefaultFilter = "call";
-        }
+        jdsDefaultFilter = this.interactionData.callAssociatedData["JdsDefaultFilter"]?.value;
 
         if (!jdsDefaultFilter) {
           console.error(
@@ -447,12 +449,13 @@ export default class CustomerJourneyWidget extends LitElement {
 
       if (jdsDefaultFilter) {
         this.defaultFilterOption = jdsDefaultFilter;
-        this.debugLogMessage("defaultFilterOption", this.defaultFilterOption);
+        this.debugLogMessage(
+          "useCadFilterOption: set defaultFilterOption as CAD variable (jdsDefaultFilter) value",
+          this.defaultFilterOption
+        );
       }
     }
 
-    // agentContact.taskMap.{{Task}}.interaction. callAssociatedData
-    // STORE.agentContact.taskMap.Task.interaction.callAssociatedData
     if (changedProperties.has("interactionData")) {
       if (this.interactionData) {
         this.debugLogMessage("interactionData", this.interactionData);
@@ -1320,9 +1323,6 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   renderEvents() {
-    console.log("render timeline dynamic", this.dynamicFilterOptions);
-    console.log("defaultFilterOPtion passed in timeline", this.defaultFilterOption);
-
     return html`
       <cjaas-timeline-v2
         ?getEventsInProgress=${this.getEventsInProgress}
