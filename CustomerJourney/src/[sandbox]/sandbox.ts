@@ -114,6 +114,7 @@ export class Sandbox extends LitElement {
             .organizationId=${ORGANIZATION_ID}
             ?enable-user-search=${true}
             ?show-alias-icon=${true}
+            ?use-cad-filter-option=${true}
             .templateId=${TEMPLATE_ID}
             .interactionData=${mockedInteractionData("INBOUND", IDENTITY)}
             project-id=${PROJECT_ID}

@@ -18,6 +18,7 @@ import { TimelineV2 } from "@cjaas/common-components";
 import { DateTime } from "luxon";
 import { v4 as uuidv4 } from "uuid";
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+import { ifDefined } from "lit-html/directives/if-defined";
 // @ts-ignore
 import { version } from "../version";
 import {
@@ -104,7 +105,7 @@ export interface CustomerEvent {
   //   uiData?: CustomUIDataPayload;
 }
 
-export const DEFAULT_CHANNEL_OPTION = "All Channels";
+export const DEFAULT_CHANNEL_OPTION = "all channels";
 
 @customElementWithCheck("customer-journey-widget")
 export default class CustomerJourneyWidget extends LitElement {
@@ -121,11 +122,11 @@ export default class CustomerJourneyWidget extends LitElement {
    */
   @property({ attribute: false }) interactionData: Interaction | undefined;
   /**
-   * Property to pass in WxCC Global callAssociatedData
-   * @prop agentContact
-   * @type any
+   * Property to pass in to use the 'jdsDefaultFilter' CAD variable as the default filter option
+   * @prop useCadFilterOption
+   * @type boolean
    */
-  @property({ attribute: false }) callAssociatedData: any;
+  @property({ type: Boolean, attribute: "use-cad-filter-option" }) useCadFilterOption = false;
   /**
    * Property to pass in JSON template to set color and icon settings
    * @prop eventIconTemplate
@@ -364,6 +365,8 @@ export default class CustomerJourneyWidget extends LitElement {
 
   @internalProperty() dynamicFilterOptions: Array<string> = [];
 
+  @internalProperty() defaultFilterOption: string = "";
+
   basicRetryConfig = {
     retries: 1,
     retryDelay: () => 3000,
@@ -424,8 +427,28 @@ export default class CustomerJourneyWidget extends LitElement {
       );
     }
 
-    if (changedProperties.has("callAssociatedData") && this.callAssociatedData) {
-      this.debugLogMessage("callAssociatedData", this.callAssociatedData);
+    if (changedProperties.has("useCadFilterOption") && this.useCadFilterOption) {
+      this.debugLogMessage("useCadFilterOption", this.useCadFilterOption);
+
+      let jdsDefaultFilter;
+      if (this.interactionData?.callAssociatedData) {
+        // jdsDefaultFilter
+        jdsDefaultFilter = this.interactionData.callAssociatedData["CallDeflected"]?.value;
+        if ((jdsDefaultFilter = "Voice")) {
+          jdsDefaultFilter = "call";
+        }
+
+        if (!jdsDefaultFilter) {
+          console.error(
+            `The CAD Variable (jdsDefaultFilter) doesn\'t exist within this interaction. Please check your flow configuration.`
+          );
+        }
+      }
+
+      if (jdsDefaultFilter) {
+        this.defaultFilterOption = jdsDefaultFilter;
+        this.debugLogMessage("defaultFilterOption", this.defaultFilterOption);
+      }
     }
 
     // agentContact.taskMap.{{Task}}.interaction. callAssociatedData
@@ -1298,6 +1321,7 @@ export default class CustomerJourneyWidget extends LitElement {
 
   renderEvents() {
     console.log("render timeline dynamic", this.dynamicFilterOptions);
+    console.log("defaultFilterOPtion passed in timeline", this.defaultFilterOption);
 
     return html`
       <cjaas-timeline-v2
@@ -1306,6 +1330,7 @@ export default class CustomerJourneyWidget extends LitElement {
         .newestEvents=${this.newestEvents}
         .mostRecentEvent=${this.mostRecentEvent}
         .dynamicChannelTypeOptions=${this.dynamicFilterOptions}
+        default-filter-option=${ifDefined(this.defaultFilterOption)}
         .eventIconTemplate=${this.eventIconTemplate}
         .badgeKeyword=${this.badgeKeyword}
         @new-event-queue-cleared=${this.updateComprehensiveEventList}
