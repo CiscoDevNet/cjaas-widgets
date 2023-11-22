@@ -641,6 +641,9 @@ export default class CustomerJourneyWidget extends LitElement {
           };
         });
 
+      // test vertical profile view
+      // profileDataPoints = profileDataPoints.concat(this.profileDataPoints);
+
       this.profileDataPointCount = profileDataPoints?.length;
       this.debugLogMessage("ProfileData", profileData);
       this.debugLogMessage("Profile data points", profileDataPoints);
