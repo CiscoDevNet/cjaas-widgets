@@ -103,10 +103,12 @@ export interface CustomerEvent {
   person?: string;
   data: Record<string, any>;
   renderingData?: RenderingDataObject;
-  //   uiData?: CustomUIDataPayload;
 }
 
 export const DEFAULT_CHANNEL_OPTION = "all channels";
+
+export const JDS_DIVISION_CAD_VARIABLE = "JDSDivision";
+export const JDS_DEFAULT_FILTER_CAD_VARIABLE = "JDSDefaultFilter";
 
 @customElementWithCheck("customer-journey-widget")
 export default class CustomerJourneyWidget extends LitElement {
@@ -123,7 +125,7 @@ export default class CustomerJourneyWidget extends LitElement {
    */
   @property({ attribute: false }) interactionData: Interaction | undefined;
   /**
-   * Property to pass in to use the 'jdsDefaultFilter' CAD variable as the default filter option
+   * Property to pass in to use the 'JDSDefaultFilter' CAD variable as the default filter option
    * @prop useCadFilterOption
    * @type boolean
    */
@@ -366,7 +368,9 @@ export default class CustomerJourneyWidget extends LitElement {
 
   @internalProperty() dynamicFilterOptions: Array<string> = [];
 
-  @internalProperty() defaultFilterOption: string = "";
+  @internalProperty() defaultFilterOption: string | undefined = undefined;
+
+  @internalProperty() cadDivisionType: string | undefined = undefined;
 
   basicRetryConfig = {
     retries: 1,
@@ -438,7 +442,7 @@ export default class CustomerJourneyWidget extends LitElement {
     if (changedProperties.has("useCadFilterOption") && this.useCadFilterOption) {
       let jdsDefaultFilter;
       if (this.interactionData?.callAssociatedData) {
-        jdsDefaultFilter = this.interactionData.callAssociatedData["JdsDefaultFilter"]?.value;
+        jdsDefaultFilter = this.interactionData.callAssociatedData[JDS_DEFAULT_FILTER_CAD_VARIABLE]?.value;
 
         if (!jdsDefaultFilter) {
           console.error(
@@ -459,6 +463,8 @@ export default class CustomerJourneyWidget extends LitElement {
     if (changedProperties.has("interactionData")) {
       if (this.interactionData) {
         this.debugLogMessage("interactionData", this.interactionData);
+
+        this.cadDivisionType = this.interactionData.callAssociatedData?.[JDS_DIVISION_CAD_VARIABLE]?.value;
 
         let cadVariableValue;
         if (this.cadVariableLookup && this.interactionData?.callAssociatedData) {
@@ -612,7 +618,7 @@ export default class CustomerJourneyWidget extends LitElement {
       });
   }
 
-  async getProjectsFirstProfileTemplateId() {
+  async getProjectsProfileTemplates() {
     const url = `${this.baseUrl}/admin/v1/api/profile-view-template/workspace-id/${this.projectId}?organizationId=${this.organizationId}`;
 
     const config: AxiosRequestConfig = {
@@ -629,12 +635,36 @@ export default class CustomerJourneyWidget extends LitElement {
       .get(url)
       .then(response => {
         const projectTemplates = response?.data?.data;
-        return projectTemplates?.[0]?.id;
+        this.debugLogMessage("project's templates", projectTemplates);
+        return projectTemplates;
       })
       .catch((err: AxiosError) => {
         console.error(`[JDS Widget] Unable to fetch the organization's workspaces`, err);
-        return undefined;
+        return [];
       });
+  }
+
+  async determineProfileTemplate() {
+    const profileTemplates = await this.getProjectsProfileTemplates();
+
+    if (this.templateId) {
+      const profileTemplateExists = profileTemplates.find(
+        (template: any) => template.id === this.templateId || template.name === this.templateId
+      );
+      if (!profileTemplateExists) {
+        console.error(
+          `[JDS Widget] the templateId (${this.templateId}) provided does not exist with this projectId (${this.projectId})`
+        );
+        return undefined;
+      } else {
+        return this.templateId;
+      }
+    } else if (profileTemplates.length) {
+      return profileTemplates?.[0]?.id;
+    } else {
+      console.error(`[JDS Widget] this projectId (${this.projectId}) has no profile templates.`);
+      return undefined;
+    }
   }
 
   //   async getDefaultTemplateId() {
@@ -673,7 +703,7 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   async subscribeToProfileViewStreamByTemplateId(customer: string | null, templateId: string | undefined) {
-    const profileTemplateId = !templateId ? await this.getProjectsFirstProfileTemplateId() : templateId;
+    const profileTemplateId = await this.determineProfileTemplate();
 
     const url = `${this.baseUrl}/v1/api/progressive-profile-view/stream/workspace-id/${this.projectId}/identity/${customer}/template-id/${profileTemplateId}?organizationId=${this.organizationId}&bearerToken=${this.bearerToken}`;
     return this.subscribeToProfileViewStream(url);
@@ -771,7 +801,7 @@ export default class CustomerJourneyWidget extends LitElement {
   //   }
 
   async getProfileViewByTemplateId(customer: string | null, templateId: string | undefined) {
-    const profileTemplateId = !templateId ? await this.getProjectsFirstProfileTemplateId() : templateId;
+    const profileTemplateId = await this.determineProfileTemplate();
 
     this.profileDataPoints = [];
     this.getProfileDataInProgress = true;
@@ -849,17 +879,15 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   hasTaskExpired(event: CustomerEvent): Boolean {
-    console.log("eventTime", event?.time, DateTime.local().toUTC());
     const date = new Date(event.time).valueOf();
     const now = new Date(Date.now()).valueOf();
     const oneHourMs = 3600000; // 1 hour delay
     const isExpired = now - oneHourMs > date;
-    console.log("hasTaskExpired", date, now, isExpired, event.time);
+    console.log("hasTaskExpired", date, now, isExpired, event?.time);
     return isExpired;
   }
 
   parseWxccData(event: CustomerEvent) {
-    /////
     const { channelType, direction } = event?.data;
     const channelTypeText = channelType === "telephony" ? "call" : channelType;
     const identityTypeText = event?.identitytype === "phone" ? "call" : event?.identitytype;
@@ -1069,8 +1097,8 @@ export default class CustomerJourneyWidget extends LitElement {
   }
 
   finalizeEventList(events: CustomerEvent[]): CustomerEvent[] {
-    this.dynamicFilterOptions = this.createDynamicFilterOptions(events);
-    console.log("dynamic options", this.dynamicFilterOptions);
+    // this.dynamicFilterOptions = this.createDynamicFilterOptions(events);
+    // console.log("dynamic options", this.dynamicFilterOptions);
     this.mostRecentEvent = undefined;
 
     const allSortedEvents = this.sortEventsByDate(events);
@@ -1082,9 +1110,20 @@ export default class CustomerJourneyWidget extends LitElement {
     const shouldIncludeWxccEvents = (event: CustomerEvent) =>
       this.hideWxccEvents ? !event.source.includes("wxcc") : true;
 
+    const notHiddenEvent = (event: CustomerEvent) => !event?.data?.uiData?.hidden;
+
+    const divisionFilterMatch = (event: CustomerEvent) => {
+      if (this.cadDivisionType) {
+        const eventDivision = event?.data?.uiData?.division?.toLowerCase();
+        return eventDivision && eventDivision === this.cadDivisionType.toLowerCase();
+      } else {
+        return true;
+      }
+    };
+
     const filteredModifiedEvents = combineTaskIdEventList
       ?.filter((event: CustomerEvent) => {
-        if (shouldIncludeWxccEvents(event)) {
+        if (shouldIncludeWxccEvents(event) && notHiddenEvent(event) && divisionFilterMatch(event)) {
           return event;
         }
       })
@@ -1150,6 +1189,9 @@ export default class CustomerJourneyWidget extends LitElement {
 
         return event;
       });
+
+    this.dynamicFilterOptions = this.createDynamicFilterOptions(filteredModifiedEvents);
+    console.log("dynamic options", this.dynamicFilterOptions);
 
     this.debugLogMessage("Formatted Sorted Events", filteredModifiedEvents);
     return filteredModifiedEvents;
@@ -1334,20 +1376,14 @@ export default class CustomerJourneyWidget extends LitElement {
   async handleNewCustomer(customer: string, templateId: string | undefined) {
     this.debugLogMessage("customer", customer);
 
-    const projectId = await this.getSubscribedProjectId();
-    if (projectId) {
-      this.projectId = projectId;
-      this.debugLogMessage("Fetched WXCC subscribed Project Id", this.projectId);
-
-      const templateId = await this.getProjectsFirstProfileTemplateId();
-      if (templateId) {
-        this.templateId = templateId;
-        this.debugLogMessage("Fetched project's first template Id", this.templateId);
+    if (!this.projectId) {
+      const projectId = await this.getSubscribedProjectId();
+      if (projectId) {
+        this.projectId = projectId;
+        this.debugLogMessage("Fetched WXCC subscribed Project Id", this.projectId);
       } else {
-        console.error(`[JDS Widget] You need to create a profile template for your WXCC subscribed Project`);
+        console.error(`[JDS Widget] You need to enable WXCC subscriptions for one of your projects`);
       }
-    } else {
-      console.error(`[JDS Widget] You need to enable WXCC subscriptions for one of your projects`);
     }
 
     await this.loadNonStreamAPIs(customer, templateId);

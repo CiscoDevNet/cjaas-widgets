@@ -28,6 +28,7 @@ import "@momentum-ui/web-components";
 import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
 import styles from "./sandbox.scss";
+import { ifDefined } from "lit-html/directives/if-defined";
 import * as iconData from "@/assets/icons.json";
 import * as customIconData from "@/assets/sandbox/custom-icons.json";
 import "..";
@@ -114,10 +115,9 @@ export class Sandbox extends LitElement {
             .organizationId=${ORGANIZATION_ID}
             ?enable-user-search=${true}
             ?show-alias-icon=${true}
-            ?use-cad-filter-option=${true}
-            .templateId=${TEMPLATE_ID}
+            template-id=${ifDefined(TEMPLATE_ID)}
             .interactionData=${mockedInteractionData("INBOUND", IDENTITY)}
-            project-id=${PROJECT_ID}
+            project-id=${ifDefined(PROJECT_ID)}
             logs-on
           ></customer-journey-widget>
         </div>
@@ -125,6 +125,8 @@ export class Sandbox extends LitElement {
     </md-theme>
   `;
   }
+
+  //   ?use-cad-filter-option=${true}
 
   render() {
     /** Update .env file
