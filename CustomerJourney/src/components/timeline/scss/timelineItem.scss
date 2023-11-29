@@ -1,0 +1,150 @@
+/**
+ * Copyright (c) Cisco Systems, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+ :host {
+   --response-10: #60B84A;
+   --response-9: #7DC569;
+   --response-8: #8DCC79;
+   --response-7: #CDE8C2;
+   --response-6: #FFCE8F;
+   --response-5: #FFBC67;
+   --response-4: #FFA138;
+   --response-3: #FFC57A;
+   --response-2: #75757B;
+   --response-1: #323334;
+  --shadowColor: 1px 1px 1px var(--md-primary-bg-color, #FFFFFF),
+  2px 2px 1px var(--md-primary-bg-color, #FFFFFF),
+  3px 3px 1px var(--md-quaternary-bg-color, #DEDEDE),
+  4px 4px 1px var(--md-primary-bg-color, #FFFFFF),
+  5px 5px 1px var(--md-primary-bg-color, #FFFFFF),
+  6px 6px 1px var(--md-quaternary-bg-color, #DEDEDE),
+  1px 1px 1px rgba(0,0,0,.3);
+ }
+
+.timeline-item {
+  background-color: var(--md-secondary-one-bg-color, #F7F7F7);
+  border-radius: 8px;
+  padding: 8px;
+
+  &.cluster-item {
+    box-shadow: var(--shadowColor);
+  }
+
+  .top-content {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    cursor: pointer;
+  }
+
+  &:hover {
+    background-color: var(--md-tertiary-bg-color, #EDEDED);
+  }
+
+  .badge {
+    flex: 0 0 40px;
+  }
+
+  .badge-icon::part(icon) {
+    font-size: 16px;
+  }
+
+  .info-section {
+    margin-left: 12px;
+    flex: 1 1 auto;
+    padding-top: 4px;
+    width: 0;
+    @include ellipsis-text();
+  }
+
+  .title {
+    @include body-regular();
+    @include primary-text();
+    @include ellipsis-text();
+    line-height: 1rem;
+  }
+
+  .sub-title {
+    @include secondary-text();
+    @include ellipsis-text();
+    font-size: 12px;
+    line-height: 12px;
+    margin: 8px 0;
+  }
+
+  .time-stamp {
+    @include body-small-regular();
+    @include secondary-text();
+    padding: .5rem;
+    flex: 0 0 4rem;
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: column;
+    align-items: end;
+
+    .date {
+      margin: 0;
+    }
+
+    .time-row {
+      display: flex;
+      justify-content: flex-end;
+    }
+  }
+
+  .nps {
+    color: white;
+    height: 2rem;
+    width: 2rem;
+    border-radius: .25rem;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    font-weight: bold;
+    font-size: 1.25rem;
+  }
+}
+
+.group-item {
+  margin: 0 0 0 .75rem;
+}
+
+.show-true {
+  display: inherit;
+  &.has-line::after{
+    display: inherit;
+  }
+}
+.show-false {
+  display: none;
+  &.has-line::after{
+    display: none;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 2rem;
+  margin: 1rem;
+  font-size: 12px;
+  margin: 0.5rem 0.5rem 0.5rem 1rem;
+  width: calc(100% - 24px);
+
+  .cell {
+    vertical-align: top;
+  }
+
+  .cell:nth-child(odd) {
+    color: var(--md-secondary-text-color, #545454);
+  }
+
+  .cell:nth-child(even) {
+    color: var(--md-primary-text-color, #121212);
+  }
+}

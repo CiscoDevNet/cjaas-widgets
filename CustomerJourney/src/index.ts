@@ -12,9 +12,11 @@ import axiosRetry from "axios-retry";
 import styles from "./assets/styles/View.scss";
 import * as iconData from "@/assets/default-icon-color-map.json";
 import { EventSourceInitDict } from "eventsource";
-import "@cjaas/common-components/dist/comp/cjaas-timeline-v2.js";
-import "@cjaas/common-components/dist/comp/cjass-profile-v2.js";
-import { TimelineV2 } from "@cjaas/common-components";
+import "@/components/timeline-v2/TimelineV2";
+import "@/components/profile-v2/ProfileV2";
+import "@/components/error-notification/ErrorNotification";
+import { TimelineV2 } from "@/components/timeline-v2/TimelineV2";
+
 import { DateTime } from "luxon";
 import { v4 as uuidv4 } from "uuid";
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
@@ -22,14 +24,7 @@ import { Desktop } from "@wxcc-desktop/sdk";
 import { ifDefined } from "lit-html/directives/if-defined";
 // @ts-ignore
 import { version } from "../version";
-import {
-  Profile,
-  ServerSentEvent,
-  IdentityData,
-  IdentityResponse,
-  AliasObject,
-  jsonPatchOperation,
-} from "./types/cjaas";
+import { ServerSentEvent, IdentityData, IdentityResponse, AliasObject, jsonPatchOperation } from "./types/cjaas";
 import _ from "lodash";
 import { nothing } from "lit-html";
 

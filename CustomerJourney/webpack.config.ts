@@ -18,7 +18,6 @@ import dotenv from "dotenv";
 const pSrc = path.resolve("src");
 const pDist = path.resolve("dist");
 export const pBuild = path.resolve("build");
-const pAssets = path.resolve("src/assets");
 const pCss = path.resolve("src/assets/styles");
 const pImg = path.resolve("src/assets/images");
 const pModules = path.resolve("node_modules");

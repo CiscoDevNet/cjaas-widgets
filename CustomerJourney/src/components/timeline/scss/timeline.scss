@@ -1,0 +1,254 @@
+/**
+ * Copyright (c) Cisco Systems, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+:host {
+  overflow-x: hidden;
+  display: block;
+}
+
+cjaas-timeline-item {
+  padding: 0.4rem; // to allow box shadow to appear for cluster item
+}
+
+.connection {
+  margin-left: auto;
+  width: 10px;
+  height: 10px;
+  border-radius: 100%;
+  background-color: #ec5656;
+  margin-bottom: 10px;
+}
+
+.connection[title="Connected"] {
+  background-color: #087e0e;
+}
+.header {
+  height: auto;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.collapse-details::part(button) {
+  font-size: 12px;
+  line-height: 150%;
+  color: $timeline-hyperlink-text-color;
+}
+
+.person {
+  font-size: 21px;
+  padding: 4px;
+  margin-bottom: 12px;
+  color: white;
+  border-radius: 4px;
+  display: inline-block;
+  background-color: #3ba9ea;
+}
+.refresh {
+  margin-left: auto;
+  margin-bottom: 10px;
+}
+.stream {
+  height: calc(100% - 12px);
+  overflow-y: scroll;
+  position: relative;
+  z-index: 1;
+}
+.block {
+  display: block;
+}
+.has-line:not(:last-child)::after {
+  height: 16px;
+  content: " ";
+  width: 1px;
+  display: block;
+  left: 28px;
+  position: relative;
+  top: 100%;
+  background-color: var(--md-quaternary-bg-color, #DEDEDE);
+}
+.badge-text {
+  color: var(--md-secondary-text-color, #545454);
+  text-transform: capitalize;
+}
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  font-size: 19px;
+  margin-top: 2rem;
+
+  .empty-state-icon::part(icon) {
+    height: 5rem;
+    font-size: 5rem;
+    color: var(--md-blue-50);
+  }
+
+  .timeline-statement {
+    &.error {
+      color: var(--md-alert-error-text-color);
+    }
+    color: var(--md-secondary-text-color, #545454);
+    text-align: center;
+    width: 100%;
+    font-weight: 100;
+    font-size: 14px;
+  }
+}
+.wrapper {
+  height: calc(100% - 1rem);
+  font-family: "CiscoSansTT Regular", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  padding: 0.3rem 0.3rem 0 0;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+
+  md-toggle-switch {
+    margin: 0;
+    height: 20px;
+  }
+}
+
+.events-list {
+  height: 85%;
+}
+
+md-badge.date::part(badge) {
+  cursor: pointer;
+  background-color: var(--md-primary-bg-color, #ffffff);
+  border-color: var(--md-quaternary-bg-color, #DEDEDE);
+  transition: all 200ms ease-in;
+  margin-top: 0.5rem;
+}
+
+md-badge.date::part(badge):hover {
+  background-color: var(--md-tertiary-bg-color, #EDEDED);
+}
+
+md-badge.date::part(badge):active {
+  background-color: var(--md-quaternary-bg-color);
+}
+
+md-badge.date {
+  display: inline-block;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  &::after {
+    height: 16px;
+    content: " ";
+    width: 1px;
+    display: block;
+    left: 28px;
+    position: relative;
+    top: 100%;
+  }
+}
+
+md-spinner::part(spinner) {
+  margin: 0;
+}
+
+.footer {
+  padding: 0.5rem 0;
+}
+
+.flex-apart {
+  display: flex;
+  min-height: 36px;
+  width: calc(100% - 42px);
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+cjaas-event-toggles {
+  position: absolute;
+  right: 0;
+  height: 36px;
+  top: 2px;
+  width: 100%;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #626060;
+  border-radius: 10px;
+  &:hover {
+    background: #5a5959;
+  }
+}
+
+md-link {
+  cursor: pointer;
+}
+
+.load-more-text {
+  font-size: 14px;
+  color: var(--md-hyperlink-text-color, #005E7D);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1rem;
+
+  &:hover {
+    color: var(--md-hyperlink-hover-text-color, #092D3B);
+  }
+}
+
+.event-counter.hidden {
+  display: none;
+}
+
+.second-row {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+}
+
+.md-toggle-switch__label {
+  padding-top: 5px;
+}
+
+.livestream-toggle {
+  padding-top: 4px;
+}
+
+.button-group-button {
+  height: 100%;
+  margin: 0;
+}
+
+md-button-group::part(button-group) {
+  padding: 4px;
+}
+
+md-button-group {
+  padding-left: 2px;
+}
+
+md-toggle-switch {
+  padding-left: 2px;
+}

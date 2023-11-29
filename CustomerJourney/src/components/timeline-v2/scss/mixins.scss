@@ -1,0 +1,35 @@
+/**
+ * Copyright (c) Cisco Systems, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+@mixin secondary-background {
+  background-color: var(--md-secondary-bg-color, #f7f7f7);
+}
+
+@mixin secondary-text {
+  color: var(--md-secondary-text-color, $md-gray-70);
+}
+
+@mixin primary-text {
+  color: var(--md-primary-text-color, #121212);
+}
+
+@mixin body-regular {
+  font-size: 14px;
+  line-height: 150%;
+}
+
+@mixin body-small-regular {
+  font-size: 12px;
+  line-height: 150%;
+}
+
+@mixin ellipsis-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

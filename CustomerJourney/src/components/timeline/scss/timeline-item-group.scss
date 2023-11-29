@@ -1,0 +1,10 @@
+md-chip::part(chip){
+  border: 1px solid var(--md-secondary-bg-color, #c7c7c7);
+  margin-bottom: .25rem;
+  background-color: var(--md-tertiary-two-bg-color, #c7c7c7);
+  color: var(--md-secondary-text-color, #3b3b3b);
+}
+md-chip.group-item::part(chip){
+  color: var(--md-primary-text-color, #dedede);
+  padding-top: 2px;
+}

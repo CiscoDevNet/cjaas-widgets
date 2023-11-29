@@ -1,0 +1,344 @@
+/**
+ * Copyright (c) Cisco Systems, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+* {
+  box-sizing: border-box;
+}
+
+.profile-section-container {
+  container: profile-section/inline-size;
+  height: 100%;
+}
+
+.profile-section {
+  font-family: "CiscoSansTT Regular", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  padding: 0.875rem 1rem;
+  max-height: 100%;
+
+  // @media screen and (max-width: $small-screen) {
+  //   max-height: 280px;
+  //   overflow-y: auto;
+  // }
+
+  &.columns {
+    // grid-template-columns: 1fr auto 1fr;
+    display: flex;
+    min-height: 130px;
+    flex-direction: row-reverse;
+
+    // @media screen and (max-width: $small-screen) {
+    //   display: flex;
+    //   flex-direction: column;
+    //   gap: 1rem;
+    // }
+  }
+
+  &.profile-error {
+    display: flex;
+    max-height: 130px;
+    overflow-y: auto;
+    flex-direction: row-reverse;
+
+    // @media screen and (max-width: $small-screen) {
+    //   max-height: 280px;
+    // }
+
+    // .top-header-row {
+      .profile-header {
+      width: 170px;
+    }
+
+    .error-container {
+      margin-right: 170px;
+    }
+  }
+
+  // @media screen and (max-width: $full-width) {
+  //   height: unset;
+  //   padding-bottom: 20px;
+  // }
+
+  .error-container {
+    width: 100%;
+  }
+
+  .profile-loading-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    display: flex;
+    align-items: center;
+    height: unset;
+    flex: 1;
+
+    .loading-text-wrapper {
+      display: flex;
+      align-items: center;
+
+      .main-loading-text {
+        font-size: 16px;
+        font-weight: 700;
+      }
+    }
+  }
+
+  .profile-header {
+    color: var(--md-primary-text-color, #121212);
+    height: 1.5rem;
+    line-height: 1.5rem;
+    margin: 0;
+  }
+
+  .profile-details-container {
+    font-size: 14px;
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+
+    &.grid-style {
+      display: grid;
+      column-gap: 1rem;
+      margin-top: 1.375rem;
+
+      // @media screen and (max-width: $full-width) {
+      //   display: flex;
+      //   flex-direction: column;
+      //   margin-top: 0.75rem;
+      // }
+
+      .data-point {
+        display: flex;
+        flex-direction: column;
+        gap: .25rem;
+        margin-top: 0;
+
+        // @media screen and (max-width: $full-width) {
+        //   display: flex;
+        //   flex-direction: row;
+        //   margin-top: 0.75rem;
+        // }
+      }
+    }
+
+    &.data-point-count-1 {
+      grid-template-columns: minmax(320px, 1fr) 1fr;
+    }
+
+    &.data-point-count-2 {
+      grid-template-columns: minmax(320px, 1fr) 1fr 1fr;
+    }
+
+    &.data-point-count-3 {
+      grid-template-columns: minmax(320px, 1fr) 1fr 1fr 1fr;
+    }
+  }
+
+  .name-column {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .data-point {
+    margin-top: 0.75rem;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 0.5rem;
+
+
+
+    .data-property {
+      font-size: 14px;
+      font-weight: 400;
+      color: $md-gray-60;
+
+    }
+
+    .data-value {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--md-primary-text-color, #121212);
+    }
+  }
+}
+
+.top-header-row {
+  display: flex;
+  justify-content: space-between;
+  height: 32px;
+}
+
+.save-cancel-button-group {
+  display: flex;
+  gap: 8px;
+}
+
+
+
+.name-section {
+  height: 34px;
+  margin-bottom: 0.875rem;
+
+  .loading-container {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.625rem;
+
+    .name-loading-spinner {
+      height: 20px;
+      width: 20px;
+    }
+
+    .loading-text {
+      font-size: 14px;
+      font-weight: 400;
+    }
+  }
+
+  &.input-fields {
+    display: flex;
+    gap: 0.5rem;
+
+    md-input::part(message) {
+      padding-left: 5px;
+      padding-top: 5px;
+
+      // @media screen and (max-width: $full-width) {
+      //   padding-left: 3px;
+      //   padding-top: 2px;
+      // }
+    }
+  }
+
+  &.text {
+    margin-bottom: 0;
+  }
+
+  .static-name {
+    color: var(--md-primary-text-color, #121212);
+    font-size: 16px;
+    font-weight: 400;
+    margin-right: 3px;
+  }
+
+  .edit-name-button::part(button) {
+    background: none;
+    color: var(--md-primary-text-color, #121212);
+
+    &:hover {
+      background: var(--md-tertiary-bg-color, #ededed);
+    }
+
+    &:active {
+      background: var(--md-quaternary-bg-color, #dedede);
+    }
+  }
+
+
+  md-input::part(input) {
+    width: 150px;
+  }
+
+  .name-spinner-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-left: 0.5rem;
+  }
+}
+
+.column-reverse-focus {
+  flex-direction: column-reverse;
+  display: flex;
+}
+
+
+@container (max-width: 800px) {
+  .container.profile-section.show-vertically {
+    max-height: 100%;
+  }
+
+  .container.profile-section {
+    max-height: 280px;
+    overflow-y: auto;
+  }
+
+  .container.profile-section.columns {
+    display: flex;
+    flex-direction: column-reverse;
+    max-height: 166px;
+  }
+
+  .profile-section .profile-loading-wrapper {
+        height: 100px;
+        flex: unset;
+  }
+}
+
+
+@container (max-width: 900px) {
+  .container.profile-section {
+    height: unset;
+    padding-bottom: 20px;
+  }
+
+  .container.profile-section .profile-details-container.grid-style {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0.75rem;
+  }
+
+  .container.profile-section .profile-details-container.grid-style .data-point {
+    display: flex;
+    flex-direction: row;
+    margin-top: 0.75rem;
+  }
+
+  .name-section md-input::part(input) {
+    padding-left: 3px;
+    padding-top: 2px;
+  }
+}
+
+.view-alias-component {
+  margin-right: 0.25rem;
+  display: inline;
+}
+
+md-modal::part(modal-backdrop) {
+  background: unset;
+  transition: unset;
+}
+
+md-modal::part(modal-container) {
+  width: 18rem;
+  max-height: calc(100vh - 100px);
+  bottom: 1rem;
+  right: 1rem;
+  margin: unset;
+  left: unset;
+  top: unset;
+  max-height: unset;
+  right: unset;
+  top: 6.75rem;
+  left: 1rem;
+  justify-content: unset;
+}
+
+md-modal::part(modal-body) {
+  margin: 0;
+  padding: 0 1rem;
+}
+
+.listed-alias {
+  margin: 0px;
+  margin-bottom: 0.5rem;
+  font-size: 12px;
+}
