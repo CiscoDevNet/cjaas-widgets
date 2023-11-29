@@ -1,0 +1,26 @@
+@import "@/components/wc_scss/path";
+
+// Core Functions
+@import "@/components/wc_scss/tools/functions/core";
+
+// Settings
+@import "@/components/wc_scss/colors/settings-base";
+@import "@/components/wc_scss/settings/core";
+
+// Tools
+@import "@/components/wc_scss/tools/mixins/core";
+@import "@/components/wc_scss/tools/mixins/focus";
+@import "@/components/wc_scss/tools/mixins/baseline";
+
+// Typography
+@import "@/components/wc_scss/typography/settings.scss";
+@import "@/components/wc_scss/typography/mixins.scss";
+@import "@/components/wc_scss/typography/typography.scss";
+
+// Generic
+@import "@/components/wc_scss/generic/normalize";
+@import "@/components/wc_scss/generic/global";
+
+[class^="md-"] {
+  box-sizing: border-box;
+}

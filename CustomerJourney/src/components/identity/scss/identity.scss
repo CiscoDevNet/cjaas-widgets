@@ -1,0 +1,172 @@
+/**
+ * Copyright (c) Cisco Systems, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+:host {
+  display: block;
+  font-family: "CiscoSansTT Regular", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.alias-grid {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  column-gap: 3rem;
+  margin: 1rem;
+  font-size: 14px;
+  color: var(--md-secondary-text-color, #545454);
+
+  .cell {
+    vertical-align: top;
+    margin: 0.5rem 0;
+  }
+
+  &.read-only {
+    grid-template-columns: auto 1fr;
+  }
+}
+
+.flex {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+
+  md-input {
+    width: 100%;
+    flex-shrink: 1;
+  }
+  md-button {
+    margin-left: 0.5rem;
+  }
+}
+
+.alias-input-row {
+  margin-top: 0.5rem;
+  gap: 1rem;
+}
+
+#alias-input {
+  height: 64px;
+}
+
+#alias-input::part(message) {
+  padding-left: 0.5rem;
+}
+
+.label-input-group {
+  flex-direction: column;
+}
+
+.aliases {
+  padding: 0 0.5rem;
+  height: calc(100% - 56px);
+}
+
+.header-container {
+  margin-bottom: 0.2rem;
+
+  .aliases-header {
+    color: var(--md-primary-text-color, #121212);
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 16px;
+    display: inline-block;
+  }
+
+  .alias-info-icon {
+    margin-left: 0.1rem;
+    vertical-align: middle;
+  }
+}
+
+.error-message {
+  color: var(--md-alert-error-text-color);
+}
+
+.alias-text,
+.null-customer-text {
+  font-weight: 100;
+  font-size: 14px;
+}
+
+.alias-list {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+
+  .delete-icon-tooltip {
+    visibility: hidden;
+  }
+
+  .alias-delete-icon {
+    display: inline;
+    cursor: pointer;
+  }
+
+  .alias-item {
+    color: var(--md-secondary-text-color, #545454);
+    padding: 0.3rem 1rem;
+    font-size: 14px;
+
+    p {
+      margin: 0;
+    }
+
+    .alias-item-text {
+
+      .alias-type-value {
+        color: var(--md-primary-text-color);
+      }
+      display: flex;
+      gap: 2rem;
+    }
+  }
+
+  li:hover {
+    background-color: var(--md-tertiary-bg-color);
+
+    .delete-icon-tooltip {
+      visibility: visible;
+    }
+  }
+}
+
+.alias-input::part(input) {
+  font-size: 14px;
+}
+
+.alt-consolidated-aliases-wrapper {
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.alias-text {
+  padding-top: 0.5rem;
+  text-align: center;
+  color: var(--md-secondary-text-color, #545454);
+
+  &.error {
+    color: var(--md-alert-error-text-color);
+  }
+}
+
+.alias-text-item {
+  color: var(--md-primary-text-color);
+}
+
+.name-property-name {
+  margin-top: 0.25rem;
+  margin-right: 0.5rem;
+  width: 5.2rem;
+}

@@ -1,0 +1,282 @@
+/**
+ * Copyright (c) Cisco Systems, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+ .timeline-item {
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-family: $brand-font-regular;
+  margin: 0.5rem 0;
+
+  &.has-data {
+    &:not(.is-wxcc-event) {
+      &.hovered-over {
+        background-color: var(--md-secondary-bg-color, #f7f7f7);
+      }
+
+      &.expanded-details {
+        background: var(--md-tertiary-bg-color, #ededed);
+      }
+    }
+  }
+
+  .most-recent-header {
+    display: none;
+  }
+
+  .body {
+    display: flex;
+    gap: 1.5rem;
+
+    .vertical-date {
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+      align-self: center;
+      gap: 0.25rem;
+      flex: 0 0 24px;
+
+      .month {
+       font-size: 12px;
+       line-height: 18px;
+       font-weight: 600;
+      }
+
+      .day {
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 24px;
+      }
+    }
+
+    .right-section {
+      flex: 1;
+      min-width: 0;
+
+      .row {
+        line-height: 21px;
+      }
+      .first-row {
+        font-size: 14px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+
+        .title {
+          text-transform: capitalize;
+        }
+
+        .event-status-badge {
+          margin-left: 0.5rem;
+        }
+      }
+
+      .second-row {
+        color: var(--md-secondary-text-color, #545454);
+        margin-top: 6px;
+        gap: 0.75rem;
+
+        .description {
+          height: 21px;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+
+        .time {
+          flex: 0 0 65px;
+        }
+      }
+    }
+
+    .hover-arrow-section {
+      color: var(--md-primary-text-color, #121212);
+      display: flex;
+      align-items: center;
+      width: 1rem;
+      visibility: visible;
+      flex: 0 0 16px;
+
+      &.hide {
+        visibility: hidden;
+        flex: 0 0 16px;
+      }
+    }
+  }
+}
+
+.most-recent .body .hover-arrow-section {
+  align-items: unset;
+}
+
+.timeline-item.most-recent {
+  background-color: var(--md-secondary-two-bg-color, #f7f7f7);
+
+  .most-recent-header {
+    display: block;
+    margin: 0;
+    font-weight: 400;
+    font-size: 12px;
+    margin-bottom: 0.5rem;
+    color: var(--md-secondary-text-color, #545454);
+    line-height: 18px;
+  }
+
+  .title {
+    margin: 0;
+  }
+
+  .event-status-badge {
+    display: none;
+  }
+
+  .grid {
+    margin-left: 8rem;
+  }
+}
+
+.timeline-item.most-recent .body .right-section {
+  .first-row {
+    gap: 0.4rem;
+  }
+
+  .second-row {
+    margin-top: 3px;
+  }
+}
+
+.timeline-item.empty-most-recent {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+
+  .body {
+    align-items: center;
+
+    .image-wrapper {
+      height: 80px;
+      width: 80px;
+    }
+  }
+}
+
+
+.event-icon {
+  height: 1rem;
+  margin-right: 0.5rem;
+}
+
+.event-icon::part(icon) {
+  line-height: 16px;
+  color: var(--md-secondary-text-color, #545454);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(auto, .5fr) 1fr;
+  column-gap: 2rem;
+  margin: 1rem;
+  font-size: 12px;
+  width: calc(100% - 24px);
+
+  column-gap: 3rem;
+  margin: 1rem 0.5rem 0.5rem 1rem;
+  grid-template-columns: auto 1fr;
+  margin-left: 9rem;
+
+  .cell {
+    vertical-align: top;
+  }
+
+  .cell:nth-child(odd) {
+    color: var(--md-secondary-text-color, #545454);
+  }
+
+  .cell:nth-child(even) {
+    color: var(--md-primary-text-color, #121212);
+  }
+}
+
+md-modal::part(modal-container) {
+  width: 515px;
+    height: 420px;
+    max-height: calc(100vh - 100px);
+    bottom: 1rem;
+    right: 1rem;
+    margin: unset;
+    left: unset;
+    top: unset;
+}
+
+md-modal::part(modal-backdrop) {
+  background: unset;
+  transition: unset;
+}
+
+md-modal::part(modal-content) {
+  height: 100%;
+}
+
+md-modal::part(modal-header) {
+  padding: 0px 0px 1rem;
+  width: fit-content;
+  margin-top: -8px;
+}
+
+md-modal::part(modal-body) {
+  padding: 0;
+}
+
+.item-expand-button {
+  height: 1rem;
+  width: 1rem;
+}
+
+.sentiment-section {
+  display: flex;
+  align-items: center;
+  flex: 0 0 105px;
+}
+
+.sentiment-badge {
+  padding-left: 10px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  color: var(--md-primary-success-text-color, #03612C);
+  height: 32px;
+  width: 95px;
+  border-radius: 8px;
+
+  &.positive {
+    background-color: var(--md-alert-success-bg-color, #befade);
+    color: var(--md-primary-success-text-color, #03612C);
+  }
+
+  &.neutral {
+    color: var(--md-secondary-text-color, #545454);
+    background: var(--md-quaternary-bg-color, #dedede);
+  }
+
+  &.negative {
+    background-color: var(--input-error-bg-color,#ffe8e3);
+    color: var(--md-alert-error-text-color, #A12512);
+  }
+
+  .sentiment-icon::part(icon) {
+    font-size: 20px;
+  }
+
+
+  .sentiment-label {
+    font-family: $brand-font-regular;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 14px;
+    text-transform: capitalize;
+  }
+}

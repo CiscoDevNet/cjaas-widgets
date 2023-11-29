@@ -1,0 +1,80 @@
+{
+  "Chat": {
+    "name": "icon-chat-active_16"
+  },
+  "Messenger": {
+    "name": "icon-messenger_16"
+  },
+  "Activity": {
+    "name": "icon-meetings_16"
+  },
+  "Email": {
+    "name": "icon-email-active_16"
+  },
+  "SMS": {
+    "name": "icon-sms_16"
+  },
+  "Telephony": {
+    "name": "icon-handset-active_16"
+  },
+  "Voice": {
+    "name": "icon-handset-active_16"
+  },
+  "Call": {
+    "name": "icon-handset-active_16"
+  },
+  "outbound-call": {
+    "name": "icon-outgoing-call-active_16"
+  },
+  "inbound-call": {
+    "name": "icon-incoming-call-active_16"
+  },
+  "Phone": {
+    "name": "icon-handset-active_16"
+  },
+  "wrapup": {
+    "name": "icon-close-space_18"
+  },
+  "agent": {
+    "name": "icon-headset_16"
+  },
+  "social": {
+    "name": "icon-contact-group_16"
+  },
+  "task": {
+    "name": "icon-tasks_16"
+  },
+  "Login": {
+    "name": "icon-sign-in_24"
+  },
+  "Page Visit": {
+    "name": "icon-mouse-cursor_16"
+  },
+  "Entered ZipCode": {
+    "name": "icon-location_16"
+  },
+  "Identify": {
+    "name": "icon-user_16"
+  },
+  "Quote": {
+    "name": "icon-file-spreadsheet_16"
+  },
+  "NPS.*": {
+    "name": "icon-analysis_16"
+  },
+  "Initiated Walk In": {
+    "name": "icon-audio-video_16"
+  },
+  "IMI_Inbound": {
+    "name": "icon-call-incoming_16"
+  },
+  "IMI_Outbound": {
+    "name": "icon-call-outgoing_16"
+  },
+  "Trigger Sent to Server": {
+    "name": "icon-event_16"
+  },
+  "Survey Response Collected": {
+    "name": "icon-report_16"
+  }
+}

@@ -1,0 +1,177 @@
+.error-notification {
+  font-family: "CiscoSansTT Regular";
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .image-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .failure-image {
+      width: 100px;
+      height: 100px;
+    }
+  }
+
+  .error-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: fit-content;
+    max-width: 400px;
+
+    .title {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0;
+      margin-bottom: 1.5rem;
+
+      .try-again-link {
+        font-size: 16px;
+        font-weight: 700;
+
+        &::part(button) {
+          text-decoration: underline;
+          color: var(--md-primary-text-color, #121212);
+          font-size: 16px;
+          font-weight: 700;
+
+          &:hover {
+            color: var(--md-hyperlink-hover-text-color, #092D3B);
+          }
+
+          &:active {
+            color: var(--md-hyperlink-hover-text-color, #092D3B);
+          }
+        }
+      }
+    }
+
+    .id {
+      font-size: 14px;
+      font-weight: 400;
+      margin: 0.625rem 0px .75rem;
+      line-height: 14px;
+    }
+
+    .expand-details-link {
+      display: block;
+      font-size: 14px;
+      font-weight: 400;
+      margin-top: 0.5rem;
+      line-height: 14px;
+
+      &::part(link) {
+        text-decoration: underline;
+        color: var(--md-primary-text-color, #121212);
+      }
+    }
+
+    .tracking-id-instructions {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--md-primary-text-color, #121212);
+      margin: 0;
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .tracking-id-row {
+      margin-top: 1rem;
+
+      .tracking-id {
+        font-size: 12px;
+        font-weight: 400;
+        display: inline-block;
+        text-align: center;
+
+        .copy-icon-button {
+          margin-left: 0.25rem;
+        }
+
+        .copy-icon-button::part(button) {
+          background: none;
+
+          &:hover {
+            background: var(--md-tertiary-bg-color, #ededed);
+          }
+
+          &:active {
+            background: var(--md-quaternary-bg-color, #dedede);
+          }
+        }
+      }
+    }
+  }
+
+  &.compact {
+      font-family: "CiscoSansTT Regular";
+      display: flex;
+      justify-content: center;
+      flex-direction: row;
+      gap: 1rem;
+
+
+  .image-wrapper {
+    margin: 0;
+  }
+
+    .error-box {
+      width: 280px;
+
+      &.no-tracking-id .title {
+        margin: 0;
+      }
+
+      .title {
+        margin: 0;
+        margin-bottom: 0.875rem;
+      }
+
+      .expand-details-link {
+        margin: 0;
+      }
+    }
+  }
+
+  &.tiny-view {
+    align-items: baseline;
+    color: var(--md-alert-error-text-color, #A12512);
+    font-size: 12px;
+
+    .first-row {
+      line-height: 12px;
+      margin-bottom: 4px;
+    }
+
+    .title {
+      margin-left: 0.25rem;
+    }
+
+    .link-button::part(button) {
+      font-size: 12px;
+      line-height: 12px;
+      &:hover {
+        color: var(--md-presence-do-not-disturb-bg-color, #D93829);
+      }
+
+      &:active {
+        color: var(--md-presence-do-not-disturb-bg-color, #D93829);
+      }
+    }
+  }
+}
+
+.link-button::part(button) {
+  text-decoration: underline;
+
+  &:hover {
+    color: var(--md-hyperlink-hover-text-color, #092D3B);
+  }
+
+  &:active {
+    color: var(--md-hyperlink-hover-text-color, #092D3B);
+  }
+}

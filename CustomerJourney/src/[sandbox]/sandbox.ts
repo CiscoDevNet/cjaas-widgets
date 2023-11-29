@@ -25,7 +25,6 @@ const TEMLPATE_ID = process.env.DOTENV.TEMPLATE_ID;
 const IDENTITY = process.env.DOTENV.IDENTITY;
 
 import "@momentum-ui/web-components";
-import "@cjaas/common-components";
 import { customElement, html, internalProperty, LitElement } from "lit-element";
 import styles from "./sandbox.scss";
 import * as iconData from "@/assets/icons.json";

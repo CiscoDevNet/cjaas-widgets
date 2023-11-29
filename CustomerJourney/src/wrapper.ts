@@ -1,7 +1,6 @@
 import { html, LitElement } from "lit-element";
 import { customElementWithCheck } from "./mixins/CustomElementCheck";
 import "@momentum-ui/web-components/dist/comp/md-theme";
-import "@cjaas/common-components";
 import styles from "./assets/styles/wrapper.scss";
 
 @customElementWithCheck("widget-theme-wrapper")

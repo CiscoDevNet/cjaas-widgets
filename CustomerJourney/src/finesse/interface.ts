@@ -1,4 +1,4 @@
-import { TimelineV2 } from "@cjaas/common-components";
+import { TimelineV2 } from "@/components/timeline-v2/TimelineV2";
 
 export interface QueryParameters {
   bearerToken: string | null;

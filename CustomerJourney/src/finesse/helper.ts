@@ -1,6 +1,6 @@
 import { QueryParameters, QueryParams, UserData } from "./interface";
 import * as iconData from "@/assets/icons.json";
-import { TimelineV2 } from "@cjaas/common-components";
+import { TimelineV2 } from "@/components/timeline-v2/TimelineV2";
 
 declare const finesse: any;
 declare const gadgets: any;

@@ -1,0 +1,231 @@
+/**
+ * Copyright (c) Cisco Systems, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+* {
+  box-sizing: border-box;
+}
+
+.profile-bound.default-template {
+  display: grid;
+  grid-template-columns: 240px calc(100% - 240px);
+  grid-template-rows: 100%;
+  grid-template-areas: "pane content";
+  height: calc(100% - 3rem);
+}
+
+.profile {
+  display: flex;
+  flex-direction: column;
+  hr {
+    margin: 0 0 1rem 0;
+    border-bottom: 1px solid var(--md-quaternary-bg-color, #DEDEDE);
+    border-top: 0;
+  }
+}
+
+@include css-grid;
+
+
+
+.grid {
+  margin: 8px 0px 0px;
+  column-gap: 3rem;
+
+  .cell {
+    margin-top: 8px;
+    line-height: 21px;
+
+    &.property-text {
+      height: 28px;
+      justify-content: center;
+      display: flex;
+      flex-direction: column;
+    }
+
+    &.property-input {
+      height: 28px;
+    }
+  }
+
+  .input-edit-button-group {
+    display: flex;
+  }
+
+  .edit-property-button {
+    visibility: hidden;
+    justify-content: flex-end;
+    display: flex;
+
+    &.make-visible {
+      visibility: visible;
+    }
+  }
+}
+
+md-input.property-input::part(input) {
+  height: 28px;
+}
+
+.top-content {
+  max-height: 50%;
+  margin-bottom: 0.75rem;
+
+  h5 {
+    margin: 0.75rem 0 0.5rem;
+    // font-size: 0.875rem;
+    font-size: 1rem;
+
+    &.customer-label {
+      color: var(--md-secondary-text-color, #545454);
+      margin: 0;
+      font-weight: normal;
+      font-size: 0.75rem;
+    }
+  }
+
+}
+md-avatar {
+  margin-top: 0.25rem;
+
+  &::part(avatar) {
+    width: 3rem;
+    height: 3rem;
+    box-sizing: border-box;
+    border: 2px solid var(--md-quaternary-bg-color, #DEDEDE);
+  }
+}
+
+.contact-item {
+  span {
+    font-size: 0.75rem;
+  }
+
+  md-badge::part(badge) {
+    width: 1rem;
+    height: 1rem;
+    display: inline-flex;
+    padding: 0.5rem;
+  }
+}
+
+.snapshot {
+  border: 1px solid var(--md-quaternary-bg-color, #dedede);
+  border-radius: .5rem;
+  padding: 1.25rem 1.5rem 0.75rem;
+
+  &.loading {
+    padding: 1.25rem 1.5rem;
+  }
+}
+
+.compact {
+  --avatar-height: 2.5rem;
+
+  border: 1px solid var(--md-quaternary-bg-color, #dedede);
+  border-radius: .5rem;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  height: 5rem;
+  padding: 1.25rem;
+
+  .customer-titles {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-left: 1rem;
+  }
+
+  md-avatar {
+    margin: 0;
+    &::part(avatar) {
+      width: var(--avatar-height);
+      height: var(--avatar-height);
+      border: none;
+    }
+  }
+
+  h5 {
+    margin:0;
+  }
+  .customer-name{
+    font-size: .875rem;
+  }
+  .customer-label{
+    font-size: .75rem;
+    font-weight: normal;
+  }
+}
+
+.profile-text {
+  color: var(--md-secondary-text-color, #545454);
+  margin-top: 1.5rem;
+  text-align: center;
+
+  &.error {
+    color: var(--md-alert-error-text-color);
+  }
+}
+
+md-loading {
+  margin: auto;
+}
+
+.loading-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.customer-name-header-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+
+  &.input-fields {
+    height: 37px;
+  }
+
+  &.text {
+    margin-bottom: 0;
+  }
+
+  md-input::part(input) {
+    width: 210px;
+  }
+
+  .names-control-button::part(button) {
+    height: 32px;
+  }
+
+  .edit-names-button::part(button) {
+    width: 12px;
+  }
+
+  .name-spinner-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-left: 0.5rem;
+  }
+}
+
+md-input::part(message) {
+  padding-left: 5px;
+  padding-top: 5px;
+}
+
+.input-error::part(input) {
+  background-color: var(--input-error-bg-color,#ffe8e3);
+  border-color: var(--input-error-hover-border-color,#f7644a);
+}
+
+.button-row {
+  display: flex;
+  gap: 0;
+}
