@@ -26,7 +26,7 @@ import "@momentum-ui/web-components/dist/comp/md-spinner";
 import "@momentum-ui/web-components/dist/comp/md-chip";
 import "@momentum-ui/web-components/dist/comp/md-dropdown";
 import iconData from "../assets/defaultIcons.json";
-import _, { groupBy } from "lodash";
+import _, { filter, groupBy } from "lodash";
 import { ifDefined } from "lit-html/directives/if-defined";
 
 const desertEmptyImage = "https://cjaas.cisco.com/assets/img/desert-open-results-192.png";
@@ -563,7 +563,9 @@ export namespace TimelineV2 {
           eventList?.filter(
             (event: CustomerEvent) =>
               event?.renderingData?.filterTags?.length &&
-              event.renderingData.filterTags.includes(this.defaultFilterOption.toLowerCase())
+              event.renderingData?.filterTags?.some(
+                filterTag => filterTag.toLowerCase() === this.defaultFilterOption.toLowerCase()
+              )
           ) || null
         );
       } else {
@@ -622,7 +624,7 @@ export namespace TimelineV2 {
 
     handleChannelTypeSelection(event: CustomEvent) {
       const { option } = event?.detail;
-      this.defaultFilterOption = option;
+      this.defaultFilterOption = option.toLowerCase();
     }
 
     handleTimeRangeSelection(event: CustomEvent) {
@@ -689,7 +691,7 @@ export namespace TimelineV2 {
           </div>
           <div class="filter-row">
             <div class="filter-block">
-              <p class="filter-label">Channel Types</p>
+              <p class="filter-label">Filter By</p>
               <md-dropdown
                 class="filter-dropdown channels-dropdown"
                 .defaultOption=${this.defaultFilterOption}

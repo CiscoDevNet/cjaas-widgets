@@ -27,6 +27,8 @@ import { version } from "../version";
 import { ServerSentEvent, IdentityData, IdentityResponse, AliasObject, jsonPatchOperation } from "./types/cjaas";
 import _ from "lodash";
 import { nothing } from "lit-html";
+import Backend from "i18next-http-backend";
+import LanguageDetector from "i18next-browser-languagedetector";
 
 export enum EventType {
   Agent = "agent",
@@ -120,12 +122,6 @@ export default class CustomerJourneyWidget extends LitElement {
    */
   @property({ attribute: false }) interactionData: Interaction | undefined;
   /**
-   * Property to pass in to use the 'JDSDefaultFilter' CAD variable as the default filter option
-   * @prop useCadFilterOption
-   * @type boolean
-   */
-  @property({ type: Boolean, attribute: "use-cad-filter-option" }) useCadFilterOption = false;
-  /**
    * Property to pass in JSON template to set color and icon settings
    * @prop eventIconTemplate
    */
@@ -172,12 +168,6 @@ export default class CustomerJourneyWidget extends LitElement {
    * enable user search
    */
   @property({ type: Boolean, attribute: "enable-user-search" }) enableUserSearch = false;
-  /**
-   * Property to pass in url of iconData JSON template to set color and icon settings
-   * @prop iconDataPath
-   */
-  @property({ type: String, attribute: "use-cad-default-filter" }) useCadDefaultFilter: string = "";
-
   /**
    * Set the number of Timeline Events to display
    * @attr limit
@@ -391,6 +381,36 @@ export default class CustomerJourneyWidget extends LitElement {
 
     const locale = Desktop.config.clientLocale;
     this.debugLogMessage("i18n locale", locale);
+
+    // // All CreateOptions for i18n are optional
+    // type CreateOptions = {
+    //     backend ? : Backend, // import Backend from "i18next-http-backend";
+    //     languageDetector ? : LanguageDetector // import LanguageDetector from "i18next-browser-languagedetector";
+    // };
+
+    // const i18n = Desktop.i18n.createInstance(Desktop.i18n.DEFAULT_INIT_OPTIONS);
+    // // const i18n = Desktop.i18n.createInstance(createOptions ? : CreateOptions) // returns instance described in https://www.i18next.com/overview/api#instance-creation
+    // const i18nMixin = Desktop.i18n.createMixin({
+    //     i18n /*Injecting i18n service instance into lit-element mixin */
+    // })
+
+    // // FYI you can see default options like so
+    // console.log(Desktop.i18n.DEFAULT_INIT_OPTIONS); // => i18n.init options that are using by Desktop by default
+
+    // // To get started, Init i18n with options to be able call "t" function translations
+    // if (!i18n.isInitialized) {
+    //     // Here, you are adding (merging) your localization package with the Desktop existing set of packages
+    //     const initOptions = Desktop.i18n.getMergedInitOptions(Desktop.i18n.DEFAULT_INIT_OPTIONS || {}, {
+    //         defaultNS: "my-ns", // "ns" here stands for the default JSON file name containing the localization
+    //         ns: ["my-ns"],
+    //         fallbackLng: "en",
+    //         backend: {
+    //             loadPath: "/.../path-to-locales/.../{{lng}}/{{ns}}.json"
+    //         }
+    //     });
+
+    //     i18n.init(initOptions).catch(err => console.log(err));
+    // }
   }
 
   async firstUpdated(_changedProperties: PropertyValues) {
@@ -434,59 +454,44 @@ export default class CustomerJourneyWidget extends LitElement {
       );
     }
 
-    if (changedProperties.has("useCadFilterOption") && this.useCadFilterOption) {
-      let jdsDefaultFilter;
-      if (this.interactionData?.callAssociatedData) {
-        jdsDefaultFilter = this.interactionData.callAssociatedData[JDS_DEFAULT_FILTER_CAD_VARIABLE]?.value;
-
-        if (!jdsDefaultFilter) {
-          console.error(
-            `The CAD Variable (jdsDefaultFilter) doesn\'t exist within this interaction. Please check your flow configuration.`
-          );
-        }
-      }
-
-      if (jdsDefaultFilter) {
-        this.defaultFilterOption = jdsDefaultFilter;
-        this.debugLogMessage(
-          "useCadFilterOption: set defaultFilterOption as CAD variable (jdsDefaultFilter) value",
-          this.defaultFilterOption
-        );
-      }
-    }
-
     if (changedProperties.has("interactionData")) {
       if (this.interactionData) {
         this.debugLogMessage("interactionData", this.interactionData);
 
-        this.cadDivisionType = this.interactionData.callAssociatedData?.[JDS_DIVISION_CAD_VARIABLE]?.value;
+        const { callAssociatedData } = this.interactionData;
+        let cadJdsDefaultFilter, cadVariableValue;
 
-        let cadVariableValue;
-        if (this.cadVariableLookup && this.interactionData?.callAssociatedData) {
-          cadVariableValue = this.interactionData.callAssociatedData[this.cadVariableLookup]?.value;
-          if (!cadVariableValue) {
+        if (callAssociatedData) {
+          this.cadDivisionType = this.interactionData.callAssociatedData?.[
+            JDS_DIVISION_CAD_VARIABLE
+          ]?.value.toLowerCase();
+
+          cadVariableValue = this.cadVariableLookup
+            ? this.interactionData.callAssociatedData?.[this.cadVariableLookup]?.value
+            : undefined;
+
+          cadJdsDefaultFilter = this.interactionData.callAssociatedData?.[
+            JDS_DEFAULT_FILTER_CAD_VARIABLE
+          ]?.value.toLowerCase();
+
+          if (cadJdsDefaultFilter) {
+            this.defaultFilterOption = cadJdsDefaultFilter.toLowerCase();
+            this.debugLogMessage(
+              "set defaultFilterOption as CAD variable (JDSDefaultFilter) value",
+              this.defaultFilterOption
+            );
+          } else {
             console.error(
-              `The CAD Variable (${this.cadVariableLookup}) doesn\'t exist within this interaction. Please check your flow configuration.`
+              `The CAD Variable (JDSDefaultFilter) doesn\'t exist within this interaction. Please check your flow configuration.`
             );
           }
+
+          console.log(
+            `CAD VARIABLES: cadDivisionType: (${this.cadDivisionType}) | cadVariableValue: (${cadVariableValue}) | cadJdsDefaultFilter: (${cadJdsDefaultFilter})`
+          );
         }
 
-        if (cadVariableValue) {
-          this.customer = cadVariableValue;
-          this.debugLogMessage(`SET customer identifier (CAD Variable: ${this.cadVariableLookup})`, this.customer);
-        } else if (this.interactionData?.contactDirection === "OUTBOUND") {
-          this.customer = this.interactionData?.dnis || null;
-          this.debugLogMessage(
-            `SET customer identifier (contactDirection: ${this.interactionData?.contactDirection})`,
-            this.customer
-          );
-        } else {
-          this.customer = this.interactionData?.ani || null;
-          this.debugLogMessage(
-            `SET customer identifier (contactDirection: ${this.interactionData?.contactDirection})`,
-            this.customer
-          );
-        }
+        this.customer = this.fetchCustomerFromInteraction(this.interactionData, cadVariableValue);
       } else {
         this.customer = null;
       }
@@ -498,6 +503,20 @@ export default class CustomerJourneyWidget extends LitElement {
       } else {
         console.error("[JDS WIDGET] customer is undefined", this.customer);
       }
+    }
+  }
+
+  fetchCustomerFromInteraction(interactionData: Interaction, cadVariableValue: string) {
+    const { contactDirection, ani, dnis } = interactionData;
+    if (cadVariableValue) {
+      this.debugLogMessage(`SET customer identifier (CAD Variable: ${this.cadVariableLookup})`, cadVariableValue);
+      return cadVariableValue;
+    } else if (contactDirection === "OUTBOUND") {
+      this.debugLogMessage(`SET customer identifier (contactDirection: ${contactDirection})`, dnis || null);
+      return dnis || null;
+    } else {
+      this.debugLogMessage(`SET customer identifier (contactDirection: ${contactDirection})`, ani || null);
+      return ani || null;
     }
   }
 
@@ -1061,7 +1080,7 @@ export default class CustomerJourneyWidget extends LitElement {
         // if (this.isWxccEvent(event)) {
         //   uniqueFilterTypes.add("wxcc");
         // }
-        uniqueFilterTypes.add(wxccFilterType);
+        uniqueFilterTypes.add(wxccFilterType.toLowerCase());
       }
 
       // custom events
@@ -1070,10 +1089,10 @@ export default class CustomerJourneyWidget extends LitElement {
       if (customEventFilterTags) {
         if (Array.isArray(customEventFilterTags)) {
           customEventFilterTags.forEach((eventFilterType: string) => {
-            uniqueFilterTypes.add(eventFilterType);
+            uniqueFilterTypes.add(eventFilterType.toLowerCase());
           });
         } else {
-          uniqueFilterTypes.add(customEventFilterTags);
+          uniqueFilterTypes.add(customEventFilterTags.toLowerCase());
         }
       }
     });
@@ -1082,13 +1101,6 @@ export default class CustomerJourneyWidget extends LitElement {
 
   isWxccEvent(event: CustomerEvent) {
     return event?.source.includes("wxcc");
-  }
-
-  createCustomFilterSet(event: CustomerEvent) {
-    const customFilterTags = event?.data?.uiData?.filterTags;
-    if (Array.isArray(customFilterTags)) {
-      customFilterTags.forEach(filterTag => {});
-    }
   }
 
   finalizeEventList(events: CustomerEvent[]): CustomerEvent[] {
@@ -1110,7 +1122,7 @@ export default class CustomerJourneyWidget extends LitElement {
     const divisionFilterMatch = (event: CustomerEvent) => {
       if (this.cadDivisionType) {
         const eventDivision = event?.data?.uiData?.division?.toLowerCase();
-        return eventDivision && eventDivision === this.cadDivisionType.toLowerCase();
+        return eventDivision && eventDivision === this.cadDivisionType;
       } else {
         return true;
       }
@@ -1119,6 +1131,22 @@ export default class CustomerJourneyWidget extends LitElement {
     const filteredModifiedEvents = combineTaskIdEventList
       ?.filter((event: CustomerEvent) => {
         if (shouldIncludeWxccEvents(event) && notHiddenEvent(event) && divisionFilterMatch(event)) {
+          // TEST
+
+          // Most Recent Event
+          // if a WXCC event, has to be a completed event. isWxccEvent && event?.type === "task:ended"
+          // if custom event, then just print as most recent
+
+          // DOUBLE CHECK, WHY !this.mostRecentEvent &&
+          if (
+            !this.mostRecentEvent &&
+            (!this.isWxccEvent(event) || (this.isWxccEvent(event) && event?.type === "task:ended"))
+          ) {
+            this.mostRecentEvent = event;
+            this.debugLogMessage("Most Recent Event", this.mostRecentEvent);
+          }
+          ///
+
           return event;
         }
       })
@@ -1170,17 +1198,19 @@ export default class CustomerJourneyWidget extends LitElement {
           filterTags,
         };
 
-        // Most Recent Event
-        // if a WXCC event, has to be a completed event. isWxccEvent && event?.type === "task:ended"
-        // if custom event, then just print as most recent
+        // // Most Recent Event
+        // // if a WXCC event, has to be a completed event. isWxccEvent && event?.type === "task:ended"
+        // // if custom event, then just print as most recent
 
-        if (
-          !this.mostRecentEvent &&
-          (!this.isWxccEvent(event) || (this.isWxccEvent(event) && event?.type === "task:ended"))
-        ) {
-          this.mostRecentEvent = event;
-          this.debugLogMessage("Most Recent Event", this.mostRecentEvent);
-        }
+        // // DOUBLE CHECK, WHY !this.mostRecentEvent &&
+        // if (
+        //   !this.mostRecentEvent &&
+        //   notHiddenEvent(event) &&
+        //   (!this.isWxccEvent(event) || (this.isWxccEvent(event) && event?.type === "task:ended"))
+        // ) {
+        //   this.mostRecentEvent = event;
+        //   this.debugLogMessage("Most Recent Event", this.mostRecentEvent);
+        // }
 
         return event;
       });

@@ -125,8 +125,6 @@ export class Sandbox extends LitElement {
   `;
   }
 
-  //   ?use-cad-filter-option=${true}
-
   render() {
     /** Update .env file
      * PRIVATE_KEY
