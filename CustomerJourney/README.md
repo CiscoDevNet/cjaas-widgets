@@ -6,7 +6,7 @@ This widget uses the JDS (Journey Data Services) APIs to display an individual c
 ```
 customer-journey-10.0.0.js
 ```
-Github Branch: `main`
+Github Branch: `jds-widget-10.0.0`
 
 <sub>_This version has a new UX Design_</sub>
 
