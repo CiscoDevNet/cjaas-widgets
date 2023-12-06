@@ -120,12 +120,6 @@ export default class CustomerJourneyWidget extends LitElement {
    */
   @property({ attribute: false }) interactionData: Interaction | undefined;
   /**
-   * Property to pass in to use the 'JDSDefaultFilter' CAD variable as the default filter option
-   * @prop useCadFilterOption
-   * @type boolean
-   */
-  @property({ type: Boolean, attribute: "use-cad-filter-option" }) useCadFilterOption = false;
-  /**
    * Property to pass in JSON template to set color and icon settings
    * @prop eventIconTemplate
    */
@@ -434,30 +428,51 @@ export default class CustomerJourneyWidget extends LitElement {
       );
     }
 
-    if (changedProperties.has("useCadFilterOption") && this.useCadFilterOption) {
-      let jdsDefaultFilter;
-      if (this.interactionData?.callAssociatedData) {
-        jdsDefaultFilter = this.interactionData.callAssociatedData[JDS_DEFAULT_FILTER_CAD_VARIABLE]?.value;
+    // if (changedProperties.has("useCadFilterOption") && this.useCadFilterOption) {
+    //   let jdsDefaultFilter;
+    //   if (this.interactionData?.callAssociatedData) {
+    //     jdsDefaultFilter = this.interactionData.callAssociatedData[JDS_DEFAULT_FILTER_CAD_VARIABLE]?.value;
 
-        if (!jdsDefaultFilter) {
-          console.error(
-            `The CAD Variable (jdsDefaultFilter) doesn\'t exist within this interaction. Please check your flow configuration.`
-          );
-        }
-      }
+    //     if (!jdsDefaultFilter) {
+    //       console.error(
+    //         `The CAD Variable (jdsDefaultFilter) doesn\'t exist within this interaction. Please check your flow configuration.`
+    //       );
+    //     }
+    //   }
 
-      if (jdsDefaultFilter) {
-        this.defaultFilterOption = jdsDefaultFilter;
-        this.debugLogMessage(
-          "useCadFilterOption: set defaultFilterOption as CAD variable (jdsDefaultFilter) value",
-          this.defaultFilterOption
-        );
-      }
-    }
+    //   if (jdsDefaultFilter) {
+    //     this.defaultFilterOption = jdsDefaultFilter;
+    //     this.debugLogMessage(
+    //       "set defaultFilterOption as CAD variable (jdsDefaultFilter) value",
+    //       this.defaultFilterOption
+    //     );
+    //   }
+    // }
 
     if (changedProperties.has("interactionData")) {
       if (this.interactionData) {
         this.debugLogMessage("interactionData", this.interactionData);
+
+        ////
+        let jdsDefaultFilter;
+        if (this.interactionData?.callAssociatedData) {
+          jdsDefaultFilter = this.interactionData.callAssociatedData[JDS_DEFAULT_FILTER_CAD_VARIABLE]?.value;
+
+          if (!jdsDefaultFilter) {
+            console.error(
+              `The CAD Variable (jdsDefaultFilter) doesn\'t exist within this interaction. Please check your flow configuration.`
+            );
+          }
+        }
+
+        if (jdsDefaultFilter) {
+          this.defaultFilterOption = jdsDefaultFilter.toLowerCase();
+          this.debugLogMessage(
+            "set defaultFilterOption as CAD variable (jdsDefaultFilter) value",
+            this.defaultFilterOption
+          );
+        }
+        ///////
 
         this.cadDivisionType = this.interactionData.callAssociatedData?.[JDS_DIVISION_CAD_VARIABLE]?.value;
 
@@ -1042,66 +1057,49 @@ export default class CustomerJourneyWidget extends LitElement {
     return generateSubTitle;
   }
 
-  /**
-   * @method createSets
-   * @returns void
-   * Sets `filterOptions` property to a unique set of filter options for filter feature.
-   */
-  createDynamicFilterOptions(events: Array<CustomerEvent> | null): Array<string> {
-    const uniqueFilterTypes: Set<string> = new Set(); // ex. chat, telephony, email, agent connected, etc
-    uniqueFilterTypes.add(DEFAULT_CHANNEL_OPTION);
+  //   /**
+  //    * @method createSets
+  //    * @returns void
+  //    * Sets `filterOptions` property to a unique set of filter options for filter feature.
+  //    */
+  //   createDynamicFilterOptions(events: Array<CustomerEvent> | null): Array<string> {
+  //     const uniqueFilterTypes: Set<string> = new Set(); // ex. chat, telephony, email, agent connected, etc
+  //     uniqueFilterTypes.add(DEFAULT_CHANNEL_OPTION);
 
-    (events || []).forEach(event => {
-      // wxcc events
-      const { channelType } = event?.data;
-      const channelTypeText = channelType === "telephony" ? "call" : channelType;
-      const wxccFilterType = this.isWxccEvent(event) ? channelTypeText || event?.identitytype || "misc" : "";
+  //     (events || []).forEach(event => {
+  //       // wxcc events
+  //       const { channelType } = event?.data;
+  //       const channelTypeText = channelType === "telephony" ? "call" : channelType;
+  //       const wxccFilterType = this.isWxccEvent(event) ? channelTypeText || event?.identitytype || "misc" : "";
 
-      if (wxccFilterType) {
-        // if (this.isWxccEvent(event)) {
-        //   uniqueFilterTypes.add("wxcc");
-        // }
-        uniqueFilterTypes.add(wxccFilterType);
-      }
+  //       if (wxccFilterType) {
+  //         // if (this.isWxccEvent(event)) {
+  //         //   uniqueFilterTypes.add("wxcc");
+  //         // }
+  //         uniqueFilterTypes.add(wxccFilterType.toLowerCase());
+  //       }
 
-      // custom events
-      const customEventFilterTags = event?.data?.uiData?.filterTags;
+  //       // custom events
+  //       const customEventFilterTags = event?.data?.uiData?.filterTags;
 
-      if (customEventFilterTags) {
-        if (Array.isArray(customEventFilterTags)) {
-          customEventFilterTags.forEach((eventFilterType: string) => {
-            uniqueFilterTypes.add(eventFilterType);
-          });
-        } else {
-          uniqueFilterTypes.add(customEventFilterTags);
-        }
-      }
-    });
-    return Array.from(uniqueFilterTypes);
-  }
+  //       if (customEventFilterTags) {
+  //         if (Array.isArray(customEventFilterTags)) {
+  //           customEventFilterTags.forEach((eventFilterType: string) => {
+  //             uniqueFilterTypes.add(eventFilterType.toLowerCase());
+  //           });
+  //         } else {
+  //           uniqueFilterTypes.add(customEventFilterTags.toLowerCase());
+  //         }
+  //       }
+  //     });
+  //     return Array.from(uniqueFilterTypes);
+  //   }
 
   isWxccEvent(event: CustomerEvent) {
     return event?.source.includes("wxcc");
   }
 
-  createCustomFilterSet(event: CustomerEvent) {
-    const customFilterTags = event?.data?.uiData?.filterTags;
-    if (Array.isArray(customFilterTags)) {
-      customFilterTags.forEach(filterTag => {});
-    }
-  }
-
-  finalizeEventList(events: CustomerEvent[]): CustomerEvent[] {
-    // this.dynamicFilterOptions = this.createDynamicFilterOptions(events);
-    // console.log("dynamic options", this.dynamicFilterOptions);
-    this.mostRecentEvent = undefined;
-
-    const allSortedEvents = this.sortEventsByDate(events);
-    this.debugLogMessage("All Sorted Events", allSortedEvents);
-
-    const combineTaskIdEventList = allSortedEvents ? this.combineTaskIdEvents(allSortedEvents) : [];
-    // const combineTaskIdEventList = allSortedEvents;
-
+  doesEventPassFilters(event: CustomerEvent) {
     const shouldIncludeWxccEvents = (event: CustomerEvent) =>
       this.hideWxccEvents ? !event.source.includes("wxcc") : true;
 
@@ -1116,9 +1114,28 @@ export default class CustomerJourneyWidget extends LitElement {
       }
     };
 
+    return shouldIncludeWxccEvents(event) && notHiddenEvent(event) && divisionFilterMatch(event);
+  }
+
+  finalizeEventList(events: CustomerEvent[]): CustomerEvent[] {
+    // this.dynamicFilterOptions = this.createDynamicFilterOptions(events);
+    // console.log("dynamic options", this.dynamicFilterOptions);
+
+    // TODO: maybe clears it too soon? when newestEvents come in?
+    // this.mostRecentEvent = undefined;
+    // this.debugLogMessage("MostRecentEvent set = undefined (finalizeEventList)", this.mostRecentEvent);
+
+    const allSortedEvents = this.sortEventsByDate(events);
+    this.debugLogMessage("All Sorted Events", allSortedEvents);
+
+    const combineTaskIdEventList = allSortedEvents ? this.combineTaskIdEvents(allSortedEvents) : [];
+    // const combineTaskIdEventList = allSortedEvents;
+
     const filteredModifiedEvents = combineTaskIdEventList
       ?.filter((event: CustomerEvent) => {
-        if (shouldIncludeWxccEvents(event) && notHiddenEvent(event) && divisionFilterMatch(event)) {
+        if (this.doesEventPassFilters(event)) {
+          this.mostRecentEvent = undefined;
+          this.debugLogMessage("MostRecentEvent set = undefined (finalizeEventList)", this.mostRecentEvent);
           return event;
         }
       })
@@ -1179,23 +1196,22 @@ export default class CustomerJourneyWidget extends LitElement {
           (!this.isWxccEvent(event) || (this.isWxccEvent(event) && event?.type === "task:ended"))
         ) {
           this.mostRecentEvent = event;
-          this.debugLogMessage("Most Recent Event", this.mostRecentEvent);
+          this.debugLogMessage("MostRecentEvent set", this.mostRecentEvent);
         }
-
         return event;
       });
 
-    this.dynamicFilterOptions = this.createDynamicFilterOptions(filteredModifiedEvents);
-    console.log("dynamic options", this.dynamicFilterOptions);
+    // this.dynamicFilterOptions = this.createDynamicFilterOptions(filteredModifiedEvents);
+    // console.log("dynamic options", this.dynamicFilterOptions);
 
     this.debugLogMessage("Formatted Sorted Events", filteredModifiedEvents);
     return filteredModifiedEvents;
   }
 
-  filterEventTypes(typePrefix: EventType, events: Array<CustomerEvent>) {
-    const filteredEvents = events.filter((event: CustomerEvent) => event.type.includes(`${typePrefix}:`));
-    return filteredEvents;
-  }
+  //   filterEventTypes(typePrefix: EventType, events: Array<CustomerEvent>) {
+  //     const filteredEvents = events.filter((event: CustomerEvent) => event.type.includes(`${typePrefix}:`));
+  //     return filteredEvents;
+  //   }
 
   getExistingEvents(customer: string | null) {
     this.events = [];
@@ -1302,7 +1318,9 @@ export default class CustomerJourneyWidget extends LitElement {
           if (data.data && (data?.datacontenttype === "string" || data?.dataContentType === "string")) {
             data.data = JSON.parse(data.data);
           }
-          this.newestEvents = this.finalizeEventList([data, ...this.newestEvents]);
+          if (this.doesEventPassFilters(data)) {
+            this.newestEvents = this.finalizeEventList([data, ...this.newestEvents]);
+          }
         } catch (err) {
           console.error("[JDS Widget] journey/stream: No parsable data fetched", err);
         }
@@ -1423,6 +1441,7 @@ export default class CustomerJourneyWidget extends LitElement {
     this.subscribeToEventStream(this.customer);
   }
 
+  //   .dynamicChannelTypeOptions=${this.dynamicFilterOptions}
   renderEvents() {
     return html`
       <cjaas-timeline-v2
@@ -1430,7 +1449,6 @@ export default class CustomerJourneyWidget extends LitElement {
         .historicEvents=${this.events}
         .newestEvents=${this.newestEvents}
         .mostRecentEvent=${this.mostRecentEvent}
-        .dynamicChannelTypeOptions=${this.dynamicFilterOptions}
         default-filter-option=${ifDefined(this.defaultFilterOption)}
         .eventIconTemplate=${this.eventIconTemplate}
         .badgeKeyword=${this.badgeKeyword}

@@ -301,6 +301,11 @@ export namespace TimelineV2 {
 
     updated(changedProperties: PropertyValues) {
       super.updated(changedProperties);
+
+      if (changedProperties.has("historicEvents")) {
+        this.dynamicChannelTypeOptions = this.createDynamicFilterOptions(this.historicEvents);
+      }
+
       if (changedProperties.has("newestEvents") && this.liveStream) {
         this.consolidateEvents();
       }
@@ -314,9 +319,9 @@ export namespace TimelineV2 {
           this.defaultFilterOption = DEFAULT_CHANNEL_OPTION;
         }
         console.log(
-          "end of change filter (default/selected)",
+          "filterOptions / defaultFilterOption",
           hasDefaultOption,
-          this.defaultFilterOption,
+          this.dynamicChannelTypeOptions,
           this.defaultFilterOption
         );
       }
@@ -378,6 +383,50 @@ export namespace TimelineV2 {
       }
     }
 
+    isWxccEvent(event: CustomerEvent) {
+      return event?.source.includes("wxcc");
+    }
+
+    /**
+     * @method createSets
+     * @returns void
+     * Sets `filterOptions` property to a unique set of filter options for filter feature.
+     */
+    createDynamicFilterOptions(events: Array<CustomerEvent> | null): Array<string> {
+      const uniqueFilterTypes: Set<string> = new Set(); // ex. chat, telephony, email, agent connected, etc
+      uniqueFilterTypes.add(DEFAULT_CHANNEL_OPTION);
+
+      (events || []).forEach(event => {
+        // wxcc events
+        const { channelType } = event?.data;
+        const channelTypeText = channelType === "telephony" ? "call" : channelType;
+        const wxccFilterType = this.isWxccEvent(event) ? channelTypeText || event?.identitytype || "misc" : "";
+
+        if (wxccFilterType) {
+          // if (this.isWxccEvent(event)) {
+          //   uniqueFilterTypes.add("wxcc");
+          // }
+          uniqueFilterTypes.add(wxccFilterType.toLowerCase());
+        }
+
+        // custom events
+        const customEventFilterTags = event?.data?.uiData?.filterTags;
+
+        if (customEventFilterTags) {
+          if (Array.isArray(customEventFilterTags)) {
+            customEventFilterTags.forEach((eventFilterType: string) => {
+              uniqueFilterTypes.add(eventFilterType.toLowerCase());
+            });
+          } else {
+            uniqueFilterTypes.add(customEventFilterTags.toLowerCase());
+          }
+        }
+      });
+      const dynamicOptions = Array.from(uniqueFilterTypes);
+      console.log("dynamicOptions ", dynamicOptions);
+      return dynamicOptions;
+    }
+
     /**
      * @method consolidateEvents
      * @returns void
@@ -388,6 +437,9 @@ export namespace TimelineV2 {
       if (this.newestEvents.length > 0) {
         this.historicEvents = [...this.newestEvents, ...(this.filteredByTypeList || [])];
         this.newestEvents = [];
+
+        this.dynamicChannelTypeOptions = this.createDynamicFilterOptions(this.historicEvents);
+
         this.dispatchEvent(
           new CustomEvent("new-event-queue-cleared", {
             bubbles: true,
@@ -563,7 +615,9 @@ export namespace TimelineV2 {
           eventList?.filter(
             (event: CustomerEvent) =>
               event?.renderingData?.filterTags?.length &&
-              event.renderingData.filterTags.includes(this.defaultFilterOption.toLowerCase())
+              event.renderingData?.filterTags?.some(
+                filterTag => filterTag.toLowerCase() === this.defaultFilterOption.toLowerCase()
+              )
           ) || null
         );
       } else {
@@ -622,7 +676,7 @@ export namespace TimelineV2 {
 
     handleChannelTypeSelection(event: CustomEvent) {
       const { option } = event?.detail;
-      this.defaultFilterOption = option;
+      this.defaultFilterOption = option.toLowerCase();
     }
 
     handleTimeRangeSelection(event: CustomEvent) {
@@ -689,7 +743,7 @@ export namespace TimelineV2 {
           </div>
           <div class="filter-row">
             <div class="filter-block">
-              <p class="filter-label">Channel Types</p>
+              <p class="filter-label">Filter By</p>
               <md-dropdown
                 class="filter-dropdown channels-dropdown"
                 .defaultOption=${this.defaultFilterOption}
