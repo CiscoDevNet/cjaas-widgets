@@ -12,11 +12,97 @@ Github Branch: `main`
 "@cjaas/common-components" version: `4.4.2` (main branch)
 
 <sub>_* This version is supported by an entire set of APIs. You don't need SAS Tokens anymore, just a reference to the agent desktop CI access token._</sub>
-<sub>_* New required parameters: BearerToken, OrganizationId, and project-id_</sub>
+
+<sub>_* New required parameters: BearerToken and Project-id (aka: workspaceID)_</sub>
+
 <sub>_* Any older version will no longer work because the widget is using a whole new set of APIs. Please use this version going forward. You will have to onboard an organization and set things up in admin portal._</sub>
 
-### Quick Start CJDS Widget Setup
-Vidcast Link: https://app.vidcast.io/share/0ebc75d5-62a4-4771-819e-518991c23b23
+### Desktop Layout CJDS Widget Configuration
+
+<sub>_Prerequisite: Onboard a Customer Journey organization, create a project in Control Hub, and toggle on the Webex Contact Center Connector._</sub>
+
+#### Vidcast 
+
+https://app.vidcast.io/share/0ebc75d5-62a4-4771-819e-518991c23b23 
+
+#### CJDS Widget (PROD) Setup Instructions 
+
+1. To start, copy the contents of the following Desktop Layout JSON file and create a new file with the contents pasted.  
+- [CJDSWidget_9.0.0_LayoutTemplate.json](https://raw.githubusercontent.com/CiscoDevNet/cjaas-widgets/main/CustomerJourney/src/assets/CJDSWidget_9.0.0_LayoutTemplate.json)
+
+2. Within that file and search for `ENTER_YOUR_PROJECT_ID_HERE` and replace that text with your project ID in quotations (from Control Hub) and save your Desktop Layout JSON file.
+
+<img width="450" alt="Control Hub JDS Admin Portal" src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/50246313-fa86-455f-80ba-275eb348efe9">
+<img width="450" alt="Control Hub JDS Admin Portal" src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/40af9fb6-9704-4267-9369-b6bb4945b3d1">
+
+  
+3. Go to Admin Portal for Agent Desktop: https://portal-v2.wxcc-us1.cisco.com 
+
+4. Sign in as an Admin and go to `Provisioning` > `Desktop layout` 
+
+5. Create a new Layout or edit an existing desktop layout, assign an agent team, upload your modified Desktop Layout JSON file and save. 
+
+6. Now, you can log into [Agent Desktop](https://desktop.wxcc-us1.cisco.com/) as an Agent or refresh the Agent Desktop browser page and the new Desktop Layout will take effect and your CJDS Widget will appear in the right hand side the next time you accept an incoming customer request.
+
+<sub>_* If you need help setting up the widget in Agent Desktop, contact cjds_widget@cisco.com._</sub>
+  
+### How to Publish Events
+Publish Event API Documentation: https://api-jds.wxdap-produs1.webex.com/publish/docs/swagger-ui/index.html
+
+#### Publishing a WXCC Event
+1. Publish Event API Documentation: https://api-jds.wxdap-produs1.webex.com/publish/docs/swagger-ui/index.html
+3.  Example API Request Body of a WXCC Chat Event (Using Postman syntax)
+   - IDENTITY: Update both `identitiy` and `data.origin` fields with the customer's identity (ex. email or phone number)
+   - ICON TYPE: `data.channelType` and `data.direction` reflects the icon type generated in the UI for this particular event (ex. email, inbound call)
+
+<img width="500" alt="Screenshot 2023-09-28 at 2 14 53 PM" src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/e5343c72-1c8f-4c00-b078-32c2ffdf51cb">
+
+
+```json
+{
+    "id": "{{$guid}}",
+    "specversion": "1.0",
+    "type": "task:ended",
+    "source": "/com/cisco/wxcc/{{$guid}}",
+    "identity": "rossgeller@cisco.com",
+    "identitytype": "email",
+    "previousidentity": null,
+    "datacontenttype": "application/json",
+    "data": {
+        "taskId": "{{$guid}}",
+        "queueId": "7a682870-472b-4a0f-b3e9-01fadf4efcf3",
+        "outboundType": null,
+        "workflowManager": null,
+        "direction": "INBOUND",
+        "channelType": "email",
+        "origin": "rossgeller@cisco.com",
+        "destination": "wxcc.ccp.switch@gmail.com"
+    }
+}
+```
+
+### How to look up and set data.channelType for your published event 
+
+1. This file is a mapping system to associate `data.channelType` of every incoming journey event to a particular icon.
+2. Begin with this file below, to modify, and save. Host your saved version and refernce it throught the icon-data-path widget property.
+[/src/assets/icons.json](https://github.com/CiscoDevNet/cjaas-widgets/blob/592aab211e332d8af13d4b0c830443e38a50aa09/CustomerJourney/src/assets/icons.json)
+
+<img width="800" alt="Setting icon type in published event" src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/ee973eda-7f9e-4e11-bccd-8c77138046ba">
+
+### How to add Custom Icons to your CJDS Widget 
+If there is an icon in the https://momentum.design/icons that does not exist in the default-icon-map.json file, you can add custom icon mappings.
+1. To start, please make a copy of the [/src/assets/icons.json](https://github.com/CiscoDevNet/cjaas-widgets/blob/592aab211e332d8af13d4b0c830443e38a50aa09/CustomerJourney/src/assets/icons.json) file found on the JDS Widget Github 
+2. Append the following highlighted block like so with the associated Momentum icon that you would like to add and save. We recommend using size 16 icon.
+
+<img width="800" alt="Add Momentum Icon to Icon Map" src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/4b94f4a2-2b0e-4a85-aa5a-52f199392924">
+
+3. Host your saved file on your own server. 
+4. Add the `icon-data-path` attribute with a URL in quotations to your CJDS Widget configuration (example screenshot below) in your Desktop Layout JSON file and save.
+
+<img width="650" alt="Setting Icon Map File to your CJDS Widget Config" src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/3b1913a1-f30f-4b5b-8a63-23923b4a68fb">
+
+5. Upload your newly edited Desktop Layout file in the Admin Portal
+
 
 ### Customer Journey Widget Properties
 
@@ -35,7 +121,7 @@ https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
 
 `@prop organizationId`: (<i>string</i>) - Agent's organizationId. You can fetch it directly from agent desktop store. Check out examples. Refer to example below on how to assign this property dynamically.
 
-`@attr base-url`: (<i>String</i>) - Path to the proper Customer Journey API deployment. To use the production instance of the Customer Journey Widget, the base-url can be set to `"https://api-jds.prod-useast1.ciscowxdap.com"`.
+`@attr base-url`: (<i>String</i>) - Path to the proper Customer Journey API deployment. To use the production instance of the Customer Journey Widget, the base-url can be set to `"https://api-jds.wxdap-produs1.webex.com"`.
 
 `@attr project-id`: (<i>String</i>) - ProjectId sets the scope within the selected org. You can obtain this from the admin portal by selecting on the specific project for project details.
 
@@ -68,254 +154,60 @@ https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js
 
 `@prop eventIconTemplate`: (<i>json object</i>) = iconData (built-in) - Property to pass in JSON template to set color and icon settings.
 
-## Examples
-
-### An example of how to upload JDS widget into DesktopLayout.json for Agent Desktop.
-
-<sub>_Prerequisite: Onboard a Customer Journey organization, create a project, and toggle on the Webex Contact Center Connector._</sub>
-
-1. You will need to log into the Agent Admin Portal, and navigate to Desktop Layouts.
-2. Create a Desktop Layout or select an existing one, assign a agent team to use this layout, and this is where you will upload your configured DesktopLayout.json file.
-3. When you create a new desktop layout, they provide you with a default layout JSON file. Download that file and use it as a starting point.
-4. Within the downloaded default desktop layout JSON file, search for the data property `"visibility": "IVR_TRANSCRIPT"`. Find the following code block associated with that.
-
-#### Find the IVR_TRANSCRIPT md-tab-panel object
-
-<sub>_IVR_TRANSCRIPT may appear a few times, please find the last appearance of `"visibility": "IVR_TRANSCRIPT"`_</sub>
-
-```json
-{
-    "comp": "md-tab-panel",
-    "attributes": {
-    "slot": "panel",
-    "class": "widget-pane"
-    },
-    "children": [
-    {
-        "comp": "slot",
-        "attributes": {
-        "name": "IVR_TRANSCRIPT"
-        }
-    }
-    ],
-    "visibility": "IVR_TRANSCRIPT"
-},
-# Add the customer journey widget code block (provided below) here
-```
-
-#### Add this Customer Journey Widget code block
-```json
-{
-    "comp": "md-tab",
-    "attributes": {
-        "slot": "tab",
-        "class": "widget-pane-tab"
-    },
-    "children": [
-        {
-            "comp": "span",
-            "textContent": "Customer Journey"
-        }
-    ]
-},
-{
-    "comp": "md-tab-panel",
-    "attributes": {
-        "slot": "panel",
-        "class": "widget-pane"
-    },
-    "children": [
-        {
-            "comp": "customer-journey-widget",
-            "script": "https://cjaas.cisco.com/widgets/customer-journey-9.0.0.js",
-            "attributes": {
-                "base-url": "https://api-jds.prod-useast1.ciscowxdap.com",
-                "logs-on": "true",
-                "project-id": "<your-project-id>" // manually add your project-id here.
-            },
-            "properties": {
-                "interactionData": "$STORE.agentContact.taskSelected",
-                "bearerToken": "$STORE.auth.accessToken",
-                "organizationId": "$STORE.agentContact.taskSelected.orgId"
-            },
-            "wrapper": {
-                "title": "Customer Journey Widget",
-                "maximizeAreaName": "app-maximize-area"
-            }
-        }
-    ]
-},
-// All boolean attributes default as false. If you want the attribute to remain false, just don't pass it in at all.
-```
-7. For quick setup, use the exact code block above with the exception of providing your own `"project-id"`.
-8. Feel free to reference all the optional attributes and properties listed at the top. These allow you to customize your customer journey widget configuration.
-9. Save the desktop Layout that now has your customer journey widget code. Then Save it within the Admin of Agent Desktop. Just refresh your Agent Desktop and the new configuration should load.
 
 ### If you want to add the Widget to the side nav of Agent Desktop (say for a supervisor account)
 1. It will mostly be the same, but you will have to manually enter in your organizationId property instead of relying on the variable.
      - Instead of `"organizationId": "$STORE.agentContact.taskSelected.orgId"`
      -  You will need to obtain your orgId and pass it in like so `"organizationId": "<your-org-id>"`
 
-### The following example is showcasing how to configure the local sandbox widget.
-```
-FILENAME: CustomerJourney/src/[sandbox]/sandbox.ts
-```
-
-```html
-    <customer-journey-widget
-        customer="John Smith"
-        base-url="https://api-jds.dev-uswest2.ciscowxdap.com"
-        .organizationId=${ORGANIZATION-ID}
-        project-id=${PROJECT_ID}
-        template-id=${TEMPLATE_ID}
-        cad-variable-lookup=${CAD-VARIABLE}
-        .bearerToken=${BEARER_TOKEN}
-        .eventIconTemplate=${iconData}
-        limit=${20}
-        logs-on
-        time-frame="30-Days"
-        icon-data-path="https://cjaas.cisco.com/widgets/iconMaps/defaultIcons.json"
-    ></customer-journey-widget>
-```  
-
-
-### Default Icon Mapping JSON File
-This file is a mapping system to associate `data.channelType` of every incoming journey event to a particular icon. 
-
-Begin with this file, to modify, and save. Host your saved version and refernce it throught the `icon-data-path` widget property.
-[/src/assets/icons.json](https://github.com/CiscoDevNet/cjaas-widgets/blob/592aab211e332d8af13d4b0c830443e38a50aa09/CustomerJourney/src/assets/icons.json)
-
-```
-{
-  "SMS": {
-    "name": "icon-sms_16",
-    "color": "mint"
-  },
-  "Telephony": {
-    "name": "icon-handset-active_16",
-    "color": "green"
-  },
-  "Voice": {
-    "name": "icon-handset-active_16",
-    "color": "green"
-  },
-  "Call": {
-    "name": "icon-handset-active_16",
-    "color": "green"
-  },
-  "Chat": {
-    "name": "icon-chat-active_16",
-    "color": "cobalt"
-  },
-  "Email": {
-    "name": "icon-email-active_16",
-    "color": "violet"
-  },
-  "wrapup": {
-    "name": "icon-close-space_18",
-    "color": "red"
-  },
-  "agent": {
-    "name": "icon-headset_16",
-    "color": "pink"
-  },
-  "Messenger": {
-    "name": "icon-messenger_16",
-    "color": "cobalt"
-  },
-  "social": {
-    "name": "icon-contact-group_16",
-    "color": "mint"
-  },
-  "task": {
-    "name": "icon-tasks_16",
-    "color": "yellow"
-  },
-  "Login": {
-    "name": "icon-sign-in_24",
-    "color": "gold"
-  },
-  "Page Visit": {
-    "name": "icon-mouse-cursor_16",
-    "color": "grey"
-  },
-  "Entered ZipCode": {
-    "name": "icon-location_16",
-    "color": "cyan"
-  },
-  "Identify": {
-    "name": "icon-user_16",
-    "color": "blue"
-  },
-  "Quote": {
-    "name": "icon-file-spreadsheet_16",
-    "color": "cobalt",
-    "showcase": "firstName"
-  },
-  "NPS.*": {
-    "name": "icon-analysis_16",
-    "color": "red"
-  },
-  "Initiated Walk In": {
-    "name": "icon-audio-video_16",
-    "color": "orange"
-  },
-  "IMI_Inbound": {
-    "name": "icon-call-incoming_16",
-    "color": "green"
-  },
-  "IMI_Outbound": {
-    "name": "icon-call-outgoing_16",
-    "color": "darkmint"
-  },
-  "Trigger Sent to Server": {
-    "name": "icon-event_16",
-    "color": "violet",
-    "showcase": "user"
-  },
-  "Survey Response Collected": {
-    "name": "icon-report_16",
-    "color": "gold"
-  },
-  "multi events single day": {
-    "name": "icon-calendar-day_12",
-    "color": "yellow"
-  }
-}
-```
-
-
-
 ## Dev Environment: Getting Started
-
-Create a `.env` file that contains below variables (TEMPLATE_ID OPTIONAL)
-
-```
-BEARER_TOKEN="<your-bearer-token>"
-BASE_URL="<your-base-url>"
-ORGANIZATION_ID="<your-organization-id>"
-PROJECT_ID="<your-project-id>"
-TEMPLATE_ID="<your-template-id>"
-IDENTITY="<your-customer-lookup-alias>"
+1. Navigate to the root directory of Customer Journey `CustomerJourney/`
+2. Make a copy of `.env.sample` file, and rename it as '.env' (`CustomerJourney/.env`)
+3. Fill out the variables. Below is a guide for variables
 
 ```
+BASE_URL="ENTER_YOUR_JDS_BASE_URL"
+BEARER_TOKEN="ENTER_YOUR_BEARER_TOKEN"
+ORGANIZATION_ID="ENTER_YOUR_ORGANIZATION_ID"
+PROJECT_ID="ENTER_YOUR_PROJECT_ID"
+TEMPLATE_ID="ENTER_OPTIONAL_TEMPLATE_ID"
+IDENTITY="ENTER_LOOKUP_CUSTOMER_IDENTIFIER"
+```
 
-- Where used in your app, pass the correct ORGANIZATION and PROJECT_ID values from your admin portal
+### How to run the CJDS Widget locally
 - run `yarn install`
 - run `yarn start`
 - navigate browser to `[localhost:8889](http://localhost:8889/)`
 
-  
-## Build and Deploy Modules
+### Env Variable Guide
+1. BASE URL
+  - DEV Base URL: "https://api-jds.wxdap-devus1.webex.com"
+  - QA Base URL: "https://api-jds.wxdap-stgus1.webex.com"
+  - PROD Base URL: "https://api-jds.wxdap-produs1.webex.com"
+2. BEARER TOKEN
+  - Navigate to the Dev Portal (based on your chosen environment) and log in with your **agent** credentials
+  - QA Base URL: https://apim-devportal-nonprod-cdn.ciscoccservice.com/
+  - PROD Base URL: https://developer.webex-cx.com/
+3. ORGANIZATION_ID
+  - Please use the Organization ID that you have onboarded for CJDS
+4. PROJECT_ID
+  - Log into Control Hub and collect the Project Id you have activated with WXCC
+5. TEMPLATE_ID **(optional)**
+  - By default, the widget will use a default profile template.
+  - If you would like to use a custom profile template, create one using our APIs and plug in the teamplte ID
+6. IDENTITY
+  - This is where you will pass in the customer's identity (ex. johndoe@gmail.com or +16303030024)
+
+
+## How Build and Deploy New CJDS Widget
 If you are using this widget as a starter for your own custom needs, follow these steps to publish it for your use.
 
 Once your widget is complete, it must be exported as a JS module that can be delivered via CDN. The build is configured to export a Web Component that can be used in your project.
 
-- run `yarn dist` to create a compiled, minified JS module
-- navigate to `CustomerJourney/dist/index.js`
-- rename and upload the bundled module (index.js) to your hosting service
-- import according to your web application's config.
-
+1. Run `yarn dist:dev` from root of project (`CustomerJourney/`) to create a compiled JS module (index.js)
+2. navigate to `CustomerJourney/dist/index.js`
+3. Name the file to best suit your needs. Semantic versioning is very helpful while adding features. For example, `customer-journey-9.0.1`
+4. Upload the file to your web hosting service where it can be retrieved via a CDN link
 
 ### Sharing widget information with Agent/Supervisor Desktop administrator
 
