@@ -68,7 +68,7 @@
         gap: 3px;
 
         .title {
-          text-transform: capitalize;
+        //   text-transform: capitalize;
         }
 
         .event-status-badge {
@@ -201,7 +201,7 @@
   }
 }
 
-md-modal::part(modal-container) {
+.event-details-modal::part(modal-container) {
   width: 515px;
     height: 420px;
     max-height: calc(100vh - 100px);
@@ -212,22 +212,22 @@ md-modal::part(modal-container) {
     top: unset;
 }
 
-md-modal::part(modal-backdrop) {
+.event-details-modal::part(modal-backdrop) {
   background: unset;
   transition: unset;
 }
 
-md-modal::part(modal-content) {
+.event-details-modal::part(modal-content) {
   height: 100%;
 }
 
-md-modal::part(modal-header) {
+.event-details-modal::part(modal-header) {
   padding: 0px 0px 1rem;
   width: fit-content;
   margin-top: -8px;
 }
 
-md-modal::part(modal-body) {
+.event-details-modal::part(modal-body) {
   padding: 0;
 }
 
@@ -279,4 +279,13 @@ md-modal::part(modal-body) {
     line-height: 14px;
     text-transform: capitalize;
   }
+}
+
+.transcript-text {
+    white-space: pre-line;
+}
+
+.transcript-modal::part(modal-container) {
+    max-height: calc(100% - 4rem);
+    top: 2rem;
 }

@@ -475,6 +475,7 @@ export default class CustomerJourneyWidget extends LitElement {
         ///////
 
         this.cadDivisionType = this.interactionData.callAssociatedData?.[JDS_DIVISION_CAD_VARIABLE]?.value;
+        console.log(`[JDS WIDGET] using CAD variable (${JDS_DIVISION_CAD_VARIABLE}) = ${this.cadDivisionType}`);
 
         let cadVariableValue;
         if (this.cadVariableLookup && this.interactionData?.callAssociatedData) {

@@ -265,6 +265,8 @@ export namespace TimelineV2 {
      * Toggle expanded event details
      */
     @internalProperty() expandDetails = false;
+    @internalProperty() isTranscriptModalOpen = false;
+    @internalProperty() modalEventTranscript: string | undefined = undefined;
 
     daysOfTheWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
@@ -314,16 +316,11 @@ export namespace TimelineV2 {
         const hasDefaultOption = this.dynamicChannelTypeOptions.includes(this.defaultFilterOption.toLowerCase());
         if (!hasDefaultOption) {
           console.error(
-            `[JDS WIDGET]: Your default filter option (${this.defaultFilterOption}) doesn't exist in the dynamic filter options.`
+            `[JDS WIDGET]: Your default filter option (${this.defaultFilterOption}) doesn't exist in the dynamic filter options.`,
+            this.dynamicChannelTypeOptions
           );
           this.defaultFilterOption = DEFAULT_CHANNEL_OPTION;
         }
-        console.log(
-          "filterOptions / defaultFilterOption",
-          hasDefaultOption,
-          this.dynamicChannelTypeOptions,
-          this.defaultFilterOption
-        );
       }
     }
 
@@ -560,6 +557,7 @@ export namespace TimelineV2 {
           .eventIconTemplate=${this.eventIconTemplate}
           class=${lastItem ? "" : "has-line"}
           ?is-ongoing=${event?.renderingData?.isActive}
+          @expand-transcript-modal=${this.expandTranscriptModal}
         ></cjaas-timeline-item-v2>
       `;
     }
@@ -685,6 +683,34 @@ export namespace TimelineV2 {
       this.dateRangeOldestDate = this.calculateOldestEntry(this.timeRangeOption);
     }
 
+    expandTranscriptModal(event: CustomEvent) {
+      const { isOpen, transcript } = event?.detail;
+      this.isTranscriptModalOpen = isOpen;
+      this.modalEventTranscript = transcript;
+    }
+
+    renderTranscriptModal() {
+      return html`
+        <md-modal
+          class="transcript-modal"
+          htmlId="transcript-modal"
+          ?show=${this.isTranscriptModalOpen}
+          size="small"
+          hideFooter
+          hideHeader
+          showCloseButton
+          backdropClickExit
+          @close-modal=${() => {
+            this.isTranscriptModalOpen = false;
+            this.modalEventTranscript = undefined;
+          }}
+        >
+          <div slot="header">Transcript</div>
+          <span class="transcript-text">${this.modalEventTranscript}</span>
+        </md-modal>
+      `;
+    }
+
     render() {
       // Groups items by date
       const filterByDateRangeResult = this.filterByDateRange();
@@ -700,6 +726,7 @@ export namespace TimelineV2 {
 
       return html`
         <div class="timeline-section" part="timeline-wrapper">
+          ${this.renderTranscriptModal()}
           <div class="top-header-row">
             <h3 class="contact-activities-header">
               Activities<md-tooltip class="contact-activity-tooltip"
@@ -739,6 +766,7 @@ export namespace TimelineV2 {
               .data=${this.mostRecentEvent?.data}
               ?empty-most-recent=${!this.mostRecentEvent}
               is-most-recent
+              @expand-transcript-modal=${this.expandTranscriptModal}
             ></cjaas-timeline-item-v2>
           </div>
           <div class="filter-row">

@@ -224,7 +224,8 @@ export namespace ProfileViewV2 {
     renderAliasModal() {
       return html`
         <md-modal
-          htmlId="modal-2"
+          class="alias-modal"
+          htmlId="alias-modal"
           ?show=${this.openAliasView}
           size="dialog"
           hideFooter

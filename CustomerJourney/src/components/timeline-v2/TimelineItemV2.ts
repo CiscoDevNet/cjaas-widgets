@@ -82,6 +82,7 @@ export namespace TimelineItemV2 {
     @internalProperty() areDetailsExpanded = false;
     @internalProperty() isWxccEvent = false;
     @internalProperty() hasData = false;
+    @internalProperty() isTranscriptModalOpen = false;
 
     updated(changedProperties: PropertyValues) {
       super.updated(changedProperties);
@@ -236,6 +237,20 @@ export namespace TimelineItemV2 {
       navigator.clipboard.writeText(copyText);
     };
 
+    expandTranscriptModal(transcript: string) {
+      this.isTranscriptModalOpen = true;
+      this.dispatchEvent(
+        new CustomEvent("expand-transcript-modal", {
+          bubbles: true,
+          composed: true,
+          detail: {
+            isOpen: this.isTranscriptModalOpen,
+            transcript,
+          },
+        })
+      );
+    }
+
     /**
      * @method createTableRecursive
      * @param data
@@ -265,6 +280,18 @@ export namespace TimelineItemV2 {
                     `;
                   } else {
                     renderValue = this.parseSubTextUrlRecursively(dataValue);
+                  }
+
+                  // transcript: create a link, open as modal
+                  if (x.toLowerCase() === "transcript") {
+                    renderValue = html`
+                      <a
+                        class="transcript-open-button"
+                        href="javascript:;"
+                        @click=${this.expandTranscriptModal.bind(this, dataValue)}
+                        ><span slot="text">View</span></a
+                      >
+                    `;
                   }
                 }
 
@@ -326,6 +353,7 @@ export namespace TimelineItemV2 {
     // renderDetailsModal() {
     //   return html`
     //     <md-modal
+    //       class="event-details-modal"
     //       htmlId="modal-1"
     //       ?show=${this.areDetailsExpanded}
     //       size="dialog"
