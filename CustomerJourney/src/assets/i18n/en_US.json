@@ -1,0 +1,10 @@
+{
+    "Loading": "Loading",
+    "emptyStateMessage": "Enter a user to search for a Journey",
+    "lookupIdentity": "Lookup Identity",
+    "error": {
+        "failedToLoadData": "Failed to load data",
+        "tryAgain": "Try Again",
+        "Learn More": "Learn More"
+    }
+}

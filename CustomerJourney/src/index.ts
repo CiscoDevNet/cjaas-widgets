@@ -361,6 +361,8 @@ export default class CustomerJourneyWidget extends LitElement {
 
   @internalProperty() cadDivisionType: string | undefined = undefined;
 
+  @internalProperty() i18n: any = undefined;
+
   basicRetryConfig = {
     retries: 1,
     retryDelay: () => 3000,
@@ -385,6 +387,47 @@ export default class CustomerJourneyWidget extends LitElement {
 
     const locale = Desktop.config.clientLocale;
     this.debugLogMessage("i18n locale", locale);
+
+    // call api to grab the i18n bundle from azure?
+    // look up bundle based on clientLocale
+    // this.i18n =
+
+    //     const url = `https://api.qaus1.ciscoccservice.com/v1/queues/statistics?from=${fromDateMS}&to=${toDateMS}&interval=15&queueIds=${queueIds}&orgId=${this.organizationId}`;
+
+    //     const config: AxiosRequestConfig = {
+    //       method: "GET",
+    //       url,
+    //       headers: {
+    //         Authorization: `Bearer ${this.bearerToken}`,
+    //       },
+    //     };
+
+    //     const axiosInstance = axios.create(config);
+
+    // return axiosInstance
+    //   .get("https://cjaas.blob.core.windows.net/$web/widgets/i18n/en_US.json")
+    //   .then(json => {
+    //     console.log("i18n json", json);
+    //     //   const queueName = json?.data?.data?.[0]?.queueName;
+    //     //   return queueName;
+    //   })
+    //   .catch((err: AxiosError) => {
+    //     console.error(`[JDS Widget] getQueueNameOfLatestEvent`, err);
+    //   });
+    // }
+
+    axios({
+      method: "get",
+      url: "https://cjaas.cisco.com/widgets/i18n/en_US.json",
+    })
+      .then(response => {
+        console.log("i18n json response", response.data);
+        this.i18n = response.data;
+        //   response.data.pipe(fs.createWriteStream("ada_lovelace.jpg"));
+      })
+      .catch(err => {
+        console.log("i18n json catch", err);
+      });
   }
 
   async firstUpdated(_changedProperties: PropertyValues) {
@@ -1795,7 +1838,7 @@ export default class CustomerJourneyWidget extends LitElement {
   renderMainInputSearch() {
     return html`
       <div class="flex-inline sub-widget-section">
-        <span class="custom-input-label">Lookup Identity</span>
+        <span class="custom-input-label">${this.i18n?.lookupIdentity}</span>
         <div class="input-wrapper">
           <md-input
             searchable
@@ -1821,7 +1864,7 @@ export default class CustomerJourneyWidget extends LitElement {
   renderEmptyStateView() {
     return html`
       <div class="empty-state-container">
-        <p class="empty-state-text">Enter a user to search for a Journey</p>
+        <p class="empty-state-text">${this.i18n?.emptyStateMessage}</p>
       </div>
     `;
   }
@@ -1854,16 +1897,13 @@ export default class CustomerJourneyWidget extends LitElement {
         <div class=${`customer-journey-widget-container ${withUserSearch ? "with-user-search" : ""}`}>
           <div class="widget-loading-wrapper">
             <md-spinner size="56"></md-spinner>
-            <p class="loading-text">Loading...</p>
+            <p class="loading-text">${this.i18n?.Loading}...</p>
           </div>
         </div>
       `;
     } else {
       return html`
         <div class=${`customer-journey-widget-container populated-data ${withUserSearch ? "with-user-search" : ""}`}>
-          <!-- <div class="top-header-row">
-            ${this.enableUserSearch ? this.renderMainInputSearch() : nothing}
-          </div> -->
           ${this.customer ? this.renderSubWidgets() : this.renderEmptyStateView()}
         </div>
       `;
