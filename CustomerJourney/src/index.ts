@@ -651,8 +651,18 @@ export default class CustomerJourneyWidget extends i18nLitMixin(LitElement) {
       } else {
         return this.templateId;
       }
-    } else if (profileTemplates.length) {
-      return profileTemplates?.[0]?.id;
+    } else if (profileTemplates?.length) {
+      const defaultTemplate = profileTemplates?.find((template: any) => template.name === "journey-default-template");
+      this.debugLogMessage(
+        "determineProfileTemplate",
+        "allProfileTemplates",
+        profileTemplates,
+        "defaultProfileTemplate",
+        defaultTemplate,
+        "firstTemplate",
+        profileTemplates?.[0]
+      );
+      return defaultTemplate?.id || profileTemplates?.[0]?.id;
     } else {
       console.error(`[JDS Widget] this projectId (${this.projectId}) has no profile templates.`);
       return undefined;
