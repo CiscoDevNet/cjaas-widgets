@@ -97,7 +97,7 @@ export const setParametersToWidget = (queryParams: QueryParameters) => {
   widget.customer = queryParams?.customer || null;
   widget.logsOn = queryParams?.logsOn || false;
   widget.disableEventStream = queryParams?.disableEventStream || false;
-  widget.defaultTimeRangeOption = queryParams?.defaultTimeRangeOption || TimelineV2.TimeRangeOption.Last30Days;
+  //   widget.defaultTimeRangeOption = queryParams?.defaultTimeRangeOption || TimelineV2.TimeRangeOption.Last30Days;
   //   widget.collapseProfileSection = queryParams?.collapseProfileSection || false;
   //   widget.collapseAliasSection = queryParams?.collapseAliasSection || false;
   //   widget.collapseTimelineSection = queryParams?.collapseTimelineSection || false;

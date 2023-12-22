@@ -1,0 +1,71 @@
+{
+    "common": {
+      "all": "Tous",
+      "cancel": "Annuler",
+      "edit": "Modifier",
+      "learnMore": "Apprendre encore plus",
+      "loading": "Chargement",
+      "loadMore": "Charger plus",
+      "reload": "Recharger",
+      "save": "Sauvegarder",
+      "showLess": "Montrer moins",
+      "today": "Aujourd'hui",
+      "tryAgain": "Essayer à nouveau",
+      "yesterday": "Hier",
+      "inbound": "Entrant",
+      "outbound": "Sortant",
+      "email": "E-mail",
+      "chat": "Chat",
+      "telephony": "Appel",
+      "call": "Appel",
+      "phone": "Appel",
+      "voice": "Voix"
+    },
+    "error": {
+      "alphaCharactersOnly": "Caractères alpha uniquement",
+      "emptyStateMessage": "Entrez un utilisateur pour rechercher un parcours",
+      "failedToFetchName": "Échec de la récupération du nom",
+      "failedToLoadData": "Échec du chargement des données",
+      "nameRequired": "Nom (obligatoire",
+      "noData": "Pas de données",
+      "noMatchesFound": "Aucun résultat",
+      "profileDataDoesNotExist": "Les données de profil n'existent pas",
+      "trackingID": "Identifiant de suivi",
+      "trackingIDHelpText": "Veuillez partager l'ID de suivi avec l'administrateur du site ou l'équipe d'assistance pour enquêter sur la situation."
+    },
+    "profile": {
+      "customerInformation": "Informations client",
+      "lookupIdentity": "Rechercher une identité",
+      "viewAliases": "Afficher les alias"
+    },
+    "timeline": {
+      "activities": "Activités",
+      "activityTooltipMessage": "Visualisez le parcours client de bout en bout de votre client et ses activités commerciales (appels, chats, visites de sites Web, etc.).",
+      "filterBy": "Filtrer par",
+      "livestream": "Direct"
+    },
+    "timelineItem": {
+      "mostRecent": "Le plus récent",
+      "ongoing": "En cours",
+      "queueId": "ID de file d'attente : {{id}}",
+      "transcript": "Transcription",
+      "view": "Voir"
+    },
+    "timeRange": {
+      "allTime": "Tout le temps",
+      "last10Days": "10 derniers jours",
+      "last12Months": "12 derniers mois",
+      "last30Days": "Les 30 derniers jours",
+      "last6Months": "6 derniers mois",
+      "timeRange": "Intervalle de temps"
+    },
+    "weekDay": {
+      "friday": "Vendredi",
+      "monday": "Lundi",
+      "saturday": "Samedi",
+      "sunday": "Dimanche",
+      "thursday": "Jeudi",
+      "tuesday": "Mardi",
+      "wednesday": "Mercredi"
+    }
+  }

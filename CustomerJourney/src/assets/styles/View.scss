@@ -78,6 +78,12 @@
   .widget-loading-wrapper {
     align-self: center;
 
+    .widget-loading-spinner {
+        display: block;
+        width: 56px;
+        margin: auto;
+    }
+
     .loading-text {
       font-size: 14px;
       font-weight: 400;

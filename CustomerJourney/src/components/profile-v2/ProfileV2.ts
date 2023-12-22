@@ -20,6 +20,7 @@ import { Input, Tooltip } from "@momentum-ui/web-components";
 import "@/components/error-notification/ErrorNotification";
 import { nothing } from "lit-html";
 import { repeat } from "lit-html/directives/repeat";
+import { i18nLitMixin } from "@/mixins/i18nLitMixin";
 
 export namespace ProfileViewV2 {
   interface ContactChannel {
@@ -45,7 +46,7 @@ export namespace ProfileViewV2 {
   }
 
   @customElementWithCheck("cjaas-profile-v2")
-  export class ELEMENT extends LitElement {
+  export class ELEMENT extends i18nLitMixin(LitElement) {
     /**
      * @prop customer
      * Customer Name used to call api
@@ -104,9 +105,11 @@ export namespace ProfileViewV2 {
     @query("#last-name-input") lastNameInput!: HTMLInputElement;
     @query("md-tooltip") editingTooltip!: Tooltip.ELEMENT;
 
-    nonAlphaNameErrorMessage = "Alpha characters only";
-    undefinedNameErrorMessage = (nameType: "First" | "Last") => `${nameType} name required`;
-
+    nonAlphaNameErrorMessage = this.t("error.alphaCharactersOnly");
+    undefinedNameErrorMessage = (nameType: "First" | "Last") => {
+      const tNameType = this.t(nameType);
+      return `${tNameType} ${this.t("error.nameRequired")}`;
+    };
     updated(changedProperties: PropertyValues) {
       super.updated(changedProperties);
 
@@ -115,7 +118,6 @@ export namespace ProfileViewV2 {
       }
 
       if (changedProperties.has("firstName") || changedProperties.has("lastName")) {
-        // this.nameApiErrorMessage = "";
         this.lastNameInvalid = false;
         this.firstNameInvalid = false;
         this.editingNames = !(this.firstName && this.lastName);
@@ -133,12 +135,10 @@ export namespace ProfileViewV2 {
 
       if (changedProperties.has("firstNameInputValue")) {
         this.firstNameErrorMessage = "";
-        // this.nameApiErrorMessage = "";
       }
 
       if (changedProperties.has("lastNameInputValue")) {
         this.lastNameErrorMessage = "";
-        // this.nameApiErrorMessage = "";
       }
 
       if (changedProperties.has("firstNameErrorMessage")) {
@@ -147,6 +147,7 @@ export namespace ProfileViewV2 {
             type: "error",
             message: this.firstNameErrorMessage,
           };
+
           this.firstNameInputMessageArray = [errorMessage];
         } else {
           this.firstNameInputMessageArray = [];
@@ -236,7 +237,7 @@ export namespace ProfileViewV2 {
             this.openAliasView = false;
           }}
         >
-          <div slot="header">Aliases</div>
+          <div slot="header">${this.t("aliases")}</div>
           ${this.renderAliasList()}
         </md-modal>
       `;
@@ -245,7 +246,7 @@ export namespace ProfileViewV2 {
     renderAliasButton() {
       return html`
         <div class="view-alias-component">
-          <md-tooltip message="View aliases" placement="top">
+          <md-tooltip message=${this.t("profile.viewAliases")} placement="top">
             <md-button circle @click=${this.viewAliases} class="view-aliases-button"
               ><md-icon slot="icon" name="participant-list_16"></md-icon
             ></md-button>
@@ -260,7 +261,7 @@ export namespace ProfileViewV2 {
         return html`
           <div class="name-section">
             <cjaas-error-notification
-              title="Failed to fetch names"
+              title=${this.t("error.failedToFetchName")}
               tracking-id=${this.nameErrorTrackingID}
               tiny-view
               @error-try-again=${this.handleNameTryAgain}
@@ -273,7 +274,7 @@ export namespace ProfileViewV2 {
           <div class="name-section">
             <div class="loading-container">
               <md-spinner class="name-loading-spinner" size=${20}></md-spinner>
-              <span class="loading-text">Loading...</span>
+              <span class="loading-text">${this.t("common.loading")}...</span>
             </div>
           </div>
         `;
@@ -307,7 +308,7 @@ export namespace ProfileViewV2 {
             <span class="static-name">
               ${this.firstName} ${this.lastName}
             </span>
-            <md-tooltip message="Edit" placement="top">
+            <md-tooltip message=${this.t("common.edit")} placement="top">
               <md-button circle @click=${this.editFirstLastName} class="edit-name-button"
                 ><md-icon slot="icon" name="edit_16"></md-icon
               ></md-button>
@@ -407,8 +408,12 @@ export namespace ProfileViewV2 {
       ) {
         return html`
           <div class="save-cancel-button-group">
-            <md-button class="cancel-edit-name" variant="secondary" @click=${this.cancelNameEdit}>Cancel</md-button>
-            <md-button class="save-edit-name" variant="primary" @click=${this.submitNames}>Save</md-button>
+            <md-button class="cancel-edit-name" variant="secondary" @click=${this.cancelNameEdit}
+              >${this.t("common.cancel")}</md-button
+            >
+            <md-button class="save-edit-name" variant="primary" @click=${this.submitNames}
+              >${this.t("common.save")}</md-button
+            >
           </div>
         `;
       }
@@ -419,7 +424,7 @@ export namespace ProfileViewV2 {
         return html`
           <div class="error-container">
             <cjaas-error-notification
-              title="Failed to load data"
+              title=${this.t("error.failedToLoadData")}
               tracking-id=${this.profileErrorTrackingID}
               compact-view
               @error-try-again=${this.handleProfileTryAgain}
@@ -430,7 +435,9 @@ export namespace ProfileViewV2 {
         return html`
           <div class="profile-loading-wrapper">
             ${this.renderSpinner(56)}
-            <div class="loading-text-wrapper"><span class="main-loading-text">Loading...</span></div>
+            <div class="loading-text-wrapper">
+              <span class="main-loading-text">${this.t("common.loading")}...</span>
+            </div>
           </div>
         `;
       } else if (this.profileDataPointCount) {
@@ -446,7 +453,7 @@ export namespace ProfileViewV2 {
       } else {
         return html`
           <div class="empty-profile-state">
-            <span>Profile Data doesn't exist</span>
+            <span>${this.t("error.profileDataDoesNotExist")}</span>
           </div>
         `;
       }
@@ -458,7 +465,7 @@ export namespace ProfileViewV2 {
         return html`
           ${this.renderProfileContent()}
           <div class="top-header-row">
-            <h3 class="profile-header">Customer Information</h3>
+            <h3 class="profile-header">${this.t("profile.customerInformation")}</h3>
             ${this.getProfileDataInProgress ? nothing : this.renderSaveCancelOptions()}
           </div>
         `;
@@ -467,7 +474,7 @@ export namespace ProfileViewV2 {
           <div class="column-reverse-focus">
             ${this.renderProfileContent()}
             <div class="top-header-row">
-              <h3 class="profile-header">Customer Information</h3>
+              <h3 class="profile-header">${this.t("profile.customerInformation")}</h3>
               ${this.getProfileDataInProgress ? nothing : this.renderSaveCancelOptions()}
             </div>
           </div>

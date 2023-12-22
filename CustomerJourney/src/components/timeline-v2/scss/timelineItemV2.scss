@@ -110,6 +110,10 @@
   }
 }
 
+.timeline-item.is-wxcc-event .title {
+    text-transform: capitalize;
+}
+
 .most-recent .body .hover-arrow-section {
   align-items: unset;
 }

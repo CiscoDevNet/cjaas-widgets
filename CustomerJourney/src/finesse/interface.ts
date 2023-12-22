@@ -13,7 +13,7 @@ export interface QueryParameters {
   customer?: string;
   logsOn?: boolean;
   disableEventStream?: boolean;
-  defaultTimeRangeOption?: TimelineV2.TimeRangeOption.Last30Days;
+  //   defaultTimeRangeOption?: TimelineV2.TimeRangeOption.Last30Days;
   disableUserSearch?: boolean;
   //   collapseTimelineSection?: boolean;
   //   collapseProfileSection?: boolean;

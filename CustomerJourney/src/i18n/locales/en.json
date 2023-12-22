@@ -1,0 +1,71 @@
+{
+    "common": {
+        "all": "All",
+        "cancel": "Cancel",
+        "edit": "Edit",
+        "learnMore": "Learn More",
+        "loading": "Loading",
+        "loadMore": "Load More",
+        "reload": "Reload",
+        "save": "Save",
+        "showLess": "Show Less",
+        "today": "Today",
+        "tryAgain": "Try Again",
+        "yesterday": "Yesterday",
+        "inbound": "Inbound",
+        "outbound": "Outbound",
+        "email": "Email",
+        "chat": "Chat",
+        "telephony": "Call",
+        "call": "Call",
+        "phone": "Call",
+        "voice": "Voice"
+    },
+    "error": {
+        "alphaCharactersOnly": "Alpha characters only",
+        "emptyStateMessage": "Enter a user to search for a Journey",
+        "failedToFetchName": "Failed to fetch name",
+        "failedToLoadData": "Failed to load data",
+        "nameRequired": "name required",
+        "noData": "No Data",
+        "noMatchesFound": "No Matches Found",
+        "profileDataDoesNotExist": "Profile Data doesn't exist",
+        "trackingID": "Tracking ID",
+        "trackingIDHelpText": "Please share the Tracking ID with site administrator or the support team to investigate the situation."
+    },
+    "profile": {
+        "customerInformation": "Customer Information",
+        "lookupIdentity": "Lookup Identity",
+        "viewAliases": "View Aliases"
+    },
+    "timeline": {
+        "activities": "Activities",
+        "activityTooltipMessage": "View your customer’s end-to-end customer journey and their business activities (calls, chats,website visits, and more).",
+        "filterBy": "Filter By",
+        "livestream": "Livestream"
+    },
+    "timelineItem": {
+        "mostRecent": "Most Recent",
+        "ongoing": "Ongoing",
+        "queueId": "Queue ID: {{id}}",
+        "transcript": "Transcript",
+        "view": "View"
+    },
+    "timeRange": {
+        "allTime": "All Time",
+        "last10Days": "Last 10 Days",
+        "last12Months": "Last 12 Months",
+        "last30Days": "Last 30 Days",
+        "last6Months": "Last 6 Months",
+        "timeRange": "Time Range"
+    },
+    "weekDay": {
+        "friday": "Friday",
+        "monday": "Monday",
+        "saturday": "Saturday",
+        "sunday": "Sunday",
+        "thursday": "Thursday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday"
+    }
+}

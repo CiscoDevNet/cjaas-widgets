@@ -16,11 +16,11 @@ import "@/components/timeline-v2/TimelineV2";
 import "@/components/profile-v2/ProfileV2";
 import "@/components/error-notification/ErrorNotification";
 import { TimelineV2 } from "@/components/timeline-v2/TimelineV2";
+import { i18nLitMixin } from "@/mixins/i18nLitMixin";
 
 import { DateTime } from "luxon";
 import { v4 as uuidv4 } from "uuid";
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
-import { Desktop } from "@wxcc-desktop/sdk";
 import { ifDefined } from "lit-html/directives/if-defined";
 // @ts-ignore
 import { version } from "../version";
@@ -36,14 +36,6 @@ export enum EventType {
 export interface ProfileDataPoint {
   displayName: string;
   value: string;
-}
-
-export enum TimeRangeOption {
-  "AllTime" = "All Time",
-  "Last10Days" = "Last 10 Days",
-  "Last30Days" = "Last 30 Days",
-  "Last6Months" = "Last 6 Months",
-  "Last12Months" = "Last 12 Months",
 }
 
 export enum RawAliasTypes {
@@ -101,17 +93,48 @@ export interface CustomerEvent {
 }
 
 export const DEFAULT_CHANNEL_OPTION = "all channels";
-
 export const JDS_DIVISION_CAD_VARIABLE = "JDSDivision";
 export const JDS_DEFAULT_FILTER_CAD_VARIABLE = "JDSDefaultFilter";
 
+export enum DataCenter {
+  DEVUS1 = "devus1",
+  INTGUS1 = "intgus1",
+  QAUS1 = "qaus1",
+  LOAD = "load",
+  APPSTAGING = "appstaging",
+  PRODUS1 = "produs1",
+  PRODEU1 = "prodeu1",
+  PRODEU2 = "prodeu2",
+}
+
+// Agent Desktop DC names
+// https://sqbu-github.cisco.com/CBABU/wxcc-desktop/blob/1ebbe39bb832132d336358c713fea15ad3a8cf36/packages/agentx/ci.config.ts
+const microServiceEnv = ["dev", "qa", "intg", "prod"];
+
+export const microservices: Record<string, string> = {
+  [DataCenter.DEVUS1]: "https://api-jds.wxdap-devus1.webex.com",
+  [DataCenter.INTGUS1]: "https://api-jds.wxdap-devus1.webex.com",
+  [DataCenter.QAUS1]: "https://api-jds.wxdap-stgus1.webex.com",
+  [DataCenter.LOAD]: "https://api-jds.wxdap-stgus1.webex.com",
+  [DataCenter.APPSTAGING]: "https://api-jds.wxdap-stgus1.webex.com",
+  [DataCenter.PRODUS1]: "https://api-jds.wxdap-produs1.webex.com",
+  [DataCenter.PRODEU1]: "https://api-jds.wxdap-prodeu1.webex.com", // UK
+  [DataCenter.PRODEU2]: "https://api-jds.wxdap-prodeu2.webex.com", // FR
+};
+
 @customElementWithCheck("customer-journey-widget")
-export default class CustomerJourneyWidget extends LitElement {
+export default class CustomerJourneyWidget extends i18nLitMixin(LitElement) {
   /**
    * Bearer Token for authentication
    * @prop bearerToken
    */
   @property({ attribute: false }) bearerToken: string | null = "";
+
+  /**
+   * Data Center name
+   * @prop dataCenter
+   */
+  @property({ attribute: false }) dataCenter: DataCenter | null = null;
 
   /**
    * Property to pass in WxCC Global state about current interaction
@@ -136,11 +159,11 @@ export default class CustomerJourneyWidget extends LitElement {
    * @attr logs-on
    */
   @property({ type: Boolean, attribute: "logs-on" }) logsOn = false;
-  /**
-   * Path to the proper Customer Journey API deployment
-   * @attr base-url
-   */
-  @property({ type: String, attribute: "base-url" }) baseUrl: string | undefined = undefined;
+  //   /**
+  //    * Path to the proper Customer Journey API deployment
+  //    * @attr base-url
+  //    */
+  //   @property({ type: String, attribute: "base-url" }) baseUrl: string | undefined = undefined;
   /**
    * Project ID within your organization
    * @attr project-id
@@ -158,7 +181,7 @@ export default class CustomerJourneyWidget extends LitElement {
   @property({ type: String, attribute: "cad-variable-lookup" }) cadVariableLookup: string | null = null;
   //   /**
   //    * Path to the proper Customer Journey API deployment
-  //    * @attr base-url
+  //    * @attr read-only-aliases
   //    */
   //   @property({ type: Boolean, attribute: "read-only-aliases" }) readOnlyAliases = false;
 
@@ -211,8 +234,8 @@ export default class CustomerJourneyWidget extends LitElement {
    * @attr default-time-range-option
    * Determine default time range on start
    */
-  @property({ type: String, attribute: "default-time-range-option" })
-  defaultTimeRangeOption: TimeRangeOption = TimeRangeOption.AllTime;
+  //   @property({ type: String, attribute: "default-time-range-option" })
+  //   defaultTimeRangeOption: TimeRangeOption = TimeRangeOption.AllTime;
 
   /**
    * Toggle to either queue or immediately load new events occurring in the stream
@@ -244,7 +267,8 @@ export default class CustomerJourneyWidget extends LitElement {
    * Feature Flag to have the Alias Icon and Modal visible
    */
   @property({ type: Boolean, attribute: "show-alias-icon" }) showAliasIcon = false;
-  /**
+
+  @internalProperty() baseUrl: string | undefined = undefined;
   /**
    * Timeline data fetched from journey history
    * @prop events
@@ -361,8 +385,6 @@ export default class CustomerJourneyWidget extends LitElement {
 
   @internalProperty() cadDivisionType: string | undefined = undefined;
 
-  @internalProperty() i18n: any = undefined;
-
   basicRetryConfig = {
     retries: 1,
     retryDelay: () => 3000,
@@ -382,63 +404,38 @@ export default class CustomerJourneyWidget extends LitElement {
   @query("#customer-input") customerInput!: HTMLInputElement;
   @query(".profile") widget!: Element;
 
-  connectedCallback() {
-    super.connectedCallback();
-
-    const locale = Desktop.config.clientLocale;
-    this.debugLogMessage("i18n locale", locale);
-
-    // call api to grab the i18n bundle from azure?
-    // look up bundle based on clientLocale
-    // this.i18n =
-
-    //     const url = `https://api.qaus1.ciscoccservice.com/v1/queues/statistics?from=${fromDateMS}&to=${toDateMS}&interval=15&queueIds=${queueIds}&orgId=${this.organizationId}`;
-
-    //     const config: AxiosRequestConfig = {
-    //       method: "GET",
-    //       url,
-    //       headers: {
-    //         Authorization: `Bearer ${this.bearerToken}`,
-    //       },
-    //     };
-
-    //     const axiosInstance = axios.create(config);
-
-    // return axiosInstance
-    //   .get("https://cjaas.blob.core.windows.net/$web/widgets/i18n/en_US.json")
-    //   .then(json => {
-    //     console.log("i18n json", json);
-    //     //   const queueName = json?.data?.data?.[0]?.queueName;
-    //     //   return queueName;
-    //   })
-    //   .catch((err: AxiosError) => {
-    //     console.error(`[JDS Widget] getQueueNameOfLatestEvent`, err);
-    //   });
-    // }
-
-    axios({
-      method: "get",
-      url: "https://cjaas.cisco.com/widgets/i18n/en_US.json",
-    })
-      .then(response => {
-        console.log("i18n json response", response.data);
-        this.i18n = response.data;
-        //   response.data.pipe(fs.createWriteStream("ada_lovelace.jpg"));
-      })
-      .catch(err => {
-        console.log("i18n json catch", err);
-      });
-  }
-
   async firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
 
-    console.log(`[JDS Widget][Version] customer-journey-${version}`);
+    const environment = process.env.NODE_ENV;
+
+    console.log(`[JDS Widget][Version][ENV] customer-journey-${version}`, environment);
     this.entireWidgetLoading = true;
   }
 
   async update(changedProperties: PropertyValues) {
     super.update(changedProperties);
+
+    if (changedProperties.has("dataCenter") && this.dataCenter) {
+      const typeOfEnv = microServiceEnv.find(env => this.dataCenter?.startsWith(env));
+
+      const fallbackUSBaseUrl = (env: string | undefined): string => {
+        return env ? `${env}us1` : `devus1`;
+      };
+
+      // TODO: will the access token work if we fallback to different url?
+      this.baseUrl =
+        microservices[this.dataCenter] ||
+        microservices[fallbackUSBaseUrl(typeOfEnv)] ||
+        "https://api-jds.wxdap-devus1.webex.com";
+      this.debugLogMessage(
+        "determining base url based on DC",
+        `dataCenter: ${this.dataCenter}`,
+        `typeOfEnv: ${typeOfEnv}`,
+        `usingFallback?: ${!microservices[this.dataCenter]}`,
+        this.baseUrl
+      );
+    }
 
     if (changedProperties.has("iconDataPath") && this.iconDataPath) {
       this.loadJSON(
@@ -471,41 +468,13 @@ export default class CustomerJourneyWidget extends LitElement {
       );
     }
 
-    // if (changedProperties.has("useCadFilterOption") && this.useCadFilterOption) {
-    //   let jdsDefaultFilter;
-    //   if (this.interactionData?.callAssociatedData) {
-    //     jdsDefaultFilter = this.interactionData.callAssociatedData[JDS_DEFAULT_FILTER_CAD_VARIABLE]?.value;
-
-    //     if (!jdsDefaultFilter) {
-    //       console.error(
-    //         `The CAD Variable (jdsDefaultFilter) doesn\'t exist within this interaction. Please check your flow configuration.`
-    //       );
-    //     }
-    //   }
-
-    //   if (jdsDefaultFilter) {
-    //     this.defaultFilterOption = jdsDefaultFilter;
-    //     this.debugLogMessage(
-    //       "set defaultFilterOption as CAD variable (jdsDefaultFilter) value",
-    //       this.defaultFilterOption
-    //     );
-    //   }
-    // }
-
     if (changedProperties.has("interactionData")) {
       if (this.interactionData) {
         this.debugLogMessage("interactionData", this.interactionData);
 
-        ////
         let jdsDefaultFilter;
         if (this.interactionData?.callAssociatedData) {
           jdsDefaultFilter = this.interactionData.callAssociatedData[JDS_DEFAULT_FILTER_CAD_VARIABLE]?.value;
-
-          if (!jdsDefaultFilter) {
-            console.error(
-              `The CAD Variable (jdsDefaultFilter) doesn\'t exist within this interaction. Please check your flow configuration.`
-            );
-          }
         }
 
         if (jdsDefaultFilter) {
@@ -515,7 +484,6 @@ export default class CustomerJourneyWidget extends LitElement {
             this.defaultFilterOption
           );
         }
-        ///////
 
         this.cadDivisionType = this.interactionData.callAssociatedData?.[JDS_DIVISION_CAD_VARIABLE]?.value;
         console.log(`[JDS WIDGET] using CAD variable (${JDS_DIVISION_CAD_VARIABLE}) = ${this.cadDivisionType}`);
@@ -565,36 +533,6 @@ export default class CustomerJourneyWidget extends LitElement {
       console.log(`[JDS WIDGET][LOGS-ON] ${infoMessage}`, args);
     }
   }
-
-  //   getQueueNameOfLatestEvent(event: CustomerEvent) {
-  //     const { createdTime, queueId } = event?.data;
-
-  //     const fromDateMS = createdTime;
-  //     const toDateMS = createdTime + 86400000;
-  //     const queueIds = queueId;
-
-  //     const url = `https://api.qaus1.ciscoccservice.com/v1/queues/statistics?from=${fromDateMS}&to=${toDateMS}&interval=15&queueIds=${queueIds}&orgId=${this.organizationId}`;
-
-  //     const config: AxiosRequestConfig = {
-  //       method: "GET",
-  //       url,
-  //       headers: {
-  //         Authorization: `Bearer ${this.bearerToken}`,
-  //       },
-  //     };
-
-  //     const axiosInstance = axios.create(config);
-
-  //     return axiosInstance
-  //       .get(url)
-  //       .then(response => {
-  //         const queueName = response?.data?.data?.[0]?.queueName;
-  //         return queueName;
-  //       })
-  //       .catch((err: AxiosError) => {
-  //         console.error(`[JDS Widget] getQueueNameOfLatestEvent`, err);
-  //       });
-  //   }
 
   sortEventsByDate(events: CustomerEvent[]) {
     if (events?.length) {
@@ -948,19 +886,14 @@ export default class CustomerJourneyWidget extends LitElement {
     const communicationTypeText = channelTypeText || identityTypeText;
     const formatDirectionText = direction?.toLowerCase();
 
-    // event.renderingData = {
-    //   title: `${formatDirectionText} ${channelTypeText}`,
-    //   subTitle: event?.data?.queueName || `Queue ID: ${event?.data?.queueId}`,
-    //   channelType: channelTypeText,
-    //   iconType: channelType === "telephony" ? `${formatDirectionText}-call` : channelType,
-    // };
-
     let wxccTitle, wxccSubTitle, wxccIconType, wxccChannelTypeTag, wxccSource, wxccIsActive, wxccFilterType;
-    // const isWxccEvent = event?.source.includes("wxcc");
 
     if (this.isWxccEvent(event)) {
       wxccTitle = `${!!direction ? formatDirectionText : ""} ${communicationTypeText}`;
-      wxccSubTitle = event?.data?.queueName || (event?.data?.queueId ? `Queue ID: ${event?.data?.queueId}` : "");
+      wxccSubTitle =
+        event?.data?.queueName ||
+        (event?.data?.queueId ? this.t("timelineItem.queueId", { id: event?.data?.queueId }) : "");
+
       wxccChannelTypeTag =
         channelTypeText === "call" || identityTypeText === "call" ? "voice" : channelTypeText || identityTypeText;
       wxccIconType =
@@ -1500,7 +1433,6 @@ export default class CustomerJourneyWidget extends LitElement {
         limit=${this.limit}
         is-event-filter-visible
         ?live-stream=${!this.disableEventStream}
-        time-range-option=${this.defaultTimeRangeOption}
         error-message=${this.timelineErrorMessage}
         error-tracking-id=${this.timelineErrorTrackingId}
         @timeline-error-try-again=${this.handleTimelineTryAgain}
@@ -1675,7 +1607,7 @@ export default class CustomerJourneyWidget extends LitElement {
       })
       .catch((err: AxiosError) => {
         console.error(`[JDS Widget] Failed to fetch first and last name by Alias: [${customer}]`, err);
-        this.nameApiErrorMessage = "Failed to fetch name";
+        this.nameApiErrorMessage = this.t("error.failedToFetchName");
         if (err?.response?.data?.trackingId) {
           this.nameApiErrorTrackingId = err?.response?.data?.trackingId;
         }
@@ -1838,7 +1770,7 @@ export default class CustomerJourneyWidget extends LitElement {
   renderMainInputSearch() {
     return html`
       <div class="flex-inline sub-widget-section">
-        <span class="custom-input-label">${this.i18n?.lookupIdentity}</span>
+        <span class="custom-input-label">${this.t("profile.lookupIdentity")}</span>
         <div class="input-wrapper">
           <md-input
             searchable
@@ -1850,7 +1782,7 @@ export default class CustomerJourneyWidget extends LitElement {
           >
           </md-input>
           <div class="reload-icon">
-            <md-tooltip message="Reload Widget">
+            <md-tooltip message=${this.t("common.reload")}>
               <md-button circle @click=${this.refreshUserSearch}>
                 <md-icon name="icon-refresh_12"></md-icon>
               </md-button>
@@ -1864,7 +1796,7 @@ export default class CustomerJourneyWidget extends LitElement {
   renderEmptyStateView() {
     return html`
       <div class="empty-state-container">
-        <p class="empty-state-text">${this.i18n?.emptyStateMessage}</p>
+        <p class="empty-state-text">${this.t("error.emptyStateMessage")}</p>
       </div>
     `;
   }
@@ -1886,7 +1818,7 @@ export default class CustomerJourneyWidget extends LitElement {
       return html`
         <div class=${`customer-journey-widget-container ${withUserSearch ? "with-user-search" : ""}`}>
           <cjaas-error-notification
-            title="Failed to load data"
+            title=${this.t("error.failedToLoadData")}
             tracking-id=${this.entireWidgetErrorTrackingId}
             @error-try-again=${this.handleWidgetTryAgain}
           ></cjaas-error-notification>
@@ -1896,8 +1828,8 @@ export default class CustomerJourneyWidget extends LitElement {
       return html`
         <div class=${`customer-journey-widget-container ${withUserSearch ? "with-user-search" : ""}`}>
           <div class="widget-loading-wrapper">
-            <md-spinner size="56"></md-spinner>
-            <p class="loading-text">${this.i18n?.Loading}...</p>
+            <md-spinner class="widget-loading-spinner" size="56"></md-spinner>
+            <p class="loading-text">${this.t("common.loading")}...</p>
           </div>
         </div>
       `;

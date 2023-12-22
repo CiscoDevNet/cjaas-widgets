@@ -14,12 +14,13 @@ import "@momentum-ui/web-components/dist/comp/md-spinner";
 import "@momentum-ui/web-components/dist/comp/md-button";
 import { nothing } from "lit-html";
 import { customElementWithCheck } from "@/mixins/CustomElementCheck";
+import { i18nLitMixin } from "@/mixins/i18nLitMixin";
 
 const cloudFailureImage = "https://cjaas.cisco.com/assets/img/cloud-failure-192.png";
 
 export namespace ErrorNotification {
   @customElementWithCheck("cjaas-error-notification")
-  export class ELEMENT extends LitElement {
+  export class ELEMENT extends i18nLitMixin(LitElement) {
     /**
      * @prop error
      * Error title to display
@@ -56,15 +57,15 @@ export namespace ErrorNotification {
       if (this.showErrorDetails) {
         return html`
           <md-button class="link-button expand-details-link" hasRemoveStyle @click=${this.expandErrorDetails}
-            >Show Less</md-button
+            >${this.t("common.showLess")}</md-button
           >
 
           <p class="tracking-id-instructions">
-            Please share the Tracking ID with site administrator or the support team to investigate the situation.
+            ${this.t("error.trackingIDHelpText")}
           </p>
           <div class="tracking-id-row">
             <span class="tracking-id"
-              >Tracking ID: ${this.trackingId}
+              >${this.t("error.trackingID")}: ${this.trackingId}
               <md-button circle class="copy-icon-button" @click=${this.copyTrackingId}
                 ><md-icon class="copy-icon" name="copy_16"></md-icon
               ></md-button>
@@ -74,7 +75,7 @@ export namespace ErrorNotification {
       } else {
         return html`
           <md-button class="link-button expand-details-link" hasRemoveStyle @click=${this.expandErrorDetails}
-            >Learn More</md-button
+            >${this.t("common.learnMore")}</md-button
           >
         `;
       }
@@ -92,12 +93,12 @@ export namespace ErrorNotification {
               <md-icon name="error_12" class="error-icon"></md-icon>
               <span class="title">${this.title}.</span>
               <md-button class="link-button try-again-link" hasRemoveStyle @click=${this.handleTryAgain}
-                >Try Again</md-button
+                >${this.t("common.tryAgain")}</md-button
               >
             </div>
             ${this.trackingId
               ? html`
-                  <span class="tracking-id">Tracking ID: ${this.trackingId} </span>
+                  <span class="tracking-id">${this.t("error.trackingID")}: ${this.trackingId} </span>
                 `
               : nothing}
           </div>
@@ -113,7 +114,7 @@ export namespace ErrorNotification {
                 <h3 class="title">
                   ${this.title}.
                   <md-button class="link-button try-again-link" hasRemoveStyle @click=${this.handleTryAgain}
-                    >Try Again</md-button
+                    >${this.t("common.tryAgain")}</md-button
                   >
                 </h3>
               </div>
@@ -129,7 +130,9 @@ export namespace ErrorNotification {
             </div>
             <div class="error-box">
               <h3 class="title">${this.title}</h3>
-              <md-button class="try-again-button" variant="primary" @click=${this.handleTryAgain}>Try Again</md-button>
+              <md-button class="try-again-button" variant="primary" @click=${this.handleTryAgain}
+                >${this.t("common.tryAgain")}</md-button
+              >
               ${this.trackingId ? this.renderErrorDetails() : nothing}
             </div>
           </div>

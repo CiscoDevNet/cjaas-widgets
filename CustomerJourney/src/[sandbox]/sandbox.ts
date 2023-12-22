@@ -32,6 +32,7 @@ import * as iconData from "@/assets/icons.json";
 import * as customIconData from "@/assets/sandbox/custom-icons.json";
 import "..";
 import { mockedInteractionData } from "./sandbox.mock";
+import { DataCenter } from "..";
 
 @customElement("cjaas-component-sandbox")
 export class Sandbox extends LitElement {
@@ -110,12 +111,12 @@ export class Sandbox extends LitElement {
         <div style=${containerStyle} class="widget-container">
           <customer-journey-widget
             .bearerToken=${BEARER_TOKEN}
-            base-url=${BASE_URL}
             .organizationId=${ORGANIZATION_ID}
             ?enable-user-search=${true}
             ?show-alias-icon=${true}
             template-id=${ifDefined(TEMPLATE_ID)}
             .interactionData=${mockedInteractionData("INBOUND", IDENTITY)}
+            .dataCenter=${DataCenter.QAUS1}
             project-id=${ifDefined(PROJECT_ID)}
             logs-on
           ></customer-journey-widget>

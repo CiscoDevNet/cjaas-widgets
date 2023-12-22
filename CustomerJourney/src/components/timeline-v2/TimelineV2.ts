@@ -28,6 +28,7 @@ import "@momentum-ui/web-components/dist/comp/md-dropdown";
 import iconData from "../assets/defaultIcons.json";
 import _, { groupBy } from "lodash";
 import { ifDefined } from "lit-html/directives/if-defined";
+import { i18nLitMixin } from "@/mixins/i18nLitMixin";
 
 const desertEmptyImage = "https://cjaas.cisco.com/assets/img/desert-open-results-192.png";
 
@@ -42,20 +43,12 @@ export namespace TimelineV2 {
     Task = "task",
   }
 
-  // export enum ChannelTypeOptions {
-  //   "AllChannels" = "All Channels",
-  //   "Voice" = "Voice",
-  //   "Chat" = "Chat",
-  //   "Email" = "Email",
-  //   "Messenger" = "Messenger",
-  // }
-
-  export enum TimeRangeOption {
-    "AllTime" = "All Time",
-    "Last10Days" = "Last 10 Days",
-    "Last30Days" = "Last 30 Days",
-    "Last6Months" = "Last 6 Months",
-    "Last12Months" = "Last 12 Months",
+  export enum TimeRangeOptionVariables {
+    "AllTime" = "allTime",
+    "Last10Days" = "last10Days",
+    "Last30Days" = "last30Days",
+    "Last6Months" = "last6Months",
+    "Last12Months" = "last12Months",
   }
 
   export enum ChannelType {
@@ -81,22 +74,6 @@ export namespace TimelineV2 {
     workflowManager?: string | null; // task new
     type?: string;
   }
-
-  // export interface CustomerEvent {
-  //   data: Record<string, any>;
-  //   renderData?: Record<string, any>;
-  //   id: string;
-  //   specversion: string;
-  //   type: string;
-  //   source: string;
-  //   time: string;
-  //   identity: string;
-  //   identitytype: "email" | "phone" | "customerId";
-  //   previousidentity: null;
-  //   datacontenttype: string;
-
-  //   person?: string;
-  // }
 
   export interface CustomUIDataPayload {
     title?: string;
@@ -147,10 +124,8 @@ export namespace TimelineV2 {
     };
   }
 
-  export const DEFAULT_CHANNEL_OPTION = "all channels";
-
   @customElementWithCheck("cjaas-timeline-v2")
-  export class ELEMENT extends LitElement {
+  export class ELEMENT extends i18nLitMixin(LitElement) {
     /**
      * @attr limit
      * Set number of events to render
@@ -171,12 +146,6 @@ export namespace TimelineV2 {
      * Show/hide date filters UI
      */
     @property({ type: Boolean, attribute: "is-date-filter-visible" }) isDateFilterVisible = false;
-    /**
-     * @attr time-frame
-     * Determine default time frame on start
-     */
-    @property({ type: String, attribute: "time-range-option" }) timeRangeOption: TimeRangeOption =
-      TimeRangeOption.AllTime;
     /**
      * @attr live-stream
      * Toggle adding latest live events being added directly to timeline (instead of queue)
@@ -212,7 +181,7 @@ export namespace TimelineV2 {
      * @prop defaultFilterOption
      * The default selected filter type
      */
-    @property({ type: String, attribute: "default-filter-option" }) defaultFilterOption = DEFAULT_CHANNEL_OPTION;
+    @property({ type: String, attribute: "default-filter-option" }) defaultFilterOption = "";
     /**
      * @prop mostRecentEvent
      * A event payload representing the most recent event
@@ -268,33 +237,37 @@ export namespace TimelineV2 {
     @internalProperty() isTranscriptModalOpen = false;
     @internalProperty() modalEventTranscript: string | undefined = undefined;
 
-    daysOfTheWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    @internalProperty() timeRangeOption = this.t(`timeRange.${TimeRangeOptionVariables.AllTime}`);
 
-    // channelTypeOptions = [
-    //   ChannelTypeOptions.AllChannels,
-    //   ChannelTypeOptions.Voice,
-    //   ChannelTypeOptions.Chat,
-    //   ChannelTypeOptions.Email,
-    //   ChannelTypeOptions.Messenger,
-    // ];
+    DEFAULT_CHANNEL_OPTION = this.t("common.all").toLowerCase();
 
-    timeRangeOptions = [
-      TimeRangeOption.AllTime,
-      TimeRangeOption.Last10Days,
-      TimeRangeOption.Last30Days,
-      TimeRangeOption.Last6Months,
-      TimeRangeOption.Last12Months,
+    daysOfTheWeek = [
+      this.t("weekDay.monday"),
+      this.t("weekDay.tuesday"),
+      this.t("weekDay.wednesday"),
+      this.t("weekDay.thursday"),
+      this.t("weekDay.friday"),
+      this.t("weekDay.saturday"),
+      this.t("weekDay.sunday"),
     ];
 
-    formattedFilterTypes = {
-      [ChannelType.telephony]: "Voice",
-      [ChannelType.chat]: "Chat",
-      [ChannelType.email]: "Email",
-    };
+    timeRangeOptionsLocale = [
+      this.t("timeRange.allTime"),
+      this.t("timeRange.last10Days"),
+      this.t("timeRange.last30Days"),
+      this.t("timeRange.last6Months"),
+      this.t("timeRange.last12Months"),
+    ];
 
     filteredByTypeList: CustomerEvent[] | null = null;
 
     newestEventsFilteredByType: Array<CustomerEvent> = [];
+
+    constructor() {
+      super();
+      this.defaultFilterOption = this.DEFAULT_CHANNEL_OPTION as string;
+      this.timeRangeOption = this.t(`timeRange.${TimeRangeOptionVariables.AllTime}`);
+    }
 
     firstUpdated(changedProperties: PropertyValues) {
       super.firstUpdated(changedProperties);
@@ -316,10 +289,10 @@ export namespace TimelineV2 {
         const hasDefaultOption = this.dynamicChannelTypeOptions.includes(this.defaultFilterOption.toLowerCase());
         if (!hasDefaultOption) {
           console.error(
-            `[JDS WIDGET]: Your default filter option (${this.defaultFilterOption}) doesn't exist in the dynamic filter options.`,
+            `[JDS WIDGET]: Your default filter option (${this.defaultFilterOption.toLowerCase()}) doesn't exist in the dynamic filter options.`,
             this.dynamicChannelTypeOptions
           );
-          this.defaultFilterOption = DEFAULT_CHANNEL_OPTION;
+          this.defaultFilterOption = this.DEFAULT_CHANNEL_OPTION as string;
         }
       }
     }
@@ -363,17 +336,17 @@ export namespace TimelineV2 {
      * @method calculateOldestEntry
      * @returns {DateTime}
      */
-    calculateOldestEntry(timeRangeOption: TimeRangeOption) {
+    calculateOldestEntry(timeRangeOption: string) {
       switch (timeRangeOption) {
-        case TimeRangeOption["AllTime"]:
+        case this.t(`timeRange.${TimeRangeOptionVariables.AllTime}`):
           return DateTime.now().minus({ year: 10 });
-        case TimeRangeOption["Last10Days"]:
+        case this.t(`timeRange.${TimeRangeOptionVariables.Last10Days}`):
           return DateTime.now().minus({ day: 10 });
-        case TimeRangeOption["Last30Days"]:
+        case this.t(`timeRange.${TimeRangeOptionVariables.Last30Days}`):
           return DateTime.now().minus({ day: 30 });
-        case TimeRangeOption["Last6Months"]:
+        case this.t(`timeRange.${TimeRangeOptionVariables.Last6Months}`):
           return DateTime.now().minus({ month: 6 });
-        case TimeRangeOption["Last12Months"]:
+        case this.t(`timeRange.${TimeRangeOptionVariables.Last12Months}`):
           return DateTime.now().minus({ month: 12 });
         default:
           return DateTime.now().minus({ year: 10 });
@@ -391,7 +364,7 @@ export namespace TimelineV2 {
      */
     createDynamicFilterOptions(events: Array<CustomerEvent> | null): Array<string> {
       const uniqueFilterTypes: Set<string> = new Set(); // ex. chat, telephony, email, agent connected, etc
-      uniqueFilterTypes.add(DEFAULT_CHANNEL_OPTION);
+      uniqueFilterTypes.add(this.DEFAULT_CHANNEL_OPTION as string);
 
       (events || []).forEach(event => {
         // wxcc events
@@ -420,7 +393,7 @@ export namespace TimelineV2 {
         }
       });
       const dynamicOptions = Array.from(uniqueFilterTypes);
-      console.log("dynamicOptions ", dynamicOptions);
+      console.log("dynamic filter options ", dynamicOptions);
       return dynamicOptions;
     }
 
@@ -457,28 +430,29 @@ export namespace TimelineV2 {
       }
     }
 
-    renderNewEventQueueToggle() {
-      return html`
-        <md-toggle-switch class="livestream-toggle" smaller @click=${this.toggleLiveEvents} ?checked=${this.liveStream}>
-          <span style="font-size:.75rem;">
-            Livestream
-          </span>
-        </md-toggle-switch>
-        ${this.renderNewEventCounter()}
-      `;
-    }
+    // renderNewEventQueueToggle() {
+    //   return html`
+    //     <md-toggle-switch class="livestream-toggle" smaller @click=${this.toggleLiveEvents} ?checked=${this.liveStream}>
+    //       <span style="font-size:.75rem;">
+    //         ${this.t("timeline.livestream")}
+    //       </span>
+    //     </md-toggle-switch>
+    //     ${this.renderNewEventCounter()}
+    //   `;
+    // }
 
-    renderNewEventCounter() {
-      return html`
-        <md-chip
-          class=${`event-counter ${this.newestEvents.length > 0 ? "" : "hidden"}`}
-          class="event-counter"
-          small
-          @click=${this.consolidateEvents}
-          value="Show ${this.newestEvents.length} new events"
-        ></md-chip>
-      `;
-    }
+    // renderNewEventCounter() {
+    //   // translate show new event if used again
+    //   return html`
+    //     <md-chip
+    //       class=${`event-counter ${this.newestEvents.length > 0 ? "" : "hidden"}`}
+    //       class="event-counter"
+    //       small
+    //       @click=${this.consolidateEvents}
+    //       value="Show ${this.newestEvents.length} new events"
+    //     ></md-chip>
+    //   `;
+    // }
 
     renderTimestamp(dateString: any, clusterId: string) {
       const dateFormat = "yyyy-MM-dd";
@@ -493,10 +467,10 @@ export namespace TimelineV2 {
       let dayName;
       switch (dateString) {
         case todayDate:
-          dayName = "Today";
+          dayName = this.t("common.today");
           break;
         case yesterdayDate:
-          dayName = "Yesterday";
+          dayName = this.t("common.yesterday");
           break;
         default:
           dayNumber = new Date(dateString).getDay();
@@ -570,7 +544,7 @@ export namespace TimelineV2 {
                 e.preventDefault();
                 this.limit += 5;
               }}
-              ><span class="load-more-text">Load More</span></md-link
+              ><span class="load-more-text">${this.t("common.loadMore")}</span></md-link
             >
           `
         : nothing;
@@ -587,7 +561,7 @@ export namespace TimelineV2 {
             <div class="image-wrapper">
               <img src="${desertEmptyImage}" class="failure-image" alt="failure-image" />
             </div>
-            <p class="no-matches-found-text">No Matches Found</p>
+            <p class="no-matches-found-text">${this.t("error.noMatchesFound")}</p>
           </div>
         </div>
       `;
@@ -608,7 +582,7 @@ export namespace TimelineV2 {
     // }
 
     filterByType(eventList: CustomerEvent[] | undefined | null) {
-      if (this.defaultFilterOption !== DEFAULT_CHANNEL_OPTION && this.defaultFilterOption) {
+      if (this.defaultFilterOption !== this.DEFAULT_CHANNEL_OPTION && this.defaultFilterOption) {
         return (
           eventList?.filter(
             (event: CustomerEvent) =>
@@ -643,7 +617,7 @@ export namespace TimelineV2 {
           <div class="center-content-wrapper">
             <div class="center-content">
               <cjaas-error-notification
-                title="Failed to load data"
+                title=${this.t("error.failedToLoadData")}
                 tracking-id=${this.errorTrackingID}
                 @error-try-again=${this.handleTimelineTryAgain}
               ></cjaas-error-notification>
@@ -705,7 +679,7 @@ export namespace TimelineV2 {
             this.modalEventTranscript = undefined;
           }}
         >
-          <div slot="header">Transcript</div>
+          <div slot="header">${this.t("timelineItem.transcript")}</div>
           <span class="transcript-text">${this.modalEventTranscript}</span>
         </md-modal>
       `;
@@ -729,23 +703,17 @@ export namespace TimelineV2 {
           ${this.renderTranscriptModal()}
           <div class="top-header-row">
             <h3 class="contact-activities-header">
-              Activities<md-tooltip class="contact-activity-tooltip"
+              ${this.t("timeline.activities")}<md-tooltip class="contact-activity-tooltip"
                 ><md-icon class="info-icon" name="info_16"></md-icon>
                 <div slot="tooltip-content">
                   <p class="contact-tooltip-message">
-                    <!-- <b>Contacts:</b>  -->
-                    View your customer’s end-to-end customer journey and their business activities (calls, chats,
-                    website visits, and more).
+                    ${this.t("timeline.activityTooltipMessage")}
                   </p>
-                  <!-- <p class="activities-tooltip-message">
-                    <b>Activities:</b> Explore customer activities performed on third-party platforms or within our
-                    website, such as logging into the portal or account reactivation
-                  </p> -->
                 </div></md-tooltip
               >
             </h3>
             <div class="toggle-container">
-              <span class="toggle-label">Livestream</span>
+              <span class="toggle-label">${this.t("timeline.livestream")}</span>
               <md-toggle-switch
                 class="livestream-toggle"
                 alignLabel="left"
@@ -771,7 +739,7 @@ export namespace TimelineV2 {
           </div>
           <div class="filter-row">
             <div class="filter-block">
-              <p class="filter-label">Filter By</p>
+              <p class="filter-label">${this.t("timeline.filterBy")}</p>
               <md-dropdown
                 class="filter-dropdown channels-dropdown"
                 .defaultOption=${this.defaultFilterOption}
@@ -780,11 +748,11 @@ export namespace TimelineV2 {
               ></md-dropdown>
             </div>
             <div class="filter-block">
-              <p class="filter-label">Time Range</p>
+              <p class="filter-label">${this.t("timeRange.timeRange")}</p>
               <md-dropdown
                 class="filter-dropdown time-range-dropdown"
-                .defaultOption=${this.timeRangeOption}
-                .options=${this.timeRangeOptions}
+                .defaultOption=${this.t(this.timeRangeOption)}
+                .options=${this.timeRangeOptionsLocale}
                 @dropdown-selected=${(event: CustomEvent) => this.handleTimeRangeSelection(event)}
               ></md-dropdown>
             </div>

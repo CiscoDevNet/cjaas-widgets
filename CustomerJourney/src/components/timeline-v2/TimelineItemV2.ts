@@ -13,13 +13,13 @@ import styles from "./scss/module.scss";
 import { getIconData } from "./utils";
 import { customElementWithCheck } from "@/mixins/CustomElementCheck";
 
-// import * as iconData from "@/assets/defaultIcons.json";
 import * as iconData from "../assets/defaultIcons.json";
 import { TimelineV2 } from "./TimelineV2";
 import { nothing, TemplateResult } from "lit-html";
 import * as linkify from "linkifyjs";
 import "@momentum-ui/web-components/dist/comp/md-modal";
 import "@momentum-ui/web-components/dist/comp/md-badge";
+import { i18nLitMixin } from "@/mixins/i18nLitMixin";
 
 const boxOpenImage = "https://cjaas.cisco.com/assets/img/box-open-120.png";
 
@@ -35,7 +35,7 @@ export namespace TimelineItemV2 {
   }
 
   @customElementWithCheck("cjaas-timeline-item-v2")
-  export class ELEMENT extends LitElement {
+  export class ELEMENT extends i18nLitMixin(LitElement) {
     /**
      * @attr title
      */
@@ -112,10 +112,15 @@ export namespace TimelineItemV2 {
       }
     }
 
+    capitalizeFirstLetter(text: string) {
+      return text.charAt(0).toUpperCase() + text.slice(1);
+    }
+
     formatTime(time: string) {
-      const dateTimeObject = DateTime.fromISO(time);
+      const dateTimeObject = DateTime.fromISO(time).setLocale(this.lng);
       this.formattedDay = dateTimeObject?.day.toString() || "";
-      this.formattedMonth = dateTimeObject?.monthShort;
+      this.formattedMonth = this.capitalizeFirstLetter(dateTimeObject?.monthShort);
+      // todo: uppercase first letter of month
 
       return dateTimeObject.toLocaleString({ hour: "2-digit", minute: "2-digit" });
     }
@@ -194,7 +199,7 @@ export namespace TimelineItemV2 {
 
     renderOngoingStatus() {
       return html`
-        <md-badge class="event-status-badge" color="gold" small>Ongoing</md-badge>
+        <md-badge class="event-status-badge" color="gold" small>${this.t("timelineItem.ongoing")}</md-badge>
       `;
     }
 
@@ -289,7 +294,7 @@ export namespace TimelineItemV2 {
                         class="transcript-open-button"
                         href="javascript:;"
                         @click=${this.expandTranscriptModal.bind(this, dataValue)}
-                        ><span slot="text">View</span></a
+                        ><span slot="text">${this.t("timelineItem.view")}</span></a
                       >
                     `;
                   }
@@ -350,30 +355,6 @@ export namespace TimelineItemV2 {
       `;
     };
 
-    // renderDetailsModal() {
-    //   return html`
-    //     <md-modal
-    //       class="event-details-modal"
-    //       htmlId="modal-1"
-    //       ?show=${this.areDetailsExpanded}
-    //       size="dialog"
-    //       hideFooter
-    //       hideHeader
-    //       showCloseButton
-    //       backdropClickExit
-    //       @close-modal=${() => {
-    //         this.areDetailsExpanded = false;
-    //         this.isHovered = false;
-    //       }}
-    //     >
-    //       <div slot="header">Activity Details</div>
-    //       <div class="details grid">
-    //         ${this.createTableRecursive(this.data)}
-    //       </div>
-    //     </md-modal>
-    //   `;
-    // }
-
     render() {
       const showDetailsArrow = this.isHovered && !this.isWxccEvent && this.hasData;
       const iconData = this.getIconData(this.iconType);
@@ -381,12 +362,12 @@ export namespace TimelineItemV2 {
       if (this.emptyMostRecent) {
         return html`
           <div id="timeline-item-container" class="timeline-item ${classMap(this.groupClassMap)}">
-            <h3 class="most-recent-header">Most Recent</h3>
+            <h3 class="most-recent-header">${this.t("timelineItem.mostRecent")}</h3>
             <div class="body">
               <div class="image-wrapper">
                 <img src="${boxOpenImage}" class="failure-image" alt="failure-image" />
               </div>
-              <span class="no-data-text">No Data</span>
+              <span class="no-data-text">${this.t("error.noData")}</span>
             </div>
             ${this.areDetailsExpanded ? this.renderExpandedDetails() : nothing}
           </div>
@@ -399,7 +380,7 @@ export namespace TimelineItemV2 {
             @mouseenter=${() => this.handleMouseEnter()}
             @mouseleave=${() => this.handleMouseLeave()}
           >
-            <h3 class="most-recent-header">Most Recent</h3>
+            <h3 class="most-recent-header">${this.t("timelineItem.mostRecent")}</h3>
             <div class="body">
               ${this.renderLeftSection(iconData)}
               <div class="right-section">
@@ -425,8 +406,6 @@ export namespace TimelineItemV2 {
     }
   }
 }
-
-// line 391:  ${this.renderDetailsModal()}
 
 declare global {
   interface HTMLElementTagNameMap {
