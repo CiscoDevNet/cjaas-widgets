@@ -234,6 +234,10 @@
               "right": {
                 "comp": "customer-journey-widget",
                 "script": "https://cjaas.cisco.com/widgets/customer-journey-10.0.0/index.js",
+                "attributes": {
+                  "condensed-view": "true",
+                  "show-alias-icon": "true"
+                },
                 "properties": {
                   "bearerToken": "$STORE.auth.accessToken",
                   "organizationId": "$STORE.agent.orgId",
