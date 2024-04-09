@@ -17,7 +17,7 @@ customer-journey-10.0.0.js
 5. [How to set IconType for a published event](#how-to-set-icontype-for-a-published-event)
 6. [How to add Custom Icons to your CJDS Widget](#how-to-add-custom-icons-to-your-cjds-widget)
 7. [View all Customer Journey Widget Properties](#customer-journey-widget-properties)
-8. [How to setup CJDS Widget in the side nav of Agent Desktop](#how-to-setup-cjds-widget-in-the-side-nav-of-agent-desktop)
+
 
 ## Setup CJDS Widget in Agent Desktop
 
@@ -30,6 +30,7 @@ customer-journey-10.0.0.js
 
 3. Download the following Desktop Layout JSON file:
 [JDSDesktopLayout10.json](https://github.com/CiscoDevNet/cjaas-widgets/blob/main/CustomerJourney/src/assets/JDSDesktopLayout10.json)
+- If you are interested in adding the CJDS Widget to your existing desktop layout, get the code snippet [here](#how-to-add-the-cjds-widget-into-an-existing-desktop-layout).
 5. While you are still logged into [Control Hub](https://admin.webex.com/), navigate to `Contact Center` > `Desktop Layouts` in the left-hand side nav.
 7. Create a new Layout or edit an existing desktop layout, assign an agent team, upload the downloaded JDSDesktopLayout10.json file and save. 
 8. Now, you can log into [Agent Desktop](https://desktop.wxcc-us1.cisco.com/) as an Agent or refresh the Agent Desktop browser page and the new Desktop Layout will take effect and your CJDS Widget will appear in the right hand side the next time you accept an incoming customer request.
@@ -190,6 +191,58 @@ Already provided like so in the defualt-desktop-JDS.json desktop layout file.
 
 And also, here is the other one to filter by cadVariable: "JDSDivision" this filters by the event payload property
 event?.data?.uiData?.division
+
+### How to add the CJDS Widget into an existing Desktop Layout
+_Prerequiste: You need to understand JSON code structure in order to properly edit the desktop layout._
+
+1. Copy the following JSON code block and paste it after the IVR_TRANSCRIPT section. 
+CJDS Widget Code Block
+```json
+          {
+            "comp": "md-tab",
+            "attributes": {
+              "slot": "tab",
+              "class": "widget-pane-tab"
+            },
+            "children": [
+              {
+                "comp": "span",
+                "textContent": "Customer Journey"
+              }
+            ]
+          },
+          {
+            "comp": "md-tab-panel",
+            "attributes": {
+              "slot": "panel",
+              "class": "widget-pane"
+            },
+            "children": [
+              {
+                "comp": "customer-journey-widget",
+                "script": "https://journey-widget.webex.com",
+                "attributes": {
+                  "show-alias-icon": "true",
+                  "condensed-view": "true"
+                },
+                "properties": {
+                  "interactionData": "$STORE.agentContact.taskSelected",
+                  "bearerToken": "$STORE.auth.accessToken",
+                  "organizationId": "$STORE.agent.orgId",
+                  "dataCenter": "$STORE.app.datacenter"
+                },
+                "wrapper": {
+                  "title": "Customer Journey Widget",
+                  "maximizeAreaName": "app-maximize-area"
+                }
+              }
+            ]
+          },
+```
+Here is a screenshot of the block in place (notice it is after IVR_TRASNCRIPT and before WXM_JOURNEY_TAB
+
+<img width="658" alt="cjdsWidget-inLayout" src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/f3dacd47-8285-4795-a5e8-7da7b95fd045">
+
 
 # Adding Widget to CCE and CCX via Finesse
 1. Assuming the widget is deployed using above steps, files under finesse directory will be used.
