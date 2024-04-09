@@ -3,10 +3,16 @@
 
 This widget uses the JDS (Journey Data Services) APIs to display an individual customer's journey as a history of events. It first retrieves the complete event history from the tape endpoint and compiles toggles for all event channelTypes, and then subscribes to a live stream of new events so they appear in real time. This code can be used as is, or be starter code for your own Custom Widget. It also embodies a profile view with a default template named 'journey-default-template'
 
-## Latest Version
+#### Latest Version: 
 ```
-customer-journey-10.0.0.js
+10.0.0
 ```
+
+#### CJDS Widget Reference
+```
+"script": "https://journey-widget.webex.com",
+```
+
 
 ## Table of Contents
 
@@ -26,7 +32,6 @@ customer-journey-10.0.0.js
 2. Log into [Control Hub](https://admin.webex.com/) as an admin and toggle on the Webex Contact Center Connector for a journey project.
 
   <img src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/24f3a5c9-c17c-413b-9dd8-0a38c9a18b76" height="300"/>
-
 
 3. Download the following Desktop Layout JSON file:
 [JDSDesktopLayout10.json](https://github.com/CiscoDevNet/cjaas-widgets/blob/main/CustomerJourney/src/assets/JDSDesktopLayout10.json)
@@ -49,7 +54,7 @@ customer-journey-10.0.0.js
 
 <img src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/3c2a8e32-a80c-4f28-a71f-894d8cce794a" height="500"/>
 
-### Publishing a WXCC Event
+## Publishing a WXCC Event
 1. Publish Event API Documentation: https://api-jds.wxdap-produs1.webex.com/publish/docs/swagger-ui/index.html#
 2.  Example API Request Body of a WXCC Chat Event (Using Postman syntax)
    - IDENTITY: Update both `identitiy` and `data.origin` fields with the customer's identity (ex. email or phone number)
@@ -82,7 +87,7 @@ customer-journey-10.0.0.js
 }
 ```
 
-### Publishing a Custom Event
+## Publishing a Custom Event
 Besides the WXCC events. you can publish custom events using our APIs. Here are instructions on how to publish your own custom event. 
 
 1. Publish Event API Documentation: https://api-jds.wxdap-produs1.webex.com/publish/docs/swagger-ui/index.html#
@@ -192,7 +197,7 @@ Already provided like so in the defualt-desktop-JDS.json desktop layout file.
 And also, here is the other one to filter by cadVariable: "JDSDivision" this filters by the event payload property
 event?.data?.uiData?.division
 
-### How to add the CJDS Widget into an existing Desktop Layout
+## How to add the CJDS Widget into an existing Desktop Layout
 _Prerequiste: You need to understand JSON code structure in order to properly edit the desktop layout._
 
 1. Copy the following JSON code block and paste it after the IVR_TRANSCRIPT section. 
@@ -244,7 +249,7 @@ Here is a screenshot of the block in place (notice it is after IVR_TRASNCRIPT an
 <img width="658" alt="cjdsWidget-inLayout" src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/f3dacd47-8285-4795-a5e8-7da7b95fd045">
 
 
-# Adding Widget to CCE and CCX via Finesse
+## Adding Widget to CCE and CCX via Finesse
 1. Assuming the widget is deployed using above steps, files under finesse directory will be used.
 2. For testing reserve CCE/CCX sanbox from devnet. Follow instructions to launch admin portal and dashboard.
 3. Add gadget config with supported queryStrings to agent desktop config.
