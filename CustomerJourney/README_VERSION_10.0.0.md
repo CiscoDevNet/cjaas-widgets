@@ -36,9 +36,9 @@ This widget uses the JDS (Journey Data Services) APIs to display an individual c
 3. Download the following Desktop Layout JSON file:
 [JDSDesktopLayout10.json](https://github.com/CiscoDevNet/cjaas-widgets/blob/main/CustomerJourney/src/assets/JDSDesktopLayout10.json)
 - If you are interested in adding the CJDS Widget to your existing desktop layout, get the code snippet [here](#how-to-add-the-cjds-widget-into-an-existing-desktop-layout).
-5. While you are still logged into [Control Hub](https://admin.webex.com/), navigate to `Contact Center` > `Desktop Layouts` in the left-hand side nav.
-7. Create a new Layout or edit an existing desktop layout, assign an agent team, upload the downloaded JDSDesktopLayout10.json file and save. 
-8. Now, you can log into [Agent Desktop](https://desktop.wxcc-us1.cisco.com/) as an Agent or refresh the Agent Desktop browser page and the new Desktop Layout will take effect and your CJDS Widget will appear in the right hand side the next time you accept an incoming customer request.
+4. While you are still logged into [Control Hub](https://admin.webex.com/), navigate to `Contact Center` > `Desktop Layouts` in the left-hand side nav.
+5. Create a new Layout or edit an existing desktop layout, assign an agent team, upload the downloaded JDSDesktopLayout10.json file and save. 
+6. Now, you can log into [Agent Desktop](https://desktop.wxcc-us1.cisco.com/) as an Agent or refresh the Agent Desktop browser page and the new Desktop Layout will take effect and your CJDS Widget will appear in the right hand side the next time you accept an incoming customer request.
 
 
 <sub>*If you need help setting up the widget in Agent Desktop, contact cjds_widget@cisco.com.*</sub>
