@@ -4,6 +4,14 @@ This widget uses the JDS (Journey Data Services) APIs to display an individual c
 
 ### Latest Version
 ```
+customer-journey-10.0.0.js
+```
+
+Please navigate to this [README-VERSION-10.0.0.md](https://github.com/CiscoDevNet/cjaas-widgets/blob/main/CustomerJourney/README_VERSION_10.0.0.md)
+
+
+###  Version 9.0.0
+```
 customer-journey-9.0.0.js
 ```
 Github Branch: `main`
