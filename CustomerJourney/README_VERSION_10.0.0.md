@@ -27,6 +27,8 @@ This widget uses the JDS (Journey Data Services) APIs to display an individual c
 
 ## Setup CJDS Widget in Agent Desktop
 
+Instructional Vidcast: [CJDS Widget v10 Setup Vidcast](https://app.vidcast.io/share/3c791866-c166-45fc-a87a-0bbaa5717103)
+
 1. Onboard a Customer Journey organization
 - CJDS is currently in Limited Availability (for US-only), please fill out this [Form](https://app.smartsheet.com/b/form/7776df72239e47d0bbb73a392e32927f)  to be onboarded. Post the initial request, the Cisco team will assist you with CJDS instance setup within 72 hours.
 2. Log into [Control Hub](https://admin.webex.com/) as an admin and toggle on the Webex Contact Center Connector for a journey project.
