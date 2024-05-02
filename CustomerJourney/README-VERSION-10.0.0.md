@@ -27,7 +27,7 @@ https://app.vidcast.io/share/0ebc75d5-62a4-4771-819e-518991c23b23
 
 1. To start, copy the contents of the following Desktop Layout JSON file and create a new file with the contents pasted.  
 
-- [DesktopLayoutStarterTemplate](https://raw.githubusercontent.com/CiscoDevNet/cjaas-widgets/main/CustomerJourney/src/assets/CJDSWidget-10-LayoutTemplate.json)
+- [JDSDesktopLayout10.json](https://github.com/CiscoDevNet/cjaas-widgets/blob/main/CustomerJourney/src/assets/JDSDesktopLayout10.json)
 
 2. Within that file and search for `ENTER_YOUR_PROJECT_ID_HERE` and replace that text with your project ID in quotations (from Control Hub) and save your Desktop Layout JSON file.
 <img width="465" alt="Desktop Layout JSON File" src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/0d42e76d-621e-4c86-b82b-9b2c08660d65">
