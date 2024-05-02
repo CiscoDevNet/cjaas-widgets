@@ -7,13 +7,6 @@ This widget uses the JDS (Journey Data Services) APIs to display an individual c
 ```
 customer-journey-10.0.0.js
 ```
-[CJDS Widget Github](https://github.com/CiscoDevNet/cjaas-widgets/tree/main/CustomerJourney)
-
-[Common Components Github](https://github.com/CiscoDevNet/cjaas-common-components) 
-
-"@cjaas/common-components" version: `5.0.0` 
-
-<sub>_* required properties: BearerToken, Organization Id, and Project Id_</sub>
 
 ### Desktop Layout CJDS Widget Configuration
 
