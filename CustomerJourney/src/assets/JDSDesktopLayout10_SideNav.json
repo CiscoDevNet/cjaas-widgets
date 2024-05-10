@@ -68,6 +68,46 @@
           {
             "comp": "md-tab",
             "attributes": {
+              "slot": "tab",
+              "class": "widget-pane-tab"
+            },
+            "children": [
+              {
+                "comp": "span",
+                "textContent": "Customer Journey"
+              }
+            ]
+          },
+          {
+            "comp": "md-tab-panel",
+            "attributes": {
+              "slot": "panel",
+              "class": "widget-pane"
+            },
+            "children": [
+              {
+                "comp": "customer-journey-widget",
+                "script": "https://journey-widget.webex.com",
+                "attributes": {
+                  "show-alias-icon": "true",
+                  "condensed-view": "true"
+                },
+                "properties": {
+                  "interactionData": "$STORE.agentContact.taskSelected",
+                  "bearerToken": "$STORE.auth.accessToken",
+                  "organizationId": "$STORE.agent.orgId",
+                  "dataCenter": "$STORE.app.datacenter"
+                },
+                "wrapper": {
+                  "title": "Customer Journey Widget",
+                  "maximizeAreaName": "app-maximize-area"
+                }
+              }
+            ]
+          },
+          {
+            "comp": "md-tab",
+            "attributes": {
               "slot": "tab"
             },
             "children": [
@@ -211,6 +251,52 @@
             }
           },
           "visibility": "WXM_METRICS"
+        },
+                        {
+          "nav": {
+            "label": "Customer Journey Widget",
+            "icon": "/app/images/wxm.bcd45cc3.svg",
+            "iconType": "other",
+            "navigateTo": "customerJourneyWidget",
+            "align": "top"
+          },
+          "page": {
+            "id": "customerJourneyWidget",
+            "widgets": {
+              "right": {
+                "comp": "customer-journey-widget",
+                "script": "https://journey-widget.webex.com",
+                "attributes": {
+                  "condensed-view": "true",
+                  "show-alias-icon": "true"
+                },
+                "properties": {
+                  "bearerToken": "$STORE.auth.accessToken",
+                  "organizationId": "$STORE.agent.orgId",
+                  "dataCenter": "$STORE.app.datacenter"
+                },
+                "wrapper": {
+                  "title": "Customer Journey Widget",
+                  "maximizeAreaName": "app-maximize-area"
+                }
+              }
+            },
+            "layout": {
+              "areas": [
+                [
+                  "right"
+                ]
+              ],
+              "size": {
+                "cols": [
+                  1
+                ],
+                "rows": [
+                  1
+                ]
+              }
+            }
+          }
         }
       ]
     }
@@ -1219,52 +1305,6 @@
                 "properties": {
                   "tpwConfigs": "$STORE.agent.tpwConfigs"
                 }
-              }
-            }
-          }
-        },
-        {
-          "nav": {
-            "label": "Customer Journey Widget",
-            "icon": "/app/images/wxm.bcd45cc3.svg",
-            "iconType": "other",
-            "navigateTo": "customerJourneyWidget",
-            "align": "top"
-          },
-          "page": {
-            "id": "customerJourneyWidget",
-            "widgets": {
-              "right": {
-                "comp": "customer-journey-widget",
-                "script": "https://journey-widget.webex.com",
-                "attributes": {
-                  "condensed-view": "true",
-                  "show-alias-icon": "true"
-                },
-                "properties": {
-                  "bearerToken": "$STORE.auth.accessToken",
-                  "organizationId": "$STORE.agent.orgId",
-                  "dataCenter": "$STORE.app.datacenter"
-                },
-                "wrapper": {
-                  "title": "Customer Journey Widget",
-                  "maximizeAreaName": "app-maximize-area"
-                }
-              }
-            },
-            "layout": {
-              "areas": [
-                [
-                  "right"
-                ]
-              ],
-              "size": {
-                "cols": [
-                  1
-                ],
-                "rows": [
-                  1
-                ]
               }
             }
           }
