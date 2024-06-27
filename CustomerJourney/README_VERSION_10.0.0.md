@@ -130,7 +130,16 @@ Besides the WXCC events. you can publish custom events using our APIs. Here are 
 
 
 ## How to add Custom Icons to your CJDS Widget 
-If there is an icon in the https://momentum.design/icons that does not exist in the default-icon-map.json file, you can add custom icon mappings.
+If there is an icon in this [collection](https://github.com/momentum-design/momentum-ui/tree/40ff564f61938e296e36df0de06c8f30e9c6c722/icons/svg) that does not exist in the default-icon-map.json file, you can add custom icon mappings.
+
+*Momentum Icons Webiste has been taken down*
+
+- Navigate to this link and search icons by keyword in the "Go To File" Input field in the upper right corner.
+  https://github.com/momentum-design/momentum-ui/tree/40ff564f61938e296e36df0de06c8f30e9c6c722/icons/svg
+
+<img width="800" alt="Screenshot 2024-06-26 at 6 43 26 PM" src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/23d54e5e-8b61-4cb7-a8eb-08a67a721c0d">
+
+
 1. To start, please make a copy of the [default-icon-color-map.json](https://raw.githubusercontent.com/CiscoDevNet/cjaas-widgets/10-dev7-barry-fixes/CustomerJourney/src/assets/default-icon-color-map.json) file found on the JDS Widget Github 
 2. Append the following highlighted block like so with the associated Momentum icon that you would like to add and save. We recommend using size 16 icon.
 <img width="800" alt="Add Momentum Icon to Icon Map" src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/25f3561a-3e29-403d-a2b9-4a306a082247">
