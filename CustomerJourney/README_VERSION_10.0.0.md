@@ -23,6 +23,8 @@ This widget uses the JDS (Journey Data Services) APIs to display an individual c
 5. [How to set IconType for a published event](#how-to-set-icontype-for-a-published-event)
 6. [How to add Custom Icons to your CJDS Widget](#how-to-add-custom-icons-to-your-cjds-widget)
 7. [View all Customer Journey Widget Properties](#customer-journey-widget-properties)
+8. [How to add CJDS Widget to the Side Nav within Agent Desktop](#how-to-add-cjds-widget-to-the-side-nav-within-agent-desktop)
+9. [How to add the CJDS Widget into an existing Desktop Layout](#how-to-add-the-cjds-widget-into-an-existing-desktop-layout)
 
 
 ## Setup CJDS Widget in Agent Desktop
@@ -208,6 +210,13 @@ Already provided like so in the defualt-desktop-JDS.json desktop layout file.
 And also, here is the other one to filter by cadVariable: "JDSDivision" this filters by the event payload property
 event?.data?.uiData?.division
 
+## How to add CJDS Widget to the Side Nav within Agent Desktop
+If you would like to have the CJDS Widget accessable from the side nav and not have to trigger an incoming event to see the widget, please read the following...
+Here is a template with the Widget already configured in the Desktop Layout to render normally as well as render within the side nav.
+1. Download the following Desktop Layout JSON file:
+[JDSDesktopLayout10_SideNav.json](https://github.com/CiscoDevNet/cjaas-widgets/blob/main/CustomerJourney/src/assets/JDSDesktopLayout10_SideNav.json)
+
+
 ## How to add the CJDS Widget into an existing Desktop Layout
 _Prerequiste: You need to understand JSON code structure in order to properly edit the desktop layout._
 
@@ -261,6 +270,8 @@ Here is a screenshot of the block in place (notice it is after IVR_TRASNCRIPT an
 
 
 ## Adding Widget to CCE and CCX via Finesse
+We have provided a gadget xml file for CJDS Widget "out of the box" configuration within Finesse.
+1. Please download this file:[CiscoJDSFinesseGadget.xml](https://github.com/CiscoDevNet/cjaas-widgets/blob/main/CustomerJourney/src/assets/CiscoJDSFinesseGadget.xml)
 1. Assuming the widget is deployed using above steps, files under finesse directory will be used.
 2. For testing reserve CCE/CCX sanbox from devnet. Follow instructions to launch admin portal and dashboard.
 3. Add gadget config with supported queryStrings to agent desktop config.
