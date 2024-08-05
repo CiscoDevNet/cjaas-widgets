@@ -90,7 +90,8 @@
                 "script": "https://journey-widget.webex.com",
                 "attributes": {
                   "show-alias-icon": "true",
-                  "condensed-view": "true"
+                  "condensed-view": "true",
+                  "enable-user-search": "true"
                 },
                 "properties": {
                   "interactionData": "$STORE.agentContact.taskSelected",
