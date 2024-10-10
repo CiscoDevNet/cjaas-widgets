@@ -111,12 +111,12 @@ Besides the WXCC events. you can publish custom events using our APIs. Here are 
   "identitytype": "email",
   "datacontenttype": "application/json",
   "data": {
+    "Visit Duration": "15 Minutes",
     "Website visited": "https://www.united.com",
-    "Visit Duration": "5 Minutes",
     "uiData": {
-      "title": "Visited Website",
+      "title": "Login",
       "iconType": "login",
-      "subTitle": "Checked balance",
+      "subTitle": "Logged into United",
       "filterTags": ["login"]
     }
   }
