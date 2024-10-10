@@ -178,7 +178,7 @@ Already provided like so in the defualt-desktop-JDS.json desktop layout file.
   },
 ```
 
-### Optional Properties
+### Optional Attributes
 `@attr project-id`: (<i>String</i>) - ProjectId sets the scope within the selected org. You can obtain this from the admin portal by selecting on the specific project for project details. If not provided, the widget automatically looks up the project Id in which the WXCC connector is enabled.
 
 `@attr template-id`: (<i>String</i>) - Sets the data template to retrieve customer Profile in desired format. If not provided, this gets assigned to the associated templateId of the `journey-default-template` via an API call or selects the first provided template Id for your particular project.
