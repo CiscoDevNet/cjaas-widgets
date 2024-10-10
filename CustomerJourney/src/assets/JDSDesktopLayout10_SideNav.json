@@ -90,8 +90,7 @@
                 "script": "https://journey-widget.webex.com",
                 "attributes": {
                   "show-alias-icon": "true",
-                  "condensed-view": "true",
-                  "enable-user-search": "true"
+                  "condensed-view": "true"
                 },
                 "properties": {
                   "interactionData": "$STORE.agentContact.taskSelected",
@@ -256,8 +255,8 @@
                         {
           "nav": {
             "label": "Customer Journey Widget",
-            "icon": "/app/images/wxm.bcd45cc3.svg",
-            "iconType": "other",
+            "icon": "launch",
+            "iconType": "momentum",
             "navigateTo": "customerJourneyWidget",
             "align": "top"
           },
