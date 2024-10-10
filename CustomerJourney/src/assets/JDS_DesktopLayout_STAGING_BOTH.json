@@ -272,7 +272,6 @@
                     "enable-user-search": "true"
                   },
                   "properties": {
-                    "interactionData": "$STORE.agentContact.taskSelected",
                     "bearerToken": "$STORE.auth.accessToken",
                     "organizationId": "$STORE.agent.orgId",
                     "dataCenter": "appstaging"
