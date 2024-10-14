@@ -216,6 +216,61 @@ Here is a template with the Widget already configured in the Desktop Layout to r
 1. Download the following Desktop Layout JSON file:
 [JDSDesktopLayout10_SideNav.json](https://github.com/CiscoDevNet/cjaas-widgets/blob/main/CustomerJourney/src/assets/JDSDesktopLayout10_SideNav.json)
 
+#### Desktop Layout CJDS Widget for side Nav Code Snippet for adding to existing layouts.
+You can look up a momentum Icon you would like to use for the side nav icon. Use the icon keyword for the "icon" property. Just make sure you have the iconType as "momentum"
+
+Navigate to this link and search icons by keyword in the "Go To File" Input field in the upper right corner. 
+https://github.com/momentum-design/momentum-ui/tree/40ff564f61938e296e36df0de06c8f30e9c6c722/icons/svg
+
+```json
+{
+  "nav": {
+    "label": "Journey Data Services",
+    "icon": "accessories",
+    "iconType": "momentum",
+    "navigateTo": "customerJourneyWidget",
+    "align": "top"
+  },
+  "page": {
+    "id": "customerJourneyWidget",
+    "widgets": {
+      "right": {
+        "comp": "customer-journey-widget",
+        "script": "https://stg-journey-widget.webex.com",
+        "attributes": {
+          "show-alias-icon": "true",
+          "condensed-view": "true",
+          "enable-user-search": "true"
+        },
+        "properties": {
+          "bearerToken": "$STORE.auth.accessToken",
+          "organizationId": "$STORE.agent.orgId",
+          "dataCenter": "appstaging"
+        },
+        "wrapper": {
+          "title": "Customer Journey Widget",
+          "maximizeAreaName": "app-maximize-area"
+        }
+      }
+    },
+    "layout": {
+      "areas": [
+        [
+          "right"
+        ]
+      ],
+      "size": {
+        "cols": [
+          1
+        ],
+        "rows": [
+          1
+        ]
+      }
+    }
+  }
+}
+```
 
 ## How to add the CJDS Widget into an existing Desktop Layout
 _Prerequiste: You need to understand JSON code structure in order to properly edit the desktop layout._
