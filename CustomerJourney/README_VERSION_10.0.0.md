@@ -236,7 +236,7 @@ https://github.com/momentum-design/momentum-ui/tree/40ff564f61938e296e36df0de06c
     "widgets": {
       "right": {
         "comp": "customer-journey-widget",
-        "script": "https://stg-journey-widget.webex.com",
+        "script": "https://journey-widget.webex.com",
         "attributes": {
           "show-alias-icon": "true",
           "condensed-view": "true",
@@ -245,7 +245,7 @@ https://github.com/momentum-design/momentum-ui/tree/40ff564f61938e296e36df0de06c
         "properties": {
           "bearerToken": "$STORE.auth.accessToken",
           "organizationId": "$STORE.agent.orgId",
-          "dataCenter": "appstaging"
+          "dataCenter": "$STORE.app.datacenter"
         },
         "wrapper": {
           "title": "Customer Journey Widget",
