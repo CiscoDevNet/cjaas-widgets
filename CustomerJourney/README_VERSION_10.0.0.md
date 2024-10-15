@@ -58,7 +58,7 @@ Instructional Vidcast: [CJDS Widget v10 Setup Vidcast](https://app.vidcast.io/sh
 
 <img src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/3c2a8e32-a80c-4f28-a71f-894d8cce794a" height="500"/>
 
-## Publishing a WXCC Event
+## Publishing a WXCC Event (You shouldn't do this manually) 
 1. Publish Event API Documentation: https://api-jds.wxdap-produs1.webex.com/publish/docs/swagger-ui/index.html#
 2.  Example API Request Body of a WXCC Chat Event (Using Postman syntax)
    - IDENTITY: Update both `identitiy` and `data.origin` fields with the customer's identity (ex. email or phone number)
