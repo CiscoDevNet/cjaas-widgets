@@ -268,7 +268,8 @@
                 "script": "https://journey-widget.webex.com",
                 "attributes": {
                   "condensed-view": "true",
-                  "show-alias-icon": "true"
+                  "show-alias-icon": "true",
+                  "enable-user-search": "true"
                 },
                 "properties": {
                   "bearerToken": "$STORE.auth.accessToken",
