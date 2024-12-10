@@ -136,11 +136,10 @@ If there is an icon in this [collection](https://github.com/momentum-design/mome
 
 *Momentum Icons Webiste has been taken down*
 
-- Navigate to this link and search icons by keyword in the "Go To File" Input field in the upper right corner.
-  https://github.com/momentum-design/momentum-ui/tree/40ff564f61938e296e36df0de06c8f30e9c6c722/icons/svg
-
-<img width="800" alt="Screenshot 2024-06-26 at 6 43 26 PM" src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/23d54e5e-8b61-4cb7-a8eb-08a67a721c0d">
-
+- Navigate to this link and search icons by keyword (ctrl+f). We are planning on finding a better process for this.
+  [Supported Icons](https://raw.githubusercontent.com/momentum-design/momentum-ui/40ff564f61938e296e36df0de06c8f30e9c6c722/icons/css/momentum-ui-icons.min.css)
+  
+<img width="863" alt="Screenshot 2024-12-10 at 9 50 34 AM" src="https://github.com/user-attachments/assets/f3c5d429-2990-45f5-a947-4cd6be1fb916">
 
 1. To start, please make a copy of the [default-icon-color-map.json](https://raw.githubusercontent.com/CiscoDevNet/cjaas-widgets/10-dev7-barry-fixes/CustomerJourney/src/assets/default-icon-color-map.json) file found on the JDS Widget Github 
 2. Append the following highlighted block like so with the associated Momentum icon that you would like to add and save. We recommend using size 16 icon.
