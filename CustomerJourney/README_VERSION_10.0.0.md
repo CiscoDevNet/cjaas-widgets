@@ -134,19 +134,37 @@ Besides the WXCC events. you can publish custom events using our APIs. Here are 
 ## How to add Custom Icons to your CJDS Widget 
 If there is an icon in this [collection](https://github.com/momentum-design/momentum-ui/tree/40ff564f61938e296e36df0de06c8f30e9c6c722/icons/svg) that does not exist in the default-icon-map.json file, you can add custom icon mappings.
 
-*Momentum Icons Webiste has been taken down*
+You can look up icons on this page
+https://mch-examples.cisco.com/icon/default
+<img width="1379" alt="Screenshot 2025-01-15 at 4 42 06 PM" src="https://github.com/user-attachments/assets/3885a545-de47-456d-9d87-c91c0ba3ac52" />
+There are two sets of momentum icons: Momentum UI Icons (older) & Momentum Design Icons (newer)
+By default, the momenetum UI Icon library is being used.
 
-- Navigate to this link and search icons by keyword (ctrl+f). We are planning on finding a better process for this.
-  [Supported Icons](https://raw.githubusercontent.com/momentum-design/momentum-ui/40ff564f61938e296e36df0de06c8f30e9c6c722/icons/css/momentum-ui-icons.min.css)
-  
-<img width="863" alt="Screenshot 2024-12-10 at 9 50 34 AM" src="https://github.com/user-attachments/assets/f3c5d429-2990-45f5-a947-4cd6be1fb916">
+Momentum UI Icons Notation
+`accessibility_16`
 
-1. To start, please make a copy of the [default-icon-color-map.json](https://raw.githubusercontent.com/CiscoDevNet/cjaas-widgets/10-dev7-barry-fixes/CustomerJourney/src/assets/default-icon-color-map.json) file found on the JDS Widget Github 
-2. Append the following highlighted block like so with the associated Momentum icon that you would like to add and save. We recommend using size 16 icon.
-<img width="800" alt="Add Momentum Icon to Icon Map" src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/25f3561a-3e29-403d-a2b9-4a306a082247">
+Momentum Design Icon Notation
+`accessibility-bold`
 
-3. Host your saved file on your own server. 
-4. Add the `icon-data-url` attribute with a URL in quotations to your CJDS Widget configuration (example screenshot below) in your Desktop Layout JSON file and save.
+You can upgrade to the momentum-design icon library by setting the following attribute:
+```
+"use-new-momentum-icons": "true"
+```
+
+1. To start, please make a copy of the default Icon map based on the library you want to use.
+
+Momentum UI (Old): [md-ui-icon-map.json](https://raw.githubusercontent.com/CiscoDevNet/cjaas-widgets/refs/heads/main/CustomerJourney/src/assets/md-ui-icon-map.json)
+Momentum Design (New): [md-design-icon-map.json](https://raw.githubusercontent.com/CiscoDevNet/cjaas-widgets/refs/heads/main/CustomerJourney/src/assets/md-design-icon-map.json)
+
+3. Append Icon and color
+    - Momentum UI icon
+<img width="366" alt="Screenshot 2025-01-15 at 5 09 37 PM" src="https://github.com/user-attachments/assets/d9e275ef-bbe6-4964-bdf4-0916367059d6" />
+
+   - Momentum Design Icon
+<img width="328" alt="Screenshot 2025-01-15 at 5 09 23 PM" src="https://github.com/user-attachments/assets/a4d76402-d276-45bb-81e9-924d8c51bebe" />
+
+4. Host your saved file on your own server. 
+5. Add the `icon-data-url` attribute with a URL in quotations to your CJDS Widget configuration (example screenshot below) in your Desktop Layout JSON file and save.
   <img width="446" alt="iconDataURL_layout" src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/43708a37-ac6c-4e2f-8cc7-a7aaa524e349">
 
 
@@ -181,6 +199,8 @@ Already provided like so in the defualt-desktop-JDS.json desktop layout file.
 `@attr project-id`: (<i>String</i>) - ProjectId sets the scope within the selected org. You can obtain this from the admin portal by selecting on the specific project for project details. If not provided, the widget automatically looks up the project Id in which the WXCC connector is enabled.
 
 `@attr template-id`: (<i>String</i>) - Sets the data template to retrieve customer Profile in desired format. If not provided, this gets assigned to the associated templateId of the `journey-default-template` via an API call or selects the first provided template Id for your particular project.
+
+`@attr use-new-momentum-icons`: (<i>Boolean</i>) = false - Toggle on to leverage the new momentum design icons. This will determine which icon name notation you will use in your custom icon map json file.
 
 `@attr customer`: (<i>String</i>) - Customer ID used for Journey lookup. (<i>PS: This is an alternative to InteractionData. InteractionData always overrides customer attribute. If no customer is provided, then the widget UI provides an identity search input field.</i>)
 
