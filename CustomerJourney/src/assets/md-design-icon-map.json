@@ -1,0 +1,129 @@
+{
+    "Generic": {
+      "name": "meeting-summary-bold",
+      "color": "grey"
+    },
+    "Chat": {
+      "name": "chat-filled",
+      "color": "cobalt"
+    },
+    "Messenger": {
+      "name": "icon-messenger_16",
+      "color": "cobalt",
+      "iconSet": "momentumUI"
+    },
+    "Facebook": {
+      "name": "social-facebook-color",
+      "color": "grey",
+      "iconSet": "momentumBrandVisuals"
+    },
+    "Apple": {
+      "name": "apple-filled",
+      "color": "black"
+    },
+    "Activity": {
+      "name": "meetings-bold",
+      "color": "grey"
+    },
+    "Email": {
+      "name": "email-bold",
+      "color": "violet"
+    },
+    "SMS": {
+      "name": "sms-filled",
+      "color": "mint"
+    },
+    "Telephony": {
+      "name": "handset-filled",
+      "color": "green"
+    },
+    "Voice": {
+        "name": "handset-filled",
+      "color": "green"
+    },
+    "Call": {
+      "name": "handset-filled",
+      "color": "green"
+    },
+    "outbound-call": {
+      "name": "outgoing-call-legacy-filled",
+      "color": "green"
+    },
+    "inbound-call": {
+      "name": "incoming-call-legacy-filled",
+      "color": "green"
+    },
+    "Phone": {
+      "name": "handset-filled",
+      "color": "green"
+    },
+    "wrapup": {
+      "name": "close-space-bold",
+      "color": "red"
+    },
+    "agent": {
+      "name": "headset-bold",
+      "color": "pink"
+    },
+    "social": {
+      "name": "queue-contact-bold",
+      "color": "mint"
+    },
+    "task": {
+      "name": "check-bold",
+      "color": "yellow"
+    },
+    "Login": {
+      "name": "sign-in-bold",
+      "color": "gold"
+    },
+    "Page Visit": {
+      "name": "mouse-cursor-bold",
+      "color": "grey"
+    },
+    "Entered ZipCode": {
+      "name": "location-bold",
+      "color": "cyan"
+    },
+    "Identify": {
+      "name": "user-bold",
+      "color": "blue"
+    },
+    "Quote": {
+      "name": "document-bold",
+      "color": "cobalt"
+    },
+    "NPS.*": {
+      "name": "analysis-filled",
+      "color": "red"
+    },
+    "Video": {
+      "name": "camera-bold",
+      "color": "orange"
+    },
+    "Initiated Walk In": {
+      "name": "camera-bold",
+      "color": "orange"
+    },
+    "IMI_Inbound": {
+      "name": "incoming-call-legacy-filled",
+      "color": "green"
+    },
+    "IMI_Outbound": {
+      "name": "outgoing-call-legacy-filled",
+      "color": "darkmint"
+    },
+    "Trigger Sent to Server": {
+      "name": "send-bold",
+      "color": "violet"
+    },
+    "Survey Response Collected": {
+      "name": "survey-bold",
+      "color": "gold"
+    },
+    "multi events single day": {
+      "name": "calendar-day-bold",
+      "color": "yellow"
+    }
+  }
+  
