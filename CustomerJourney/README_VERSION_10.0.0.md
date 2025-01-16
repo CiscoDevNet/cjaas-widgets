@@ -132,36 +132,39 @@ Besides the WXCC events. you can publish custom events using our APIs. Here are 
 
 
 ## How to add Custom Icons to your CJDS Widget 
-If there is an icon in this [collection](https://github.com/momentum-design/momentum-ui/tree/40ff564f61938e296e36df0de06c8f30e9c6c722/icons/svg) that does not exist in the default-icon-map.json file, you can add custom icon mappings.
+By default, the **Momenetum UI Icon library** is being used.
 
-You can look up icons on this page
-https://mch-examples.cisco.com/icon/default
-<img width="1379" alt="Screenshot 2025-01-15 at 4 42 06 PM" src="https://github.com/user-attachments/assets/3885a545-de47-456d-9d87-c91c0ba3ac52" />
-There are two sets of momentum icons: Momentum UI Icons (older) & Momentum Design Icons (newer)
-By default, the momenetum UI Icon library is being used.
+### Old Momentum UI Icon Library
+1. To start, make a copy of the built-in Momentum UI Icon Map: [md-ui-icon-map.json](https://raw.githubusercontent.com/CiscoDevNet/cjaas-widgets/refs/heads/main/CustomerJourney/src/assets/md-ui-icon-map.json)
 
-Momentum UI Icons Notation
-`accessibility_16`
+2. Lookup Momentum UI Icon: https://github.com/momentum-design/momentum-ui/tree/main/icons/svg
+![old-md-ui-icons-lookup](https://github.com/user-attachments/assets/727f189e-2afe-4029-9e3c-41ebb2d42f00)
 
-Momentum Design Icon Notation
-`accessibility-bold`
+3.  Append icon keyword with icon name and color. 
+Momentum UI Icon Notation:  `icon-sign-in_16`  `icon-${icon-name}_16`
+<img width="371" alt="Screenshot 2025-01-16 at 10 39 20 AM" src="https://github.com/user-attachments/assets/f6b06857-8d17-445f-853c-266ed146b5a2" />
 
-You can upgrade to the momentum-design icon library by setting the following attribute:
+4. Host your saved file on your own server. 
+5. Add the `icon-data-url` attribute with a URL in quotations to your CJDS Widget configuration (example screenshot below) in your Desktop Layout JSON file and save.
+  <img width="446" alt="iconDataURL_layout" src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/43708a37-ac6c-4e2f-8cc7-a7aaa524e349">
+
+6. Upload your newly edited Desktop Layout file in the Admin Portal
+
+### New Momentum Design Icon Library
+1. Upgrade to the momentum-design icon library (if you want to use the new library) by setting the following attribute:
 ```
 "use-new-momentum-icons": "true"
 ```
+<img width="453" alt="Screenshot 2025-01-16 at 10 49 46 AM" src="https://github.com/user-attachments/assets/445db51c-fed3-4f28-b034-2cb1cf75b3c9" />
 
-1. To start, please make a copy of the default Icon map based on the library you want to use.
 
-Momentum UI (Old): [md-ui-icon-map.json](https://raw.githubusercontent.com/CiscoDevNet/cjaas-widgets/refs/heads/main/CustomerJourney/src/assets/md-ui-icon-map.json)
-Momentum Design (New): [md-design-icon-map.json](https://raw.githubusercontent.com/CiscoDevNet/cjaas-widgets/refs/heads/main/CustomerJourney/src/assets/md-design-icon-map.json)
+1. Make a copy of the default Momentum Design icon map: [md-design-icon-map.json](https://raw.githubusercontent.com/CiscoDevNet/cjaas-widgets/refs/heads/main/CustomerJourney/src/assets/md-design-icon-map.json)
 
-3. Append Icon and color
-    - Momentum UI icon
-<img width="366" alt="Screenshot 2025-01-15 at 5 09 37 PM" src="https://github.com/user-attachments/assets/d9e275ef-bbe6-4964-bdf4-0916367059d6" />
+2. Lookup Momentum Design Icon: https://momentum-design.github.io/momentum-design/en/tokens/icons/
+![new-md-design-icon-lookup](https://github.com/user-attachments/assets/bf57dc75-814e-44f2-b274-1781ecaa12b0)
 
-   - Momentum Design Icon
-<img width="328" alt="Screenshot 2025-01-15 at 5 09 23 PM" src="https://github.com/user-attachments/assets/a4d76402-d276-45bb-81e9-924d8c51bebe" />
+3. Append icon keyword with icon name and color. Momentum Design Icon Notation:  `sign-in-bold`  `${icon-name}-bold`
+<img width="340" alt="Screenshot 2025-01-16 at 9 55 03 AM" src="https://github.com/user-attachments/assets/a8f844e3-be5f-4a02-b565-a5b694909e50" />
 
 4. Host your saved file on your own server. 
 5. Add the `icon-data-url` attribute with a URL in quotations to your CJDS Widget configuration (example screenshot below) in your Desktop Layout JSON file and save.
