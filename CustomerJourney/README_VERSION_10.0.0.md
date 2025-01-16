@@ -173,6 +173,22 @@ Momentum UI Icon Notation:  `icon-sign-in_16`  `icon-${icon-name}_16`
 
 6. Upload your newly edited Desktop Layout file in the Admin Portal
 
+### New Momentum Design brand-visuals (logos)
+If you want to use a logo (ex. Apple or Facebook) you can refrence the following list of logo svgs.
+https://github.com/momentum-design/momentum-design/tree/main/packages/assets/brand-visuals/src/logos
+
+![new-md-design-logo-lookup-2](https://github.com/user-attachments/assets/8dafe123-ccfd-462c-ab16-b975d32990d2)
+
+Append the icon name with name, color, and iconSet as "momentumBrandVisuals"
+```
+    "Facebook": {
+      "name": "social-facebook-color",
+      "color": "grey",
+      "iconSet": "momentumBrandVisuals"
+    }
+```
+<img width="378" alt="Screenshot 2025-01-16 at 2 19 23 PM" src="https://github.com/user-attachments/assets/577793c5-0730-4b53-9861-bee76473e99a" />
+
 ## Customer Journey Widget Properties
 
 <i>The JDS Customer Journey Widget accepts specific properties to interact with the JDS APIs</i>
