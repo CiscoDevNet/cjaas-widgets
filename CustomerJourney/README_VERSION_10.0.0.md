@@ -163,15 +163,24 @@ Momentum UI Icon Notation:  `icon-sign-in_16`  `icon-${icon-name}_16`
 2. Lookup Momentum Design Icon: https://momentum-design.github.io/momentum-design/en/tokens/icons/
 ![new-md-design-icon-lookup](https://github.com/user-attachments/assets/bf57dc75-814e-44f2-b274-1781ecaa12b0)
 
-3. Append icon keyword with icon name and color. Momentum Design Icon Notation:  `sign-in-bold`  `${icon-name}-bold`
+_If you cannot find an icon in this library, you can use an icon from the old library. In order to do so, you would set the iconSet to "momentumUI"_
+```
+    "Messenger": {
+      "name": "icon-messenger_16",
+      "color": "cobalt",
+      "iconSet": "momentumUI"
+    }
+```
+
+4. Append icon keyword with icon name and color. Momentum Design Icon Notation:  `sign-in-bold`  `${icon-name}-bold`
 <img width="340" alt="Screenshot 2025-01-16 at 9 55 03 AM" src="https://github.com/user-attachments/assets/a8f844e3-be5f-4a02-b565-a5b694909e50" />
 
-4. Host your saved file on your own server. 
-5. Add the `icon-data-url` attribute with a URL in quotations to your CJDS Widget configuration (example screenshot below) in your Desktop Layout JSON file and save.
+5. Host your saved file on your own server. 
+6. Add the `icon-data-url` attribute with a URL in quotations to your CJDS Widget configuration (example screenshot below) in your Desktop Layout JSON file and save.
   <img width="446" alt="iconDataURL_layout" src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/43708a37-ac6c-4e2f-8cc7-a7aaa524e349">
 
 
-6. Upload your newly edited Desktop Layout file in the Admin Portal
+7. Upload your newly edited Desktop Layout file in the Admin Portal
 
 ### New Momentum Design brand-visuals (logos)
 If you want to use a logo (ex. Apple or Facebook) you can refrence the following list of logo svgs.
