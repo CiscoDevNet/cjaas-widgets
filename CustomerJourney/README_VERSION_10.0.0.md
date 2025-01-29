@@ -234,6 +234,10 @@ Already provided like so in the defualt-desktop-JDS.json desktop layout file.
 
 `@attr show-alias-icon`: (<i>Boolean</i>) = true - Enables the view of an alias icon that when clicked, shows a modal of all aliases of the current viewed identity. By default, this is enabled.
 
+`@attr hide-profile-name`: (<i>Boolean</i>) = false - When enabled, the alias button, first name and last name get removed from the UI and are not displayed.
+
+`@attr use-new-momentum-icons`: (<i>Boolean</i>) = false - When enabled, the icons used for the events within the timeline section reference the new  momentum icon library (with a fallback to the old momentum icons).
+
 `@attr limit`: (<i>Number</i>) = 20 - Set the number of Timeline Events to display
 
 `@attr time-frame`: (<i>"All" | "24-Hours" | "7-Days" | "30-Days"</i>) = "All" - Set the time frame the timeline section has selected at start up.
