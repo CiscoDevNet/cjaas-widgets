@@ -39,6 +39,7 @@ Instructional Vidcast: [CJDS Widget v10 Setup Vidcast](https://app.vidcast.io/sh
 
 3. Download the following Desktop Layout JSON file:
 [JDSDesktopLayout10.json](https://github.com/CiscoDevNet/cjaas-widgets/blob/main/CustomerJourney/src/assets/JDSDesktopLayout10.json)
+- This layout is specifically compatable for a production instance and for an "agent" role. If you have a "supervisor" role or "supervisorAgent" role, you will need to modify the JSON.
 - If you are interested in adding the CJDS Widget to your existing desktop layout, get the code snippet [here](#how-to-add-the-cjds-widget-into-an-existing-desktop-layout).
 4. While you are still logged into [Control Hub](https://admin.webex.com/), navigate to `Contact Center` > `Desktop Layouts` in the left-hand side nav.
 5. Create a new Layout or edit an existing desktop layout, assign an agent team, upload the downloaded JDSDesktopLayout10.json file and save. 
@@ -142,13 +143,16 @@ By default, the **Momenetum UI Icon library** is being used.
 
 3.  Append icon keyword with icon name and color. 
 Momentum UI Icon Notation:  `icon-sign-in_16`  `icon-${icon-name}_16`
+
+      Valid Colors: (blue, gray, green, lime, pink, purple, violet, mint, darkmint, yellow, gold, red, darkred, orange, cyan)
+      File Referenced for colors: `web-components/src/components/badge/tokens/lm-badge-tokens.js`
 <img width="371" alt="Screenshot 2025-01-16 at 10 39 20 AM" src="https://github.com/user-attachments/assets/f6b06857-8d17-445f-853c-266ed146b5a2" />
 
-4. Host your saved file on your own server. 
-5. Add the `icon-data-url` attribute with a URL in quotations to your CJDS Widget configuration (example screenshot below) in your Desktop Layout JSON file and save.
+5. Host your saved file on your own server. 
+6. Add the `icon-data-url` attribute with a URL in quotations to your CJDS Widget configuration (example screenshot below) in your Desktop Layout JSON file and save.
   <img width="446" alt="iconDataURL_layout" src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/43708a37-ac6c-4e2f-8cc7-a7aaa524e349">
 
-6. Upload your newly edited Desktop Layout file in the Admin Portal
+7. Upload your newly edited Desktop Layout file in the Admin Portal
 
 ### New Momentum Design Icon Library
 1. Upgrade to the momentum-design icon library (if you want to use the new library) by setting the following attribute:
