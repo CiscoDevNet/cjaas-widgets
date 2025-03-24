@@ -126,14 +126,17 @@ Besides the WXCC events. you can publish custom events using our APIs. Here are 
 - In the highlighted section above, the optional uiData object allows the event publisher to declare custom UI properties that correspond to the text and icon displayed per event.
 - The remaining property names/values under the sub data object are parsed out and displayed in rows within the expanded Activity Details Modal. 
 
-## How to set IconType for a published event 
-
-1. Cross check this file [default-icon-color-map.json](https://github.com/CiscoDevNet/cjaas-widgets/blob/10-dev7-barry-fixes/CustomerJourney/src/assets/default-icon-color-map.json) to look up default Icon keywords.
-<img width="800" alt="Setting icon type in published event" src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/4394ccd6-e096-4dd8-88d1-7467ba57869d">
-
 
 ## How to add Custom Icons to your CJDS Widget 
 By default, the **Momenetum UI Icon library** is being used.
+
+
+### How to set IconType for a published event 
+
+1. Default Icon Map File: [default-icon-color-map.json](https://github.com/CiscoDevNet/cjaas-widgets/blob/10-dev7-barry-fixes/CustomerJourney/src/assets/default-icon-color-map.json). This file is what is used by default for mapping iconTypes to icons. Please make a copy of this default file to then _add_ your addition icon mappings.
+<img width="800" alt="Setting icon type in published event" src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/4394ccd6-e096-4dd8-88d1-7467ba57869d">
+
+
 
 ### Old Momentum UI Icon Library
 1. To start, make a copy of the built-in Momentum UI Icon Map: [md-ui-icon-map.json](https://raw.githubusercontent.com/CiscoDevNet/cjaas-widgets/refs/heads/main/CustomerJourney/src/assets/md-ui-icon-map.json)
