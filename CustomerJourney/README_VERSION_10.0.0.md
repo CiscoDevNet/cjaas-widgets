@@ -20,12 +20,13 @@ This widget uses the JDS (Journey Data Services) APIs to display an individual c
 2. [How to Troubleshoot](#how-to-troubleshoot)
 3. [How a published WXCC Event paylod works](#publishing-a-wxcc-event)
 4. [How to publish a Custom Event](#publishing-a-custom-event)
-5. [How to set IconType for a published event](#how-to-set-icontype-for-a-published-event)
-6. [How to add Custom Icons to your CJDS Widget](#how-to-add-custom-icons-to-your-cjds-widget)
-7. [How to customize your CJDS Widget](#how-to-customize-your-cjds-widget)
-8. [View all Customer Journey Widget Properties](#customer-journey-widget-properties)
-9. [How to add CJDS Widget to the Side Nav within Agent Desktop](#how-to-add-cjds-widget-to-the-side-nav-within-agent-desktop)
-10. [How to add the CJDS Widget into an existing Desktop Layout](#how-to-add-the-cjds-widget-into-an-existing-desktop-layout)
+5. [How to configure CJDS widget with customized profile template](how-to-configure-cjds-widget-with-customized-profile-template)
+6. [How to set IconType for a published event](#how-to-set-icontype-for-a-published-event)
+7. [How to add Custom Icons to your CJDS Widget](#how-to-add-custom-icons-to-your-cjds-widget)
+8. [How to customize your CJDS Widget](#how-to-customize-your-cjds-widget)
+9. [View all Customer Journey Widget Properties](#customer-journey-widget-properties)
+10. [How to add CJDS Widget to the Side Nav within Agent Desktop](#how-to-add-cjds-widget-to-the-side-nav-within-agent-desktop)
+11. [How to add the CJDS Widget into an existing Desktop Layout](#how-to-add-the-cjds-widget-into-an-existing-desktop-layout)
 
 
 ## Setup CJDS Widget in Agent Desktop
@@ -128,7 +129,7 @@ Besides the WXCC events. you can publish custom events using our APIs. Here are 
 - The remaining property names/values under the sub data object are parsed out and displayed in rows within the expanded Activity Details Modal. 
 
 ## How to configure CJDS widget with customized profile template
-By default, the profile template will consist of the following fields:
+By default, the profile template, `journey-default-template` will consist of the following fields:
 
 - Contact in the Last 10 Days
 - Contact in the Last 24 Hours 
