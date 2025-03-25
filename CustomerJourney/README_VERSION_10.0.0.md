@@ -268,7 +268,7 @@ event?.data?.uiData?.division
 
 ## [After April 2025] How to customize your CJDS Widget within the default desktop layout
 If you have the out of the box version of the CJDS widget working in your environmnet, but you want to customize it, please follow the instructions below.
-1. First, you will want to login to [Control Hub](https://admin.webex.com/)) with admin credentials.
+1. First, you will want to login to [Control Hub](https://admin.webex.com/) with admin credentials.
 2. Navigate to Contact Center > Desktop Layouts.
 3. Create Desktop Layout or click on an existing Desktop Layout.
 4. Download the Default Desktop Layout.
@@ -277,7 +277,43 @@ If you have the out of the box version of the CJDS widget working in your enviro
 ![Uploading replaceSlottedWithCustomized.png…]()
 
 
-6. Replace the following code snippet with the snippet highlighted in the screenshot.
+6. Replace the following code snippet #1 with the new code snippet #2 (you will do this in two different sections of the json file. ~ line 83 & ~ line 713)
+**Code Snippet #1 (default)**
+```json
+          {
+            "comp": "md-tab",
+            "attributes": {
+              "slot": "tab",
+              "class": "widget-pane-tab"
+            },
+            "children": [
+              {
+                "comp": "slot",
+                "attributes": {
+                  "name": "CUSTOMER_JOURNEY_WIDGET_TAB"
+                }
+              }
+            ],
+            "visibility": "CUSTOMER_JOURNEY_WIDGET"
+          },
+          {
+            "comp": "md-tab-panel",
+            "attributes": {
+              "slot": "panel",
+              "class": "widget-pane"
+            },
+            "children": [
+              {
+                "comp": "slot",
+                "attributes": {
+                  "name": "CUSTOMER_JOURNEY_WIDGET"
+                }
+              }
+            ],
+            "visibility": "CUSTOMER_JOURNEY_WIDGET"
+          },
+```
+**Code Snippet #2 (customizable)**
 ```json
           {
             "comp": "md-tab",
@@ -320,6 +356,12 @@ If you have the out of the box version of the CJDS widget working in your enviro
             ]
           },
 ```
+7. With the newly place code (in two different sections), proceed to add your custom attributes within the attribute section below "condensed-view": "true"
+8. You can reference the custom attributes within this documentation.
+
+   Here is an example of how to add the custom attribute "use-new-momentum-icons"
+   ![Uploading howToAddCustomAttribute.png…]()
+
 
 ## How to add CJDS Widget to the Side Nav within Agent Desktop
 If you would like to have the CJDS Widget accessable from the side nav and not have to trigger an incoming event to see the widget, please read the following...
