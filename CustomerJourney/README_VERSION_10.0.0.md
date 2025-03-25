@@ -18,13 +18,14 @@ This widget uses the JDS (Journey Data Services) APIs to display an individual c
 
 1. [How to setup CJDS Widget in Agent Desktop](#setup-cjds-widget-in-agent-desktop)
 2. [How to Troubleshoot](#how-to-troubleshoot)
-3. [How to publish a WXCC Event](#publishing-a-wxcc-event)
+3. [How a published WXCC Event paylod works](#publishing-a-wxcc-event)
 4. [How to publish a Custom Event](#publishing-a-custom-event)
 5. [How to set IconType for a published event](#how-to-set-icontype-for-a-published-event)
 6. [How to add Custom Icons to your CJDS Widget](#how-to-add-custom-icons-to-your-cjds-widget)
-7. [View all Customer Journey Widget Properties](#customer-journey-widget-properties)
-8. [How to add CJDS Widget to the Side Nav within Agent Desktop](#how-to-add-cjds-widget-to-the-side-nav-within-agent-desktop)
-9. [How to add the CJDS Widget into an existing Desktop Layout](#how-to-add-the-cjds-widget-into-an-existing-desktop-layout)
+7. [How to customize your CJDS Widget](#how-to-customize-your-cjds-widget)
+8. [View all Customer Journey Widget Properties](#customer-journey-widget-properties)
+9. [How to add CJDS Widget to the Side Nav within Agent Desktop](#how-to-add-cjds-widget-to-the-side-nav-within-agent-desktop)
+10. [How to add the CJDS Widget into an existing Desktop Layout](#how-to-add-the-cjds-widget-into-an-existing-desktop-layout)
 
 
 ## Setup CJDS Widget in Agent Desktop
@@ -266,18 +267,18 @@ Already provided like so in the defualt-desktop-JDS.json desktop layout file.
 And also, here is the other one to filter by cadVariable: "JDSDivision" this filters by the event payload property
 event?.data?.uiData?.division
 
-## [After April 2025] How to customize your CJDS Widget within the default desktop layout
+## How to customize your CJDS Widget
 If you have the out of the box version of the CJDS widget working in your environmnet, but you want to customize it, please follow the instructions below.
 1. First, you will want to login to [Control Hub](https://admin.webex.com/) with admin credentials.
 2. Navigate to Contact Center > Desktop Layouts.
 3. Create Desktop Layout or click on an existing Desktop Layout.
 4. Download the Default Desktop Layout.
-![Uploading DefaultDesktopLayoutAdmin.png…]()
+<img width="1284" alt="DefaultDesktopLayoutAdmin" src="https://github.com/user-attachments/assets/8949d94f-07ab-4a34-b61e-00c4d50dc348" />
+
 5. Search in file for `CUSTOMER_JOURNEY_WIDGET_TAB`. It should appear twice. You will want to replace both sections.
-![Uploading replaceSlottedWithCustomized.png…]()
+   <img width="1091" alt="cjds-default-to-customized-layout" src="https://github.com/user-attachments/assets/2eb30bd5-a4b4-4949-a8a3-22dda0c419d2" />
 
-
-6. Replace the following code snippet #1 with the new code snippet #2 (you will do this in two different sections of the json file. ~ line 83 & ~ line 713)
+7. Replace the following code snippet #1 with the new code snippet #2 (you will do this in two different sections of the json file. ~ line 83 & ~ line 713)
 **Code Snippet #1 (default)**
 ```json
           {
@@ -357,11 +358,12 @@ If you have the out of the box version of the CJDS widget working in your enviro
           },
 ```
 7. With the newly place code (in two different sections), proceed to add your custom attributes within the attribute section below "condensed-view": "true"
-8. You can reference the custom attributes within this documentation.
+8. You can reference the custom attributes [here](#customer-journey-widget-properties)
 
    Here is an example of how to add the custom attribute "use-new-momentum-icons"
-   ![Uploading howToAddCustomAttribute.png…]()
+  <img width="457" alt="howToAddCustomAttribute" src="https://github.com/user-attachments/assets/74272dfc-bcbf-4a24-8961-0850ec77ba87" />
 
+9. Save the updated layout with customizations and upload within control hub in the Contact Center > Desktop Layouts Section.
 
 ## How to add CJDS Widget to the Side Nav within Agent Desktop
 If you would like to have the CJDS Widget accessable from the side nav and not have to trigger an incoming event to see the widget, please read the following...
