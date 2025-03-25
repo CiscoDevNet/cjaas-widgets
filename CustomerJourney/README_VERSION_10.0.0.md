@@ -20,7 +20,7 @@ This widget uses the JDS (Journey Data Services) APIs to display an individual c
 2. [How to Troubleshoot](#how-to-troubleshoot)
 3. [How a published WXCC Event paylod works](#publishing-a-wxcc-event)
 4. [How to publish a Custom Event](#publishing-a-custom-event)
-5. [How to configure CJDS widget with customized profile template](how-to-configure-cjds-widget-with-customized-profile-template)
+5. [How to configure CJDS widget with customized profile template](#how-to-configure-cjds-widget-with-customized-profile-template)
 6. [How to set IconType for a published event](#how-to-set-icontype-for-a-published-event)
 7. [How to add Custom Icons to your CJDS Widget](#how-to-add-custom-icons-to-your-cjds-widget)
 8. [How to customize your CJDS Widget](#how-to-customize-your-cjds-widget)
