@@ -235,8 +235,6 @@ Already provided like so in the defualt-desktop-JDS.json desktop layout file.
 
 `@attr template-id`: (<i>String</i>) - Sets the data template to retrieve customer Profile in desired format. If not provided, this gets assigned to the associated templateId of the `journey-default-template` via an API call or selects the first provided template Id for your particular project.
 
-`@attr use-new-momentum-icons`: (<i>Boolean</i>) = false - Toggle on to leverage the new momentum design icons. This will determine which icon name notation you will use in your custom icon map json file.
-
 `@attr customer`: (<i>String</i>) - Customer ID used for Journey lookup. (<i>PS: This is an alternative to InteractionData. InteractionData always overrides customer attribute. If no customer is provided, then the widget UI provides an identity search input field.</i>)
 
 `@attr show-alias-icon`: (<i>Boolean</i>) = true - Enables the view of an alias icon that when clicked, shows a modal of all aliases of the current viewed identity. By default, this is enabled.
@@ -267,6 +265,61 @@ Already provided like so in the defualt-desktop-JDS.json desktop layout file.
 
 And also, here is the other one to filter by cadVariable: "JDSDivision" this filters by the event payload property
 event?.data?.uiData?.division
+
+## [After April 2025] How to customize your CJDS Widget within the default desktop layout
+If you have the out of the box version of the CJDS widget working in your environmnet, but you want to customize it, please follow the instructions below.
+1. First, you will want to login to [Control Hub](https://admin.webex.com/)) with admin credentials.
+2. Navigate to Contact Center > Desktop Layouts.
+3. Create Desktop Layout or click on an existing Desktop Layout.
+4. Download the Default Desktop Layout.
+![Uploading DefaultDesktopLayoutAdmin.png…]()
+5. Search in file for `CUSTOMER_JOURNEY_WIDGET_TAB`. It should appear twice. You will want to replace both sections.
+![Uploading replaceSlottedWithCustomized.png…]()
+
+
+6. Replace the following code snippet with the snippet highlighted in the screenshot.
+```json
+          {
+            "comp": "md-tab",
+            "attributes": {
+              "slot": "tab",
+              "class": "widget-pane-tab"
+            },
+            "children": [
+              {
+                "comp": "span",
+                "textContent": "Customer Journey"
+              }
+            ]
+          },
+          {
+            "comp": "md-tab-panel",
+            "attributes": {
+              "slot": "panel",
+              "class": "widget-pane"
+            },
+            "children": [
+              {
+                "comp": "customer-journey-widget",
+                "script": "https://journey-widget.webex.com",
+                "attributes": {
+                  "show-alias-icon": "true",
+                  "condensed-view": "true"
+                },
+                "properties": {
+                  "interactionData": "$STORE.agentContact.taskSelected",
+                  "bearerToken": "$STORE.auth.accessToken",
+                  "organizationId": "$STORE.agent.orgId",
+                  "dataCenter": "$STORE.app.datacenter"
+                },
+                "wrapper": {
+                  "title": "Customer Journey Widget",
+                  "maximizeAreaName": "app-maximize-area"
+                }
+              }
+            ]
+          },
+```
 
 ## How to add CJDS Widget to the Side Nav within Agent Desktop
 If you would like to have the CJDS Widget accessable from the side nav and not have to trigger an incoming event to see the widget, please read the following...
