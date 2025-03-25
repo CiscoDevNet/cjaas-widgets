@@ -127,6 +127,23 @@ Besides the WXCC events. you can publish custom events using our APIs. Here are 
 - In the highlighted section above, the optional uiData object allows the event publisher to declare custom UI properties that correspond to the text and icon displayed per event.
 - The remaining property names/values under the sub data object are parsed out and displayed in rows within the expanded Activity Details Modal. 
 
+## How to configure CJDS widget with customized profile template
+By default, the profile template will consist of the following fields:
+
+- Contact in the Last 10 Days
+- Contact in the Last 24 Hours 
+
+<img width="410" alt="profileTemplateSection" src="https://github.com/user-attachments/assets/5acd5579-f7bf-4cb8-bb4a-641719f84f56" />
+
+If you want to customize the template to render different fields or more fields follow the instructions below.
+1. Proceed to the API documentation for Template Creation: [Template Creation API](https://developer.webex-cx.com/documentation/journey/v1/create-template). Read the instructions there to create a new custom profile template.
+2. Once you have made the POST request, grab the new template id from the response body.
+3. In order to customize the CJDS widget, you will need to have a general overview of how to modify the desktop layout that is configurable from control hub. Please refer to [How to customize your CJDS Widget](#how-to-customize-your-cjds-widget) for details.
+4. Once you have created your customizable CJDS desktop layout, you may append the following to assign your newly created profile template id to the CJDS widget configuration within the desktop layout.
+<img width="383" alt="customTemplateConfig" src="https://github.com/user-attachments/assets/e9a58ffc-1a33-4977-be92-e07e771799e9" />
+
+5. Now, upload that modified Desktop Layout in Control Hub. (In order to see the updates, you may need to logout of agent desktop and log back in)
+
 
 ## How to add Custom Icons to your CJDS Widget 
 By default, the **Momenetum UI Icon library** is being used.
