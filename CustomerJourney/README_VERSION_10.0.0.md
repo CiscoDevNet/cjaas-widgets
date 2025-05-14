@@ -1,7 +1,16 @@
 
-# JDS Customer Journey Widget
+# CJDS: Customer Journey Widget
 
 This widget uses the JDS (Journey Data Services) APIs to display an individual customer's journey as a history of events. It first retrieves the complete event history from the tape endpoint and compiles toggles for all event channelTypes, and then subscribes to a live stream of new events so they appear in real time. This code can be used as is, or be starter code for your own Custom Widget. It also embodies a profile view with a default template named 'journey-default-template'
+
+### Onboarding instructions
+
+CJDS is GA and offered as part of Webex Contact Center Customer Flex 3 Standard Agent License. To ensure seamless CJDS provisioning, review the following actions based on your organization's setup:
+
+1. For organizations with a Webex Contact Center set up before February 28, 2025, and without CJDS provisioned: No action is necessary. CJDS tenants are automatically linked to your Webex Contact Center Org ID. 
+- Default Agent Desktop Template will up updated for all customers for agent and agent/supervisor persona
+2. For those with CJDS already provisioned and using the Customer Journey Widget in a custom layout: No changes are required. Your current setup is fully compatible. 
+3. For organizations with a Webex Contact Center set up after March 1, 2025: Complete  this form to request CJDS provisioning for your organization. A Customer Journey tenant will be provisioned within 72 hours upon receiving your request.
 
 #### Latest Version: 
 ```
@@ -62,8 +71,8 @@ Instructional Vidcast: [CJDS Widget v10 Setup Vidcast](https://app.vidcast.io/sh
 <img src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/3c2a8e32-a80c-4f28-a71f-894d8cce794a" height="500"/>
 
 ## Publishing a WXCC Event (You shouldn't do this manually) 
-1. Publish Event API Documentation: https://api-jds.wxdap-produs1.webex.com/publish/docs/swagger-ui/index.html#
-2.  Example API Request Body of a WXCC Chat Event (Using Postman syntax)
+1. Publish Event API Documentation: https://developer.webex-cx.com/documentation/journey/v1/journey-event-posting
+3.  Example API Request Body of a WXCC Chat Event (Using Postman syntax)
    - IDENTITY: Update both `identitiy` and `data.origin` fields with the customer's identity (ex. email or phone number)
    - ICON TYPE: `data.channelType` and `data.direction` reflects the icon type generated in the UI for this particular event (ex. email, inbound call)
 
@@ -97,7 +106,7 @@ Instructional Vidcast: [CJDS Widget v10 Setup Vidcast](https://app.vidcast.io/sh
 ## Publishing a Custom Event
 Besides the WXCC events. you can publish custom events using our APIs. Here are instructions on how to publish your own custom event. 
 
-1. Publish Event API Documentation: https://api-jds.wxdap-produs1.webex.com/publish/docs/swagger-ui/index.html#
+1. Publish Event API Documentation: https://developer.webex-cx.com/documentation/journey/v1/journey-event-posting
 2.  Example API Request Body (Using Postman syntax)
 <img width="500" alt="Event Request Body Payload" src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/06bbe182-bc0a-40fb-b02b-0f84da7410ba">
 
