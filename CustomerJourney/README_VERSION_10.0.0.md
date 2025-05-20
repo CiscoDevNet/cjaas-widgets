@@ -3,14 +3,7 @@
 
 This widget uses the JDS (Journey Data Services) APIs to display an individual customer's journey as a history of events. It first retrieves the complete event history from the tape endpoint and compiles toggles for all event channelTypes, and then subscribes to a live stream of new events so they appear in real time. This code can be used as is, or be starter code for your own Custom Widget. It also embodies a profile view with a default template named 'journey-default-template'
 
-### Onboarding instructions
-
-CJDS is GA and offered as part of Webex Contact Center Customer Flex 3 Standard Agent License. To ensure seamless CJDS provisioning, review the following actions based on your organization's setup:
-
-1. For organizations with a Webex Contact Center set up before February 28, 2025, and without CJDS provisioned: No action is necessary. CJDS tenants are automatically linked to your Webex Contact Center Org ID. 
-- Default Agent Desktop Template will up updated for all customers for agent and agent/supervisor persona
-2. For those with CJDS already provisioned and using the Customer Journey Widget in a custom layout: No changes are required. Your current setup is fully compatible. 
-3. For organizations with a Webex Contact Center set up after March 1, 2025: Complete  this form to request CJDS provisioning for your organization. A Customer Journey tenant will be provisioned within 72 hours upon receiving your request.
+CJDS is GA and offered as part of Webex Contact Center Customer Flex 3 Standard Agent License. To ensure seamless CJDS provisioning, review the [Onboarding Instructions](#outboarding-instructions)
 
 #### Latest Version: 
 ```
@@ -25,25 +18,33 @@ CJDS is GA and offered as part of Webex Contact Center Customer Flex 3 Standard 
 
 ## Table of Contents
 
-1. [How to setup CJDS Widget in Agent Desktop](#setup-cjds-widget-in-agent-desktop)
-2. [How to Troubleshoot](#how-to-troubleshoot)
-3. [How a published WXCC Event paylod works](#publishing-a-wxcc-event)
-4. [How to publish a Custom Event](#publishing-a-custom-event)
-5. [How to configure CJDS widget with customized profile template](#how-to-configure-cjds-widget-with-customized-profile-template)
-6. [How to set IconType for a published event](#how-to-set-icontype-for-a-published-event)
-7. [How to add Custom Icons to your CJDS Widget](#how-to-add-custom-icons-to-your-cjds-widget)
-8. [How to customize your CJDS Widget](#how-to-customize-your-cjds-widget)
-9. [View all Customer Journey Widget Properties](#customer-journey-widget-properties)
-10. [How to add CJDS Widget to the Side Nav within Agent Desktop](#how-to-add-cjds-widget-to-the-side-nav-within-agent-desktop)
-11. [How to add the CJDS Widget into an existing Desktop Layout](#how-to-add-the-cjds-widget-into-an-existing-desktop-layout)
+1. [Onboarding Instructions](#outboarding-instructions)
+2. [How to setup CJDS Widget in Agent Desktop](#setup-cjds-widget-in-agent-desktop)
+3. [How to Troubleshoot](#how-to-troubleshoot)
+4. [How a published WXCC Event paylod works](#publishing-a-wxcc-event)
+5. [How to publish a Custom Event](#publishing-a-custom-event)
+6. [How to configure CJDS widget with customized profile template](#how-to-configure-cjds-widget-with-customized-profile-template)
+7. [How to set IconType for a published event](#how-to-set-icontype-for-a-published-event)
+8. [How to add Custom Icons to your CJDS Widget](#how-to-add-custom-icons-to-your-cjds-widget)
+9. [How to customize your CJDS Widget](#how-to-customize-your-cjds-widget)
+10. [View all Customer Journey Widget Properties](#customer-journey-widget-properties)
+11. [How to add CJDS Widget to the Side Nav within Agent Desktop](#how-to-add-cjds-widget-to-the-side-nav-within-agent-desktop)
+12. [How to add the CJDS Widget into an existing Desktop Layout](#how-to-add-the-cjds-widget-into-an-existing-desktop-layout)
 
+### Onboarding instructions
+
+CJDS is GA and offered as part of Webex Contact Center Customer Flex 3 Standard Agent License. To ensure seamless CJDS provisioning, review the following actions based on your organization's setup:
+
+1. For organizations with a Webex Contact Center set up before February 28, 2025, and without CJDS provisioned: No action is necessary. CJDS tenants are automatically linked to your Webex Contact Center Org ID. 
+- Default Agent Desktop Template will up updated for all customers for agent and agent/supervisor persona
+2. For those with CJDS already provisioned and using the Customer Journey Widget in a custom layout: No changes are required. Your current setup is fully compatible. 
+3. For organizations with a Webex Contact Center set up after March 1, 2025: Complete this [Form](https://app.smartsheet.com/b/form/7776df72239e47d0bbb73a392e32927f) to request CJDS provisioning for your organization. A Customer Journey tenant will be provisioned within 72 hours upon receiving your request.
 
 ## Setup CJDS Widget in Agent Desktop
 
 Instructional Vidcast: [CJDS Widget v10 Setup Vidcast](https://app.vidcast.io/share/3c791866-c166-45fc-a87a-0bbaa5717103)
 
-1. Onboard a Customer Journey organization
-- CJDS is currently in Limited Availability (for US-only), please fill out this [Form](https://app.smartsheet.com/b/form/7776df72239e47d0bbb73a392e32927f)  to be onboarded. Post the initial request, the Cisco team will assist you with CJDS instance setup within 72 hours.
+1. Confirm you have onboarded your organization. [Onboarding Instructions](#outboarding-instructions)
 2. Log into [Control Hub](https://admin.webex.com/) as an admin and toggle on the Webex Contact Center Connector for a journey project.
 
   <img src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/24f3a5c9-c17c-413b-9dd8-0a38c9a18b76" height="300"/>
