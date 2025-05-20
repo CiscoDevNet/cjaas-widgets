@@ -3,7 +3,7 @@
 
 This widget uses the JDS (Journey Data Services) APIs to display an individual customer's journey as a history of events. It first retrieves the complete event history from the tape endpoint and compiles toggles for all event channelTypes, and then subscribes to a live stream of new events so they appear in real time. This code can be used as is, or be starter code for your own Custom Widget. It also embodies a profile view with a default template named 'journey-default-template'
 
-CJDS is GA and offered as part of Webex Contact Center Customer Flex 3 Standard Agent License. To ensure seamless CJDS provisioning, review the [Onboarding Instructions](#outboarding-instructions)
+CJDS is GA and offered as part of Webex Contact Center Customer Flex 3 Standard Agent License. To ensure seamless CJDS provisioning, review the [Onboarding Instructions](#onboarding-instructions)
 
 #### Latest Version: 
 ```
@@ -18,7 +18,7 @@ CJDS is GA and offered as part of Webex Contact Center Customer Flex 3 Standard 
 
 ## Table of Contents
 
-1. [Onboarding Instructions](#outboarding-instructions)
+1. [Onboarding Instructions](#onboarding-instructions)
 2. [How to setup CJDS Widget in Agent Desktop](#setup-cjds-widget-in-agent-desktop)
 3. [How to Troubleshoot](#how-to-troubleshoot)
 4. [How a published WXCC Event paylod works](#publishing-a-wxcc-event)
@@ -44,7 +44,7 @@ CJDS is GA and offered as part of Webex Contact Center Customer Flex 3 Standard 
 
 Instructional Vidcast: [CJDS Widget v10 Setup Vidcast](https://app.vidcast.io/share/3c791866-c166-45fc-a87a-0bbaa5717103)
 
-1. Confirm you have onboarded your organization. [Onboarding Instructions](#outboarding-instructions)
+1. Confirm you have onboarded your organization. [Onboarding Instructions](#onboarding-instructions)
 2. Log into [Control Hub](https://admin.webex.com/) as an admin and toggle on the Webex Contact Center Connector for a journey project.
 
   <img src="https://github.com/CiscoDevNet/cjaas-widgets/assets/15151981/24f3a5c9-c17c-413b-9dd8-0a38c9a18b76" height="300"/>
