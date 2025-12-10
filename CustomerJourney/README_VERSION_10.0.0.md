@@ -40,6 +40,11 @@ CJDS is GA and offered as part of Webex Contact Center Customer Flex 3 Standard 
 2. For those with CJDS already provisioned and using the Customer Journey Widget in a custom layout: No changes are required. Your current setup is fully compatible. 
 3. For organizations with a Webex Contact Center set up after March 1, 2025: Complete this [Form](https://app.smartsheet.com/b/form/7776df72239e47d0bbb73a392e32927f) to request CJDS provisioning for your organization. A Customer Journey tenant will be provisioned within 72 hours upon receiving your request.
 
+Feature Flag Requests
+1. If you would like the ability to have real-time events, please reach out to Zubin and request for the following feature flag to be turned on for your organzation (by id).
+`wxcc-cjds-event-stream-toggle-visibility`
+
+
 ## Setup CJDS Widget in Agent Desktop
 
 Instructional Vidcast: [CJDS Widget v10 Setup Vidcast](https://app.vidcast.io/share/3c791866-c166-45fc-a87a-0bbaa5717103)
