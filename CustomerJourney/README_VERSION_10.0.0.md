@@ -38,7 +38,7 @@ CJDS is GA and offered as part of Webex Contact Center Customer Flex 3 Standard 
 1. For organizations with a Webex Contact Center set up before February 28, 2025, and without CJDS provisioned: No action is necessary. CJDS tenants are automatically linked to your Webex Contact Center Org ID. 
 - Default Agent Desktop Template will up updated for all customers for agent and agent/supervisor persona
 2. For those with CJDS already provisioned and using the Customer Journey Widget in a custom layout: No changes are required. Your current setup is fully compatible. 
-3. For organizations with a Webex Contact Center set up after March 1, 2025: Complete this [Form](https://app.smartsheet.com/b/form/7776df72239e47d0bbb73a392e32927f) to request CJDS provisioning for your organization. A Customer Journey tenant will be provisioned within 72 hours upon receiving your request.
+3. For organizations with a Webex Contact Center set up after March 1, 2025: Complete this [Form](https://ciscocx.qualtrics.com/jfe/form/SV_0oFIX1j9BUbh3f0) to request CJDS provisioning for your organization. A Customer Journey tenant will be provisioned within 72 hours upon receiving your request.
 
 Feature Flag Requests
 1. If you would like the ability to have real-time events, please reach out to Zubin and request for the following feature flag to be turned on for your organzation (by id).
