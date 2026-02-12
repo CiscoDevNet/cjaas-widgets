@@ -309,7 +309,9 @@ If you have the out of the box version of the CJDS widget working in your enviro
 <img width="1284" alt="DefaultDesktopLayoutAdmin" src="https://github.com/user-attachments/assets/8949d94f-07ab-4a34-b61e-00c4d50dc348" />
 
 5. Search in file for `CUSTOMER_JOURNEY_WIDGET_TAB`. It should appear twice. You will want to replace both sections.
-   <img width="1091" alt="cjds-default-to-customized-layout" src="https://github.com/user-attachments/assets/2eb30bd5-a4b4-4949-a8a3-22dda0c419d2" />
+<img width="1141" height="775" alt="cjds-default-to-customized-layout" src="https://github.com/user-attachments/assets/201f8f44-1cc7-4628-8fc7-37fd74702b6f" />
+
+   
 
 7. Replace the following code snippet #1 with the new code snippet #2 (you will do this in two different sections of the json file. ~ line 83 & ~ line 713)
 **Code Snippet #1 (default)**
@@ -371,7 +373,6 @@ If you have the out of the box version of the CJDS widget working in your enviro
             "children": [
               {
                 "comp": "customer-journey-widget",
-                "script": "https://journey-widget.webex.com",
                 "attributes": {
                   "show-alias-icon": "true",
                   "condensed-view": "true"
