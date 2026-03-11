@@ -375,7 +375,10 @@ If you have the out of the box version of the CJDS widget working in your enviro
                 "comp": "customer-journey-widget",
                 "attributes": {
                   "show-alias-icon": "true",
-                  "condensed-view": "true"
+                  "condensed-view": "true",
+                  "use-new-momentum-icons": "true",
+                  "is-visual-rebrand-enabled": "true",
+                  "is-momentum-v2-enabled": "true"
                 },
                 "properties": {
                   "interactionData": "$STORE.agentContact.taskSelected",
@@ -429,6 +432,9 @@ https://github.com/momentum-design/momentum-ui/tree/40ff564f61938e296e36df0de06c
         "attributes": {
           "show-alias-icon": "true",
           "condensed-view": "true",
+          "use-new-momentum-icons": "true",
+          "is-visual-rebrand-enabled": "true",
+          "is-momentum-v2-enabled": "true",
           "enable-user-search": "true"
         },
         "properties": {
