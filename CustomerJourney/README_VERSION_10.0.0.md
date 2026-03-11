@@ -313,7 +313,7 @@ If you have the out of the box version of the CJDS widget working in your enviro
 
    
 
-7. Replace the following code snippet #1 with the new code snippet #2 (you will do this in two different sections of the json file. ~ line 83 & ~ line 713)
+7. Replace the following code snippet #1 with the new code snippet #2 (you will do this in three different sections (for agent, supervisor, and supervisorAgent) of the json file. ~ line 83 & ~ line 713)
 **Code Snippet #1 (default)**
 ```json
           {
@@ -428,7 +428,6 @@ https://github.com/momentum-design/momentum-ui/tree/40ff564f61938e296e36df0de06c
     "widgets": {
       "right": {
         "comp": "customer-journey-widget",
-        "script": "https://journey-widget.webex.com",
         "attributes": {
           "show-alias-icon": "true",
           "condensed-view": "true",
@@ -495,10 +494,12 @@ CJDS Widget Code Block
             "children": [
               {
                 "comp": "customer-journey-widget",
-                "script": "https://journey-widget.webex.com",
                 "attributes": {
                   "show-alias-icon": "true",
-                  "condensed-view": "true"
+                  "condensed-view": "true",
+                  "use-new-momentum-icons": "true",
+                  "is-visual-rebrand-enabled": "true",
+                  "is-momentum-v2-enabled": "true"
                 },
                 "properties": {
                   "interactionData": "$STORE.agentContact.taskSelected",
