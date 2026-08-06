@@ -13,15 +13,25 @@ CJDS is GA and offered as part of Webex Contact Center Customer Flex 3 Standard 
 #### CJDS Widget: Gateway URLs
 
 https://api.intgus1.ciscoccservice.com
+
 https://api.qaus1.ciscoccservice.com
+
 https://api.loadus1.ciscoccservice.com
+
 https://api.wxcc-eu1.cisco.com
+
 https://api.wxcc-us1.cisco.com
+
 https://api.wxcc-ca1.cisco.com
+
 https://api.wxcc-eu2.cisco.com
+
 https://api.wxcc-anz1.cisco.com
+
 https://api.wxcc-jp1.cisco.com
+
 https://api.wxcc-sg1.cisco.com
+
 https://api.wxcc-in1.cisco.com
 
 
