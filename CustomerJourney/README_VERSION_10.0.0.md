@@ -10,29 +10,29 @@ CJDS is GA and offered as part of Webex Contact Center Customer Flex 3 Standard 
 10.0.0
 ```
 
-#### CJDS Widget: Gateway URLs
+#### CJDS Widget: CDN Url
 
-https://api.intgus1.ciscoccservice.com
+https://dataservices-jds-ui-nonprod-cdn.ciscoccservice.com/journey-widget/intgus1/index.js
 
-https://api.qaus1.ciscoccservice.com
+https://dataservices-jds-ui-nonprod-cdn.ciscoccservice.com/journey-widget/qaus1/index.js
 
-https://api.loadus1.ciscoccservice.com
+https://dataservices-jds-ui-nonprod-cdn.ciscoccservice.com/journey-widget/loadus1/index.js
 
-https://api.wxcc-eu1.cisco.com
+https://journey-widget.ciscoccservice.com/journey-widget/produs1/index.js
 
-https://api.wxcc-us1.cisco.com
+https://journey-widget.ciscoccservice.com/journey-widget/prodeu1/index.js
 
-https://api.wxcc-ca1.cisco.com
+https://journey-widget.ciscoccservice.com/journey-widget/prodeu2/index.js
 
-https://api.wxcc-eu2.cisco.com
+https://journey-widget.ciscoccservice.com/journey-widget/prodsg1/index.js
 
-https://api.wxcc-anz1.cisco.com
+https://journey-widget.ciscoccservice.com/journey-widget/prodanz1/index.js
 
-https://api.wxcc-jp1.cisco.com
+https://journey-widget.ciscoccservice.com/journey-widget/prodjp1/index.js
 
-https://api.wxcc-sg1.cisco.com
+https://journey-widget.ciscoccservice.com/journey-widget/prodin1/index.js
 
-https://api.wxcc-in1.cisco.com
+https://journey-widget.ciscoccservice.com/journey-widget/prodca1/index.js
 
 
 ## Table of Contents
